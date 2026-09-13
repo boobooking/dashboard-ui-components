@@ -22,7 +22,7 @@ export default {
         PickDay,
     },
 
-    emits: ["update:dateFrom", "update:dateTo", "updated"],
+    emits: ["update:dateFrom", "update:dateTo", "changed"],
 
     props: {
         dateFrom: {
@@ -64,13 +64,13 @@ export default {
         userDateFrom(newValue) {
             this.$emit("update:dateFrom", newValue);
             if (this.dateFrom !== newValue) {
-                this.$emit("updated");
+                this.$emit("changed");
             }
         },
         userDateTo(newValue) {
             this.$emit("update:dateTo", newValue);
             if (this.dateTo !== newValue) {
-                this.$emit("updated");
+                this.$emit("changed");
             }
         },
     },
