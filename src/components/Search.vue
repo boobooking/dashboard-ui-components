@@ -39,7 +39,7 @@ export default {
         },
         header: {
             type: String,
-            default: '',
+            required: true,
         },
         isRequired: {
             type: Boolean,
