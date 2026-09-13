@@ -24,19 +24,53 @@
             </div>
             <p>Значение: {{ day === '' ? '(пусто)' : day }}</p>
         </section>
+
+        <section>
+            <h2>RussianMobileFilter</h2>
+            <russian-mobile-filter v-model="phone" @changed="phoneCommits++"/>
+            <p>Значение: {{ phone === '' ? '(пусто)' : phone }}, запросов: {{ phoneCommits }}</p>
+        </section>
+
+        <section>
+            <h2>Search</h2>
+            <search v-model="search" header="Поиск"/>
+            <p>Значение: {{ search === '' ? '(пусто)' : search }}</p>
+        </section>
+
+        <section>
+            <h2>SelectDateInterval</h2>
+            <select-date-interval
+                header="Интервал"
+                v-model:date-from="dateFrom"
+                v-model:date-to="dateTo"
+            />
+            <p>С {{ dateFrom || '(пусто)' }} по {{ dateTo || '(пусто)' }}</p>
+        </section>
     </div>
 </template>
 
 <script>
-import { Popup, Dot, PickDay } from '../dist/index.js';
+import {
+    Popup,
+    Dot,
+    PickDay,
+    RussianMobileFilter,
+    Search,
+    SelectDateInterval,
+} from '../dist/index.js';
 
 export default {
-    components: { Popup, Dot, PickDay },
+    components: { Popup, Dot, PickDay, RussianMobileFilter, Search, SelectDateInterval },
 
     data() {
         return {
             popupIsOpen: false,
             day: '',
+            phone: '',
+            phoneCommits: 0,
+            search: '',
+            dateFrom: '',
+            dateTo: '',
         };
     },
 };

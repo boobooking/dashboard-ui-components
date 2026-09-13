@@ -8,7 +8,7 @@
     npm install @boobooking/dashboard-ui-components
 
 ```js
-import { Popup, Dot } from '@boobooking/dashboard-ui-components'
+import { RussianMobileFilter, SelectDateInterval } from '@boobooking/dashboard-ui-components'
 import '@boobooking/dashboard-ui-components/style.css'
 ```
 
