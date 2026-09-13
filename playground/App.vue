@@ -20,7 +20,7 @@
         <section>
             <h2>PickDay</h2>
             <div class="field">
-                <pick-day v-model:day="day" placeholder-text="от"/>
+                <pick-day v-model="day" placeholder-text="от"/>
             </div>
             <p>Значение: {{ day === '' ? '(пусто)' : day }}</p>
         </section>

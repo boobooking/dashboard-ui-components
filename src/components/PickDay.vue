@@ -50,10 +50,10 @@ export default {
         Eraser,
     },
 
-    emits: ["update:day"],
+    emits: ["update:modelValue", "changed"],
 
     props: {
-        day: {
+        modelValue: {
             type: String,
             required: true,
         },
@@ -103,7 +103,8 @@ export default {
             },
             onSelect: (value) => {
                 this.popupIsOpen = false;
-                this.$emit("update:day", formatDay(value));
+                this.$emit("update:modelValue", formatDay(value));
+                this.$emit("changed");
             },
         });
     },
@@ -115,12 +116,12 @@ export default {
     data() {
         return {
             popupIsOpen: false,
-            dayValue: this.day,
+            dayValue: this.modelValue,
         };
     },
 
     watch: {
-        day(newValue) {
+        modelValue(newValue) {
             this.dayValue = newValue;
             this.syncPicker(newValue);
         },
@@ -128,7 +129,7 @@ export default {
 
     methods: {
         // Программная установка без onSelect: значение пришло снаружи, и возвращать
-        // его родителю незачем — update:day ушёл бы обратно эхом.
+        // его родителю незачем — update:modelValue ушёл бы обратно эхом.
         syncPicker(value) {
             const date = parseDay(value);
 
@@ -142,15 +143,16 @@ export default {
         },
 
         clearPicker() {
-            this.$emit("update:day", "");
+            this.$emit("update:modelValue", "");
             this.dayValue = "";
             this.picker.clear();
+            this.$emit("changed");
         },
     },
 
     computed: {
         hasValue() {
-            return this.day.length > 0;
+            return this.modelValue.length > 0;
         },
 
         needsEraser() {

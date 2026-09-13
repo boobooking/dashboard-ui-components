@@ -4,8 +4,8 @@
             <div class="flex flex-col min-w-72 w-72 bg-white h-full">
                 <element-header :text="header" :is-required="isRequired" :is-loading="isLoading"/>
                 <div class="flex h-full divide-x divide-gray-200">
-                    <pick-day v-model:day="userDateFrom" class="flex-1 min-w-36 pl-3" placeholder-text="от"/>
-                    <pick-day v-model:day="userDateTo" class="flex-1 min-w-36 pl-3" placeholder-text="до"/>
+                    <pick-day v-model="userDateFrom" class="flex-1 min-w-36 pl-3" placeholder-text="от"/>
+                    <pick-day v-model="userDateTo" class="flex-1 min-w-36 pl-3" placeholder-text="до"/>
                 </div>
             </div>
         </div>
