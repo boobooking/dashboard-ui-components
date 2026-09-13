@@ -1,7 +1,7 @@
 <template>
     <div class="bb-dashboard-ui flex flex-none">
         <div class="flex w-full flex-col border border-white bg-white">
-            <element-header :text="header" :is-loading="isLoading" />
+            <element-header :text="header" :is-required="isRequired" :is-loading="isLoading" />
             <div class="relative flex h-full w-full">
                 <label class="flex w-full h-full items-center justify-center">
                     <input
@@ -51,7 +51,11 @@ export default {
         },
         header: {
             type: String,
-            default: 'Телефон',
+            required: true,
+        },
+        isRequired: {
+            type: Boolean,
+            default: false,
         },
         isLoading: {
             type: Boolean,

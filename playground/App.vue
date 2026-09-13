@@ -27,7 +27,7 @@
 
         <section>
             <h2>RussianMobileFilter</h2>
-            <russian-mobile-filter v-model="phone" @changed="phoneCommits++"/>
+            <russian-mobile-filter v-model="phone" header="Телефон" @changed="phoneCommits++"/>
             <p>Значение: {{ phone === '' ? '(пусто)' : phone }}, запросов: {{ phoneCommits }}</p>
         </section>
 
