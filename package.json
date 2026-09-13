@@ -1,0 +1,33 @@
+{
+    "name": "@boobooking/dashboard-ui-components",
+    "version": "0.0.0",
+    "description": "Компоненты фильтров дашборда на Vue 3",
+    "license": "MIT",
+    "type": "module",
+    "files": ["dist"],
+    "exports": {
+        ".": "./dist/index.js",
+        "./style.css": "./dist/style.css"
+    },
+    "scripts": {
+        "build": "vite build",
+        "test": "vitest run --passWithNoTests",
+        "playground": "npm run build && vite --config vite.playground.config.js"
+    },
+    "peerDependencies": {
+        "vue": "^3.2"
+    },
+    "dependencies": {
+        "imask": "^7.6.1",
+        "pikaday": "^1.8.2"
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.10",
+        "@tailwindcss/vite": "^4.3.3",
+        "@vitejs/plugin-vue": "^6.0.8",
+        "tailwindcss": "^4.3.3",
+        "vite": "^8.3.0",
+        "vitest": "^5.0.0",
+        "vue": "^3.5.35"
+    }
+}

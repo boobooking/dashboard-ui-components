@@ -1,0 +1,78 @@
+/*
+ * Объявлены все четыре слоя, хотя пакет заполняет три. Порядок слоёв задаётся
+ * первым упоминанием имени, а незнакомые имена дописываются в конец: объяви мы
+ * только theme и utilities, слои base и components из CSS приложения встали бы
+ * после utilities. Тогда preflight и @tailwindcss/forms приложения получили бы
+ * приоритет над всеми утилитами, а собственный ресет пакета уехал бы выше
+ * собственных утилит пакета.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+
+@source '../components';
+
+/*
+ * Ширина поля под маску «+7 (000) 000 00 00»: она почти вся из цифр, поэтому
+ * меряется в ch и следует за шрифтом приложения. Слагаемое в пикселях — запас
+ * под ластик: он прижат к правому краю поля и без запаса наезжал на хвост
+ * номера, а его размер от шрифта не зависит.
+ */
+@theme {
+    --container-phone: calc(19ch + 16px);
+}
+
+/*
+ * preflight.css не импортируется: библиотека не имеет права ресетить теги
+ * чужого приложения. Вместо него — тот же минимум, ограниченный поддеревом
+ * пакета. Слой components, а не base: в base ресет оказался бы рядом с
+ * @tailwindcss/forms потребителя и проиграл бы ему по порядку подключения,
+ * потому что CSS пакета идёт первым. В components он выше чужого base и ниже
+ * любых утилит.
+ */
+@layer components {
+    .bb-dashboard-ui,
+    .bb-dashboard-ui *,
+    .bb-dashboard-ui ::before,
+    .bb-dashboard-ui ::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        border: 0 solid;
+    }
+
+    .bb-dashboard-ui button,
+    .bb-dashboard-ui input {
+        font: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        border-radius: 0;
+        background-color: transparent;
+        opacity: 1;
+    }
+
+    .bb-dashboard-ui button {
+        appearance: button;
+    }
+
+    /* Как у @tailwindcss/forms, а не как у preflight: у нас только текстовые
+       поля, и родной вид им не нужен. */
+    .bb-dashboard-ui input {
+        appearance: none;
+    }
+
+    /* Снимает кольцо, которое плагин вешает на :focus. Перебивается свойство
+       box-shadow целиком, поэтому переменные --tw-ring-* и --tw-shadow
+       перестают на что-либо влиять. */
+    .bb-dashboard-ui input:focus {
+        box-shadow: none;
+    }
+
+    .bb-dashboard-ui ::placeholder {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+        opacity: 1;
+    }
+}
