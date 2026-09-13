@@ -46,6 +46,17 @@
             />
             <p>С {{ dateFrom || '(пусто)' }} по {{ dateTo || '(пусто)' }}</p>
         </section>
+
+        <section>
+            <h2>SelectSingle</h2>
+            <select-single
+                header="Вендор"
+                :items="vendorItems"
+                v-model="vendor"
+                @changed="vendorCommits++"
+            />
+            <p>Выбрано: {{ vendor === null ? '(ничего)' : vendor }}, запросов: {{ vendorCommits }}</p>
+        </section>
     </div>
 </template>
 
@@ -57,10 +68,19 @@ import {
     RussianMobileFilter,
     Search,
     SelectDateInterval,
+    SelectSingle,
 } from '../dist/index.js';
 
 export default {
-    components: { Popup, Dot, PickDay, RussianMobileFilter, Search, SelectDateInterval },
+    components: {
+        Popup,
+        Dot,
+        PickDay,
+        RussianMobileFilter,
+        Search,
+        SelectDateInterval,
+        SelectSingle,
+    },
 
     data() {
         return {
@@ -71,6 +91,13 @@ export default {
             search: '',
             dateFrom: '',
             dateTo: '',
+            vendorItems: [
+                { id: 'a', name: 'Первый вендор' },
+                { id: 'b', name: 'Второй вендор' },
+                { id: 'c', name: 'Третий вендор с длинным именем' },
+            ],
+            vendor: null,
+            vendorCommits: 0,
         };
     },
 };
