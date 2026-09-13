@@ -1,8 +1,12 @@
 {
     "name": "@boobooking/dashboard-ui-components",
-    "version": "0.4.0",
+    "version": "1.0.0",
     "description": "Компоненты фильтров дашборда на Vue 3",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/boobooking/dashboard-ui-components.git"
+    },
     "type": "module",
     "files": [
         "dist"
