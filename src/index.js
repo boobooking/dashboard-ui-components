@@ -2,5 +2,5 @@
 // style.css из одного pikaday, без единой утилиты Tailwind и без ошибки.
 import './styles/index.css'
 
-// Экспорты добавляются по мере выноса компонентов.
-export {}
+export { default as Popup } from './components/Popup.vue'
+export { default as Dot } from './components/Dot.vue'

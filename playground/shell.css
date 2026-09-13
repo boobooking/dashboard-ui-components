@@ -28,3 +28,11 @@
     border-radius: 6px;
     cursor: pointer;
 }
+
+.menu {
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
