@@ -36,3 +36,10 @@
     border-radius: 6px;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
+
+.field {
+    width: 220px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+}
