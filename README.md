@@ -63,16 +63,17 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 Поле выбора одной даты на Pikaday, с ластиком очистки.
 
-    <pick-day v-model:day="date" placeholder-text="от" />
+    <pick-day v-model="date" placeholder-text="от" />
 
 | Проп | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
-| `day` | `String` | обязателен | Текущая дата |
+| `modelValue` | `String` | обязателен | Текущая дата |
 | `withEraser` | `Boolean` | `true` | Показывать ли ластик очистки |
 | `placeholderText` | `String` | `""` | Текст подсказки в пустом поле |
 
-Событие: `update:day` — при выборе даты в календаре и при очистке (пустой
-строкой).
+События: `update:modelValue` — при выборе даты в календаре и при очистке
+(пустой строкой); `changed` — в тех же двух случаях, для использования наравне
+с остальными фильтрами.
 
 ### RussianMobileFilter
 
@@ -84,7 +85,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | Проп | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
 | `modelValue` | `String` | `""` | Номер: цифры вместе с кодом страны, без «+» (например, `79031234567`), либо пустая строка |
-| `header` | `String` | `"Телефон"` | Подпись поля |
+| `header` | `String` | обязателен | Подпись поля |
+| `isRequired` | `Boolean` | `false` | Пометка обязательности в заголовке |
 | `isLoading` | `Boolean` | `false` | Индикатор загрузки в заголовке |
 
 «+» — неудачный символ для URL, поэтому в параметре только цифры; плюс к
@@ -105,7 +107,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | Проп | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
 | `modelValue` | `String` | `""` | Текущий текст поиска |
-| `header` | `String` | `""` | Подпись поля |
+| `header` | `String` | обязателен | Подпись поля |
 | `isRequired` | `Boolean` | `false` | Пометка обязательности в заголовке |
 | `isLoading` | `Boolean` | `false` | Индикатор загрузки в заголовке |
 
@@ -121,7 +123,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
         :date-to="dateTo"
         @update:date-from="dateFrom = $event"
         @update:date-to="dateTo = $event"
-        @updated="reload"
+        @changed="reload"
     />
 
 | Проп | Тип | По умолчанию | Описание |
@@ -136,7 +138,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 передавать обе даты явно.
 
 События: `update:dateFrom`, `update:dateTo` — на каждый выбор в
-соответствующем `PickDay`; `updated` — когда новое значение отличается от
+соответствующем `PickDay`; `changed` — когда новое значение отличается от
 переданного пропса (отдельно для каждой из двух дат).
 
 ### SelectSingle
