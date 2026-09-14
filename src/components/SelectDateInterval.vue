@@ -27,11 +27,11 @@ export default {
     props: {
         dateFrom: {
             type: String,
-            required: true,
+            default: "",
         },
         dateTo: {
             type: String,
-            required: true,
+            default: "",
         },
         header: {
             type: String,
