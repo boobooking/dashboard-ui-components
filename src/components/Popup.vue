@@ -51,6 +51,9 @@ export default {
         align: {
             type: String,
             default: "left",
+            validator: (value) => {
+                return ["left", "right"].indexOf(value) !== -1;
+            },
         },
     },
 
