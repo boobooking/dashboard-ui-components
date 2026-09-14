@@ -1,7 +1,7 @@
 <template>
     <div
         class="bb-dashboard-ui flex h-full items-center leading-none text-4xl"
-        :class="{ 'text-red-500': isRed, 'text-green-500': isGreen, 'animate-pulse': addPulse }"
+        :class="{ 'text-red-500': isRed, 'text-green-500': isGreen, 'animate-pulse': withPulse }"
     >
         <svg class="fill-current w-2 h-2" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="45" />
@@ -12,7 +12,7 @@
 <script>
 export default {
     props: {
-        addPulse: {
+        withPulse: {
             type: Boolean,
             default: false,
         },

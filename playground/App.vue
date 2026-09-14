@@ -6,7 +6,7 @@
             <h2>Dot</h2>
             <dot color="red"/>
             <dot color="green"/>
-            <dot color="red" :add-pulse="true"/>
+            <dot color="red" :with-pulse="true"/>
         </section>
 
         <section>

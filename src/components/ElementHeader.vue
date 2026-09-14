@@ -4,7 +4,7 @@
             class="flex flex-1 h-full items-center text-xs text-gray-500 whitespace-nowrap truncate leading-tight select-none"
             v-text="text"
         />
-        <dot v-show="isLoading" color="red" :add-pulse="true" class="ml-3"/>
+        <dot v-show="isLoading" color="red" :with-pulse="true" class="ml-3"/>
         <dot v-show="isRequired" color="red" class="ml-3"/>
     </div>
 </template>
