@@ -1,5 +1,5 @@
 <template>
-    <!-- Обёртка рендерится всегда: если прятать её вместе с isOpen, меню уходит
+    <!-- Обёртка рендерится всегда: если прятать её вместе с modelValue, меню уходит
          из потока раньше, чем доиграет переход. Пустая и нулевой высоты, на
          раскладку не влияет. -->
     <div class="bb-dashboard-ui relative">
@@ -18,7 +18,7 @@
             leave-to-class="opacity-0 scale-95"
         >
             <div
-                v-show="isOpen"
+                v-show="modelValue"
                 v-bind="$attrs"
                 class="absolute z-20"
                 :class="{ 'left-0': alignLeft, 'right-0': alignRight }"
@@ -41,10 +41,10 @@ export default {
     // меню transform-origin считается по его собственной коробке.
     inheritAttrs: false,
 
-    emits: ["update:isOpen"],
+    emits: ["update:modelValue"],
 
     props: {
-        isOpen: {
+        modelValue: {
             type: Boolean,
             default: false,
         },
@@ -56,16 +56,16 @@ export default {
 
     data() {
         return {
-            overlayIsOpen: this.isOpen,
+            overlayIsOpen: this.modelValue,
         };
     },
 
     watch: {
-        isOpen: function (newState) {
+        modelValue: function (newState) {
             this.overlayIsOpen = newState;
         },
         overlayIsOpen(newValue) {
-            this.$emit("update:isOpen", newValue);
+            this.$emit("update:modelValue", newValue);
         },
     },
 

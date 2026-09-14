@@ -12,7 +12,7 @@
         <section>
             <h2>Popup</h2>
             <button type="button" class="demo-button" @click="popupIsOpen = !popupIsOpen">Открыть меню</button>
-            <popup v-model:is-open="popupIsOpen">
+            <popup v-model="popupIsOpen">
                 <div class="menu">Содержимое меню</div>
             </popup>
         </section>

@@ -15,7 +15,7 @@
             <eraser v-if="needsEraser" @click="$emit('erased')" class="pr-2 h-full"></eraser>
         </div>
 
-        <popup v-model:is-open="popupIsOpen">
+        <popup v-model="popupIsOpen">
             <slot></slot>
         </popup>
     </div>

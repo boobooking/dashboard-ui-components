@@ -31,7 +31,7 @@
             <eraser v-if="needsEraser" @click="clearPicker" class="z-10 h-full pr-2"/>
         </div>
 
-        <popup v-model:is-open="popupIsOpen">
+        <popup v-model="popupIsOpen">
             <div ref="container" class="flex mt-1 bg-white border border-gray-200 rounded-md shadow-lg"></div>
         </popup>
     </div>
