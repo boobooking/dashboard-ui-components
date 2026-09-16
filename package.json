@@ -1,6 +1,6 @@
 {
     "name": "@boobooking/dashboard-ui-components",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Компоненты фильтров дашборда на Vue 3",
     "keywords": [
         "vue",
