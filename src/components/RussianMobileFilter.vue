@@ -9,7 +9,7 @@
                         type="tel"
                         inputmode="tel"
                         autocomplete="off"
-                        class="flex w-phone h-full px-3 py-2 cursor-pointer truncate hover:bg-blue-100 focus:bg-white focus:outline-hidden border-none"
+                        class="flex w-phone h-full px-3 py-2 cursor-pointer truncate focus:outline-hidden border-none"
                         @focus="onFocus"
                         @blur="onBlur"
                         @keydown.enter="commit"

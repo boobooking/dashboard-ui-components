@@ -5,7 +5,7 @@
             <div class="relative flex h-full w-full">
                 <label class="flex w-full h-full items-center justify-center">
                     <input
-                        class="flex w-full h-full px-3 py-2 cursor-pointer truncate hover:bg-blue-100 focus:bg-white focus:outline-hidden border-none"
+                        class="flex w-full h-full px-3 py-2 cursor-pointer truncate focus:outline-hidden border-none"
                         v-model.trim="search"
                         @input="startSearch"
                     />
