@@ -42,8 +42,11 @@
         border: 0 solid;
     }
 
+    /* Корень компонента сам бывает кнопкой (Closer): селектор потомка его не
+       задевает, поэтому корень перечислен отдельно. */
     .bb-dashboard-ui button,
-    .bb-dashboard-ui input {
+    .bb-dashboard-ui input,
+    button.bb-dashboard-ui {
         font: inherit;
         font-feature-settings: inherit;
         font-variation-settings: inherit;
@@ -54,8 +57,19 @@
         opacity: 1;
     }
 
-    .bb-dashboard-ui button {
+    .bb-dashboard-ui button,
+    button.bb-dashboard-ui {
         appearance: button;
+    }
+
+    /* Как в preflight: ссылка берёт цвет и оформление текста у окружения.
+       Без этого в приложении без preflight ссылка — внутри компонента или сам
+       корень, как у DownloadLink, — осталась бы синей и подчёркнутой. */
+    .bb-dashboard-ui a,
+    a.bb-dashboard-ui {
+        color: inherit;
+        -webkit-text-decoration: inherit;
+        text-decoration: inherit;
     }
 
     /* Как у @tailwindcss/forms, а не как у preflight: у нас только текстовые
