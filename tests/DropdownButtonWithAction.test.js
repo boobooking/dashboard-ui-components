@@ -6,9 +6,9 @@ import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction
 
 enableAutoUnmount(afterEach)
 
-// Popup и Overlay настоящие: эхо Popup и закрытие по Escape проверяются на тех
-// компонентах, что уедут в пакет. attachTo нужен isVisible(): видимость меню
-// задаёт v-show на обёртке Popup, и проверяется она по предкам в документе.
+// Popup и Overlay настоящие, без заглушек: на них проверяются эхо Popup и
+// закрытие по Escape. attachTo нужен isVisible(): видимость меню задаёт v-show
+// на самом меню внутри Popup, и проверяется она по предкам в документе.
 const slots = {
     button: () => h('span', 'Редактировать'),
     actions: () => h('a', { href: '#' }, 'Удалить'),
