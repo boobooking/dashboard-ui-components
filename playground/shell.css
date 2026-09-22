@@ -5,8 +5,7 @@
 .page,
 .field,
 .demo-button,
-.demo-row,
-.demo-action {
+.demo-row {
     box-sizing: border-box;
 }
 
