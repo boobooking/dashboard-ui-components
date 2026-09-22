@@ -5,7 +5,8 @@
 .page,
 .field,
 .demo-button,
-.demo-row {
+.demo-row,
+.demo-action {
     box-sizing: border-box;
 }
 
@@ -74,4 +75,12 @@
 .closer-demo {
     width: 32px;
     height: 32px;
+}
+
+/* Содержимое слотов — разметка страницы, как у приложения, где в слоты
+   кладутся ссылки с отступами. */
+.demo-action {
+    display: block;
+    padding: 8px 16px;
+    font-size: 14px;
 }

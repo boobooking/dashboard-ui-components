@@ -112,6 +112,32 @@
                 @action-canceled="modalCancels++; dangerousModalIsOpen = false"
             />
         </section>
+
+        <section>
+            <h2>DropdownButtonWithAction</h2>
+            <div class="demo-row">
+                <dropdown-button-with-action>
+                    <template #button><span class="demo-action">Без привязки</span></template>
+                    <template #actions>
+                        <a href="#" class="demo-action">Первое действие</a>
+                        <a href="#" class="demo-action">Второе действие</a>
+                    </template>
+                </dropdown-button-with-action>
+                <dropdown-button-with-action v-model="dropdownIsOpen">
+                    <template #button><span class="demo-action">С v-model</span></template>
+                    <template #actions>
+                        <a href="#" class="demo-action">Действие</a>
+                    </template>
+                </dropdown-button-with-action>
+                <dropdown-button-with-action>
+                    <template #button><span class="demo-action">Без действий</span></template>
+                </dropdown-button-with-action>
+            </div>
+            <p>
+                Меню с v-model: {{ dropdownIsOpen ? 'открыто' : 'закрыто' }}
+                <button type="button" class="demo-button" @click="dropdownIsOpen = !dropdownIsOpen">Переключить снаружи</button>
+            </p>
+        </section>
     </div>
 </template>
 
@@ -129,6 +155,7 @@ import {
     Closer,
     DownloadLink,
     ConfirmationModal,
+    DropdownButtonWithAction,
 } from '../dist/index.js';
 
 export default {
@@ -145,6 +172,7 @@ export default {
         Closer,
         DownloadLink,
         ConfirmationModal,
+        DropdownButtonWithAction,
     },
 
     data() {
@@ -176,6 +204,7 @@ export default {
             dangerousModalIsOpen: false,
             modalConfirms: 0,
             modalCancels: 0,
+            dropdownIsOpen: false,
         };
     },
 };
