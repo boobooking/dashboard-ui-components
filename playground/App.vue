@@ -86,6 +86,32 @@
             <h2>DownloadLink</h2>
             <download-link url="#download" title="скачать xlsx"/>
         </section>
+
+        <section>
+            <h2>ConfirmationModal</h2>
+            <div class="demo-row">
+                <button type="button" class="demo-button" @click="warningModalIsOpen = true">Жёлтая</button>
+                <button type="button" class="demo-button" @click="dangerousModalIsOpen = true">Красная</button>
+            </div>
+            <p>Подтверждений: {{ modalConfirms }}, отмен: {{ modalCancels }}</p>
+            <confirmation-modal
+                :is-open="warningModalIsOpen"
+                confirmation-heading="Начать отправку?"
+                confirmation-text="Сообщения уйдут всем получателям группы."
+                action-button-text="Начать отправку"
+                @action-confirmed="modalConfirms++; warningModalIsOpen = false"
+                @action-canceled="modalCancels++; warningModalIsOpen = false"
+            />
+            <confirmation-modal
+                :is-open="dangerousModalIsOpen"
+                type="dangerous"
+                confirmation-heading="Удаление администратора"
+                confirmation-text="Вы уверены, что хотите удалить администратора? Это действие необратимо."
+                action-button-text="Удалить"
+                @action-confirmed="modalConfirms++; dangerousModalIsOpen = false"
+                @action-canceled="modalCancels++; dangerousModalIsOpen = false"
+            />
+        </section>
     </div>
 </template>
 
@@ -102,6 +128,7 @@ import {
     ErrorMessages,
     Closer,
     DownloadLink,
+    ConfirmationModal,
 } from '../dist/index.js';
 
 export default {
@@ -117,6 +144,7 @@ export default {
         ErrorMessages,
         Closer,
         DownloadLink,
+        ConfirmationModal,
     },
 
     data() {
@@ -144,6 +172,10 @@ export default {
                 'Ключи уже загружены в другие сертификаты: abc-123',
             ],
             closerClicks: 0,
+            warningModalIsOpen: false,
+            dangerousModalIsOpen: false,
+            modalConfirms: 0,
+            modalCancels: 0,
         };
     },
 };

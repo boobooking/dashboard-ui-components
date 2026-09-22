@@ -17,7 +17,10 @@ jobs:
       - run: npm run build
 
   # Обычная установка тянет последнюю минорную версию Vue, поэтому заявленная
-  # нижняя граница иначе осталась бы непроверенной.
+  # нижняя граница иначе осталась бы непроверенной. Версия указана точно:
+  # vue@3.5 разрешился бы в последнюю 3.5.x и совпал бы с основным прогоном.
+  # @vue/server-renderer назван явно: без него npm кладёт зависимости vue@3.5.0
+  # внутрь node_modules/vue, и @vue/test-utils не находит server-renderer.
   vue-floor:
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +29,6 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npm install --no-save vue@3.2
+      - run: npm install --no-save vue@3.5.0 @vue/server-renderer@3.5.0
       - run: npm test
       - run: npm run build
