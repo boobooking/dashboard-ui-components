@@ -57,6 +57,35 @@
             />
             <p>Выбрано: {{ vendor === null ? '(ничего)' : vendor }}, запросов: {{ vendorCommits }}</p>
         </section>
+
+        <section>
+            <h2>SmallBadge</h2>
+            <div class="demo-row">
+                <small-badge text="Зелёный" color="green"/>
+                <small-badge text="Индиго" color="indigo"/>
+                <small-badge text="Серый" color="gray"/>
+                <small-badge text="Синий" color="blue"/>
+                <small-badge text="Красный" color="red"/>
+                <small-badge text="Жёлтый с длинным текстом" color="yellow"/>
+            </div>
+        </section>
+
+        <section>
+            <h2>ErrorMessages</h2>
+            <error-messages :messages="errorObject"/>
+            <error-messages class="demo-gap" :messages="errorArray" type="dangerous"/>
+        </section>
+
+        <section>
+            <h2>Closer</h2>
+            <closer class="closer-demo" @clicked="closerClicks++"/>
+            <p>Нажатий: {{ closerClicks }}</p>
+        </section>
+
+        <section>
+            <h2>DownloadLink</h2>
+            <download-link url="#download" title="скачать xlsx"/>
+        </section>
     </div>
 </template>
 
@@ -69,6 +98,10 @@ import {
     Search,
     SelectDateInterval,
     SelectSingle,
+    SmallBadge,
+    ErrorMessages,
+    Closer,
+    DownloadLink,
 } from '../dist/index.js';
 
 export default {
@@ -80,6 +113,10 @@ export default {
         Search,
         SelectDateInterval,
         SelectSingle,
+        SmallBadge,
+        ErrorMessages,
+        Closer,
+        DownloadLink,
     },
 
     data() {
@@ -98,6 +135,15 @@ export default {
             ],
             vendor: null,
             vendorCommits: 0,
+            errorObject: {
+                email: 'Неверный email',
+                password: 'Пароль слишком короткий',
+            },
+            errorArray: [
+                'Слишком длинные ключи: xxxxxxxx…',
+                'Ключи уже загружены в другие сертификаты: abc-123',
+            ],
+            closerClicks: 0,
         };
     },
 };

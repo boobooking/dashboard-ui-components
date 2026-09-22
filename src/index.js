@@ -9,3 +9,7 @@ export { default as RussianMobileFilter } from './components/RussianMobileFilter
 export { default as Search } from './components/Search.vue'
 export { default as SelectDateInterval } from './components/SelectDateInterval.vue'
 export { default as SelectSingle } from './components/SelectSingle.vue'
+export { default as SmallBadge } from './components/SmallBadge.vue'
+export { default as ErrorMessages } from './components/ErrorMessages.vue'
+export { default as Closer } from './components/Closer.vue'
+export { default as DownloadLink } from './components/DownloadLink.vue'

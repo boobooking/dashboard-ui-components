@@ -4,7 +4,8 @@
    ловить его отсутствие. */
 .page,
 .field,
-.demo-button {
+.demo-button,
+.demo-row {
     box-sizing: border-box;
 }
 
@@ -24,7 +25,10 @@
     font-weight: 600;
 }
 
-.page p {
+/* Только абзацы самой оболочки — прямые дети секций. Стили оболочки лежат
+   вне слоёв и перебивают ресет пакета, поэтому .page p дало бы отступы и
+   абзацам внутри компонентов, которых в приложении нет. */
+.page > section > p {
     margin: 8px 0 0;
 }
 
@@ -52,4 +56,22 @@
     height: 40px;
     background: #fff;
     border: 1px solid #e5e7eb;
+}
+
+.demo-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Классы на корнях компонентов пакета: так страница задаёт им размер и
+   отступ, как это делает приложение. Стили оболочки вне слоёв и перебивают
+   ресет пакета. */
+.demo-gap {
+    margin-top: 8px;
+}
+
+.closer-demo {
+    width: 32px;
+    height: 32px;
 }
