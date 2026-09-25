@@ -52,9 +52,9 @@ export default {
 
     computed: {
         // Object.keys одинаково считает и объект ошибок валидации, и массив
-        // строк: у массива ключи — индексы.
+        // строк: у массива ключи — индексы. null — как отсутствие сообщений.
         hasErrors() {
-            return Object.keys(this.messages).length > 0;
+            return Object.keys(this.messages ?? {}).length > 0;
         },
 
         isDangerous() {

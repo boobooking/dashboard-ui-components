@@ -13,7 +13,7 @@
                     class="flex flex-col py-1 mt-1 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-200 divide-dashed"
                 >
                     <list-element
-                        v-for="item in items"
+                        v-for="item in itemList"
                         :name="item.name"
                         :key="item.id"
                         :is-checked="item.id === modelValue"
@@ -73,8 +73,13 @@ export default {
     },
 
     computed: {
+        // null и undefined — как пустой список: компонент не должен падать.
+        itemList() {
+            return this.items ?? [];
+        },
+
         activeItem() {
-            return this.items.find((item) => item.id === this.modelValue) ?? null;
+            return this.itemList.find((item) => item.id === this.modelValue) ?? null;
         },
 
         activeItemName() {
@@ -82,7 +87,7 @@ export default {
         },
 
         hasItems() {
-            return this.items.length > 0;
+            return this.itemList.length > 0;
         },
 
         hasValue() {
