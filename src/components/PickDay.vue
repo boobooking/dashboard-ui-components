@@ -116,14 +116,17 @@ export default {
     data() {
         return {
             popupIsOpen: false,
-            dayValue: this.modelValue,
+            dayValue: this.modelValue ?? "",
         };
     },
 
     watch: {
+        // null и undefined — как пустая строка: родитель мог сбросить значение в null.
         modelValue(newValue) {
-            this.dayValue = newValue;
-            this.syncPicker(newValue);
+            const day = newValue ?? "";
+
+            this.dayValue = day;
+            this.syncPicker(day);
         },
     },
 
@@ -152,7 +155,7 @@ export default {
 
     computed: {
         hasValue() {
-            return this.modelValue.length > 0;
+            return (this.modelValue ?? "").length > 0;
         },
 
         needsEraser() {
