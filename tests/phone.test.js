@@ -43,6 +43,8 @@ describe('toDigits', () => {
         { name: 'код страны снимается', input: '79031234567', expected: '9031234567' },
         { name: 'плюс из старой ссылки терпим', input: '+79031234567', expected: '9031234567' },
         { name: 'значение без кода страны не трогаем', input: '9031234567', expected: '9031234567' },
+        { name: 'null — пустое значение', input: null, expected: '' },
+        { name: 'undefined — пустое значение', input: undefined, expected: '' },
     ]
 
     for (const testCase of cases) {

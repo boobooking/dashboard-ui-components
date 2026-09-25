@@ -21,9 +21,11 @@ export function toParam(digits) {
     return digits === '' ? '' : `7${digits}`;
 }
 
-// Плюс терпим: он мог приехать из старой ссылки.
+// Плюс терпим: он мог приехать из старой ссылки. null и undefined — как пустая
+// строка: родитель мог сбросить значение в null.
 export function toDigits(param) {
-    const digits = param.startsWith('+') ? param.slice(1) : param;
+    const text = param ?? '';
+    const digits = text.startsWith('+') ? text.slice(1) : text;
 
     return digits.startsWith('7') ? digits.slice(1) : digits;
 }
