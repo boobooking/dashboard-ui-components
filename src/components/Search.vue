@@ -53,7 +53,7 @@ export default {
 
     data() {
         return {
-            search: this.modelValue
+            search: this.modelValue ?? ''
         };
     },
 
@@ -66,8 +66,9 @@ export default {
     watch: {
         // Значение пришло от родителя, поэтому без эмитов: update:modelValue
         // вернул бы его обратно эхом, а changed запустил бы лишний перезапрос.
+        // null и undefined — как пустая строка: родитель мог сбросить значение в null.
         modelValue(value) {
-            this.search = value
+            this.search = value ?? ''
         },
     },
 

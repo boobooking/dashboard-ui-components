@@ -48,4 +48,20 @@ describe('Search', () => {
         expect(search.emitted('update:modelValue')).toEqual([['евро']])
         expect(search.emitted('changed')).toHaveLength(1)
     })
+
+    it('не падает, если родитель передал null', async () => {
+        const errors = []
+        const wrapper = mount(Search, {
+            props: { header: 'Поиск', modelValue: null },
+            global: { config: { errorHandler: (error) => errors.push(error) } },
+        })
+
+        expect(wrapper.get('input').element.value).toBe('')
+
+        await wrapper.setProps({ modelValue: 'евро' })
+        await wrapper.setProps({ modelValue: null })
+
+        expect(errors).toEqual([])
+        expect(wrapper.get('input').element.value).toBe('')
+    })
 })
