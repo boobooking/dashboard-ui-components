@@ -64,7 +64,11 @@ export default {
     },
 
     watch: {
-
+        // Значение пришло от родителя, поэтому без эмитов: update:modelValue
+        // вернул бы его обратно эхом, а changed запустил бы лишний перезапрос.
+        modelValue(value) {
+            this.search = value
+        },
     },
 
     methods: {

@@ -119,7 +119,9 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `isRequired` | `Boolean` | `false` | Пометка обязательности в заголовке |
 | `isLoading` | `Boolean` | `false` | Индикатор загрузки в заголовке |
 
-События: `update:modelValue` и `changed` — оба на каждый ввод.
+События: `update:modelValue` и `changed` — оба на каждый ввод. Значение,
+изменённое родителем, поле показывает сразу и без событий: ответный
+`update:modelValue` вернул бы родителю его же значение.
 
 ### SelectDateInterval
 
