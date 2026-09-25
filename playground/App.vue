@@ -88,6 +88,20 @@
         </section>
 
         <section>
+            <h2>Modal</h2>
+            <div class="demo-row">
+                <button type="button" class="demo-button" @click="plainModalIsOpen = true">Открыть</button>
+            </div>
+            <modal :is-open="plainModalIsOpen" :heading-id="plainModalHeadingId">
+                <div style="padding: 24px">
+                    <h3 :id="plainModalHeadingId">Произвольное содержимое</h3>
+                    <p>Разметку внутри модалки задаёт приложение.</p>
+                    <button type="button" class="demo-button" @click="plainModalIsOpen = false">Закрыть</button>
+                </div>
+            </modal>
+        </section>
+
+        <section>
             <h2>ConfirmationModal</h2>
             <div class="demo-row">
                 <button type="button" class="demo-button" @click="warningModalIsOpen = true">Жёлтая</button>
@@ -142,6 +156,7 @@
 </template>
 
 <script>
+import { useId } from 'vue';
 import {
     Popup,
     Dot,
@@ -154,6 +169,7 @@ import {
     ErrorMessages,
     Closer,
     DownloadLink,
+    Modal,
     ConfirmationModal,
     DropdownButtonWithAction,
 } from '../dist/index.js';
@@ -171,8 +187,15 @@ export default {
         ErrorMessages,
         Closer,
         DownloadLink,
+        Modal,
         ConfirmationModal,
         DropdownButtonWithAction,
+    },
+
+    setup() {
+        return {
+            plainModalHeadingId: useId(),
+        };
     },
 
     data() {
@@ -200,6 +223,7 @@ export default {
                 'Ключи уже загружены в другие сертификаты: abc-123',
             ],
             closerClicks: 0,
+            plainModalIsOpen: false,
             warningModalIsOpen: false,
             dangerousModalIsOpen: false,
             modalConfirms: 0,
