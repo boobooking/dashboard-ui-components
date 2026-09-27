@@ -1,18 +1,18 @@
 <template>
-    <div class="bb-dashboard-ui flex flex-none">
-        <div class="flex w-full flex-col border border-white bg-white">
+    <div class="bb-dashboard-ui bb:flex bb:flex-none">
+        <div class="bb:flex bb:w-full bb:flex-col bb:border bb:border-white bb:bg-white">
             <element-header :text="header" :is-required="isRequired" :is-loading="isLoading" />
-            <div class="relative flex h-full w-full">
-                <label class="flex w-full h-full items-center justify-center">
+            <div class="bb:relative bb:flex bb:h-full bb:w-full">
+                <label class="bb:flex bb:w-full bb:h-full bb:items-center bb:justify-center">
                     <input
-                        class="flex w-full h-full px-3 py-2 cursor-pointer truncate focus:outline-hidden border-none"
+                        class="bb:flex bb:w-full bb:h-full bb:px-3 bb:py-2 bb:cursor-pointer bb:truncate bb:focus:outline-hidden bb:border-none"
                         v-model.trim="search"
                         @input="startSearch"
                     />
                     <eraser
                         v-show="inputNeedsEraser"
                         @click="clearInput"
-                        class="pr-2 h-full"
+                        class="bb:pr-2 bb:h-full"
                     />
                 </label>
             </div>

@@ -1,14 +1,14 @@
 <template>
-    <div class="bb-dashboard-ui flex flex-col">
-        <div class="relative flex h-full cursor-pointer leading-none">
+    <div class="bb-dashboard-ui bb:flex bb:flex-col">
+        <div class="bb:relative bb:flex bb:h-full bb:cursor-pointer bb:leading-none">
             <button
                 ref="trigger"
                 type="button"
-                class="flex w-full items-center focus:outline-hidden"
-                :class="{ 'z-20': popupIsOpen }"
+                class="bb:flex bb:w-full bb:items-center bb:focus:outline-hidden"
+                :class="{ 'bb:z-20': popupIsOpen }"
                 @click="popupIsOpen = !popupIsOpen"
             >
-                <label class="min-w-24 w-full h-full">
+                <label class="bb:min-w-24 bb:w-full bb:h-full">
                     <!-- Геометрия поля выписана явно: базовый слой пакета обнуляет
                          отступы и рамку, а раньше их неявно задавал @tailwindcss/forms
                          приложения. py-2 pr-3 и рамка в 1 px — те же значения, что
@@ -23,16 +23,16 @@
                         type="text"
                         :value="dayValue"
                         :placeholder="placeholderText"
-                        class="w-full h-full py-2 pr-3 leading-none border border-transparent whitespace-nowrap bg-transparent placeholder:text-sm placeholder-gray-300 cursor-pointer focus:outline-hidden"
+                        class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:outline-hidden"
                     />
                 </label>
             </button>
 
-            <eraser v-if="needsEraser" @click="clearPicker" class="z-10 h-full pr-2"/>
+            <eraser v-if="needsEraser" @click="clearPicker" class="bb:z-10 bb:h-full bb:pr-2"/>
         </div>
 
         <popup v-model="popupIsOpen">
-            <div ref="container" class="flex mt-1 bg-white border border-gray-200 rounded-md shadow-lg"></div>
+            <div ref="container" class="bb:flex bb:mt-1 bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"></div>
         </popup>
     </div>
 </template>

@@ -1,31 +1,31 @@
 <template>
     <modal :is-open="isOpen" :heading-id="headingId">
-        <div class="flex bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
+        <div class="bb:flex bb:bg-white bb:px-4 bb:pt-5 bb:pb-4 bb:sm:p-6 bb:sm:pb-4">
+            <div class="bb:sm:flex bb:sm:items-start">
                 <div
-                    class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10"
-                    :class="{ 'bg-red-100': isDangerous, 'bg-yellow-100': isWarning }"
+                    class="bb:mx-auto bb:shrink-0 bb:flex bb:items-center bb:justify-center bb:h-12 bb:w-12 bb:rounded-full bb:sm:mx-0 bb:sm:h-10 bb:sm:w-10"
+                    :class="{ 'bb:bg-red-100': isDangerous, 'bb:bg-yellow-100': isWarning }"
                 >
                     <warning v-if="isWarning"/>
                     <dangerous v-if="isDangerous"/>
                 </div>
-                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" :id="headingId">
+                <div class="bb:mt-3 bb:text-center bb:sm:mt-0 bb:sm:ml-4 bb:sm:text-left">
+                    <h3 class="bb:text-lg bb:leading-6 bb:font-medium bb:text-gray-900" :id="headingId">
                         {{ confirmationHeading }}
                     </h3>
-                    <div class="mt-2">
-                        <p class="text-sm text-gray-500">{{ confirmationText }}</p>
+                    <div class="bb:mt-2">
+                        <p class="bb:text-sm bb:text-gray-500">{{ confirmationText }}</p>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <div class="bb:bg-gray-50 bb:px-4 bb:py-3 bb:sm:px-6 bb:sm:flex bb:sm:flex-row-reverse">
             <button
                 type="button"
-                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-xs px-4 py-2 text-base font-medium text-white focus:outline-hidden focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                class="bb:w-full bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-transparent bb:shadow-xs bb:px-4 bb:py-2 bb:text-base bb:font-medium bb:text-white bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:sm:ml-3 bb:sm:w-auto bb:sm:text-sm"
                 :class="{
-                    'bg-red-600 hover:bg-red-700 focus:ring-red-500': isDangerous,
-                    'bg-yellow-400 hover:bg-yellow-500 focus:ring-yellow-300': isWarning,
+                    'bb:bg-red-600 bb:hover:bg-red-700 bb:focus:ring-red-500': isDangerous,
+                    'bb:bg-yellow-400 bb:hover:bg-yellow-500 bb:focus:ring-yellow-300': isWarning,
                 }"
                 @click.prevent="$emit('actionConfirmed')"
             >
@@ -33,7 +33,7 @@
             </button>
             <button
                 type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-xs px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                class="bb:mt-3 bb:w-full bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-gray-300 bb:shadow-xs bb:px-4 bb:py-2 bb:bg-white bb:text-base bb:font-medium bb:text-gray-700 bb:hover:bg-gray-50 bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:focus:ring-indigo-500 bb:sm:mt-0 bb:sm:ml-3 bb:sm:w-auto bb:sm:text-sm"
                 @click.prevent="$emit('actionCanceled')"
             >
                 {{ cancelButtonText }}

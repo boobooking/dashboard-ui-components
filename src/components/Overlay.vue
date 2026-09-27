@@ -4,11 +4,11 @@
         v-show="isOpen"
         tabindex="-1"
         @click.prevent="closeOverlay"
-        class="fixed inset-0 w-full h-full cursor-default flex items-start"
+        class="bb:fixed bb:inset-0 bb:w-full bb:h-full bb:cursor-default bb:flex bb:items-start"
         :class="{
-            'z-20': isOpen,
-            'bg-transparent': isTransparent,
-            'bg-gray-900 opacity-75': !isTransparent,
+            'bb:z-20': isOpen,
+            'bb:bg-transparent': isTransparent,
+            'bb:bg-gray-900 bb:opacity-75': !isTransparent,
         }"
     />
 </template>

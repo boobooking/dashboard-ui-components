@@ -1,7 +1,7 @@
 <template>
     <!-- Heroicon name: solid/exclamation -->
     <svg
-        class="h-7 w-7 text-yellow-400"
+        class="bb:h-7 bb:w-7 bb:text-yellow-400"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"

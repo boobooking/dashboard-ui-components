@@ -1,9 +1,9 @@
 <template>
     <div
-        class="bb-dashboard-ui flex h-full items-center leading-none text-4xl"
-        :class="{ 'text-red-500': isRed, 'text-green-500': isGreen, 'animate-pulse': withPulse }"
+        class="bb-dashboard-ui bb:flex bb:h-full bb:items-center bb:leading-none bb:text-4xl"
+        :class="{ 'bb:text-red-500': isRed, 'bb:text-green-500': isGreen, 'bb:animate-pulse': withPulse }"
     >
-        <svg class="fill-current w-2 h-2" viewBox="0 0 120 120">
+        <svg class="bb:fill-current bb:w-2 bb:h-2" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="45" />
         </svg>
     </div>

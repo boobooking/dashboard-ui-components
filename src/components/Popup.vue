@@ -2,7 +2,7 @@
     <!-- Обёртка рендерится всегда: если прятать её вместе с modelValue, меню уходит
          из потока раньше, чем доиграет переход. Пустая и нулевой высоты, на
          раскладку не влияет. -->
-    <div class="bb-dashboard-ui relative">
+    <div class="bb-dashboard-ui bb:relative">
         <overlay v-model:is-open="overlayIsOpen"></overlay>
         <!-- Переход висит на самом меню, а не на обёртке. Ненулевой scale на
              обёртке делал её контекстом наложения, из-за чего z-20 меню не
@@ -10,18 +10,18 @@
              чего ловушка кликов схлопывалась. Плюс transform-origin считался
              по коробке обёртки, а не меню. -->
         <transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
+            enter-active-class="bb:transition bb:ease-out bb:duration-100"
+            enter-from-class="bb:opacity-0 bb:scale-95"
+            enter-to-class="bb:opacity-100 bb:scale-100"
+            leave-active-class="bb:transition bb:ease-in bb:duration-75"
+            leave-from-class="bb:opacity-100 bb:scale-100"
+            leave-to-class="bb:opacity-0 bb:scale-95"
         >
             <div
                 v-show="modelValue"
                 v-bind="$attrs"
-                class="absolute z-20"
-                :class="{ 'left-0': alignLeft, 'right-0': alignRight }"
+                class="bb:absolute bb:z-20"
+                :class="{ 'bb:left-0': alignLeft, 'bb:right-0': alignRight }"
             >
                 <slot></slot>
             </div>

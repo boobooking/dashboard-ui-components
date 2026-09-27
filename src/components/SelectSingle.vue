@@ -1,6 +1,6 @@
 <template>
-    <div class="bb-dashboard-ui flex flex-none">
-        <div class="flex w-full flex-col border border-white bg-white">
+    <div class="bb-dashboard-ui bb:flex bb:flex-none">
+        <div class="bb:flex bb:w-full bb:flex-col bb:border bb:border-white bb:bg-white">
             <element-header :text="header" :is-required="isRequired" :is-loading="isLoading"/>
             <dropdown-button
                 :title="activeItemName"
@@ -10,7 +10,7 @@
                 @erased="clear"
             >
                 <div
-                    class="flex flex-col py-1 mt-1 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-200 divide-dashed"
+                    class="bb:flex bb:flex-col bb:py-1 bb:mt-1 bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg bb:divide-y bb:divide-gray-200 bb:divide-dashed"
                 >
                     <list-element
                         v-for="item in itemList"

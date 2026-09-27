@@ -4,10 +4,10 @@
     <a
         :href="url"
         :title="title"
-        class="bb-dashboard-ui inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium leading-none select-none bg-purple-100 text-purple-800 hover:text-purple-600"
+        class="bb-dashboard-ui bb:inline-flex bb:items-center bb:px-3 bb:py-1.5 bb:rounded-full bb:text-xs bb:font-medium bb:leading-none bb:select-none bb:bg-purple-100 bb:text-purple-800 bb:hover:text-purple-600"
     >
         <download-icon/>
-        <span class="ml-1">{{ title }}</span>
+        <span class="bb:ml-1">{{ title }}</span>
     </a>
 </template>
 

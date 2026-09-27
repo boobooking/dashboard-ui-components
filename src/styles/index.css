@@ -8,7 +8,14 @@
  */
 @layer theme, base, components, utilities;
 
-@import 'tailwindcss/theme.css' layer(theme);
+/*
+ * Префикс bb: утилиты пакета — bb:flex, bb:sm:inline-block, переменные темы —
+ * --bb-*. Tailwind приложения таких классов не генерирует, поэтому
+ * одноимённых правил у пакета и приложения нет, и порядок подключения стилей
+ * на вид компонентов не влияет. Каждый класс в разметке компонентов пишется
+ * с префиксом; пропуск ловит tests/utilityPrefix.test.js.
+ */
+@import 'tailwindcss/theme.css' layer(theme) prefix(bb);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 
 @source '../components';

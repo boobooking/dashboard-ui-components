@@ -1,14 +1,14 @@
 <template>
     <div
         v-if="hasErrors"
-        class="bb-dashboard-ui border-l-4 p-4"
-        :class="isDangerous ? 'bg-red-50 border-red-400' : 'bg-yellow-50 border-yellow-400'"
+        class="bb-dashboard-ui bb:border-l-4 bb:p-4"
+        :class="isDangerous ? 'bb:bg-red-50 bb:border-red-400' : 'bb:bg-yellow-50 bb:border-yellow-400'"
     >
-        <div class="flex">
-            <div class="shrink-0">
+        <div class="bb:flex">
+            <div class="bb:shrink-0">
                 <svg
-                    class="h-5 w-5"
-                    :class="isDangerous ? 'text-red-400' : 'text-yellow-400'"
+                    class="bb:h-5 bb:w-5"
+                    :class="isDangerous ? 'bb:text-red-400' : 'bb:text-yellow-400'"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                 >
@@ -19,10 +19,10 @@
                     />
                 </svg>
             </div>
-            <div class="ml-3">
+            <div class="bb:ml-3">
                 <p
-                    class="text-sm leading-5"
-                    :class="isDangerous ? 'text-red-700' : 'text-yellow-700'"
+                    class="bb:text-sm bb:leading-5"
+                    :class="isDangerous ? 'bb:text-red-700' : 'bb:text-yellow-700'"
                     v-for="(message, key) in messages"
                     :key="key"
                     v-text="message"

@@ -1,24 +1,24 @@
 <template>
-    <span class="bb-dashboard-ui relative inline-flex shadow-xs rounded-md">
+    <span class="bb-dashboard-ui bb:relative bb:inline-flex bb:shadow-xs bb:rounded-md">
         <!-- Без дополнительных действий стрелке нечего открывать: её нет,
              и кнопка скругляется с обеих сторон. -->
         <button
             type="button"
-            class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white hover:bg-gray-50 focus:outline-hidden"
-            :class="{ 'rounded-r-md': !$slots.actions }"
+            class="bb:relative bb:inline-flex bb:items-center bb:rounded-l-md bb:border bb:border-gray-300 bb:bg-white bb:hover:bg-gray-50 bb:focus:outline-hidden"
+            :class="{ 'bb:rounded-r-md': !$slots.actions }"
         >
             <slot name="button"></slot>
         </button>
-        <span class="-ml-px relative block" v-if="$slots.actions">
+        <span class="bb:-ml-px bb:relative bb:block" v-if="$slots.actions">
             <button
                 @click.prevent="setOpen(!popupIsOpen)"
                 :id="menuButtonId"
                 type="button"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:bg-gray-50 bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
             >
-                <span class="sr-only">Открыть меню</span>
+                <span class="bb:sr-only">Открыть меню</span>
                 <svg
-                    class="h-5 w-5"
+                    class="bb:h-5 bb:w-5"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
                     fill="currentColor"
@@ -32,13 +32,13 @@
                 </svg>
             </button>
             <popup
-                class="origin-top-right right-0"
+                class="bb:origin-top-right bb:right-0"
                 :model-value="popupIsOpen"
                 align="right"
                 @update:model-value="setOpen"
             >
                 <div
-                    class="mt-1 w-56 rounded-md shadow-lg bg-white ring-1 ring-black/5"
+                    class="bb:mt-1 bb:w-56 bb:rounded-md bb:shadow-lg bb:bg-white bb:ring-1 bb:ring-black/5"
                     role="menu"
                     aria-orientation="vertical"
                     :aria-labelledby="menuButtonId"
