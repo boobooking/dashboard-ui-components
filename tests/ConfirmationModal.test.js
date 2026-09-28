@@ -36,4 +36,18 @@ describe('ConfirmationModal', () => {
         }
         expect(pairs[0].headingId).not.toBe(pairs[1].headingId)
     })
+
+    // Панель Modal не обрезает содержимое, поэтому квадратные фоны блоков
+    // закрыли бы её скругление: внешние углы скругляют сами блоки, тем же
+    // радиусом, что у панели.
+    it('скругляет внешние углы блоков как у панели', () => {
+        const wrapper = mount(ConfirmationModal, { props: { isOpen: true, actionButtonText: 'Да' } })
+
+        const panel = wrapper.get('[role="dialog"]')
+        const blocks = panel.element.children
+        expect(panel.classes()).toContain('bb:rounded-lg')
+        expect(blocks).toHaveLength(2)
+        expect(blocks[0].classList).toContain('bb:rounded-t-lg')
+        expect(blocks[1].classList).toContain('bb:rounded-b-lg')
+    })
 })

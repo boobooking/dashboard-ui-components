@@ -1,6 +1,8 @@
 <template>
     <modal :is-open="isOpen" :heading-id="headingId">
-        <div class="bb:flex bb:bg-white bb:px-4 bb:pt-5 bb:pb-4 bb:sm:p-6 bb:sm:pb-4">
+        <!-- Панель Modal не обрезает содержимое, поэтому внешние углы блоков
+             скругляются здесь тем же радиусом: иначе их фон закрыл бы скругление панели. -->
+        <div class="bb:flex bb:bg-white bb:rounded-t-lg bb:px-4 bb:pt-5 bb:pb-4 bb:sm:p-6 bb:sm:pb-4">
             <div class="bb:sm:flex bb:sm:items-start">
                 <div
                     class="bb:mx-auto bb:shrink-0 bb:flex bb:items-center bb:justify-center bb:h-12 bb:w-12 bb:rounded-full bb:sm:mx-0 bb:sm:h-10 bb:sm:w-10"
@@ -19,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <div class="bb:bg-gray-50 bb:px-4 bb:py-3 bb:sm:px-6 bb:sm:flex bb:sm:flex-row-reverse">
+        <div class="bb:bg-gray-50 bb:rounded-b-lg bb:px-4 bb:py-3 bb:sm:px-6 bb:sm:flex bb:sm:flex-row-reverse">
             <button
                 type="button"
                 class="bb:w-full bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-transparent bb:shadow-xs bb:px-4 bb:py-2 bb:text-base bb:font-medium bb:text-white bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:sm:ml-3 bb:sm:w-auto bb:sm:text-sm"
