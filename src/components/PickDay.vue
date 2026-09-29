@@ -43,12 +43,15 @@ import "pikaday/css/pikaday.css";
 import Popup from "./Popup.vue";
 import Eraser from "./Eraser.vue";
 import { formatDay, parseDay } from "../date.js";
+import { withLang } from "../lang.js";
 
 export default {
     components: {
         Popup,
         Eraser,
     },
+
+    mixins: [withLang],
 
     emits: ["update:modelValue", "changed"],
 
@@ -81,25 +84,13 @@ export default {
             firstDay: 1,
             parse: (value) => parseDay(value),
             toString: (value) => formatDay(value),
+            // Язык берётся при монтировании: Pikaday собирается один раз.
             i18n: {
-                previousMonth: "Предыдущий месяц",
-                nextMonth: "Следующий месяц",
-                months: [
-                    "Январь",
-                    "Февраль",
-                    "Март",
-                    "Апрель",
-                    "Май",
-                    "Июнь",
-                    "Июль",
-                    "Август",
-                    "Сентябрь",
-                    "Октябрь",
-                    "Ноябрь",
-                    "Декабрь",
-                ],
-                weekdays: ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"],
-                weekdaysShort: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+                previousMonth: this.texts.previousMonth,
+                nextMonth: this.texts.nextMonth,
+                months: this.texts.months,
+                weekdays: this.texts.weekdays,
+                weekdaysShort: this.texts.weekdaysShort,
             },
             onSelect: (value) => {
                 this.popupIsOpen = false;

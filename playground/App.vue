@@ -152,6 +152,43 @@
                 <button type="button" class="demo-button" @click="dropdownIsOpen = !dropdownIsOpen">Переключить снаружи</button>
             </p>
         </section>
+
+        <section>
+            <h2>Pagination</h2>
+            <pagination :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
+            <pagination :links="{ prev: null, next: '/list?page=2' }" :meta="{ from: 1, to: 15, total: 40 }"/>
+            <p>Последний переход: {{ lastNavigation || '—' }}</p>
+        </section>
+
+        <section>
+            <h2>NavigationMenuElement</h2>
+            <div class="demo-row">
+                <navigation-menu-element name="Активный" url="/section/active" :is-active="true"/>
+                <navigation-menu-element name="Обычный" url="/section/other"/>
+            </div>
+        </section>
+
+        <section>
+            <h2>lang="en"</h2>
+            <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
+            <pick-day v-model="day" lang="en"/>
+            <download-link url="/export.xlsx" lang="en"/>
+            <dropdown-button-with-action lang="en">
+                <template #button><span class="demo-action">Action</span></template>
+                <template #actions><a href="#" class="demo-action">Another action</a></template>
+            </dropdown-button-with-action>
+            <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
+            <confirmation-modal
+                :is-open="englishModalIsOpen"
+                lang="en"
+                confirmation-heading="Delete?"
+                confirmation-text="This cannot be undone."
+                action-button-text="Delete"
+                @action-confirmed="englishModalIsOpen = false"
+                @action-canceled="englishModalIsOpen = false"
+            />
+            <pagination lang="en" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
+        </section>
     </div>
 </template>
 
@@ -172,7 +209,10 @@ import {
     Modal,
     ConfirmationModal,
     DropdownButtonWithAction,
+    Pagination,
+    NavigationMenuElement,
 } from '../dist/index.js';
+import { lastNavigation } from './navigation-log.js';
 
 export default {
     components: {
@@ -190,17 +230,21 @@ export default {
         Modal,
         ConfirmationModal,
         DropdownButtonWithAction,
+        Pagination,
+        NavigationMenuElement,
     },
 
     setup() {
         return {
             plainModalHeadingId: useId(),
+            lastNavigation,
         };
     },
 
     data() {
         return {
             popupIsOpen: false,
+            englishModalIsOpen: false,
             day: '',
             phone: '',
             phoneCommits: 0,

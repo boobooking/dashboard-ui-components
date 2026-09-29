@@ -4,8 +4,8 @@
             <div class="bb:flex bb:flex-col bb:min-w-72 bb:w-72 bb:bg-white bb:h-full">
                 <element-header :text="header" :is-required="isRequired" :is-loading="isLoading"/>
                 <div class="bb:flex bb:h-full bb:divide-x bb:divide-gray-200">
-                    <pick-day v-model="userDateFrom" class="bb:flex-1 bb:min-w-36 bb:pl-3" placeholder-text="от"/>
-                    <pick-day v-model="userDateTo" class="bb:flex-1 bb:min-w-36 bb:pl-3" placeholder-text="до"/>
+                    <pick-day v-model="userDateFrom" class="bb:flex-1 bb:min-w-36 bb:pl-3" :placeholder-text="texts.dateFrom" :lang="resolvedLang"/>
+                    <pick-day v-model="userDateTo" class="bb:flex-1 bb:min-w-36 bb:pl-3" :placeholder-text="texts.dateTo" :lang="resolvedLang"/>
                 </div>
             </div>
         </div>
@@ -15,12 +15,15 @@
 <script>
 import ElementHeader from "./ElementHeader.vue";
 import PickDay from "./PickDay.vue";
+import { withLang } from "../lang.js";
 
 export default {
     components: {
         ElementHeader,
         PickDay,
     },
+
+    mixins: [withLang],
 
     emits: ["update:dateFrom", "update:dateTo", "changed"],
 

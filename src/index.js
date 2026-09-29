@@ -2,6 +2,8 @@
 // style.css из одного pikaday, без единой утилиты Tailwind и без ошибки.
 import './styles/index.css'
 
+export { dashboardUi } from './plugin.js'
+
 export { default as Popup } from './components/Popup.vue'
 export { default as Dot } from './components/Dot.vue'
 export { default as PickDay } from './components/PickDay.vue'
@@ -16,3 +18,5 @@ export { default as DownloadLink } from './components/DownloadLink.vue'
 export { default as Modal } from './components/Modal.vue'
 export { default as ConfirmationModal } from './components/ConfirmationModal.vue'
 export { default as DropdownButtonWithAction } from './components/DropdownButtonWithAction.vue'
+export { default as Pagination } from './components/Pagination.vue'
+export { default as NavigationMenuElement } from './components/NavigationMenuElement.vue'

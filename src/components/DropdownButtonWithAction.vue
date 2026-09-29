@@ -16,7 +16,7 @@
                 type="button"
                 class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:bg-gray-50 bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
             >
-                <span class="bb:sr-only">Открыть меню</span>
+                <span class="bb:sr-only">{{ texts.openMenu }}</span>
                 <svg
                     class="bb:h-5 bb:w-5"
                     xmlns="http://www.w3.org/2000/svg"
@@ -53,9 +53,12 @@
 <script>
 import { useId } from "vue";
 import Popup from "./Popup.vue";
+import { withLang } from "../lang.js";
 
 export default {
     components: {Popup},
+
+    mixins: [withLang],
 
     emits: ["update:modelValue"],
 

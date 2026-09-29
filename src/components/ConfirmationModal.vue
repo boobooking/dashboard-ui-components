@@ -38,7 +38,7 @@
                 class="bb:mt-3 bb:w-full bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-gray-300 bb:shadow-xs bb:px-4 bb:py-2 bb:bg-white bb:text-base bb:font-medium bb:text-gray-700 bb:hover:bg-gray-50 bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:focus:ring-indigo-500 bb:sm:mt-0 bb:sm:ml-3 bb:sm:w-auto bb:sm:text-sm"
                 @click.prevent="$emit('actionCanceled')"
             >
-                {{ cancelButtonText }}
+                {{ cancelButtonText ?? texts.cancel }}
             </button>
         </div>
     </modal>
@@ -49,6 +49,7 @@ import { useId } from "vue";
 import Modal from "./Modal.vue";
 import Dangerous from "./icons/Dangerous.vue";
 import Warning from "./icons/Warning.vue";
+import { withLang } from "../lang.js";
 
 export default {
     components: {
@@ -56,6 +57,8 @@ export default {
         Dangerous,
         Warning,
     },
+
+    mixins: [withLang],
 
     emits: ["actionConfirmed", "actionCanceled"],
 
@@ -79,9 +82,10 @@ export default {
             type: String,
             default: "",
         },
+        // Не задан — текст кнопки из словаря языка; явно переданный главнее языка.
         cancelButtonText: {
             type: String,
-            default: "Отмена",
+            default: null,
         },
         actionButtonText: {
             type: String,
