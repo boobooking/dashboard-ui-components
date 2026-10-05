@@ -28,14 +28,18 @@ createApp(App).use(dashboardUi, {
 })
 ```
 
-- `lang` — `'ru'` (по умолчанию) или `'en'`; другое значение — ошибка в `app.use`.
+- `lang` — `'ru'` (по умолчанию) или `'en'`; другое значение — ошибка в
+  `app.use`.
 - `navigate(href)` — переход приложения по адресу: для Inertia
   `router.visit(href)`, для Vue Router `router.push(href)`. Компоненты рисуют
   настоящий `<a href>` и отдают `navigate` только обычный клик левой кнопкой;
   клики с Ctrl/Cmd/Shift/Alt, средней кнопкой и ссылки с `target` остаются
   браузеру. Без `navigate` браузер идёт по ссылке сам.
 
-`navigate` получает адрес ровно таким, каким он лежит в компоненте: `Pagination` отдаёт `links` Laravel как есть, а это абсолютные URL. С Vue Router приложение само превращает их в маршрут, например `new URL(href).pathname + search`, и только потом зовёт `router.push`.
+`navigate` получает адрес ровно таким, каким он лежит в компоненте:
+`Pagination` отдаёт `links` Laravel как есть, а это абсолютные URL. С Vue
+Router приложение само превращает их в маршрут, например
+`new URL(href).pathname + search`, и только потом зовёт `router.push`.
 
 ## Требования
 
@@ -52,10 +56,10 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 `RussianMobileFilter`, `Search`, `SelectDateInterval`, `SelectSingle`,
 `SmallBadge`, `ErrorMessages`, `Closer`, `DownloadLink`,
 `ConfirmationModal`, `DropdownButtonWithAction`, `Pagination`,
-`NavigationMenuElement`, `PageCard`, `NotificationMessage` и плагин `dashboardUi`. В архив пакета
-(`files: ["dist"]`) исходники не
-попадают, поэтому контракт каждого компонента — здесь и в playground, а не в
-исходном коде.
+`NavigationMenuElement`, `PageCard`, `NotificationMessage` и плагин
+`dashboardUi`. В архив пакета (`files: ["dist"]`) исходники не попадают,
+поэтому контракт каждого компонента — здесь и в playground, а не в исходном
+коде.
 
 ### Popup
 
@@ -384,9 +388,10 @@ sm:rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: ф�
 `padding-right: var(--bb-closer-space)`, а в Tailwind 3 —
 `pr-[var(--bb-closer-space)]`. Вне `PageCard` отступ равен нулю.
 
-Карточка не обрезает содержимое, как у `ConfirmationModal`: выпадающие списки и календари
-могут выходить за её край. Блок со своим фоном у края карточки скругляет свои
-углы сам — например, нижний блок строк: `overflow-hidden sm:rounded-b-lg`.
+Карточка не обрезает содержимое, как у `ConfirmationModal`: выпадающие списки
+и календари могут выходить за её край. Блок со своим фоном у края карточки
+скругляет свои углы сам — например, нижний блок строк:
+`overflow-hidden sm:rounded-b-lg`.
 
 Крестик доступен с клавиатуры: Tab, Enter, пробел; в порядке табуляции крестик
 идёт после содержимого карточки; при фокусе с клавиатуры
@@ -572,7 +577,8 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 такие обращения перестанут находить элементы: внутренние классы в контракт
 пакета не входят.
 
-С версии 0.10.0 `Modal` не экспортируется: это внутренняя оболочка `ConfirmationModal`.
+С версии 0.10.0 `Modal` не экспортируется: это внутренняя оболочка
+`ConfirmationModal`.
 
 Ресет пакета распространяется и на содержимое слотов — разметку приложения
 внутри `Popup` и `DropdownButtonWithAction`. Ресет лежит в слое

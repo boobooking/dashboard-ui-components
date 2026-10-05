@@ -89,12 +89,12 @@
    приложения с preflight и @tailwindcss/forms. Отступы карточки — классом на
    корень, как их передают формы приложений. */
 .page-card-demo {
-    padding: 16px 16px 16px;
+    padding: 16px;
 }
 
 @media (min-width: 640px) {
     .page-card-demo {
-        padding: 24px 24px 24px;
+        padding: 24px;
     }
 }
 
@@ -122,4 +122,11 @@
     border-radius: 6px;
     appearance: none;
     box-shadow: none;
+}
+
+/* Фокус поля — одинаково в обоих окружениях: @tailwindcss/forms делает
+   outline прозрачным, а браузер без него рисует свой. */
+.page-card-demo-input:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
 }

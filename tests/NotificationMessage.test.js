@@ -110,6 +110,8 @@ describe('NotificationMessage: живая область', () => {
         expect(wrapper.element).toBe(root)
         expect(panelOf(root)).not.toBeNull()
         expect(panelOf(root).parentElement).toBe(root)
+        // Панель — единственный элемент корня: содержимое области — только она.
+        expect(root.childElementCount).toBe(1)
         expect(root.getAttribute('role')).toBe('alert')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
@@ -201,6 +203,8 @@ describe('NotificationMessage: недопустимый type', () => {
         expect(warnings.length).toBeGreaterThan(0)
         expect(warnings.every((warning) => warning.includes('Invalid prop'))).toBe(true)
         expect(panel).not.toBeNull()
+        // Всё, что не dangerous, объявляется вежливо — как status.
+        expect(wrapper.attributes('role')).toBe('status')
         expect(panel.querySelector('svg path[d^="M9 12.75"], svg path[d^="M8.257"], svg path[d^="M12 9v2"]')).toBeNull()
         for (const background of ['bb:bg-gray-50', 'bb:bg-yellow-50', 'bb:bg-red-50']) {
             expect(panel.classList.contains(background)).toBe(false)
