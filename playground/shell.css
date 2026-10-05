@@ -83,3 +83,43 @@
     padding: 8px 16px;
     font-size: 14px;
 }
+
+/* Демо PageCard. Компонент содержимое слота не нормализует, поэтому заголовок
+   и поле оформлены здесь явно — одинаково в голом окружении и в окружении
+   приложения с preflight и @tailwindcss/forms. Отступы карточки — классом на
+   корень, как их передают формы приложений. */
+.page-card-demo {
+    padding: 16px 16px 16px;
+}
+
+@media (min-width: 640px) {
+    .page-card-demo {
+        padding: 24px 24px 24px;
+    }
+}
+
+.page-card-demo-heading {
+    margin: 0;
+    padding: 0 var(--bb-closer-space, 0px) 0 0;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 500;
+}
+
+.page-card-demo-input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    margin: 16px 0 0;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    color: #111827;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    appearance: none;
+    box-shadow: none;
+}

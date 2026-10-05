@@ -189,6 +189,14 @@
             />
             <pagination lang="en" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
         </section>
+
+        <section>
+            <h2>PageCard</h2>
+            <page-card class="page-card-demo">
+                <h3 class="page-card-demo-heading">Длинный заголовок карточки: на узком экране он переносится и не заходит под крестик</h3>
+                <input class="page-card-demo-input" type="text" value="Поле формы">
+            </page-card>
+        </section>
     </div>
 </template>
 
@@ -211,6 +219,7 @@ import {
     DropdownButtonWithAction,
     Pagination,
     NavigationMenuElement,
+    PageCard,
 } from '../dist/index.js';
 import { lastNavigation } from './navigation-log.js';
 
@@ -232,6 +241,7 @@ export default {
         DropdownButtonWithAction,
         Pagination,
         NavigationMenuElement,
+        PageCard,
     },
 
     setup() {

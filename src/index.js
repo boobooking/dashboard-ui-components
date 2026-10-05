@@ -20,3 +20,4 @@ export { default as ConfirmationModal } from './components/ConfirmationModal.vue
 export { default as DropdownButtonWithAction } from './components/DropdownButtonWithAction.vue'
 export { default as Pagination } from './components/Pagination.vue'
 export { default as NavigationMenuElement } from './components/NavigationMenuElement.vue'
+export { default as PageCard } from './components/PageCard.vue'

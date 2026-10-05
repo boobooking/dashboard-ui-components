@@ -1,11 +1,12 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { messages } from '../src/i18n.js'
 import { dashboardUi } from '../src/plugin.js'
 import ConfirmationModal from '../src/components/ConfirmationModal.vue'
 import DownloadLink from '../src/components/DownloadLink.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
+import PageCard from '../src/components/PageCard.vue'
 import Pagination from '../src/components/Pagination.vue'
 import PickDay from '../src/components/PickDay.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
@@ -142,6 +143,39 @@ describe('недопустимый lang: язык плагина, а не пад
             }
         })
     }
+})
+
+describe('недопустимый lang: крестик PageCard', () => {
+    // Крестик рисуется, только если в истории больше одной записи; компонент
+    // читает её при создании.
+    beforeAll(() => {
+        window.history.pushState({}, '')
+        expect(window.history.length).toBeGreaterThan(1)
+    })
+
+    it('lang de и плагин en — доступное имя Back', () => {
+        const warnings = []
+        const errors = []
+        const wrapper = mount(PageCard, {
+            props: { lang: 'de' },
+            global: {
+                ...inApp({ lang: 'en' }),
+                config: {
+                    errorHandler: (error) => errors.push(error),
+                    warnHandler: (message) => warnings.push(message),
+                },
+            },
+        })
+
+        const cross = wrapper.findAll('button').find((button) => button.find('path[d="M6 18L18 6M6 6l12 12"]').exists())
+        expect(cross.attributes('aria-label')).toBe('Back')
+        expect(errors).toEqual([])
+        // Валидатор пропа по-прежнему предупреждает — и только он.
+        expect(warnings.length).toBeGreaterThan(0)
+        for (const warning of warnings) {
+            expect(warning).toContain('Invalid prop')
+        }
+    })
 })
 
 describe('PickDay: месяц в шапке календаря', () => {

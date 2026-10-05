@@ -29,6 +29,8 @@ export const messages = {
         resultsBefore: 'Показаны результаты',
         resultsOf: 'из',
         resultsAfter: '',
+        // PageCard: доступное имя крестика «назад по истории».
+        back: 'Назад',
     },
     en: {
         cancel: 'Cancel',
@@ -50,5 +52,6 @@ export const messages = {
         resultsBefore: 'Showing',
         resultsOf: 'of',
         resultsAfter: 'results',
+        back: 'Back',
     },
 }
