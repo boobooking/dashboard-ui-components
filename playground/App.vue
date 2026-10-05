@@ -88,20 +88,6 @@
         </section>
 
         <section>
-            <h2>Modal</h2>
-            <div class="demo-row">
-                <button type="button" class="demo-button" @click="plainModalIsOpen = true">Открыть</button>
-            </div>
-            <modal :is-open="plainModalIsOpen" :heading-id="plainModalHeadingId">
-                <div style="padding: 24px">
-                    <h3 :id="plainModalHeadingId">Произвольное содержимое</h3>
-                    <p>Разметку внутри модалки задаёт приложение.</p>
-                    <button type="button" class="demo-button" @click="plainModalIsOpen = false">Закрыть</button>
-                </div>
-            </modal>
-        </section>
-
-        <section>
             <h2>ConfirmationModal</h2>
             <div class="demo-row">
                 <button type="button" class="demo-button" @click="warningModalIsOpen = true">Жёлтая</button>
@@ -197,11 +183,23 @@
                 <input class="page-card-demo-input" type="text" value="Поле формы">
             </page-card>
         </section>
+
+        <section>
+            <h2>NotificationMessage</h2>
+            <div class="demo-row">
+                <button type="button" class="demo-button" @click="showNotice('confirmation')">Подтверждение</button>
+                <button type="button" class="demo-button" @click="showNotice('warning')">Предупреждение</button>
+                <button type="button" class="demo-button" @click="showNotice('dangerous')">Ошибка</button>
+            </div>
+            <!-- У каждого типа свой экземпляр: роль живой области задаётся типом. -->
+            <notification-message v-model="confirmationNotice" type="confirmation" notification-heading="Письмо отправлено"/>
+            <notification-message v-model="warningNotice" type="warning" notification-heading="Проверьте данные"/>
+            <notification-message v-model="dangerousNotice" type="dangerous" notification-heading="Ошибка отправки"/>
+        </section>
     </div>
 </template>
 
 <script>
-import { useId } from 'vue';
 import {
     Popup,
     Dot,
@@ -214,12 +212,12 @@ import {
     ErrorMessages,
     Closer,
     DownloadLink,
-    Modal,
     ConfirmationModal,
     DropdownButtonWithAction,
     Pagination,
     NavigationMenuElement,
     PageCard,
+    NotificationMessage,
 } from '../dist/index.js';
 import { lastNavigation } from './navigation-log.js';
 
@@ -236,17 +234,16 @@ export default {
         ErrorMessages,
         Closer,
         DownloadLink,
-        Modal,
         ConfirmationModal,
         DropdownButtonWithAction,
         Pagination,
         NavigationMenuElement,
         PageCard,
+        NotificationMessage,
     },
 
     setup() {
         return {
-            plainModalHeadingId: useId(),
             lastNavigation,
         };
     },
@@ -255,6 +252,9 @@ export default {
         return {
             popupIsOpen: false,
             englishModalIsOpen: false,
+            confirmationNotice: '',
+            warningNotice: '',
+            dangerousNotice: '',
             day: '',
             phone: '',
             phoneCommits: 0,
@@ -277,13 +277,21 @@ export default {
                 'Ключи уже загружены в другие сертификаты: abc-123',
             ],
             closerClicks: 0,
-            plainModalIsOpen: false,
             warningModalIsOpen: false,
             dangerousModalIsOpen: false,
             modalConfirms: 0,
             modalCancels: 0,
             dropdownIsOpen: false,
         };
+    },
+
+    methods: {
+        // На экране одно уведомление: у всех трёх одно место в углу.
+        showNotice(type) {
+            this.confirmationNotice = type === 'confirmation' ? 'Письмо отправлено на адрес user@example.com' : '';
+            this.warningNotice = type === 'warning' ? 'Заполните все обязательные поля.' : '';
+            this.dangerousNotice = type === 'dangerous' ? 'Не удалось отправить письмо на адрес user@example.com' : '';
+        },
     },
 };
 </script>

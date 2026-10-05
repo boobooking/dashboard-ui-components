@@ -31,6 +31,8 @@ export const messages = {
         resultsAfter: '',
         // PageCard: доступное имя крестика «назад по истории».
         back: 'Назад',
+        // NotificationMessage: подпись крестика для скринридера.
+        close: 'Закрыть',
     },
     en: {
         cancel: 'Cancel',
@@ -53,5 +55,6 @@ export const messages = {
         resultsOf: 'of',
         resultsAfter: 'results',
         back: 'Back',
+        close: 'Close',
     },
 }
