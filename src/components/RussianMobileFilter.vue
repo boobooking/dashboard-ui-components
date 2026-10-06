@@ -70,12 +70,13 @@ export default {
     },
 
     created() {
-        // Нереактивные поля: маску нельзя заворачивать в прокси Vue, а таймер и
-        // lastCommitted в шаблоне не нужны.
+        // Нереактивные поля: маску нельзя заворачивать в прокси Vue, а таймер,
+        // lastCommitted и признак размонтирования в шаблоне не нужны.
         this.mask = null;
         this.debounceTimer = null;
         this.isWritingProgrammatically = false;
         this.lastCommitted = toDigits(this.modelValue);
+        this.isUnmounted = false;
     },
 
     mounted() {
@@ -104,6 +105,7 @@ export default {
     },
 
     beforeUnmount() {
+        this.isUnmounted = true;
         clearTimeout(this.debounceTimer);
         this.mask?.destroy();
     },
@@ -184,7 +186,15 @@ export default {
             });
         },
 
+        // Chrome шлёт blur и при удалении поля в фокусе — во время
+        // размонтирования, когда маска уже уничтожена. После beforeUnmount
+        // ничего не делаем: маски нет, а changed со страницы, с которой
+        // уходят, запустил бы её фильтр снова.
         onBlur() {
+            if (this.isUnmounted) {
+                return;
+            }
+
             this.setLazy(true);
 
             if (this.digits === '') {
