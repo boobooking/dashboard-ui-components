@@ -173,30 +173,64 @@ describe('DropdownButtonWithAction без привязки', () => {
         }
     })
 
-    it('toggle, пришедший после размонтирования, не оставляет слушателей прокрутки и размера окна', async () => {
-        const added = []
-        const removed = []
+    // Слушатели прокрутки и размера окна, добавленные и снятые за время теста.
+    function recordWindowListeners() {
+        const record = { added: [], removed: [] }
         const addSpy = vi.spyOn(window, 'addEventListener').mockImplementation((type, listener) => {
             if (type === 'scroll' || type === 'resize') {
-                added.push([type, listener])
+                record.added.push([type, listener])
             }
         })
         const removeSpy = vi.spyOn(window, 'removeEventListener').mockImplementation((type, listener) => {
-            removed.push([type, listener])
+            record.removed.push([type, listener])
         })
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+        record.restore = () => {
+            addSpy.mockRestore()
+            removeSpy.mockRestore()
+        }
+
+        return record
+    }
+
+    it('toggle, пришедший после размонтирования, не оставляет слушателей прокрутки и размера окна', async () => {
+        const record = recordWindowListeners()
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            slots,
+            global: { config: { errorHandler: (error) => errors.push(error) } },
+        })
 
         try {
             await arrowOf(wrapper).trigger('click')
             wrapper.unmount()
-            await expect(settle()).resolves.toBeUndefined()
+            await settle()
 
-            for (const entry of added) {
-                expect(removed).toContainEqual(entry)
+            expect(errors).toEqual([])
+            for (const entry of record.added) {
+                expect(record.removed).toContainEqual(entry)
             }
         } finally {
-            addSpy.mockRestore()
-            removeSpy.mockRestore()
+            record.restore()
+        }
+    })
+
+    it('размонтирование открытого меню снимает слушатели прокрутки и размера окна', async () => {
+        const record = recordWindowListeners()
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        try {
+            await arrowOf(wrapper).trigger('click')
+            await settle()
+            expect(record.added.map(([type]) => type).sort()).toEqual(['resize', 'scroll'])
+
+            wrapper.unmount()
+
+            for (const entry of record.added) {
+                expect(record.removed).toContainEqual(entry)
+            }
+        } finally {
+            record.restore()
         }
     })
 

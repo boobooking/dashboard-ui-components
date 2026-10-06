@@ -7,7 +7,7 @@
 // - toggle приходит отложенной задачей, а переключения подряд до неё
 //   объединяются в одно событие: oldState — первого, newState — последнего;
 // - открытие popover="auto" закрывает другие открытые auto;
-// - клик по кнопке с popovertarget переключает свой элемент;
+// - клик по кнопке с popovertarget переключает свой элемент, если клик не отменён;
 // - клик вне открытых auto и Escape закрывают их.
 //
 // Синхронный toggle здесь недопустим: он пропустил бы компонент, который
@@ -95,6 +95,11 @@ export function installPopoverStub() {
     }
 
     function onClick(event) {
+        // Отменённый клик браузер не превращает в действие popovertarget.
+        if (event.defaultPrevented) {
+            return
+        }
+
         const invoker = event.target.closest?.('[popovertarget]')
         const target = invoker ? document.getElementById(invoker.getAttribute('popovertarget')) : null
 
