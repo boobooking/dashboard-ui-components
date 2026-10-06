@@ -234,6 +234,35 @@ describe('DropdownButtonWithAction без привязки', () => {
         }
     })
 
+    it('открытие, закрытие, повторное открытие и размонтирование не оставляют слушателей', async () => {
+        const record = recordWindowListeners()
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        try {
+            await arrowOf(wrapper).trigger('click')
+            await settle()
+            await arrowOf(wrapper).trigger('click')
+            await settle()
+            await arrowOf(wrapper).trigger('click')
+            await settle()
+            expect(record.added.length).toBeGreaterThan(2)
+
+            wrapper.unmount()
+
+            for (const entry of record.added) {
+                expect(record.removed).toContainEqual(entry)
+            }
+        } finally {
+            record.restore()
+        }
+    })
+
+    it('панель наследует цвет текста: у popover в верхнем слое свой color', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        expect(menuOf(wrapper).classes()).toContain('bb:text-inherit')
+    })
+
     it('без действий стрелки и панели нет', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,

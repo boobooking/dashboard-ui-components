@@ -103,6 +103,15 @@ describe('DataTable: ячейки', () => {
         expect(cellsOf(wrapper, 1)[0].text()).toBe('B')
     })
 
+    it('value и secondary не функции — ячейка по умолчанию, второй строки нет', () => {
+        const wrapper = mountTable({
+            columns: [{ key: 'phone', label: 'Телефон', value: 'name', secondary: 5 }],
+        })
+
+        expect(cellsOf(wrapper, 0)[0].text()).toBe('+79990000001')
+        expect(cellsOf(wrapper, 0)[0].findAll('div')).toHaveLength(1)
+    })
+
     it('пустая вторая строка не рисуется', () => {
         const wrapper = mountTable({ columns: [{ key: 'phone', label: 'Т', secondary: () => '' }] })
 
@@ -159,6 +168,14 @@ describe('DataTable: строки', () => {
         }).findAll('tbody tr')).toHaveLength(2)
     })
 
+    it('columns не массив — таблицы нет, исключения нет', () => {
+        const warnings = []
+        const wrapper = mountTable({ columns: null }, {}, { warnings })
+
+        expect(warnings.some((warning) => warning.includes('columns'))).toBe(true)
+        expect(wrapper.findAll('th')).toHaveLength(0)
+    })
+
     it('rows не массив — пустой список', () => {
         const warnings = []
         const wrapper = mountTable({ rows: null, emptyText: 'Не найдено записей' }, {}, { warnings })
@@ -178,6 +195,23 @@ describe('DataTable: бейдж, пустое состояние, пагинац
 
         expect(wrapper.text()).toContain('Найдено ордеров: 40')
         expect(wrapper.find('nav').exists()).toBe(true)
+    })
+
+    it('meta без links — пагинация без предупреждений Vue', () => {
+        const warnings = []
+        const wrapper = mountTable({ meta, foundText: 'Найдено ордеров' }, {}, { warnings })
+
+        expect(warnings).toEqual([])
+        expect(wrapper.find('nav').exists()).toBe(true)
+    })
+
+    it('lang доходит до пагинации', () => {
+        const wrapper = mountTable({ meta, links: { prev: '/list?page=1', next: '/list?page=3' }, lang: 'en' })
+
+        expect(wrapper.get('nav').text()).toContain('Previous')
+        expect(wrapper.get('nav').text()).toContain('Next')
+        expect(wrapper.get('nav').text()).toContain('Showing')
+        expect(wrapper.get('nav').text()).toContain('results')
     })
 
     it('без meta число — длина rows, пагинации нет', () => {
