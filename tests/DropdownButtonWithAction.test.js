@@ -1,17 +1,28 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
+import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
 
-// Popup и Overlay настоящие, без заглушек: на них проверяются эхо Popup и
-// закрытие по Escape. attachTo нужен isVisible(): видимость меню задаёт v-show
-// на самом меню внутри Popup, и проверяется она по предкам в документе.
+// Панель меню — popover="auto" Popover API. Его заменяет tests/popoverStub.js:
+// toggle в нём приходит отложенно и объединённо, как в браузере. attachTo
+// нужен показу: showPopover требует элемент в документе.
+let uninstallPopover
+
+beforeEach(() => {
+    uninstallPopover = installPopoverStub()
+})
+
+afterEach(() => {
+    uninstallPopover()
+})
+
 const slots = {
     button: () => h('span', 'Редактировать'),
-    actions: () => h('a', { href: '#' }, 'Удалить'),
+    actions: () => h('a', { href: '#', class: 'item' }, 'Удалить'),
 }
 
 function arrowOf(wrapper) {
@@ -20,6 +31,15 @@ function arrowOf(wrapper) {
 
 function menuOf(wrapper) {
     return wrapper.get('[role="menu"]')
+}
+
+function isOpen(wrapper) {
+    return menuOf(wrapper).element.matches(':popover-open')
+}
+
+async function settle() {
+    await flushToggles()
+    await flushPromises()
 }
 
 // Две строки с меню, которыми управляет родитель, как на Users/Index:
@@ -56,23 +76,26 @@ function row(wrapper, name) {
 }
 
 describe('DropdownButtonWithAction без привязки', () => {
-    it('открывает и закрывает меню стрелкой', async () => {
+    it('стрелка с popovertarget открывает и закрывает меню', async () => {
         const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
 
-        await arrowOf(wrapper).trigger('click')
-        await flushPromises()
-        expect(menuOf(wrapper).isVisible()).toBe(true)
+        expect(arrowOf(wrapper).attributes('popovertarget')).toBe(menuOf(wrapper).attributes('id'))
+        expect(menuOf(wrapper).attributes('popover')).toBe('auto')
 
         await arrowOf(wrapper).trigger('click')
-        await flushPromises()
-        expect(menuOf(wrapper).isVisible()).toBe(false)
+        await settle()
+        expect(isOpen(wrapper)).toBe(true)
+
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+        expect(isOpen(wrapper)).toBe(false)
     })
 
     it('на клик по стрелке эмитит update:modelValue один раз', async () => {
         const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
 
         await arrowOf(wrapper).trigger('click')
-        await flushPromises()
+        await settle()
 
         expect(wrapper.emitted('update:modelValue')).toEqual([[true]])
     })
@@ -81,12 +104,110 @@ describe('DropdownButtonWithAction без привязки', () => {
         const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
 
         await arrowOf(wrapper).trigger('click')
-        await flushPromises()
+        await settle()
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
-        await flushPromises()
+        await settle()
 
         expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
-        expect(menuOf(wrapper).isVisible()).toBe(false)
+        expect(isOpen(wrapper)).toBe(false)
+    })
+
+    it('на клик вне меню эмитит false', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+        document.body.click()
+        await settle()
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
+    })
+
+    it('клик по пункту меню закрывает меню и эмитит false', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+        await menuOf(wrapper).get('.item').trigger('click')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
+    })
+
+    it('прокрутка вне меню и изменение размера окна закрывают меню, прокрутка меню — нет', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+        menuOf(wrapper).element.dispatchEvent(new Event('scroll'))
+        await settle()
+        expect(isOpen(wrapper)).toBe(true)
+
+        document.dispatchEvent(new Event('scroll'))
+        await settle()
+        expect(isOpen(wrapper)).toBe(false)
+
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+        window.dispatchEvent(new Event('resize'))
+        await settle()
+        expect(isOpen(wrapper)).toBe(false)
+    })
+
+    it('у стрелки возле левого края окна меню сужается до места слева', async () => {
+        Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 })
+        Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 800 })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+        arrowOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 120, left: 120, right: 140 })
+
+        try {
+            await arrowOf(wrapper).trigger('click')
+            await settle()
+
+            expect(menuOf(wrapper).element.style.maxWidth).toBe('132px')
+            expect(menuOf(wrapper).element.style.right).toBe('860px')
+        } finally {
+            delete document.documentElement.clientWidth
+            delete document.documentElement.clientHeight
+        }
+    })
+
+    it('toggle, пришедший после размонтирования, не оставляет слушателей прокрутки и размера окна', async () => {
+        const added = []
+        const removed = []
+        const addSpy = vi.spyOn(window, 'addEventListener').mockImplementation((type, listener) => {
+            if (type === 'scroll' || type === 'resize') {
+                added.push([type, listener])
+            }
+        })
+        const removeSpy = vi.spyOn(window, 'removeEventListener').mockImplementation((type, listener) => {
+            removed.push([type, listener])
+        })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots })
+
+        try {
+            await arrowOf(wrapper).trigger('click')
+            wrapper.unmount()
+            await expect(settle()).resolves.toBeUndefined()
+
+            for (const entry of added) {
+                expect(removed).toContainEqual(entry)
+            }
+        } finally {
+            addSpy.mockRestore()
+            removeSpy.mockRestore()
+        }
+    })
+
+    it('без действий стрелки и панели нет', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            slots: { button: slots.button },
+        })
+
+        expect(arrowOf(wrapper)).toBeUndefined()
+        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
     })
 })
 
@@ -99,13 +220,42 @@ describe('DropdownButtonWithAction с привязкой', () => {
         })
 
         await wrapper.setProps({ modelValue: true })
-        await flushPromises()
-        expect(menuOf(wrapper).isVisible()).toBe(true)
+        await settle()
+        expect(isOpen(wrapper)).toBe(true)
 
         await wrapper.setProps({ modelValue: false })
-        await flushPromises()
-        expect(menuOf(wrapper).isVisible()).toBe(false)
+        await settle()
+        expect(isOpen(wrapper)).toBe(false)
 
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
+    it('не эмитит и тогда, когда toggle приходит позже и объединённым', async () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { modelValue: false },
+            slots,
+        })
+
+        // Оба значения — до отложенного toggle: браузер пришлёт одно
+        // событие с newState: 'closed'.
+        await wrapper.setProps({ modelValue: true })
+        await wrapper.setProps({ modelValue: false })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
+    it('открытое при монтировании меню открыто без ответного события', async () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { modelValue: true },
+            slots,
+        })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(true)
         expect(wrapper.emitted('update:modelValue')).toBeUndefined()
     })
 
@@ -119,13 +269,13 @@ describe('DropdownButtonWithAction с привязкой', () => {
             const wrapper = mount(Rows, { attachTo: document.body })
 
             await arrowOf(row(wrapper, testCase.from)).trigger('click')
-            await flushPromises()
+            await settle()
             await arrowOf(row(wrapper, testCase.to)).trigger('click')
-            await flushPromises()
+            await settle()
 
             expect(wrapper.vm.active).toBe(testCase.to)
-            expect(menuOf(row(wrapper, testCase.from)).isVisible()).toBe(false)
-            expect(menuOf(row(wrapper, testCase.to)).isVisible()).toBe(true)
+            expect(isOpen(row(wrapper, testCase.from))).toBe(false)
+            expect(isOpen(row(wrapper, testCase.to))).toBe(true)
         })
     }
 
@@ -133,24 +283,49 @@ describe('DropdownButtonWithAction с привязкой', () => {
         const wrapper = mount(Rows, { attachTo: document.body })
 
         await arrowOf(row(wrapper, 'a')).trigger('click')
-        await flushPromises()
+        await settle()
         wrapper.vm.active = null
-        await flushPromises()
+        await settle()
 
-        expect(menuOf(row(wrapper, 'a')).isVisible()).toBe(false)
+        expect(isOpen(row(wrapper, 'a'))).toBe(false)
         expect(wrapper.vm.closes).toBe(0)
     })
 
-    it('даёт стрелке каждой кнопки свой id', () => {
+    it('даёт стрелке и меню каждой кнопки свои id', () => {
         const wrapper = mount(Rows, { attachTo: document.body })
 
         const ids = ['a', 'b'].map((name) => {
             const arrowId = arrowOf(row(wrapper, name)).attributes('id')
+            const menuId = menuOf(row(wrapper, name)).attributes('id')
             expect(arrowId).toBeTruthy()
+            expect(menuId).toBeTruthy()
             expect(menuOf(row(wrapper, name)).attributes('aria-labelledby')).toBe(arrowId)
-            return arrowId
+            expect(arrowOf(row(wrapper, name)).attributes('popovertarget')).toBe(menuId)
+            return [arrowId, menuId]
         })
 
-        expect(ids[0]).not.toBe(ids[1])
+        expect(ids[0][0]).not.toBe(ids[1][0])
+        expect(ids[0][1]).not.toBe(ids[1][1])
+    })
+})
+
+describe('DropdownButtonWithAction без Popover API', () => {
+    it('стрелка и входящее значение не бросают исключений', async () => {
+        uninstallPopover()
+        uninstallPopover = () => {}
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { modelValue: false },
+            slots,
+            global: { config: { errorHandler: (error) => errors.push(error) } },
+        })
+
+        await arrowOf(wrapper).trigger('click')
+        await wrapper.setProps({ modelValue: true })
+        await flushPromises()
+
+        expect(errors).toEqual([])
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
     })
 })
