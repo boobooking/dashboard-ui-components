@@ -37,7 +37,7 @@ createApp(App).use(dashboardUi, {
   браузеру. Без `navigate` браузер идёт по ссылке сам.
 
 `navigate` получает адрес ровно таким, каким он лежит в компоненте:
-`Pagination` отдаёт `links` Laravel как есть, а это абсолютные URL. С Vue
+пагинация `DataTable` отдаёт `links` Laravel как есть, а это абсолютные URL. С Vue
 Router приложение само превращает их в маршрут, например
 `new URL(href).pathname + search`, и только потом зовёт `router.push`.
 
@@ -50,12 +50,15 @@ Vue не ниже 3.5, ESM, сборщик, умеющий импорт CSS из
 Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в CSS приложения
 пакету не нужны.
 
+Меню `DropdownButtonWithAction` стоит на Popover API браузера: Safari 17+,
+Chrome 114+, Firefox 125+. В браузерах старше меню видно в потоке всегда.
+
 ## Компоненты
 
 Пакет экспортирует семнадцать компонентов: `Popup`, `Dot`, `PickDay`,
 `RussianMobileFilter`, `Search`, `SelectDateInterval`, `SelectSingle`,
 `SmallBadge`, `ErrorMessages`, `Closer`, `DownloadLink`,
-`ConfirmationModal`, `DropdownButtonWithAction`, `Pagination`,
+`ConfirmationModal`, `DropdownButtonWithAction`, `DataTable`,
 `NavigationMenuElement`, `PageCard`, `NotificationMessage` и плагин
 `dashboardUi`. В архив пакета (`files: ["dist"]`) исходники не попадают,
 поэтому контракт каждого компонента — здесь и в playground, а не в исходном
@@ -312,28 +315,89 @@ ConfirmationModal нет v-model».
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` |
 
 Событие: `update:modelValue` — только когда меню открыл или закрыл сам
-компонент: клик по стрелке, клик вне меню, Escape. Значение, пришедшее от
-родителя, компонент принимает молча: ответное событие вернуло бы родителю его
-же решение. Без `v-model` меню работает само по себе.
+компонент или браузер: клик по стрелке, клик вне меню, Escape, клик
+по пункту меню, прокрутка, изменение размера окна. Значение, пришедшее
+от родителя, компонент принимает молча: ответное событие вернуло бы
+родителю его же решение. Без `v-model` меню работает само по себе.
 
-### Pagination
+Меню открывается в верхнем слое браузера (Popover API): его не обрезает
+таблица с горизонтальной прокруткой, и оно стоит поверх страницы. Правый
+край меню — по правому краю стрелки; меню открывается вниз или вверх —
+где больше места, сужается у левого края окна и закрывается кликом
+по любому пункту, прокруткой страницы или таблицы и изменением размера
+окна. Открытие другого меню закрывает предыдущее.
 
-Переход на предыдущую и следующую страницу и строка «Показаны результаты X - Y
-из Z» для списков на Laravel API Resource.
+### DataTable
 
-    <pagination class="mt-6" :links="orders.links" :meta="orders.meta" />
+Список данных: бейдж «Найдено X: N», таблица в карточке с горизонтальной
+прокруткой, пустое состояние и пагинация — по ответу Laravel API Resource
+`{ data, meta, links }`. Особые ячейки — слотами.
+
+    <data-table
+        :rows="orderObjects"
+        :columns="columns"
+        row-key="uuid"
+        :meta="orders.meta"
+        :links="orders.links"
+        found-text="Найдено ордеров"
+        empty-text="Не найдено ордеров"
+    >
+        <template #results-actions>
+            <download-link :url="exportUrl" title="скачать xlsx" />
+        </template>
+        <template #cell-status="{ row }">
+            <small-badge :text="row.statusLabel" :color="row.statusColor" />
+        </template>
+    </data-table>
+
+    columns: [
+        { key: 'phone', label: 'Телефон' },
+        { key: 'vendor', label: 'Вендор / Сертификат', secondary: (row) => row.certificate },
+        { key: 'amount', label: 'Номинал', align: 'right', muted: true },
+        { key: 'status', label: 'Статус' },
+        { key: 'cost', label: 'Стоимость', align: 'right', visible: isAdmin },
+        { key: 'actions', align: 'right', narrow: true },
+    ]
 
 | Проп | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
-| `links` | `Object` | обязателен | `{ prev, next }` — адреса соседних страниц или `null` |
-| `meta` | `Object` | обязателен | `{ from, to, total }` |
-| `lang` | `String` | язык плагина | `"ru"` или `"en"` |
+| `rows` | `Array` | обязателен | Строки: обычные объекты или модели страницы |
+| `columns` | `Array` | обязателен | Столбцы, см. ниже |
+| `rowKey` | `String`, `Function` | обязателен | Имя поля ключа строки или `row => ключ` |
+| `meta` | `Object` | `null` | `{ from, to, total }` пагинации Laravel; есть — внизу пагинация, а число в бейдже — `total` |
+| `links` | `Object` | `null` | `{ prev, next }` пагинации Laravel |
+| `foundText` | `String` | `null` | «Найдено ордеров» → бейдж «Найдено ордеров: 100», когда записи есть |
+| `emptyText` | `String` | `null` | «Не найдено ордеров» — бейдж, когда записей нет |
+| `variant` | `String` | `"page"` | `"page"` — отдельная карточка с тенью; `"card"` — таблица внутри карточки страницы, только линия сверху |
+| `rowColor` | `Function` | `null` | `row => 'red' \| 'green' \| null` — цвет строки вместо полосатости |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"` — тексты пагинации |
 
-Если записей нет — `meta` не задан или `meta.total` не больше нуля, —
-компонент ничего не рисует. Строка «Показаны результаты» — только когда в
-`meta` есть числовые `from` и `to`. Кнопка — только при непустом адресе в
-`links.prev` / `links.next`; при `links: null` остаётся одна строка
-результатов. Ссылки — через `navigate` плагина. Событий нет.
+Столбец:
+
+| Поле | По умолчанию | Описание |
+| --- | --- | --- |
+| `key` | обязателен | Имя слота `cell-<key>` и поле значения по умолчанию |
+| `label` | `""` | Заголовок; пустой — у столбца действий |
+| `value` | `row => row[key]` | Основной текст ячейки. У моделей с геттерами — `(row) => row.getName()` |
+| `secondary` | нет | `row => текст` — серая вторая строка |
+| `muted` | `false` | Основной текст серый — даты, статусы, суммы |
+| `align` | `"left"` | `"left"`, `"center"` или `"right"` — для заголовка и ячеек |
+| `wrap` | `false` | Текст ячеек переносится |
+| `narrow` | `false` | Ширина по содержимому — столбцы действий и иконок |
+| `visible` | `true` | `false` — столбца нет вовсе: ни заголовка, ни ячеек, ни слота |
+
+Скрытый столбец — только отображение: данные, которые пользователю видеть
+нельзя, сервер не отдаёт.
+
+Слоты: `#cell-<key>="{ row, index }"` — своя разметка ячейки (отступы,
+выравнивание и перенос ячейки остаются за компонентом);
+`#results-actions` — рядом с бейджем, только когда записи есть.
+
+Записей нет — только бейдж с `emptyText`, без таблицы и пагинации; без
+текстов — ничего. Страница за последней (`total` больше нуля, `rows` пуст) —
+бейдж и пагинация без таблицы. Строки выравниваются по верху. Широкая
+таблица прокручивается в своей карточке. Ссылки пагинации — через
+`navigate` плагина. Событий нет.
 
 ### NavigationMenuElement
 
@@ -465,7 +529,7 @@ sm:rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: ф�
 | `DropdownButtonWithAction` — подпись стрелки для скринридера | Открыть меню | Open menu |
 | `PickDay` — месяцы, дни недели, кнопки календаря | по-русски | in English |
 | `SelectDateInterval` — подсказки полей | от / до | from / to |
-| `Pagination` | Предыдущая / Следующая / Показаны результаты X - Y из Z | Previous / Next / Showing X - Y of Z results |
+| `DataTable` — пагинация | Предыдущая / Следующая / Показаны результаты X - Y из Z | Previous / Next / Showing X - Y of Z results |
 | `PageCard` — доступное имя крестика | Назад | Back |
 | `NotificationMessage` — подпись крестика для скринридера | Закрыть | Close |
 
@@ -522,7 +586,7 @@ Inertia SSR), а серверная разметка гидратируется 
   `followLink($event, href)` миксина `withNavigation`, который отдаёт его
   `navigate` плагина. Ни Inertia, ни роутер пакет не импортирует. Исключение —
   `DownloadLink`: это обычная ссылка браузера, скачивающая файл, и через
-  `navigate` она не идёт. Через `navigate` ходят `Pagination` и
+  `navigate` она не идёт. Через `navigate` ходят `DataTable` (его пагинация) и
   `NavigationMenuElement`.
 - Компонент обращается к `window`, `document` и другим API браузера только
   в `mounted()`, `beforeUnmount()` и обработчиках событий; загрузка модуля,
@@ -579,6 +643,15 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 
 Правила номера телефона в `RussianMobileFilter` — российские; язык текстов
 задаётся, см. «Языки».
+
+## Обновление с 0.11
+
+- `Pagination` больше не экспортируется. Страница, импортирующая её
+  из пакета, переводит свой список на `DataTable`: бейдж «Найдено»,
+  таблица, пустое состояние и пагинация теперь в одном компоненте.
+- Меню `DropdownButtonWithAction` открывается в верхнем слое браузера
+  и закрывается кликом по пункту. Страницы, которые сами закрывали меню
+  через `v-model` перед открытием модалки, работают как раньше.
 
 ## Ограничение
 
