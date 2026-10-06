@@ -140,10 +140,80 @@
         </section>
 
         <section>
-            <h2>Pagination</h2>
-            <pagination :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
-            <pagination :links="{ prev: null, next: '/list?page=2' }" :meta="{ from: 1, to: 15, total: 40 }"/>
+            <h2>DataTable</h2>
+
+            <h3>page: пагинация, бейдж, ссылка рядом с бейджем, меню действий</h3>
+            <data-table
+                :rows="tableRows"
+                :columns="tableColumns"
+                row-key="uuid"
+                :meta="{ from: 16, to: 30, total: 40 }"
+                :links="{ prev: '/list?page=1', next: '/list?page=3' }"
+                found-text="Найдено ордеров"
+                empty-text="Не найдено ордеров"
+            >
+                <template #results-actions>
+                    <download-link url="/export.xlsx" title="скачать xlsx"/>
+                </template>
+                <template #cell-status="{ row }">
+                    <small-badge :text="row.status" :color="row.statusColor"/>
+                </template>
+                <template #cell-actions>
+                    <dropdown-button-with-action>
+                        <template #button><span class="demo-action">Редактировать</span></template>
+                        <template #actions>
+                            <a href="#" class="demo-action">Поменять пароль</a>
+                            <a href="#" class="demo-action">Удалить</a>
+                        </template>
+                    </dropdown-button-with-action>
+                </template>
+            </data-table>
             <p>Последний переход: {{ lastNavigation || '—' }}</p>
+
+            <h3>card: внутри белой карточки с flex-колонкой</h3>
+            <div class="demo-card">
+                <div class="demo-card-column">
+                    <data-table
+                        variant="card"
+                        :rows="tableRows"
+                        :columns="tableColumns"
+                        row-key="uuid"
+                        found-text="Найдено ордеров"
+                    >
+                        <template #cell-status="{ row }">
+                            <small-badge :text="row.status" :color="row.statusColor"/>
+                        </template>
+                        <template #cell-actions>
+                            <dropdown-button-with-action>
+                                <template #button><span class="demo-action">Редактировать</span></template>
+                                <template #actions>
+                                    <a href="#" class="demo-action">Удалить</a>
+                                </template>
+                            </dropdown-button-with-action>
+                        </template>
+                    </data-table>
+                </div>
+            </div>
+
+            <h3>Скрытый столбец, цвет строки, без пагинации</h3>
+            <data-table
+                :rows="tableRows"
+                :columns="tableColumnsWithoutCost"
+                row-key="uuid"
+                :row-color="(row) => row.rowColor"
+                found-text="Найдено анкет"
+            />
+
+            <h3>Пустой список</h3>
+            <data-table
+                :rows="[]"
+                :columns="tableColumns"
+                row-key="uuid"
+                :meta="{ from: null, to: null, total: 0 }"
+                :links="{ prev: null, next: null }"
+                found-text="Найдено ордеров"
+                empty-text="Не найдено ордеров"
+            />
         </section>
 
         <section>
@@ -173,7 +243,7 @@
                 @action-confirmed="englishModalIsOpen = false"
                 @action-canceled="englishModalIsOpen = false"
             />
-            <pagination lang="en" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
+            <data-table lang="en" :rows="tableRows.slice(0, 2)" :columns="tableColumnsWithoutCost" row-key="uuid" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
         </section>
 
         <section>
@@ -214,7 +284,7 @@ import {
     DownloadLink,
     ConfirmationModal,
     DropdownButtonWithAction,
-    Pagination,
+    DataTable,
     NavigationMenuElement,
     PageCard,
     NotificationMessage,
@@ -236,7 +306,7 @@ export default {
         DownloadLink,
         ConfirmationModal,
         DropdownButtonWithAction,
-        Pagination,
+        DataTable,
         NavigationMenuElement,
         PageCard,
         NotificationMessage,
@@ -282,7 +352,45 @@ export default {
             modalConfirms: 0,
             modalCancels: 0,
             dropdownIsOpen: false,
+            // Десять строк: таблица выше окна, у нижних строк меню
+            // открывается вверх. Ширину таблицы задают столбцы без переноса:
+            // при узком окне она шире карточки — проверяется горизонтальная
+            // прокрутка.
+            tableRows: Array.from({ length: 10 }, (_, index) => ({
+                uuid: `row-${index}`,
+                phone: `+7999000${String(index).padStart(4, '0')}`,
+                vendor: index % 2 === 0 ? 'Сбер' : 'Озон',
+                certificate: index % 2 === 0 ? 'СберКарта' : 'Подарочная карта',
+                amount: `${(index + 1) * 500} ₽`,
+                cost: `${(index + 1) * 2},50 ₽`,
+                status: index % 3 === 0 ? 'Доставлено' : 'В очереди',
+                statusColor: index % 3 === 0 ? 'green' : 'gray',
+                comment: 'Провайдер принял сообщение, итог доставки пока не получен — длинное пояснение переносится',
+                createdAt: '06.10.2026',
+                rowColor: index === 1 ? 'red' : index === 2 ? 'green' : null,
+            })),
         };
+    },
+
+    computed: {
+        tableColumns() {
+            return [
+                { key: 'phone', label: 'Телефон' },
+                { key: 'vendor', label: 'Вендор / Сертификат', secondary: (row) => row.certificate },
+                { key: 'amount', label: 'Номинал', align: 'right', muted: true },
+                { key: 'cost', label: 'Стоимость', align: 'right' },
+                { key: 'status', label: 'Статус' },
+                { key: 'comment', label: 'Состояние', wrap: true },
+                { key: 'createdAt', label: 'Создан', muted: true },
+                { key: 'actions', align: 'right', narrow: true },
+            ];
+        },
+
+        tableColumnsWithoutCost() {
+            return this.tableColumns
+                .filter((column) => column.key !== 'actions')
+                .map((column) => (column.key === 'cost' ? { ...column, visible: false } : column));
+        },
     },
 
     methods: {
