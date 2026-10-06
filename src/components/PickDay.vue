@@ -38,7 +38,6 @@
 </template>
 
 <script>
-import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
 import Popup from "./Popup.vue";
 import Eraser from "./Eraser.vue";
@@ -71,11 +70,21 @@ export default {
     },
 
     created() {
-        // Нереактивное поле: инстанс pikaday нельзя заворачивать в прокси Vue.
+        // Нереактивные поля: инстанс pikaday нельзя заворачивать в прокси Vue.
         this.picker = null;
+        this.isUnmounted = false;
     },
 
-    mounted() {
+    async mounted() {
+        // pikaday загружается здесь, а не при загрузке модуля: он обращается к
+        // window сразу при выполнении своего модуля, и статический импорт
+        // уронил бы загрузку всего пакета на сервере (SSR).
+        const { default: Pikaday } = await import("pikaday");
+
+        if (this.isUnmounted) {
+            return;
+        }
+
         this.picker = new Pikaday({
             field: this.$refs.field,
             container: this.$refs.container,
@@ -84,7 +93,8 @@ export default {
             firstDay: 1,
             parse: (value) => parseDay(value),
             toString: (value) => formatDay(value),
-            // Язык берётся при монтировании: Pikaday собирается один раз.
+            // Язык берётся при создании календаря, после загрузки pikaday:
+            // Pikaday собирается один раз.
             i18n: {
                 previousMonth: this.texts.previousMonth,
                 nextMonth: this.texts.nextMonth,
@@ -101,6 +111,7 @@ export default {
     },
 
     beforeUnmount() {
+        this.isUnmounted = true;
         this.picker?.destroy();
     },
 
@@ -125,6 +136,11 @@ export default {
         // Программная установка без onSelect: значение пришло снаружи, и возвращать
         // его родителю незачем — update:modelValue ушёл бы обратно эхом.
         syncPicker(value) {
+            // Календаря ещё нет: pikaday при создании прочтёт значение из поля.
+            if (this.picker === null) {
+                return;
+            }
+
             const date = parseDay(value);
 
             if (date === null) {
@@ -139,7 +155,7 @@ export default {
         clearPicker() {
             this.$emit("update:modelValue", "");
             this.dayValue = "";
-            this.picker.clear();
+            this.picker?.clear();
             this.$emit("changed");
         },
     },

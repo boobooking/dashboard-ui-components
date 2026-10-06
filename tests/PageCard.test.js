@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import PageCard from '../src/components/PageCard.vue'
 import { dashboardUi } from '../src/plugin.js'
 
@@ -36,14 +37,15 @@ function mountCard({ attrs = {}, props = {}, plugin } = {}) {
 
 const findCross = (wrapper) => wrapper.findAll('button').find((button) => button.find(CROSS_PATH).exists())
 
-// Компонент читает history.length при создании. Порядок блоков важен: первый
-// монтирует при истории из одной записи, последний добавляет запись до своих
-// монтирований.
+// Компонент читает history.length после монтирования. Порядок блоков важен:
+// первый монтирует при истории из одной записи, последний добавляет запись до
+// своих монтирований.
 describe('PageCard: вкладка без истории', () => {
-    it('крестика нет, места под него нет', () => {
+    it('крестика нет, места под него нет', async () => {
         expect(window.history.length).toBeLessThan(2)
 
         const { wrapper, errors, warnings } = mountCard()
+        await nextTick()
 
         expect(findCross(wrapper)).toBeUndefined()
         expect(wrapper.classes()).toContain('bb:[--bb-closer-space:0px]')
@@ -84,14 +86,15 @@ describe('PageCard: карточка', () => {
 })
 
 describe('PageCard: вкладка с историей', () => {
-    // До монтирования: компонент читает history.length при создании.
+    // До монтирования: компонент читает history.length после монтирования.
     beforeAll(() => {
         window.history.pushState({ pageCardTest: true }, '')
         expect(window.history.length).toBeGreaterThan(1)
     })
 
-    it('крестик после слота, доступен с клавиатуры, место под него задано', () => {
+    it('крестик после слота, доступен с клавиатуры, место под него задано', async () => {
         const { wrapper, errors, warnings } = mountCard()
+        await nextTick()
         const cross = findCross(wrapper)
 
         expect(cross).toBeDefined()
@@ -114,8 +117,9 @@ describe('PageCard: вкладка с историей', () => {
     ]
 
     for (const testCase of labelCases) {
-        it(`доступное имя крестика: ${testCase.name}`, () => {
+        it(`доступное имя крестика: ${testCase.name}`, async () => {
             const { wrapper, errors, warnings } = mountCard({ plugin: testCase.plugin, props: testCase.props })
+            await nextTick()
 
             expect(findCross(wrapper).attributes('aria-label')).toBe(testCase.expected)
             expect(errors).toEqual([])
@@ -126,10 +130,26 @@ describe('PageCard: вкладка с историей', () => {
     it('клик по крестику — history.back() один раз', async () => {
         const back = vi.spyOn(window.history, 'back').mockImplementation(() => {})
         const { wrapper, errors, warnings } = mountCard()
+        await nextTick()
 
         await findCross(wrapper).trigger('click')
 
         expect(back).toHaveBeenCalledTimes(1)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('крестик появляется после монтирования, а не при создании', async () => {
+        const { wrapper, errors, warnings } = mountCard()
+
+        // mounted() уже прочёл историю, но перерисовка ещё не прошла.
+        expect(findCross(wrapper)).toBeUndefined()
+        expect(wrapper.classes()).toContain('bb:[--bb-closer-space:0px]')
+
+        await nextTick()
+
+        expect(findCross(wrapper)).toBeDefined()
+        expect(wrapper.classes()).toContain('bb:[--bb-closer-space:3.5rem]')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })

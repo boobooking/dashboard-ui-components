@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { messages } from '../src/i18n.js'
 import { dashboardUi } from '../src/plugin.js'
 import ConfirmationModal from '../src/components/ConfirmationModal.vue'
@@ -14,6 +15,12 @@ import SelectDateInterval from '../src/components/SelectDateInterval.vue'
 enableAutoUnmount(afterEach)
 
 const inApp = (options) => ({ plugins: [[dashboardUi, options]] })
+
+// pikaday загружается в mounted() PickDay: календарь появляется после загрузки.
+async function pikadayLoaded() {
+    await vi.dynamicImportSettled()
+    await flushPromises()
+}
 
 describe('словари', () => {
     it('ключи ru и en совпадают', () => {
@@ -96,8 +103,9 @@ describe('SelectDateInterval: подсказки и оба календаря', 
     ]
 
     for (const testCase of cases) {
-        it(testCase.name, () => {
+        it(testCase.name, async () => {
             const wrapper = mount(SelectDateInterval, { props: { header: 'Интервал', ...testCase.props }, global: testCase.global })
+            await pikadayLoaded()
 
             expect(wrapper.findAll('input').map((input) => input.attributes('placeholder'))).toEqual(testCase.placeholders)
 
@@ -127,13 +135,14 @@ describe('недопустимый lang: язык плагина, а не пад
     ]
 
     for (const testCase of cases) {
-        it(testCase.name, () => {
+        it(testCase.name, async () => {
             const warnings = []
             const wrapper = mount(testCase.component, {
                 props: testCase.props,
                 slots: testCase.slots,
                 global: { ...testCase.global, config: { warnHandler: (message) => warnings.push(message) } },
             })
+            await pikadayLoaded()
 
             expect(wrapper.text()).toContain(testCase.expected)
             // Валидатор пропа по-прежнему предупреждает — и только он.
@@ -147,13 +156,13 @@ describe('недопустимый lang: язык плагина, а не пад
 
 describe('недопустимый lang: крестик PageCard', () => {
     // Крестик рисуется, только если в истории больше одной записи; компонент
-    // читает её при создании.
+    // читает её после монтирования.
     beforeAll(() => {
         window.history.pushState({}, '')
         expect(window.history.length).toBeGreaterThan(1)
     })
 
-    it('lang de и плагин en — доступное имя Back', () => {
+    it('lang de и плагин en — доступное имя Back', async () => {
         const warnings = []
         const errors = []
         const wrapper = mount(PageCard, {
@@ -166,6 +175,7 @@ describe('недопустимый lang: крестик PageCard', () => {
                 },
             },
         })
+        await nextTick()
 
         const cross = wrapper.findAll('button').find((button) => button.find('path[d="M6 18L18 6M6 6l12 12"]').exists())
         expect(cross.attributes('aria-label')).toBe('Back')
@@ -185,8 +195,9 @@ describe('PickDay: месяц в шапке календаря', () => {
     ]
 
     for (const testCase of cases) {
-        it(testCase.name, () => {
+        it(testCase.name, async () => {
             const wrapper = mount(PickDay, { global: testCase.global })
+            await pikadayLoaded()
             // Дата не фиксирована, поэтому ищем месяц среди двенадцати.
             const label = wrapper.get('.pika-label').text()
 
@@ -203,9 +214,10 @@ describe('PickDay: календарь', () => {
     ]
 
     for (const testCase of cases) {
-        it(testCase.name, () => {
+        it(testCase.name, async () => {
             const wrapper = mount(PickDay, { global: testCase.global })
-            // Pikaday рисует календарь в контейнер сразу (bound: false);
+            await pikadayLoaded()
+            // Pikaday рисует календарь в контейнер, как только создан (bound: false);
             // шапка таблицы — краткие дни недели.
             const header = wrapper.get('.pika-table thead').text()
 
