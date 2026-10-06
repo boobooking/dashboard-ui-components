@@ -11,6 +11,7 @@ describe('публичная поверхность пакета', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'Closer',
             'ConfirmationModal',
+            'DataTable',
             'Dot',
             'DownloadLink',
             'DropdownButtonWithAction',
@@ -18,7 +19,6 @@ describe('публичная поверхность пакета', () => {
             'NavigationMenuElement',
             'NotificationMessage',
             'PageCard',
-            'Pagination',
             'PickDay',
             'Popup',
             'RussianMobileFilter',
@@ -28,5 +28,9 @@ describe('публичная поверхность пакета', () => {
             'SmallBadge',
             'dashboardUi',
         ])
+    })
+
+    it('Pagination — внутренний, рисуется только внутри DataTable', () => {
+        expect(pkg).not.toHaveProperty('Pagination')
     })
 })

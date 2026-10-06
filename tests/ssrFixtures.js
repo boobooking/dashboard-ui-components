@@ -7,6 +7,16 @@ import { h } from 'vue'
 export const ssrFixtures = {
     Closer: {},
     ConfirmationModal: { props: { isOpen: true, actionButtonText: 'Удалить', confirmationHeading: 'Удалить запись?', confirmationText: 'Действие нельзя отменить.' } },
+    DataTable: {
+        props: {
+            rows: [{ uuid: '1', name: 'Первый' }, { uuid: '2', name: 'Второй' }],
+            columns: [{ key: 'name', label: 'Имя' }],
+            rowKey: 'uuid',
+            meta: { from: 16, to: 17, total: 40 },
+            links: { prev: '/list?page=1', next: '/list?page=3' },
+            foundText: 'Найдено записей',
+        },
+    },
     Dot: { props: { color: 'green' } },
     DownloadLink: { props: { url: '/export.xlsx' } },
     DropdownButtonWithAction: { slots: { button: () => 'Действие', actions: () => h('a', { href: '#' }, 'Другое действие') } },
@@ -14,7 +24,6 @@ export const ssrFixtures = {
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
     PageCard: { slots: { default: () => h('h3', 'Заголовок') } },
-    Pagination: { props: { links: { prev: '/list?page=1', next: '/list?page=3' }, meta: { from: 16, to: 30, total: 40 } } },
     PickDay: { props: { modelValue: '15.03.2026', placeholderText: 'от' } },
     Popup: { props: { modelValue: true }, slots: { default: () => h('div', 'Меню') } },
     RussianMobileFilter: { props: { header: 'Телефон', modelValue: '79031234567' } },
