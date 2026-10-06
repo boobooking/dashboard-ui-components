@@ -19,13 +19,14 @@ const columns = [
     { key: 'actions', align: 'right', narrow: true },
 ]
 
-// quiet глушит предупреждение Vue в тестах, которые нарочно передают
-// недопустимое значение пропа: вывод тестов остаётся чистым.
-function mountTable(props = {}, slots = {}, { quiet = false } = {}) {
+// warnings собирает предупреждения Vue в тестах, которые нарочно передают
+// недопустимое значение пропа: вывод тестов остаётся чистым, а тест
+// проверяет, что предупреждение было.
+function mountTable(props = {}, slots = {}, { warnings = null } = {}) {
     return mount(DataTable, {
         props: { rows, columns, rowKey: 'uuid', ...props },
         slots,
-        global: quiet ? { config: { warnHandler: () => {} } } : {},
+        global: warnings ? { config: { warnHandler: (message) => warnings.push(message) } } : {},
     })
 }
 
@@ -136,6 +137,18 @@ describe('DataTable: строки', () => {
         expect(wrapper.findAll('tbody tr')[0].classes()).toContain('bb:bg-green-50')
     })
 
+    it.each([
+        ['имени поля', 'uuid'],
+        ['функции', (row) => row.uuid],
+    ])('ключ строки по %s: при перестановке строк элементы переиспользуются', async (_, rowKey) => {
+        const wrapper = mountTable({ rowKey })
+        const first = wrapper.findAll('tbody tr')[0].element
+
+        await wrapper.setProps({ rows: [rows[1], rows[0]] })
+
+        expect(wrapper.findAll('tbody tr')[1].element).toBe(first)
+    })
+
     it('ключ строки по функции, по отсутствующему полю и по бросающей функции — без исключений', () => {
         expect(mountTable({ rowKey: (row) => row.uuid }).findAll('tbody tr')).toHaveLength(2)
         expect(mountTable({ rowKey: 'nothing' }).findAll('tbody tr')).toHaveLength(2)
@@ -147,8 +160,10 @@ describe('DataTable: строки', () => {
     })
 
     it('rows не массив — пустой список', () => {
-        const wrapper = mountTable({ rows: null, emptyText: 'Не найдено записей' }, {}, { quiet: true })
+        const warnings = []
+        const wrapper = mountTable({ rows: null, emptyText: 'Не найдено записей' }, {}, { warnings })
 
+        expect(warnings.some((warning) => warning.includes('rows'))).toBe(true)
         expect(wrapper.find('table').exists()).toBe(false)
         expect(wrapper.text()).toContain('Не найдено записей')
     })
@@ -269,8 +284,10 @@ describe('DataTable: варианты', () => {
     })
 
     it('variant вне списка — page', () => {
-        const wrapper = mountTable({ variant: 'sheet' }, {}, { quiet: true })
+        const warnings = []
+        const wrapper = mountTable({ variant: 'sheet' }, {}, { warnings })
 
+        expect(warnings.some((warning) => warning.includes('variant'))).toBe(true)
         expect(scrollerOf(wrapper).className).toContain('bb:shadow-sm')
     })
 
