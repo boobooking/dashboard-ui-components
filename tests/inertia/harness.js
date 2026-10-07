@@ -55,6 +55,13 @@ export function serve(address) {
         return page('Form', address, { fallback: `/groups/${match[1]}/certificates` })
     }
 
+    // Форма с абсолютным запасным адресом, как отдаёт Ziggy.
+    match = path.match(/^\/groups\/(\w+)\/abs-keys$/)
+
+    if (match) {
+        return page('Form', address, { fallback: `${window.location.origin}/groups/${match[1]}/certificates` })
+    }
+
     if (/^\/users\/\d+\/edit$/.test(path)) {
         return page('Editor', address, {})
     }

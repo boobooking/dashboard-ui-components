@@ -212,6 +212,21 @@ describe('окна: правила назначения', () => {
         expect(chain(state)).toEqual([['group:A', '/orders']])
     })
 
+    it('окно прежней страницы закрылось на этом же переходе — новое окно от его предка', () => {
+        const { state } = play([
+            { show: '/groups' },
+            { show: '/groups/A/orders', mount: 'g', key: 'g' },
+            { show: '/groups/A/keys', unmount: 'g', mount: 'form', key: '/groups/A/keys' },
+            { show: '/groups/A/orders', unmount: 'form', mount: 't', key: 'g' },
+            { unmount: 't', mount: 'x', key: 'other' },
+        ])
+
+        expect(chain(state)).toEqual([
+            ['g', '/groups'],
+            ['other', null],
+        ])
+    })
+
     it('вперёд в карточку после ухода «Назад» — новая цепочка от списка', () => {
         const { state } = play([
             { show: '/list' },

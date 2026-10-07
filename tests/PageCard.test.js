@@ -11,6 +11,21 @@ afterEach(() => {
     vi.restoreAllMocks()
 })
 
+// Ошибки и предупреждения Vue каждого смонтированного случая: после случая
+// они должны быть пустыми, так что ни один случай не может про них забыть.
+// Случай, который ждёт предупреждение, сам проверяет его и объявляет это
+// опцией expectsWarnings.
+const collected = []
+
+afterEach(() => {
+    for (const { errors, warnings, expectsWarnings } of collected.splice(0)) {
+        expect(errors).toEqual([])
+        if (!expectsWarnings) {
+            expect(warnings).toEqual([])
+        }
+    }
+})
+
 const CROSS_PATH = 'path[d="M6 18L18 6M6 6l12 12"]'
 
 // Карточка открыта, монтирование назначило окно, перерисовка прошла.
@@ -24,9 +39,10 @@ const settle = async () => {
 // в Inertia, он меняется до того, как создаются компоненты новой страницы.
 // plugin: 'windows' — плагин с navigate-шпионом и currentUrl; объект —
 // эти опции плагина; null — без плагина.
-function mountPage({ address = '/list', plugin = 'windows', props = {}, attrs = {}, show = false } = {}) {
+function mountPage({ address = '/list', plugin = 'windows', props = {}, attrs = {}, show = false, expectsWarnings = false } = {}) {
     const errors = []
     const warnings = []
+    collected.push({ errors, warnings, expectsWarnings })
     const current = ref(address)
     const navigate = vi.fn()
     const page = reactive({ show, props, attrs })
@@ -161,6 +177,8 @@ describe('PageCard: без адреса возврата', () => {
         await settle()
         await page.cross().trigger('click')
 
+        expect(page.chain()).toEqual([['/card', null]])
+        expect(page.wrapper.vm.uiSettings.windows.state.windows[0].fallbackAddress).toBe('/b')
         expect(page.navigate).toHaveBeenCalledWith('/b')
         expect(page.warnings).toEqual([])
     })
@@ -298,7 +316,7 @@ describe('PageCard: карточка', () => {
     }
 
     it('недопустимая ширина — вид xl и предупреждение валидатора', async () => {
-        const page = mountPage({ plugin: null, show: true, props: { fallbackUrl: '/list', width: 'wide' } })
+        const page = mountPage({ plugin: null, show: true, expectsWarnings: true, props: { fallbackUrl: '/list', width: 'wide' } })
         await settle()
 
         expect(page.card().classes()).toContain('bb:sm:max-w-xl')
