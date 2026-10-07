@@ -44,12 +44,14 @@ export function moveMenuFocus(menu, findSelected = () => null) {
     }
 
     // mousemove, а не mouseover: после стрелки курсор стоит на прежнем пункте,
-    // и сдвиг мыши в его пределах должен вернуть фокус под курсор.
+    // и сдвиг мыши в его пределах должен вернуть фокус под курсор. Без
+    // прокрутки: пункт под курсором уже виден, а прокрутка к частично видному
+    // пункту у края окна сдвигала бы страницу под мышью.
     const onMousemove = (event) => {
         const item = event.target.closest(ITEMS)
 
         if (item !== null) {
-            item.focus()
+            item.focus({ preventScroll: true })
         }
     }
 

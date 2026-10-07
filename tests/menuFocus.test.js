@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { moveMenuFocus } from '../src/menuFocus.js'
 
 // Меню из трёх пунктов и кнопка вне меню, с которой фокус уходит в меню.
@@ -101,6 +101,18 @@ describe('moveMenuFocus', () => {
 
         items[1].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
 
+        expect(focused()).toBe('B')
+    })
+
+    // Пункт под курсором уже виден: прокрутка к частично видному пункту у края
+    // окна сдвигала бы страницу под мышью, и следующий пункт снова уезжал бы.
+    it('движение мыши ставит фокус без прокрутки к пункту', () => {
+        stop = moveMenuFocus(menu)
+        const focus = vi.spyOn(items[1], 'focus')
+
+        items[1].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
+
+        expect(focus).toHaveBeenCalledWith({ preventScroll: true })
         expect(focused()).toBe('B')
     })
 
