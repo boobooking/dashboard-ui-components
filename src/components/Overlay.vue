@@ -39,6 +39,8 @@ export default {
         // нажатия может быть где угодно на странице. Escape обрабатывается
         // только у открытого оверлея — закрытых на странице столько же, сколько
         // выпадающих списков, и все они отвечали бы на одно нажатие.
+        // Слушатель — в фазе захвата: расширения браузера останавливают
+        // keydown на body, и до document на всплытии Escape не доходит.
         handleEscape(event) {
             if (!this.isOpen) {
                 return;
@@ -51,11 +53,11 @@ export default {
     },
 
     mounted() {
-        document.addEventListener("keydown", this.handleEscape);
+        document.addEventListener("keydown", this.handleEscape, true);
     },
 
     beforeUnmount() {
-        document.removeEventListener("keydown", this.handleEscape);
+        document.removeEventListener("keydown", this.handleEscape, true);
     },
 };
 </script>
