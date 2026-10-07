@@ -57,3 +57,21 @@ describe('SSR: PageCard', () => {
         expect(warnings).toEqual([])
     })
 })
+
+describe('SSR: плагин', () => {
+    it('currentUrl на сервере не вызывается', async () => {
+        let calls = 0
+        const app = createSSRApp({ render: () => h('div') })
+
+        app.use(pkg.dashboardUi, {
+            currentUrl: () => {
+                calls += 1
+
+                return '/list'
+            },
+        })
+        await renderToString(app)
+
+        expect(calls).toBe(0)
+    })
+})
