@@ -21,6 +21,7 @@
 - Каждый класс в шаблоне — с префиксом `bb:`, а `:class` — только литералы (строка, тернарник, объект со строковыми ключами, массив): это проверяет `tests/utilityPrefix.test.js`, метод в `:class` его роняет.
 - Стиль кода: в `.vue` — двойные кавычки и точки с запятой; в `.js` тестов — одинарные кавычки без точек с запятой; отступ 4 пробела; комментарии по-русски, описывают код как он есть.
 - Вывод `npm test` чистый: ни одного предупреждения или ошибки; ожидаемые предупреждения перехватываются в тестах.
+- Полный набор — один прогон с логом и проверкой кода завершения: `npm test > /private/tmp/dbwa-test.log 2>&1; echo "exit $?"`, итоги и шум — `grep` по логу. Не строить цепочки вида `npm test | grep … && …`: без `pipefail` код цепочки — это код `grep`, и следующий шаг пошёл бы при упавших тестах.
 - Коммиты — conventional commits по-русски, повелительное наклонение, без служебных строк; `--no-verify` запрещён.
 
 ## Review Focus
@@ -313,6 +314,18 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
         expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
         expect(press('ArrowDown').defaultPrevented).toBe(false)
     })
+
+    // Наблюдатель modelValue срабатывает до рендера: если пункты и открытие
+    // пришли разом, меню в этот момент ещё нет в DOM.
+    it('пункты и открытие пришли одновременно — меню открыто, ответного события нет', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { modelValue: false, actions: [] } })
+
+        await wrapper.setProps({ actions, modelValue: true })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(true)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
 })
 ```
 
@@ -392,20 +405,28 @@ import { withNavigation } from "../navigation.js";
 6. В `watch` после наблюдателя `modelValue` добавить:
 
 ```js
-        // Удаляя открытый popover из документа, браузер не присылает toggle:
-        // без этого слушатели стрелок и прокрутки остались бы висеть, а родитель
+        // DOM меню появляется и исчезает только при рендере, поэтому
+        // наблюдатель — после него (flush: "post"). Пункты появились:
+        // наблюдатель modelValue мог сработать раньше, когда меню ещё не было
+        // в DOM, — состояние применяется заново. Пункты пропали: удаляя
+        // открытый popover из документа, браузер не присылает toggle, и без
+        // этого слушатели стрелок и прокрутки остались бы висеть, а родитель
         // считал бы меню открытым.
-        hasActions(hasActions) {
-            if (hasActions) {
-                return;
-            }
+        hasActions: {
+            flush: "post",
+            handler(hasActions) {
+                if (hasActions) {
+                    this.applyMenuState();
+                    return;
+                }
 
-            this.stopListening();
+                this.stopListening();
 
-            if (this.menuIsOpen) {
-                this.menuIsOpen = false;
-                this.$emit("update:modelValue", false);
-            }
+                if (this.menuIsOpen) {
+                    this.menuIsOpen = false;
+                    this.$emit("update:modelValue", false);
+                }
+            },
         },
 ```
 
@@ -426,8 +447,15 @@ import { withNavigation } from "../navigation.js";
 Run: `npx vitest run tests/DropdownButtonWithAction.test.js tests/i18n.test.js tests/ssr.test.js tests/hydration.test.js tests/utilityPrefix.test.js`
 Expected: PASS, без предупреждений в выводе.
 
-Run: `npm test`
-Expected: PASS всего набора, вывод чистый (`npm test 2>&1 | grep -ciE "warn|error|stderr"` → `0`).
+Run (полный набор — по правилу Global Constraints, один прогон с логом):
+
+```bash
+npm test > /private/tmp/dbwa-test.log 2>&1; echo "exit $?"
+grep -E "Test Files|Tests " /private/tmp/dbwa-test.log
+grep -ciE "warn|error|stderr" /private/tmp/dbwa-test.log
+```
+
+Expected: `exit 0`; все файлы и тесты passed; `0`.
 
 - [ ] **Step 6: Коммит**
 
@@ -556,13 +584,28 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         expect(errors).toEqual([failure])
         expect(isOpen(wrapper)).toBe(false)
     })
+
+    // Vue передаёт в errorHandler отклонённый Promise, только если обработчик
+    // клика его вернул; иначе отказ уходит в unhandledrejection.
+    it('асинхронный onSelect с отказом отдаёт ошибку Vue, а меню закрывается сразу', async () => {
+        const failure = new Error('сбой асинхронного обработчика')
+        const { wrapper, errors } = mountChecked([{ label: 'Удалить', onSelect: async () => { throw failure } }])
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+
+        menuOf(wrapper).get('[role="menuitem"]').element.click()
+        expect(isOpen(wrapper)).toBe(false)
+
+        await settle()
+        expect(errors).toEqual([failure])
+    })
 })
 ```
 
 - [ ] **Step 2: Убедиться, что тесты падают**
 
 Run: `npx vitest run tests/DropdownButtonWithAction.test.js`
-Expected: FAIL — таблица неверных пунктов не находит предупреждения валидатора (его нет); «неверные пункты не роняют компонент» и «список из одних необъектов» падают: `errors` содержит `TypeError` (обращение к `href` у `null`, вызов строки `onSelect`); «не массив» — `TypeError` или стрелка есть. Тесты верных пунктов и «onSelect, бросивший исключение» проходят уже сейчас: первые — потому что валидатора нет, второй закрепляет поведение Vue (ошибка обработчика уходит в `errorHandler`, всплытие клика до меню продолжается).
+Expected: FAIL — таблица неверных пунктов не находит предупреждения валидатора (его нет); «неверные пункты не роняют компонент» и «список из одних необъектов» падают: `errors` содержит `TypeError` (обращение к `href` у `null`, вызов строки `onSelect`); «не массив» — `TypeError` или стрелка есть; «асинхронный onSelect с отказом» — `errors` пуст, а vitest сообщает о необработанном отказе Promise (`Unhandled Rejection`): `select` из Task 1 результат `onSelect` не возвращает. Тесты верных пунктов и «onSelect, бросивший исключение» проходят уже сейчас: первые — потому что валидатора нет, второй закрепляет поведение Vue (ошибка обработчика уходит в `errorHandler`, всплытие клика до меню продолжается).
 
 - [ ] **Step 3: Реализация**
 
@@ -624,9 +667,12 @@ function isAction(item) {
         },
 
         // Кнопка без функции onSelect по клику только закрывает меню.
+        // Результат onSelect возвращается обработчику клика: отклонённый
+        // Promise асинхронного onSelect Vue передаёт в свой обработчик ошибок,
+        // а без return отказ ушёл бы в unhandledrejection.
         select(item) {
             if (typeof item.onSelect === "function") {
-                item.onSelect();
+                return item.onSelect();
             }
         },
 ```
@@ -636,15 +682,23 @@ function isAction(item) {
 Run: `npx vitest run tests/DropdownButtonWithAction.test.js`
 Expected: PASS.
 
-Run: `npm test`
-Expected: PASS всего набора, `npm test 2>&1 | grep -ciE "warn|error|stderr"` → `0`.
+Run:
+
+```bash
+npm test > /private/tmp/dbwa-test.log 2>&1; echo "exit $?"
+grep -E "Test Files|Tests " /private/tmp/dbwa-test.log
+grep -ciE "warn|error|stderr" /private/tmp/dbwa-test.log
+```
+
+Expected: `exit 0`; все файлы и тесты passed; `0`.
 
 - [ ] **Step 5: Мутационная проверка**
 
 Изменения задачи ещё не закоммичены, поэтому откат — из копии, а не через git (`git checkout` стёр бы реализацию). Перед мутациями: `cp src/components/DropdownButtonWithAction.vue /private/tmp/dbwa-task2.vue`; после каждой: `cp /private/tmp/dbwa-task2.vue src/components/DropdownButtonWithAction.vue`; в конце: `cmp /private/tmp/dbwa-task2.vue src/components/DropdownButtonWithAction.vue && rm /private/tmp/dbwa-task2.vue`. По очереди внести:
 - в `isAction` убрать `&& item.onSelect === undefined` — должен упасть тест «href и onSelect-строка»;
 - в `isAction` убрать `&& item.href === undefined` — должны упасть «пустой href и onSelect» и «href null и onSelect»;
-- в `select` убрать проверку `typeof` — должен упасть «неверные пункты не роняют компонент».
+- в `select` убрать проверку `typeof` — должен упасть «неверные пункты не роняют компонент»;
+- в `select` убрать `return` — должен упасть «асинхронный onSelect с отказом».
 
 Run после каждой мутации: `npx vitest run tests/DropdownButtonWithAction.test.js` — Expected: FAIL названного теста. После отката — PASS.
 
@@ -735,7 +789,15 @@ Expected: FAIL «переданный слот…» — `warn` вызван 0 р
 Run: `npx vitest run tests/DropdownButtonWithAction.test.js`
 Expected: PASS.
 
-Run: `npm test` — Expected: PASS, вывод чистый (`grep -ciE "warn|error|stderr"` → `0`; шпион глушит `console.warn` только в своём `describe`).
+Run:
+
+```bash
+npm test > /private/tmp/dbwa-test.log 2>&1; echo "exit $?"
+grep -E "Test Files|Tests " /private/tmp/dbwa-test.log
+grep -ciE "warn|error|stderr" /private/tmp/dbwa-test.log
+```
+
+Expected: `exit 0`; все файлы и тесты passed; `0` — шпион глушит `console.warn` только в своём `describe`.
 
 Run: `npm run build && grep -c 'process.env.NODE_ENV' dist/index.js`
 Expected: сборка проходит, `1` — Vite в библиотечном режиме `process.env.*` не подменяет.
@@ -1091,10 +1153,17 @@ git commit -m "docs: описать проп actions и обновление с 
 Run:
 
 ```bash
-npm test 2>&1 | grep -E "Test Files|Tests " && npm run build && npx vite build --config vite.playground.config.js --outDir /Users/boobooking/Code/mars/certificates/src/public/build/ui-playground --emptyOutDir --base ./
+npm test > /private/tmp/dbwa-test.log 2>&1; echo "tests exit $?"
+grep -E "Test Files|Tests " /private/tmp/dbwa-test.log
 ```
 
-Expected: весь набор PASS, обе сборки проходят.
+Expected: `tests exit 0`, все файлы и тесты passed. Только после этого:
+
+```bash
+npm run build && npx vite build --config vite.playground.config.js --outDir /Users/boobooking/Code/mars/certificates/src/public/build/ui-playground --emptyOutDir --base ./; echo "build exit $?"
+```
+
+Expected: `build exit 0`, обе сборки прошли.
 
 - [ ] **Step 2: Chrome (chrome-devtools MCP), `https://certificates.test/build/ui-playground/index.html` и `…/host.html`**
 
@@ -1129,8 +1198,17 @@ Expected: три строки `0.13.0` → `0.14.0` (одна в `package.json`,
 
 - [ ] **Step 2: Финальная проверка**
 
-Run: `npm test 2>&1 | grep -E "Test Files|Tests |×"; npm test 2>&1 | grep -ciE "warn|error|stderr"; npm run build 2>&1 | grep -E "built|error"`
-Expected: всё PASS, `0`, `✓ built`.
+Run:
+
+```bash
+npm test > /private/tmp/dbwa-test.log 2>&1; echo "tests exit $?"
+grep -E "Test Files|Tests |×" /private/tmp/dbwa-test.log
+grep -ciE "warn|error|stderr" /private/tmp/dbwa-test.log
+npm run build > /private/tmp/dbwa-build.log 2>&1; echo "build exit $?"
+grep -E "built|error" /private/tmp/dbwa-build.log
+```
+
+Expected: `tests exit 0`, все файлы и тесты passed, `0`, `build exit 0`, `✓ built`. При ненулевом коде — не коммитить, разобрать лог.
 
 - [ ] **Step 3: Коммит**
 
@@ -1145,3 +1223,5 @@ git commit -m "chore: поднять версию пакета до 0.14.0"
 
 - Спека §8 называет один коммит `feat:` для пунктов меню; план делит его на три атомарных коммита по задачам 1–3 (проп и разметка, проверка пунктов, предупреждение о слоте) и добавляет `docs:` для playground и README.
 - Добавлено поведение, о котором спека молчит (Review Focus): при опустевшем списке у открытого меню компонент снимает слушатели и эмитит `update:modelValue(false)`.
+- Добавлено по ревью плана: когда пункты появляются, компонент применяет состояние меню после рендера (наблюдатель `hasActions` с `flush: "post"`) — иначе пункты, пришедшие вместе с `modelValue: true`, дают закрытое меню при внутреннем состоянии «открыто».
+- Добавлено по ревью плана: `select` возвращает результат `onSelect`, и отказ асинхронного обработчика попадает в `errorHandler` Vue, а не в `unhandledrejection`.
