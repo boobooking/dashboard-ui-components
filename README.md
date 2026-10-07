@@ -21,18 +21,6 @@ import '@boobooking/dashboard-ui-components/style.css'
 `fallback-url`.
 
 ```js
-import { RussianMobileFilter, SelectDateInterval } from '@boobooking/dashboard-ui-components'
-import '@boobooking/dashboard-ui-components/style.css'
-```
-
-Стили пакета подключаются **до** стилей приложения.
-
-### Подключение к приложению
-
-Плагин `dashboardUi` задаёт язык и переход по ссылкам пакета. Оба параметра
-необязательны; без плагина компоненты русскоязычные, а ссылки — обычные `<a>`.
-
-```js
 import { dashboardUi } from '@boobooking/dashboard-ui-components'
 import { router, usePage } from '@inertiajs/vue3'
 
