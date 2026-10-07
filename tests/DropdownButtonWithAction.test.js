@@ -392,3 +392,56 @@ describe('DropdownButtonWithAction без Popover API', () => {
         expect(wrapper.emitted('update:modelValue')).toBeUndefined()
     })
 })
+
+describe('DropdownButtonWithAction: стрелки', () => {
+    const twoActions = {
+        button: () => h('span', 'Редактировать'),
+        actions: () => [
+            h('a', { href: '#', role: 'menuitem' }, 'Поменять пароль'),
+            h('a', { href: '#', role: 'menuitem' }, 'Удалить'),
+        ],
+    }
+
+    function press(key) {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+        document.activeElement.dispatchEvent(event)
+        return event
+    }
+
+    async function openMenu(wrapper) {
+        arrowOf(wrapper).element.focus()
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+    }
+
+    it.each([
+        { key: 'ArrowDown', want: 'Поменять пароль' },
+        { key: 'ArrowUp', want: 'Удалить' },
+    ])('в открытом меню $key переводит фокус на «$want» и не прокручивает страницу', async ({ key, want }) => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: twoActions })
+        await openMenu(wrapper)
+
+        const event = press(key)
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement.textContent).toBe(want)
+    })
+
+    it('в закрытом меню стрелки прокручивают страницу', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: twoActions })
+        arrowOf(wrapper).element.focus()
+
+        expect(press('ArrowDown').defaultPrevented).toBe(false)
+    })
+
+    it('после закрытия меню стрелки снова прокручивают страницу', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: twoActions })
+        await openMenu(wrapper)
+
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(press('ArrowDown').defaultPrevented).toBe(false)
+    })
+})

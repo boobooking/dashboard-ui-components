@@ -65,6 +65,7 @@
 import { useId } from "vue";
 import { withLang } from "../lang.js";
 import { canControlPopover, closeOnScrollAndResize, isPopoverOpen, placePopover } from "../popover.js";
+import { moveMenuFocus } from "../menuFocus.js";
 
 // Ширина меню — bb:w-56. У стрелки ближе к левому краю окна меню сужается
 // до места слева.
@@ -111,6 +112,8 @@ export default {
     created() {
         // Снимает слушатели прокрутки и размера окна, пока меню открыто.
         this.stopClosing = null;
+        // Снимает слушатель стрелок, пока меню открыто.
+        this.stopArrows = null;
     },
 
     mounted() {
@@ -165,6 +168,7 @@ export default {
             const menu = this.$refs.menu;
             if (isPopoverOpen(menu)) {
                 this.stopClosing = closeOnScrollAndResize(menu, this.close);
+                this.stopArrows = moveMenuFocus(menu);
             }
 
             const isOpen = event.newState === "open";
@@ -180,6 +184,11 @@ export default {
             if (this.stopClosing !== null) {
                 this.stopClosing();
                 this.stopClosing = null;
+            }
+
+            if (this.stopArrows !== null) {
+                this.stopArrows();
+                this.stopArrows = null;
             }
         },
     },
