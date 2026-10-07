@@ -206,6 +206,14 @@ export default {
         this.stopClosing = null;
         // Снимает слушатель стрелок, пока меню открыто.
         this.stopArrows = null;
+
+        // Слот actions убран: пункты задаёт проп. Меню проекта, который ещё
+        // передаёт разметку, осталось бы без пунктов молча. Проверку
+        // process.env.NODE_ENV подменяет бандлер проекта, как у самого Vue:
+        // в продакшен-сборке её и предупреждения нет.
+        if (process.env.NODE_ENV !== "production" && this.$slots.actions) {
+            console.warn("[dashboard-ui-components] DropdownButtonWithAction: слот actions убран, пункты меню передаются пропом actions");
+        }
     },
 
     mounted() {

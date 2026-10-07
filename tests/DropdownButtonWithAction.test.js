@@ -707,3 +707,41 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         expect(errors).toEqual([failure])
     })
 })
+
+describe('DropdownButtonWithAction: убранный слот actions', () => {
+    const MESSAGE = '[dashboard-ui-components] DropdownButtonWithAction: слот actions убран, пункты меню передаются пропом actions'
+    let warn
+
+    beforeEach(() => {
+        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        warn.mockRestore()
+        vi.unstubAllEnvs()
+    })
+
+    const withSlot = { ...slots, actions: () => h('a', { href: '#', class: 'from-slot' }, 'Из слота') }
+
+    it('переданный слот не рисуется, а в консоль уходит предупреждение', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot })
+
+        expect(wrapper.find('.from-slot').exists()).toBe(false)
+        expect(warn).toHaveBeenCalledTimes(1)
+        expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('без слота предупреждения нет', () => {
+        mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+
+        expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('в продакшен-сборке предупреждения нет', () => {
+        vi.stubEnv('NODE_ENV', 'production')
+
+        mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot })
+
+        expect(warn).not.toHaveBeenCalled()
+    })
+})
