@@ -246,9 +246,12 @@
             <data-table lang="en" :rows="tableRows.slice(0, 2)" :columns="tableColumnsWithoutCost" row-key="uuid" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
         </section>
 
-        <section>
+        <section id="page-card">
             <h2>PageCard</h2>
-            <page-card class="page-card-demo">
+            <!-- Адреса возврата в playground нет: currentUrl не подключён.
+                 Крестик ведёт на fallback-url, переход виден в строке
+                 «Последний переход». -->
+            <page-card class="page-card-demo" fallback-url="#page-card">
                 <h3 class="page-card-demo-heading">Длинный заголовок карточки: на узком экране он переносится и не заходит под крестик</h3>
                 <input class="page-card-demo-input" type="text" value="Поле формы">
             </page-card>
