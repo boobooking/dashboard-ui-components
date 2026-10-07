@@ -116,18 +116,11 @@
         <section>
             <h2>DropdownButtonWithAction</h2>
             <div class="demo-row">
-                <dropdown-button-with-action>
+                <dropdown-button-with-action :actions="menuActions">
                     <template #button><span class="demo-action">Без привязки</span></template>
-                    <template #actions>
-                        <a href="#" class="demo-action">Первое действие</a>
-                        <a href="#" class="demo-action">Второе действие</a>
-                    </template>
                 </dropdown-button-with-action>
-                <dropdown-button-with-action v-model="dropdownIsOpen">
+                <dropdown-button-with-action v-model="dropdownIsOpen" :actions="[{ label: 'Действие', onSelect: countSelection }]">
                     <template #button><span class="demo-action">С v-model</span></template>
-                    <template #actions>
-                        <a href="#" class="demo-action">Действие</a>
-                    </template>
                 </dropdown-button-with-action>
                 <dropdown-button-with-action>
                     <template #button><span class="demo-action">Без действий</span></template>
@@ -137,6 +130,7 @@
                 Меню с v-model: {{ dropdownIsOpen ? 'открыто' : 'закрыто' }}
                 <button type="button" class="demo-button" @click="dropdownIsOpen = !dropdownIsOpen">Переключить снаружи</button>
             </p>
+            <p>Выбрано действий: {{ menuSelections }}</p>
         </section>
 
         <section>
@@ -159,12 +153,8 @@
                     <small-badge :text="row.status" :color="row.statusColor"/>
                 </template>
                 <template #cell-actions>
-                    <dropdown-button-with-action>
+                    <dropdown-button-with-action :actions="menuActions">
                         <template #button><span class="demo-action">Редактировать</span></template>
-                        <template #actions>
-                            <a href="#" class="demo-action">Поменять пароль</a>
-                            <a href="#" class="demo-action">Удалить</a>
-                        </template>
                     </dropdown-button-with-action>
                 </template>
             </data-table>
@@ -184,11 +174,8 @@
                             <small-badge :text="row.status" :color="row.statusColor"/>
                         </template>
                         <template #cell-actions>
-                            <dropdown-button-with-action>
+                            <dropdown-button-with-action :actions="[{ label: 'Удалить', danger: true, onSelect: countSelection }]">
                                 <template #button><span class="demo-action">Редактировать</span></template>
-                                <template #actions>
-                                    <a href="#" class="demo-action">Удалить</a>
-                                </template>
                             </dropdown-button-with-action>
                         </template>
                     </data-table>
@@ -229,9 +216,8 @@
             <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
             <pick-day v-model="day" lang="en"/>
             <download-link url="/export.xlsx" lang="en"/>
-            <dropdown-button-with-action lang="en">
+            <dropdown-button-with-action lang="en" :actions="[{ label: 'Another action', onSelect: countSelection }]">
                 <template #button><span class="demo-action">Action</span></template>
-                <template #actions><a href="#" class="demo-action">Another action</a></template>
             </dropdown-button-with-action>
             <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
             <confirmation-modal
@@ -355,6 +341,7 @@ export default {
             modalConfirms: 0,
             modalCancels: 0,
             dropdownIsOpen: false,
+            menuSelections: 0,
             // Десять строк: таблица выше окна, у нижних строк меню
             // открывается вверх. Ширину таблицы задают столбцы без переноса:
             // при узком окне она шире карточки — проверяется горизонтальная
@@ -376,6 +363,18 @@ export default {
     },
 
     computed: {
+        // Как меню страницы администраторов: переход и опасное действие.
+        // Длинный пункт показывает перенос строки в меню шириной w-56.
+        // Переход — по hash: в голом окружении без navigate страница
+        // не уходит.
+        menuActions() {
+            return [
+                { label: 'Поменять пароль', href: '#password' },
+                { label: 'Отправить письмо с новым паролем на старый и новый адрес', onSelect: this.countSelection },
+                { label: 'Удалить', danger: true, onSelect: this.countSelection },
+            ];
+        },
+
         tableColumns() {
             return [
                 { key: 'phone', label: 'Телефон' },
@@ -402,6 +401,10 @@ export default {
             this.confirmationNotice = type === 'confirmation' ? 'Письмо отправлено на адрес user@example.com' : '';
             this.warningNotice = type === 'warning' ? 'Заполните все обязательные поля.' : '';
             this.dangerousNotice = type === 'dangerous' ? 'Не удалось отправить письмо на адрес user@example.com' : '';
+        },
+
+        countSelection() {
+            this.menuSelections++;
         },
     },
 };
