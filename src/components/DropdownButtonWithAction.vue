@@ -5,11 +5,11 @@
         <button
             type="button"
             class="bb:relative bb:inline-flex bb:items-center bb:rounded-l-md bb:border bb:border-gray-300 bb:bg-white bb:hover:bg-gray-50 bb:focus:outline-hidden"
-            :class="{ 'bb:rounded-r-md': !$slots.actions }"
+            :class="{ 'bb:rounded-r-md': !hasActions }"
         >
             <slot name="button"></slot>
         </button>
-        <span class="bb:-ml-px bb:relative bb:block" v-if="$slots.actions">
+        <span class="bb:-ml-px bb:relative bb:block" v-if="hasActions">
             <!-- Открывает и закрывает меню браузер по popovertarget: свой
                  обработчик click открывал бы меню заново сразу после того,
                  как браузер закрыл его по клику вне. -->
@@ -55,7 +55,29 @@
                 @toggle="onToggle"
                 @click="close"
             >
-                <slot name="actions"></slot>
+                <!-- Вид пунктов задаёт только компонент: страница передаёт
+                     данные, а не разметку. Подсветка — фокус, его ставят и
+                     стрелки, и мышь (moveMenuFocus), поэтому hover-стилей нет. -->
+                <template v-for="(item, index) in actionItems" :key="index">
+                    <a
+                        v-if="isLink(item)"
+                        :href="item.href"
+                        role="menuitem"
+                        class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
+                        :class="item.danger === true ? 'bb:bg-red-400 bb:text-white bb:focus:bg-red-500' : 'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900'"
+                        @click="followLink($event, item.href)"
+                        v-text="item.label"
+                    ></a>
+                    <button
+                        v-else
+                        type="button"
+                        role="menuitem"
+                        class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
+                        :class="item.danger === true ? 'bb:bg-red-400 bb:text-white bb:focus:bg-red-500' : 'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900'"
+                        @click="select(item)"
+                        v-text="item.label"
+                    ></button>
+                </template>
             </div>
         </span>
     </span>
@@ -64,6 +86,7 @@
 <script>
 import { useId } from "vue";
 import { withLang } from "../lang.js";
+import { withNavigation } from "../navigation.js";
 import { canControlPopover, closeOnScrollAndResize, isPopoverOpen, placePopover } from "../popover.js";
 import { moveMenuFocus } from "../menuFocus.js";
 
@@ -72,11 +95,17 @@ import { moveMenuFocus } from "../menuFocus.js";
 const MENU_WIDTH = 224;
 
 export default {
-    mixins: [withLang],
+    mixins: [withLang, withNavigation],
 
     emits: ["update:modelValue"],
 
     props: {
+        // Пункты меню: { label, href } — переход, { label, onSelect } —
+        // действие, danger: true — опасный пункт.
+        actions: {
+            type: Array,
+            default: () => [],
+        },
         modelValue: {
             type: Boolean,
             default: false,
@@ -99,6 +128,17 @@ export default {
         };
     },
 
+    computed: {
+        // null — пустой список: компонент не падает на null.
+        actionItems() {
+            return this.actions ?? [];
+        },
+
+        hasActions() {
+            return this.actionItems.length > 0;
+        },
+    },
+
     watch: {
         // Входящее значение только принимается. Ответное событие вернуло бы
         // родителю его же решение, и обработчик вида «закрыли — сбросить
@@ -106,6 +146,30 @@ export default {
         modelValue(isOpen) {
             this.menuIsOpen = isOpen;
             this.applyMenuState();
+        },
+
+        // DOM меню появляется и исчезает только при рендере, поэтому
+        // наблюдатель — после него (flush: "post"). Пункты появились:
+        // наблюдатель modelValue мог сработать раньше, когда меню ещё не было
+        // в DOM, — состояние применяется заново. Пункты пропали: удаляя
+        // открытый popover из документа, браузер не присылает toggle, и без
+        // этого слушатели стрелок и прокрутки остались бы висеть, а родитель
+        // считал бы меню открытым.
+        hasActions: {
+            flush: "post",
+            handler(hasActions) {
+                if (hasActions) {
+                    this.applyMenuState();
+                    return;
+                }
+
+                this.stopListening();
+
+                if (this.menuIsOpen) {
+                    this.menuIsOpen = false;
+                    this.$emit("update:modelValue", false);
+                }
+            },
         },
     },
 
@@ -125,6 +189,14 @@ export default {
     },
 
     methods: {
+        isLink(item) {
+            return item.href !== undefined;
+        },
+
+        select(item) {
+            item.onSelect();
+        },
+
         // Привести меню к menuIsOpen. Без Popover API и вне документа
         // управлять нечем.
         applyMenuState() {

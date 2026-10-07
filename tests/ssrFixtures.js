@@ -19,7 +19,7 @@ export const ssrFixtures = {
     },
     Dot: { props: { color: 'green' } },
     DownloadLink: { props: { url: '/export.xlsx' } },
-    DropdownButtonWithAction: { slots: { button: () => 'Действие', actions: () => h('a', { href: '#' }, 'Другое действие') } },
+    DropdownButtonWithAction: { props: { actions: [{ label: 'Другое действие', href: '#' }] }, slots: { button: () => 'Действие' } },
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },

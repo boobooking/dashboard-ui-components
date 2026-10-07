@@ -85,7 +85,8 @@ describe('DropdownButtonWithAction: подпись стрелки', () => {
     for (const testCase of cases) {
         it(testCase.name, () => {
             const wrapper = mount(DropdownButtonWithAction, {
-                slots: { button: 'Основное', actions: '<a href="#">Действие</a>' },
+                slots: { button: 'Основное' },
+                props: { actions: [{ label: 'Действие', href: '#' }] },
                 global: testCase.global,
             })
 
@@ -131,7 +132,7 @@ describe('недопустимый lang: язык плагина, а не пад
         { name: 'DownloadLink, lang de и плагин en — English', component: DownloadLink, props: { url: '/export', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Download' },
         { name: 'PickDay, lang пустой и без плагина — русский', component: PickDay, props: { lang: '' }, global: {}, expected: 'Пн' },
         { name: 'SelectDateInterval, lang de и плагин en — English', component: SelectDateInterval, props: { header: 'Интервал', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Mon' },
-        { name: 'DropdownButtonWithAction, lang de и плагин en — English', component: DropdownButtonWithAction, props: { lang: 'de' }, slots: { button: 'Основное', actions: '<a href="#">Действие</a>' }, global: inApp({ lang: 'en' }), expected: 'Open menu' },
+        { name: 'DropdownButtonWithAction, lang de и плагин en — English', component: DropdownButtonWithAction, props: { lang: 'de', actions: [{ label: 'Действие', href: '#' }] }, slots: { button: 'Основное' }, global: inApp({ lang: 'en' }), expected: 'Open menu' },
     ]
 
     for (const testCase of cases) {
