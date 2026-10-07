@@ -94,6 +94,27 @@ import { moveMenuFocus } from "../menuFocus.js";
 // до места слева.
 const MENU_WIDTH = 224;
 
+// Пункт меню — ровно одна из двух форм: переход (href без onSelect) или
+// действие (onSelect без href). Поле отсутствует, если оно undefined.
+function isAction(item) {
+    if (typeof item !== "object" || item === null) {
+        return false;
+    }
+
+    if (typeof item.label !== "string" || item.label === "") {
+        return false;
+    }
+
+    if (item.danger !== undefined && typeof item.danger !== "boolean") {
+        return false;
+    }
+
+    const isLink = typeof item.href === "string" && item.href !== "" && item.onSelect === undefined;
+    const isCommand = typeof item.onSelect === "function" && item.href === undefined;
+
+    return isLink || isCommand;
+}
+
 export default {
     mixins: [withLang, withNavigation],
 
@@ -105,6 +126,7 @@ export default {
         actions: {
             type: Array,
             default: () => [],
+            validator: (value) => value.every(isAction),
         },
         modelValue: {
             type: Boolean,
@@ -129,9 +151,15 @@ export default {
     },
 
     computed: {
-        // null — пустой список: компонент не падает на null.
+        // Валидатор только предупреждает и данные не исправляет, поэтому
+        // компонент не падает ни на каком значении: не массив — пустой
+        // список, элементы-необъекты пропускаются.
         actionItems() {
-            return this.actions ?? [];
+            if (!Array.isArray(this.actions)) {
+                return [];
+            }
+
+            return this.actions.filter((item) => typeof item === "object" && item !== null);
         },
 
         hasActions() {
@@ -189,12 +217,20 @@ export default {
     },
 
     methods: {
+        // Ссылка — только при непустом строковом href; у ссылки onSelect
+        // не вызывается.
         isLink(item) {
-            return item.href !== undefined;
+            return typeof item.href === "string" && item.href !== "";
         },
 
+        // Кнопка без функции onSelect по клику только закрывает меню.
+        // Результат onSelect возвращается обработчику клика: отклонённый
+        // Promise асинхронного onSelect Vue передаёт в свой обработчик ошибок,
+        // а без return отказ ушёл бы в unhandledrejection.
         select(item) {
-            item.onSelect();
+            if (typeof item.onSelect === "function") {
+                return item.onSelect();
+            }
         },
 
         // Привести меню к menuIsOpen. Без Popover API и вне документа

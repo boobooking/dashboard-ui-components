@@ -589,3 +589,121 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
         expect(wrapper.emitted('update:modelValue')).toBeUndefined()
     })
 })
+
+describe('DropdownButtonWithAction: проверка пунктов', () => {
+    const fn = () => {}
+    const VALIDATOR_WARNING = 'Invalid prop: custom validator check failed for prop "actions"'
+
+    function mountChecked(value) {
+        const warnings = []
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            slots,
+            props: { actions: value },
+            global: {
+                config: {
+                    warnHandler: (message) => warnings.push(message),
+                    errorHandler: (error) => errors.push(error),
+                },
+            },
+        })
+
+        return { wrapper, warnings, errors }
+    }
+
+    it.each([
+        { name: 'элемент null', item: null },
+        { name: 'элемент-строка', item: 'Удалить' },
+        { name: 'нет label', item: { onSelect: fn } },
+        { name: 'пустой label', item: { label: '', onSelect: fn } },
+        { name: 'ни href, ни onSelect', item: { label: 'Удалить' } },
+        { name: 'пустой href', item: { label: 'Открыть', href: '' } },
+        { name: 'оба верных поля', item: { label: 'Открыть', href: '#open', onSelect: fn } },
+        { name: 'href и onSelect-строка', item: { label: 'Открыть', href: '#open', onSelect: 'ошибка' } },
+        { name: 'пустой href и onSelect', item: { label: 'Удалить', href: '', onSelect: fn } },
+        { name: 'href null и onSelect', item: { label: 'Удалить', href: null, onSelect: fn } },
+        { name: 'onSelect-строка без href', item: { label: 'Удалить', onSelect: 'ошибка' } },
+        { name: 'danger-строка', item: { label: 'Удалить', danger: 'да', onSelect: fn } },
+    ])('неверный пункт ($name) — предупреждение Vue', ({ item }) => {
+        const { warnings } = mountChecked([{ label: 'Верный', onSelect: fn }, item])
+
+        expect(warnings.some((message) => message.includes(VALIDATOR_WARNING))).toBe(true)
+    })
+
+    it.each([
+        { name: 'переход', item: { label: 'Открыть', href: '#open' } },
+        { name: 'действие', item: { label: 'Удалить', onSelect: fn } },
+        { name: 'переход с danger', item: { label: 'Открыть', href: '#open', danger: true } },
+        { name: 'действие с danger: false', item: { label: 'Удалить', danger: false, onSelect: fn } },
+        { name: 'поле со значением undefined', item: { label: 'Открыть', href: '#open', onSelect: undefined } },
+    ])('верный пункт ($name) — без предупреждений', ({ item }) => {
+        const { warnings } = mountChecked([item])
+
+        expect(warnings).toEqual([])
+    })
+
+    it('неверные пункты не роняют компонент ни при рендере, ни при клике', async () => {
+        const { wrapper, errors } = mountChecked([
+            null,
+            'строка',
+            { label: 'A', onSelect: 'ошибка' },
+            { label: 'B', href: 42 },
+            { label: 'C', href: '#c', onSelect: 'ошибка' },
+        ])
+        const rendered = () => menuOf(wrapper).findAll('[role="menuitem"]')
+
+        expect(rendered().map((item) => [item.element.tagName, item.text()])).toEqual([['BUTTON', 'A'], ['BUTTON', 'B'], ['A', 'C']])
+
+        for (const index of [0, 1, 2]) {
+            await arrowOf(wrapper).trigger('click')
+            await settle()
+            await rendered()[index].trigger('click')
+            await settle()
+            expect(isOpen(wrapper)).toBe(false)
+        }
+        expect(errors).toEqual([])
+    })
+
+    it('список из одних необъектов — без стрелки', () => {
+        const { wrapper, errors } = mountChecked([null, 'строка'])
+
+        expect(arrowOf(wrapper)).toBeUndefined()
+        expect(errors).toEqual([])
+    })
+
+    it('не массив — без стрелки и без ошибок', () => {
+        const { wrapper, errors } = mountChecked('Удалить')
+
+        expect(arrowOf(wrapper)).toBeUndefined()
+        expect(errors).toEqual([])
+    })
+
+    it('onSelect, бросивший исключение, отдаёт ошибку Vue и не оставляет меню открытым', async () => {
+        const failure = new Error('сбой обработчика')
+        const { wrapper, errors } = mountChecked([{ label: 'Удалить', onSelect: () => { throw failure } }])
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+
+        await menuOf(wrapper).get('[role="menuitem"]').trigger('click')
+        await settle()
+
+        expect(errors).toEqual([failure])
+        expect(isOpen(wrapper)).toBe(false)
+    })
+
+    // Vue передаёт в errorHandler отклонённый Promise, только если обработчик
+    // клика его вернул; иначе отказ уходит в unhandledrejection.
+    it('асинхронный onSelect с отказом отдаёт ошибку Vue, а меню закрывается сразу', async () => {
+        const failure = new Error('сбой асинхронного обработчика')
+        const { wrapper, errors } = mountChecked([{ label: 'Удалить', onSelect: async () => { throw failure } }])
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+
+        menuOf(wrapper).get('[role="menuitem"]').element.click()
+        expect(isOpen(wrapper)).toBe(false)
+
+        await settle()
+        expect(errors).toEqual([failure])
+    })
+})
