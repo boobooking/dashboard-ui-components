@@ -84,6 +84,16 @@ export default {
                 this.stopArrows = moveMenuFocus(this.$refs.list, this.activeItemElement);
             }
         },
+
+        // Пункты пропали — выпадающий список уходит из DOM открытым, и закрыть
+        // его нечем: слушатель стрелок остался бы на отсоединённом списке
+        // и глушил бы стрелки на всей странице. Список закрывается и
+        // вернётся закрытым.
+        hasItems(hasItems) {
+            if (!hasItems) {
+                this.isOpen = false;
+            }
+        },
     },
 
     created() {

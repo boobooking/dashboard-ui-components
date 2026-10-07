@@ -93,3 +93,39 @@ describe('SelectSingle', () => {
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
     })
 })
+
+describe('SelectSingle: пункты пропали при открытом списке', () => {
+    function press(key) {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+        document.activeElement.dispatchEvent(event)
+        return event
+    }
+
+    it('стрелки снова прокручивают страницу, а вернувшиеся пункты открываются заново и ходят по новому списку', async () => {
+        const wrapper = mount(SelectSingle, { props: { header: 'Вендор', items }, attachTo: document.body })
+        wrapper.find('button').element.focus()
+        await wrapper.find('button').trigger('click')
+        await flushPromises()
+
+        await wrapper.setProps({ items: [] })
+        await flushPromises()
+
+        const field = document.createElement('textarea')
+        document.body.append(field)
+        try {
+            field.focus()
+            expect(press('ArrowDown').defaultPrevented).toBe(false)
+        } finally {
+            field.remove()
+        }
+
+        await wrapper.setProps({ items })
+        await flushPromises()
+        wrapper.find('button').element.focus()
+        await wrapper.find('button').trigger('click')
+        await flushPromises()
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+    })
+})
