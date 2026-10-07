@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { messages } from '../src/i18n.js'
@@ -155,18 +155,12 @@ describe('недопустимый lang: язык плагина, а не пад
 })
 
 describe('недопустимый lang: крестик PageCard', () => {
-    // Крестик рисуется, только если в истории больше одной записи; компонент
-    // читает её после монтирования.
-    beforeAll(() => {
-        window.history.pushState({}, '')
-        expect(window.history.length).toBeGreaterThan(1)
-    })
-
+    // Крестик рисуется, когда у карточки есть цель: здесь — fallback-url.
     it('lang de и плагин en — доступное имя Back', async () => {
         const warnings = []
         const errors = []
         const wrapper = mount(PageCard, {
-            props: { lang: 'de' },
+            props: { lang: 'de', fallbackUrl: '/list' },
             global: {
                 ...inApp({ lang: 'en' }),
                 config: {

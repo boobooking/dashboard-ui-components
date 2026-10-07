@@ -48,12 +48,24 @@ describe('SSR: рендер каждого компонента', () => {
 })
 
 describe('SSR: PageCard', () => {
-    it('на сервере крестика нет и места под него нет', async () => {
+    it('с fallback-url сервер рисует крестик и место под него', async () => {
         const { html, warnings, errors } = await renderOnServer('PageCard')
+
+        expect(html).toContain('M6 18L18 6M6 6l12 12')
+        expect(html).toContain('bb:[--bb-closer-space:3.5rem]')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('без fallback-url крестика и места под него нет', async () => {
+        const app = createSSRApp({ render: () => h(pkg.PageCard, null, () => h('h3', 'Заголовок')) })
+        const warnings = []
+        app.config.warnHandler = (message) => warnings.push(message)
+
+        const html = await renderToString(app)
 
         expect(html).not.toContain('M6 18L18 6M6 6l12 12')
         expect(html).toContain('bb:[--bb-closer-space:0px]')
-        expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
 })

@@ -47,6 +47,14 @@ function classLiterals(node) {
             return node.elements.flatMap(classLiterals)
         case 'StringLiteral':
             return [node.value]
+        case 'MemberExpression':
+            // $attrs.class — классы приложения на корне компонента: это
+            // утилиты приложения, а не пакета, и префикса у них нет.
+            if (node.object.type === 'Identifier' && node.object.name === '$attrs'
+                && node.property.type === 'Identifier' && node.property.name === 'class' && !node.computed) {
+                return []
+            }
+            throw new Error('форма MemberExpression в :class не проверяется — запишите классы литералами')
         default:
             throw new Error(`форма ${node.type} в :class не проверяется — запишите классы литералами`)
     }

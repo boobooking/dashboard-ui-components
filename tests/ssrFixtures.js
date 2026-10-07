@@ -23,7 +23,7 @@ export const ssrFixtures = {
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
-    PageCard: { slots: { default: () => h('h3', 'Заголовок') } },
+    PageCard: { props: { fallbackUrl: '/list' }, slots: { default: () => h('h3', 'Заголовок') } },
     PickDay: { props: { modelValue: '15.03.2026', placeholderText: 'от' } },
     Popup: { props: { modelValue: true }, slots: { default: () => h('div', 'Меню') } },
     RussianMobileFilter: { props: { header: 'Телефон', modelValue: '79031234567' } },

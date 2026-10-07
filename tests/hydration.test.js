@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createSSRApp, h, nextTick } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { flushPromises } from '@vue/test-utils'
@@ -73,16 +73,11 @@ describe('гидратация каждого компонента', () => {
     }
 })
 
-describe('гидратация PageCard при истории вкладки', () => {
-    beforeAll(() => {
-        window.history.pushState({ hydrationTest: true }, '')
-        expect(window.history.length).toBeGreaterThan(1)
-    })
-
-    it('сервер — без крестика, после гидратации крестик появляется без расхождений', async () => {
+describe('гидратация PageCard', () => {
+    it('с fallback-url крестик есть и на сервере, и после гидратации', async () => {
         const result = await hydrate(renderFixture('PageCard'))
 
-        expect(result.html).not.toContain('M6 18L18 6M6 6l12 12')
+        expect(result.html).toContain('M6 18L18 6M6 6l12 12')
 
         await nextTick()
 
@@ -90,6 +85,20 @@ describe('гидратация PageCard при истории вкладки', (
         expect(result.warnings).toEqual([])
         expect(result.errors).toEqual([])
         expect(result.consoleErrors).toEqual([])
+        expect(result.consoleWarns).toEqual([])
+        result.client.unmount()
+    })
+
+    it('без fallback-url и без плагина крестика нет ни до, ни после гидратации', async () => {
+        const result = await hydrate(() => h(pkg.PageCard, null, () => h('h3', 'Заголовок')))
+
+        await nextTick()
+
+        expect(result.html).not.toContain('M6 18L18 6M6 6l12 12')
+        expect(result.container.querySelector(CROSS_PATH)).toBeNull()
+        expect(result.warnings).toEqual([])
+        expect(result.consoleErrors).toEqual([])
+        expect(result.consoleWarns).toEqual([])
         result.client.unmount()
     })
 })
