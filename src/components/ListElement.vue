@@ -2,7 +2,7 @@
     <button
         type="button"
         @click.prevent="toggle"
-        class="bb:flex bb:w-full bb:bg-white bb:hover:bg-indigo-100 bb:cursor-pointer bb:focus:outline-hidden bb:focus:ring-3 bb:focus:z-10 bb:focus:ring-blue-500/50"
+        class="bb:flex bb:w-full bb:bg-white bb:cursor-pointer bb:focus:outline-hidden bb:focus:bg-indigo-100"
     >
         <span class="bb:flex bb:w-9 bb:h-9 bb:items-center bb:justify-center">
             <svg v-show="isChecked" class="bb:w-5 bb:h-5 bb:fill-current bb:text-green-300" viewBox="0 0 20 20">

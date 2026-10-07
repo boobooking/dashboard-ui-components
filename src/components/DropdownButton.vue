@@ -2,6 +2,7 @@
     <div class="bb:flex bb:flex-col bb:grow bb:bg-white">
         <div class="bb:relative bb:flex bb:w-full bb:h-full">
             <button
+                ref="trigger"
                 type="button"
                 class="bb:flex bb:w-full bb:h-full bb:items-center bb:focus:outline-hidden bb:cursor-pointer"
                 :class="{ 'bb:z-20': isOpen }"
@@ -52,8 +53,14 @@ export default {
     },
 
     watch: {
+        // Фокус со скрытого пункта возвращается на кнопку: иначе он пропал бы
+        // со страницы, и Tab начинал бы с её начала.
         isOpen(newValue) {
             this.popupIsOpen = newValue;
+
+            if (!newValue && this.$el.contains(document.activeElement)) {
+                this.$refs.trigger.focus();
+            }
         },
         popupIsOpen(newValue) {
             this.$emit("update:isOpen", newValue);
