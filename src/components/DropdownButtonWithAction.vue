@@ -39,15 +39,13 @@
                  прокруткой оно не расширяет, и она его не обрезает.
                  m-0 inset-auto снимают умолчания браузера для [popover],
                  иначе меню встало бы в центр окна; координаты ставит
-                 placePopover. text-inherit возвращает пунктам цвет текста
-                 страницы: у popover в верхнем слое свой color. Клик внутри
-                 меню закрывает его: открытое
+                 placePopover. Клик внутри меню закрывает его: открытое
                  меню легло бы поверх модалки, которую открывает пункт. -->
             <div
                 ref="menu"
                 :id="menuId"
                 popover="auto"
-                class="bb:m-0 bb:inset-auto bb:w-56 bb:rounded-md bb:shadow-lg bb:bg-white bb:text-inherit bb:ring-1 bb:ring-black/5"
+                class="bb:m-0 bb:inset-auto bb:w-56 bb:rounded-md bb:shadow-lg bb:bg-white bb:ring-1 bb:ring-black/5"
                 role="menu"
                 aria-orientation="vertical"
                 :aria-labelledby="menuButtonId"
@@ -56,7 +54,9 @@
                 @click="close"
             >
                 <!-- Вид пунктов задаёт только компонент: страница передаёт
-                     данные, а не разметку. Подсветка — фокус, его ставят и
+                     данные, а не разметку. Цвет текста у каждого пункта
+                     свой: у popover в верхнем слое color браузера, а не
+                     страницы. Подсветка — фокус, его ставят и
                      стрелки, и мышь (moveMenuFocus), поэтому hover-стилей нет. -->
                 <template v-for="(item, index) in actionItems" :key="index">
                     <a

@@ -262,10 +262,16 @@ describe('DropdownButtonWithAction без привязки', () => {
         }
     })
 
-    it('панель наследует цвет текста: у popover в верхнем слое свой color', () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+    it('пункты задают цвет текста сами: у popover в верхнем слое свой color', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            slots,
+            props: { actions: [{ label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', danger: true, onSelect: () => {} }] },
+        })
 
-        expect(menuOf(wrapper).classes()).toContain('bb:text-inherit')
+        const [link, danger] = menuOf(wrapper).findAll('[role="menuitem"]')
+        expect(link.classes()).toContain('bb:text-gray-700')
+        expect(danger.classes()).toContain('bb:text-white')
     })
 
     it('без действий стрелки и панели нет', () => {
