@@ -32,7 +32,7 @@ function walk(node, visit) {
 // Классы в :class записываются литералами: ключи объекта, ветки тернарного
 // оператора, элементы массива, строка. Условия — не классы, их не трогаем.
 // Любая другая форма не проверяется статически, поэтому запрещена.
-function classLiterals(node) {
+function classLiterals(node, fileName) {
     switch (node.type) {
         case 'ObjectExpression':
             return node.properties.map((property) => {
@@ -42,9 +42,9 @@ function classLiterals(node) {
                 return property.key.value
             })
         case 'ConditionalExpression':
-            return [...classLiterals(node.consequent), ...classLiterals(node.alternate)]
+            return [...classLiterals(node.consequent, fileName), ...classLiterals(node.alternate, fileName)]
         case 'ArrayExpression':
-            return node.elements.flatMap(classLiterals)
+            return node.elements.flatMap((element) => classLiterals(element, fileName))
         case 'StringLiteral':
             return [node.value]
         case 'MemberExpression':
@@ -55,6 +55,16 @@ function classLiterals(node) {
                 return []
             }
             throw new Error('форма MemberExpression в :class не проверяется — запишите классы литералами')
+        case 'Identifier':
+            // panelClass в PopoverPanel.vue — вид панели, переданный атрибутом
+            // panel-class вызывающих компонентов. Этот атрибут тест читает
+            // как проп классов и проверяет каждую утилиту в нём, поэтому
+            // здесь проверять нечего. В любом другом файле имя переменной
+            // в :class статически не проверить.
+            if (node.name === 'panelClass' && fileName === 'PopoverPanel.vue') {
+                return []
+            }
+            throw new Error('форма Identifier в :class не проверяется — запишите классы литералами')
         default:
             throw new Error(`форма ${node.type} в :class не проверяется — запишите классы литералами`)
     }
@@ -66,7 +76,7 @@ function isClassProp(name) {
     return name === 'class' || name.endsWith('-class') || name.endsWith('Class')
 }
 
-function classTokens(source) {
+function classTokens(source, fileName) {
     const { descriptor, errors } = parse(source)
     if (errors.length > 0) throw errors[0]
 
@@ -96,7 +106,7 @@ function classTokens(source) {
 
                     if (isClassProp(prop.arg.content)) {
                         const expression = babelParse(`(${prop.exp.content})`).program.body[0].expression
-                        tokens.push(...classLiterals(expression).flatMap((literal) => literal.split(/\s+/)))
+                        tokens.push(...classLiterals(expression, fileName).flatMap((literal) => literal.split(/\s+/)))
                     }
                 } else {
                     // v-bind="…" без аргумента — целиком объект пропов
@@ -140,10 +150,28 @@ describe('префикс bb у утилит в разметке компонен
 
     for (const file of files) {
         it(path.relative(componentsDir, file), () => {
-            const unprefixed = classTokens(fs.readFileSync(file, 'utf8'))
+            const unprefixed = classTokens(fs.readFileSync(file, 'utf8'), path.basename(file))
                 .filter((token) => token !== 'bb-dashboard-ui' && !token.startsWith('bb:'))
 
             expect(unprefixed).toEqual([])
         })
     }
+})
+
+describe('исключение для panelClass', () => {
+    const panel = '<template><div class="bb:m-0" :class="panelClass"></div></template>'
+
+    it('в PopoverPanel.vue :class="panelClass" принимается', () => {
+        expect(classTokens(panel, 'PopoverPanel.vue')).toEqual(['bb:m-0'])
+    })
+
+    it('в другом файле то же отклоняется', () => {
+        expect(() => classTokens(panel, 'DropdownButton.vue')).toThrow('форма Identifier в :class не проверяется')
+    })
+
+    it('утилита без префикса в panel-class вызывающего компонента находится', () => {
+        const caller = '<template><popover-panel panel-class="bb:border flex"></popover-panel></template>'
+
+        expect(classTokens(caller, 'PickDay.vue')).toEqual(['bb:border', 'flex'])
+    })
 })
