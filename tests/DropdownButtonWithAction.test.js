@@ -577,6 +577,20 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
         expect(press('ArrowDown').defaultPrevented).toBe(false)
     })
 
+    // toggle об открытии приходит отложенно, и список может опустеть раньше:
+    // меню к этому времени уже нет в DOM, и открытым его считать нельзя.
+    it('список опустел до запоздавшего toggle об открытии: родитель не узнаёт об открытии, стрелки прокручивают страницу', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+
+        await arrowOf(wrapper).trigger('click')
+        await wrapper.setProps({ actions: [] })
+        await settle()
+
+        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+        expect(press('ArrowDown').defaultPrevented).toBe(false)
+    })
+
     // Наблюдатель modelValue срабатывает до рендера: если пункты и открытие
     // пришли разом, меню в этот момент ещё нет в DOM.
     it('пункты и открытие пришли одновременно — меню открыто, ответного события нет', async () => {

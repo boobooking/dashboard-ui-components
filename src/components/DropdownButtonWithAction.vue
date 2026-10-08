@@ -276,18 +276,20 @@ export default {
         // Единственный путь, которым меню сообщает родителю об открытии или
         // закрытии: стрелка, клик вне, Escape, клик по пункту, прокрутка,
         // размер окна. Значение, совпавшее с текущим, — эхо входящего, его
-        // не эмитят. Слушатели вешаются по фактическому состоянию меню:
-        // toggle мог прийти после размонтирования или устареть.
-        onToggle(event) {
+        // не эмитят. Слушатели и сообщение родителю — по фактическому
+        // состоянию меню, а не по newState: toggle мог прийти после
+        // размонтирования, устареть или запоздать за пунктами, которые
+        // пропали и унесли меню из DOM, — такое меню закрыто.
+        onToggle() {
             this.stopListening();
 
             const menu = this.$refs.menu;
-            if (isPopoverOpen(menu)) {
+            const isOpen = isPopoverOpen(menu);
+            if (isOpen) {
                 this.stopClosing = closeOnScrollAndResize(menu, this.close);
                 this.stopArrows = moveMenuFocus(menu);
             }
 
-            const isOpen = event.newState === "open";
             if (isOpen === this.menuIsOpen) {
                 return;
             }
