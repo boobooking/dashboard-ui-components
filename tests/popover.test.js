@@ -73,6 +73,57 @@ describe('placePopover', () => {
         expect(popover.style.maxHeight).toBe('0px')
         expect(popover.style.maxWidth).toBe('0px')
     })
+
+    it('align start: левый край по кнопке, ширина — местом справа', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 100, right: 320 }), popover, { align: 'start' })
+
+        expect(popover.style.left).toBe('100px')
+        expect(popover.style.right).toBe('auto')
+        expect(popover.style.top).toBe('144px')
+        expect(popover.style.maxWidth).toBe('892px')
+    })
+
+    it('align start: у правого края окна — правым краем по кнопке, ширина — местом слева', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 700, right: 920 }), popover, { align: 'start' })
+
+        expect(popover.style.left).toBe('auto')
+        expect(popover.style.right).toBe('80px')
+        expect(popover.style.maxWidth).toBe('912px')
+    })
+
+    it('align start: maxWidth ограничивает ширину вместе с местом', () => {
+        viewport(300, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 100, right: 200 }), popover, { align: 'start', maxWidth: 224 })
+        expect(popover.style.maxWidth).toBe('192px')
+
+        viewport(1000, 800)
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 100, right: 200 }), popover, { align: 'start', maxWidth: 224 })
+        expect(popover.style.maxWidth).toBe('224px')
+    })
+
+    it('повторное размещение другой стороной не оставляет старых координат', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 900, right: 920 }), popover, { maxWidth: 224 })
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 100, right: 320 }), popover, { align: 'start' })
+        expect(popover.style.right).toBe('auto')
+        expect(popover.style.left).toBe('100px')
+        expect(popover.style.maxWidth).toBe('892px')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 900, right: 920 }), popover)
+        expect(popover.style.left).toBe('auto')
+        expect(popover.style.right).toBe('80px')
+        expect(popover.style.maxWidth).toBe('')
+    })
 })
 
 describe('canControlPopover и isPopoverOpen', () => {
