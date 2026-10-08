@@ -29,6 +29,15 @@
                 v-model:date-to="dateTo"
             />
             <p>С {{ dateFrom || '(пусто)' }} по {{ dateTo || '(пусто)' }}</p>
+
+            <h3>У правого края: календарь прижимается правым краем к полю</h3>
+            <div class="demo-end">
+                <select-date-interval
+                    header="Интервал у края"
+                    v-model:date-from="edgeDateFrom"
+                    v-model:date-to="edgeDateTo"
+                />
+            </div>
         </section>
 
         <section>
@@ -40,6 +49,9 @@
                 @changed="vendorCommits++"
             />
             <p>Выбрано: {{ vendor === null ? '(ничего)' : vendor }}, запросов: {{ vendorCommits }}</p>
+
+            <h3>Длинный список: прокрутка внутри, у нижнего края окна — вверх</h3>
+            <select-single header="Сертификат" :items="longItems" v-model="longItem"/>
         </section>
 
         <section>
@@ -303,6 +315,8 @@ export default {
             search: '',
             dateFrom: '',
             dateTo: '',
+            edgeDateFrom: '',
+            edgeDateTo: '',
             vendorItems: [
                 { id: 'a', name: 'Первый вендор' },
                 { id: 'b', name: 'Второй вендор' },
@@ -310,6 +324,7 @@ export default {
             ],
             vendor: null,
             vendorCommits: 0,
+            longItem: null,
             errorObject: {
                 email: 'Неверный email',
                 password: 'Пароль слишком короткий',
@@ -346,6 +361,12 @@ export default {
     },
 
     computed: {
+        // Тридцать пунктов: список выше окна, высота ограничена местом до
+        // края, и он прокручивается внутри.
+        longItems() {
+            return Array.from({ length: 30 }, (_, index) => ({ id: `c${index + 1}`, name: `Сертификат ${index + 1}` }));
+        },
+
         // Как меню страницы администраторов: переход и опасное действие.
         // Длинный пункт показывает перенос строки в меню шириной w-56.
         // Переход — по hash: в голом окружении без navigate страница
