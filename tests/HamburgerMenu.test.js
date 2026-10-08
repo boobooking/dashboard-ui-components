@@ -198,9 +198,14 @@ describe('HamburgerMenu: место меню', () => {
         Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 })
         Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 800 })
         const wrapper = mount(HamburgerMenu, { attachTo: document.body, props: { actions: profileActions() } })
-        // Обёртка шире кнопки: по обёртке правый край меню был бы 50px.
-        wrapper.element.getBoundingClientRect = () => ({ top: 10, bottom: 50, left: 800, right: 950 })
-        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 10, bottom: 50, left: 860, right: 900 })
+        const button = buttonOf(wrapper).element
+        // Обёртка кнопки — корень PopoverMenu. wrapper.element для этого
+        // не годится: в режиме разработки корень HamburgerMenu — фрагмент
+        // из комментария и <popover-menu>, и wrapper.element — контейнер
+        // монтирования. Обёртка шире кнопки: по обёртке правый край меню
+        // был бы 50px.
+        button.parentElement.getBoundingClientRect = () => ({ top: 10, bottom: 50, left: 800, right: 950 })
+        button.getBoundingClientRect = () => ({ top: 10, bottom: 50, left: 860, right: 900 })
 
         try {
             await openMenu(wrapper)
