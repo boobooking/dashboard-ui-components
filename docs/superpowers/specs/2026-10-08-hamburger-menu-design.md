@@ -102,7 +102,10 @@ Escape, клик по пункту, прокрутка, размер окна, �
 благодаря `toMenuItems`.
 
 Слот `trigger` получает пропсы `{ id, popovertarget }`. Компонент, который
-рисует кнопку, вешает их на неё (`v-bind`): по `popovertarget` браузер сам
+рисует кнопку, вешает их на неё двумя явными атрибутами —
+`:id="trigger.id" :popovertarget="trigger.popovertarget"`: `v-bind="trigger"`
+без аргумента не пропускает `tests/utilityPrefix.test.js`, потому что классы
+в таком объекте статически не проверить. По `popovertarget` браузер сам
 открывает и закрывает меню, `id` связывает панель с кнопкой
 (`aria-labelledby`). Оба идентификатора — `useId()`, одинаковые при SSR и
 гидрации.
@@ -182,7 +185,8 @@ Popover API — `transition` на панели и `@starting-style` для на�
                       :model-value="modelValue"
                       @update:model-value="$emit('update:modelValue', $event)">
             <template #trigger="trigger">
-                <button type="button" v-bind="trigger" …классы стрелки…>…</button>
+                <button type="button" :id="trigger.id" :popovertarget="trigger.popovertarget"
+                        …классы стрелки…>…</button>
             </template>
         </popover-menu>
     </span>
@@ -210,7 +214,8 @@ Popover API — `transition` на панели и `@starting-style` для на�
 
     <popover-menu class="bb-dashboard-ui bb:inline-flex" :actions="actions">
         <template #trigger="trigger">
-            <button type="button" v-bind="trigger" class="…">
+            <button type="button" :id="trigger.id"
+                    :popovertarget="trigger.popovertarget" class="…">
                 <span class="bb:sr-only">{{ texts.openMenu }}</span>
                 <svg class="bb:h-6 bb:w-6" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor" aria-hidden="true">
@@ -266,7 +271,9 @@ vitest и happy-dom, Popover API — заглушка `tests/popoverStub.js`. К
   - действие вызывает `onSelect` и закрывает меню;
   - в открытом меню стрелки ведут фокус по пунктам и гасят прокрутку,
     у закрытого стрелки прокручивают страницу;
-  - меню встаёт правым краем по правому краю кнопки;
+  - меню встаёт правым краем по правому краю кнопки; у кнопки и обёртки
+    `PopoverMenu` в тесте разные координаты, чтобы тест различал, по чему
+    считается место;
   - неверный пункт — ровно одно предупреждение валидатора и без ошибок;
     верные пункты — без предупреждений.
 - `tests/exports.test.js` — список из пятнадцати компонентов.
