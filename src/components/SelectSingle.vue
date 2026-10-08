@@ -7,11 +7,14 @@
                 v-model:is-open="isOpen"
                 v-if="hasItems"
                 :has-value="hasValue"
+                :find-selected="activeItemElement"
                 @erased="clear"
             >
+                <!-- Рамку, фон, скругление и тень списка задаёт панель
+                     DropdownButton; здесь — раскладка пунктов и разделители. -->
                 <div
                     ref="list"
-                    class="bb:flex bb:flex-col bb:py-1 bb:mt-1 bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg bb:divide-y bb:divide-gray-200 bb:divide-dashed"
+                    class="bb:flex bb:flex-col bb:py-1 bb:divide-y bb:divide-gray-200 bb:divide-dashed"
                 >
                     <list-element
                         v-for="item in itemList"
@@ -30,7 +33,6 @@
 import ElementHeader from "./ElementHeader.vue";
 import DropdownButton from "./DropdownButton.vue";
 import ListElement from "./ListElement.vue";
-import { moveMenuFocus } from "../menuFocus.js";
 
 export default {
     components: {
@@ -75,34 +77,14 @@ export default {
     },
 
     watch: {
-        // Стрелки ходят по пунктам, только пока список открыт: у закрытого
-        // они прокручивают страницу.
-        isOpen(isOpen) {
-            this.stopMovingFocus();
-
-            if (isOpen) {
-                this.stopArrows = moveMenuFocus(this.$refs.list, this.activeItemElement);
-            }
-        },
-
-        // Пункты пропали — выпадающий список уходит из DOM открытым, и закрыть
-        // его нечем: слушатель стрелок остался бы на отсоединённом списке
-        // и глушил бы стрелки на всей странице. Список закрывается и
-        // вернётся закрытым.
+        // Пункты пропали — выпадающий список уходит из DOM открытым. Без
+        // закрытия isOpen остался бы true, и вернувшиеся пункты открыли бы
+        // список сами. Список закрывается и вернётся закрытым.
         hasItems(hasItems) {
             if (!hasItems) {
                 this.isOpen = false;
             }
         },
-    },
-
-    created() {
-        // Снимает слушатель стрелок, пока список открыт.
-        this.stopArrows = null;
-    },
-
-    beforeUnmount() {
-        this.stopMovingFocus();
     },
 
     computed: {
@@ -146,13 +128,6 @@ export default {
             const index = this.itemList.indexOf(this.activeItem);
 
             return index === -1 ? null : this.$refs.list.querySelectorAll("button")[index];
-        },
-
-        stopMovingFocus() {
-            if (this.stopArrows !== null) {
-                this.stopArrows();
-                this.stopArrows = null;
-            }
         },
     },
 };

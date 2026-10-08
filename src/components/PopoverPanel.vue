@@ -96,6 +96,16 @@ export default {
             type: String,
             default: null,
         },
+        // Фокус был внутри панели при закрытии — после закрытия он
+        // возвращается на кнопку: иначе он пропал бы со страницы, и Tab
+        // начинал бы с её начала. Safari по клику фокус на кнопку не ставит
+        // и при закрытии уводит его на body, поэтому браузер кнопку сам
+        // не вернёт. Фокус, который браузер отдал другому элементу (клик по
+        // соседнему полю), не забирается.
+        returnFocus: {
+            type: Boolean,
+            default: false,
+        },
     },
 
     setup() {
@@ -153,6 +163,8 @@ export default {
         this.stopClosing = null;
         // Снимает слушатель стрелок, пока панель открыта.
         this.stopArrows = null;
+        // Был ли фокус внутри панели, когда она начала закрываться.
+        this.focusWasInside = false;
     },
 
     mounted() {
@@ -197,11 +209,16 @@ export default {
         },
 
         // Место панели — по кнопке из слота, а не по обёртке: обёртка может
-        // быть шире кнопки.
+        // быть шире кнопки. При закрытии запоминается, был ли фокус внутри:
+        // к toggle браузер его уже переставит.
         onBeforeToggle(event) {
             if (event.newState === "open") {
                 placePopover(document.getElementById(this.buttonId), this.$refs.panel, { maxWidth: this.maxWidth, align: this.align });
+                return;
             }
+
+            const panel = this.$refs.panel;
+            this.focusWasInside = panel !== undefined && panel !== null && panel.contains(document.activeElement);
         },
 
         // Единственный путь, которым панель сообщает родителю об открытии или
@@ -224,12 +241,33 @@ export default {
                 }
             }
 
+            if (!isOpen) {
+                this.restoreFocus(panel);
+            }
+
             if (isOpen === this.panelIsOpen) {
                 return;
             }
 
             this.panelIsOpen = isOpen;
             this.$emit("update:modelValue", isOpen);
+        },
+
+        // Вернуть фокус на кнопку, если он был внутри закрытой панели и
+        // теперь потерян: на body или всё ещё на скрытом пункте.
+        restoreFocus(panel) {
+            const focusWasInside = this.focusWasInside;
+            this.focusWasInside = false;
+
+            if (!this.returnFocus || !focusWasInside) {
+                return;
+            }
+
+            const active = document.activeElement;
+            const isLost = active === null || active === document.body || (panel !== undefined && panel !== null && panel.contains(active));
+            if (isLost) {
+                document.getElementById(this.buttonId)?.focus();
+            }
         },
 
         stopListening() {
