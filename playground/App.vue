@@ -112,6 +112,17 @@
         </section>
 
         <section>
+            <h2>HamburgerMenu</h2>
+            <!-- Полоса как шапка проектов: кнопка ☰ у правого края, меню
+                 профиля открывается под ней влево. -->
+            <div class="demo-header">
+                <span>Шапка</span>
+                <hamburger-menu :actions="profileActions"/>
+            </div>
+            <p>Выбрано действий: {{ menuSelections }}</p>
+        </section>
+
+        <section>
             <h2>DataTable</h2>
 
             <h3>page: пагинация, бейдж, ссылка рядом с бейджем, меню действий</h3>
@@ -196,6 +207,7 @@
             <dropdown-button-with-action lang="en" :actions="[{ label: 'Another action', onSelect: countSelection }]">
                 <template #button><span class="demo-action">Action</span></template>
             </dropdown-button-with-action>
+            <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countSelection }]"/>
             <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
             <confirmation-modal
                 :is-open="englishModalIsOpen"
@@ -247,6 +259,7 @@ import {
     DownloadLink,
     ConfirmationModal,
     DropdownButtonWithAction,
+    HamburgerMenu,
     DataTable,
     NavigationMenuElement,
     PageCard,
@@ -266,6 +279,7 @@ export default {
         DownloadLink,
         ConfirmationModal,
         DropdownButtonWithAction,
+        HamburgerMenu,
         DataTable,
         NavigationMenuElement,
         PageCard,
@@ -340,6 +354,16 @@ export default {
                 { label: 'Поменять пароль', href: '#password' },
                 { label: 'Отправить письмо с новым паролем на старый и новый адрес', onSelect: this.countSelection },
                 { label: 'Удалить', danger: true, onSelect: this.countSelection },
+            ];
+        },
+
+        // Как меню профиля в шапке проектов: два перехода и выход действием.
+        // Переходы — по hash, как у menuActions.
+        profileActions() {
+            return [
+                { label: 'Администраторы', href: '#users' },
+                { label: 'Поменять пароль', href: '#password' },
+                { label: 'Выйти', onSelect: this.countSelection },
             ];
         },
 
