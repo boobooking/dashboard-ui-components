@@ -7,7 +7,7 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty('Modal')
     })
 
-    it('ровно семнадцать компонентов и плагин', () => {
+    it('ровно восемнадцать компонентов и плагин', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'Closer',
             'ConfirmationModal',
@@ -16,6 +16,7 @@ describe('публичная поверхность пакета', () => {
             'DownloadLink',
             'DropdownButtonWithAction',
             'ErrorMessages',
+            'HamburgerMenu',
             'NavigationMenuElement',
             'NotificationMessage',
             'PageCard',

@@ -21,6 +21,7 @@ export const ssrFixtures = {
     DownloadLink: { props: { url: '/export.xlsx' } },
     DropdownButtonWithAction: { props: { actions: [{ label: 'Другое действие', href: '#' }] }, slots: { button: () => 'Действие' } },
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
+    HamburgerMenu: { props: { actions: [{ label: 'Выйти', href: '#' }] } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
     PageCard: { props: { fallbackUrl: '/list' }, slots: { default: () => h('h3', 'Заголовок') } },
