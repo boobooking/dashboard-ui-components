@@ -96,7 +96,7 @@ const MENU_WIDTH = 224;
 
 // Пункт меню — ровно одна из двух форм: переход (href без onSelect) или
 // действие (onSelect без href). Поле отсутствует, если оно undefined.
-function isAction(item) {
+function isMenuItem(item) {
     if (typeof item !== "object" || item === null) {
         return false;
     }
@@ -126,7 +126,7 @@ export default {
         actions: {
             type: Array,
             default: () => [],
-            validator: (value) => value.every(isAction),
+            validator: (value) => value.every(isMenuItem),
         },
         modelValue: {
             type: Boolean,
