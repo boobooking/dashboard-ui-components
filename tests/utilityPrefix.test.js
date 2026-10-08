@@ -113,7 +113,8 @@ function classTokens(source, fileName) {
                     const expression = babelParse(`(${prop.exp.content})`).program.body[0].expression
 
                     if (expression.type === 'Identifier' && expression.name === '$attrs') {
-                        // разрешено: Popup.vue пробрасывает атрибуты приложения на меню
+                        // разрешено: компонент пробрасывает атрибуты приложения — это
+                        // утилиты приложения, а не пакета
                     } else if (expression.type === 'ObjectExpression') {
                         const classKey = expression.properties.find((property) => {
                             if (property.type !== 'ObjectProperty') return false
