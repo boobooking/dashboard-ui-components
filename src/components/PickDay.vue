@@ -1,9 +1,11 @@
 <template>
     <div class="bb-dashboard-ui bb:flex bb:flex-col">
-        <div class="bb:relative bb:flex bb:h-full bb:cursor-pointer bb:leading-none">
+        <div class="bb:relative bb:flex bb:h-full">
             <!-- Календарь — PopoverPanel под полем: открывает и закрывает его
                  браузер по popovertarget кнопки. Обёртка кнопки занимает
-                 место кнопки рядом с ластиком. -->
+                 место кнопки рядом с ластиком. Курсор и межстрочный интервал
+                 поля — на кнопке, а не на обёртке: панель календаря лежит
+                 в обёртке и унаследовала бы их. -->
             <popover-panel
                 class="bb:flex bb:w-full"
                 v-model="popupIsOpen"
@@ -16,7 +18,7 @@
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
-                        class="bb:flex bb:w-full bb:items-center bb:focus:outline-hidden"
+                        class="bb:flex bb:w-full bb:items-center bb:cursor-pointer bb:leading-none bb:focus:outline-hidden"
                     >
                         <!-- Клик по полю достаётся кнопке: у <label> и поля своё
                              поведение активации, и клик по тексту даты или

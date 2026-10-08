@@ -205,4 +205,14 @@ describe('PickDay: календарь на Popover API', () => {
 
         expect(panelOf(wrapper).classes().filter((name) => DISPLAY.test(name))).toEqual([])
     })
+
+    // Панель лежит в DOM внутри обёртки поля и наследует её line-height
+    // и cursor: календарь стал бы ниже, а курсор над ним — рукой.
+    it('календарь не наследует межстрочный интервал и курсор поля', () => {
+        const wrapper = mount(PickDay, { attachTo: document.body })
+        const panel = panelOf(wrapper).element
+
+        expect(panel.closest('.bb\\:leading-none')).toBeNull()
+        expect(panel.closest('.bb\\:cursor-pointer')).toBeNull()
+    })
 })
