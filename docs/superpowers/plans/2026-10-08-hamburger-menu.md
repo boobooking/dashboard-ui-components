@@ -56,6 +56,7 @@
 
 ```bash
 W=.superpowers/sdd/2026-10-08-hamburger-menu
+mkdir -p "$W"
 npx vitest run tests/DropdownButtonWithAction.test.js --reporter=verbose > $W/t1-before.log 2>&1; echo "exit $?"
 grep -E "(✓|×) .* > " $W/t1-before.log | sed -E 's/ [0-9]+ms$//' | sort > $W/t1-before.txt
 wc -l < $W/t1-before.txt
@@ -1648,7 +1649,55 @@ Expected: `assets`, `manifest.json`.
 
 ---
 
-### Task 7: Версия `0.15.0`
+### Task 7: Итоговое ревью ветки
+
+Независимое ревью всей ветки до коммита с версией (спека §12): исправления ложатся до него, и версия остаётся последним коммитом.
+
+**Files:**
+- Изменяются только файлы, которых касаются исправления; без замечаний Critical и Important — коммитов нет.
+
+**Interfaces:**
+- Consumes: все коммиты Tasks 1–5 и результат приёмки Task 6.
+- Produces: ветка без замечаний Critical и Important; список отложенных Minor для владельца.
+
+- [ ] **Step 1: Пакет ревью**
+
+```bash
+W=.superpowers/sdd/2026-10-08-hamburger-menu
+BASE=$(git merge-base main HEAD)
+git diff --stat $BASE..HEAD > $W/review-stat.txt
+git diff $BASE..HEAD > $W/review.diff
+git log --oneline $BASE..HEAD
+```
+
+Если доступен скрипт superpowers `subagent-driven-development/scripts/review-package`, пакет собирается им: `review-package docs/superpowers/plans/2026-10-08-hamburger-menu.md $BASE HEAD`.
+
+- [ ] **Step 2: Ревьюер**
+
+Свежий ревьюер на самой сильной доступной модели (модель указывается явно) по `superpowers:requesting-code-review` (`code-reviewer.md`). Ему передаются: пакет ревью, спека `docs/superpowers/specs/2026-10-08-hamburger-menu-design.md`, этот план, раздел Review Focus дословно и решения из журнала исполнения (строки `Ruling:`). Свой разбор диффа ревьюера не заменяет.
+
+- [ ] **Step 3: Разбор замечаний**
+
+Каждое замечание переоценивается по тому, что получит человек, если ветка выйдет как есть, а не по тому, называет ли спека этот случай. Critical и Important — в исправления; Minor — в список отложенных для владельца, без исправлений.
+
+- [ ] **Step 4: Исправления**
+
+Каждое исправление — отдельно: тест, который воспроизводит замечание и сначала падает; исправление; тот же тест проходит; весь набор:
+
+```bash
+W=.superpowers/sdd/2026-10-08-hamburger-menu
+npm test > $W/t7-suite.log 2>&1; echo "tests exit $?"
+grep -E "Test Files|Tests |×" $W/t7-suite.log
+grep -ciE "warn|error|stderr" $W/t7-suite.log
+```
+
+Expected: `tests exit 0`, всё passed, `0`. Коммит на каждое исправление — `fix: …` (или тип по сути правки), только файлы этого исправления.
+
+Если исправление меняет то, что видно в браузере, — повторить затронутые пункты Task 6, Step 2 в Chrome и попросить владельца повторить их в Safari; сборку playground выложить и убрать, как в Task 6, Steps 1 и 4.
+
+---
+
+### Task 8: Версия `0.15.0`
 
 **Files:**
 - Modify: `package.json`, `package-lock.json`
@@ -1662,11 +1711,11 @@ Expected: три строки `0.14.0` → `0.15.0` (одна в `package.json`,
 
 ```bash
 W=.superpowers/sdd/2026-10-08-hamburger-menu
-npm test > $W/t7-test.log 2>&1; echo "tests exit $?"
-grep -E "Test Files|Tests |×" $W/t7-test.log
-grep -ciE "warn|error|stderr" $W/t7-test.log
-npm run build > $W/t7-build.log 2>&1; echo "build exit $?"
-grep -E "built|error" $W/t7-build.log
+npm test > $W/t8-test.log 2>&1; echo "tests exit $?"
+grep -E "Test Files|Tests |×" $W/t8-test.log
+grep -ciE "warn|error|stderr" $W/t8-test.log
+npm run build > $W/t8-build.log 2>&1; echo "build exit $?"
+grep -E "built|error" $W/t8-build.log
 ```
 
 Expected: `tests exit 0`, всё passed, `0`, `build exit 0`, `✓ built`. При ненулевом коде — не коммитить, разобрать лог.
