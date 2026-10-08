@@ -119,7 +119,7 @@
                 <span>Шапка</span>
                 <hamburger-menu :actions="profileActions"/>
             </div>
-            <p>Выбрано действий: {{ menuSelections }}</p>
+            <p>Выбрано действий: {{ profileSelections }}</p>
         </section>
 
         <section>
@@ -207,7 +207,7 @@
             <dropdown-button-with-action lang="en" :actions="[{ label: 'Another action', onSelect: countSelection }]">
                 <template #button><span class="demo-action">Action</span></template>
             </dropdown-button-with-action>
-            <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countSelection }]"/>
+            <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
             <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
             <confirmation-modal
                 :is-open="englishModalIsOpen"
@@ -324,6 +324,7 @@ export default {
             modalCancels: 0,
             dropdownIsOpen: false,
             menuSelections: 0,
+            profileSelections: 0,
             // Десять строк: таблица выше окна, у нижних строк меню
             // открывается вверх. Ширину таблицы задают столбцы без переноса:
             // при узком окне она шире карточки — проверяется горизонтальная
@@ -363,7 +364,7 @@ export default {
             return [
                 { label: 'Администраторы', href: '#users' },
                 { label: 'Поменять пароль', href: '#password' },
-                { label: 'Выйти', onSelect: this.countSelection },
+                { label: 'Выйти', onSelect: this.countProfileSelection },
             ];
         },
 
@@ -397,6 +398,11 @@ export default {
 
         countSelection() {
             this.menuSelections++;
+        },
+
+        // У меню профиля свой счётчик: по нему видно, что сработало именно оно.
+        countProfileSelection() {
+            this.profileSelections++;
         },
     },
 };
