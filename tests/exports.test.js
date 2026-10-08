@@ -7,9 +7,14 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty('Modal')
     })
 
-    it('ровно восемнадцать компонентов и плагин', () => {
+    // Части SelectSingle, SelectDateInterval и PageCard: проекты их
+    // не используют.
+    it.each(['Popup', 'PickDay', 'Closer'])('%s — внутренний, не экспортируется', (name) => {
+        expect(pkg).not.toHaveProperty(name)
+    })
+
+    it('ровно пятнадцать компонентов и плагин', () => {
         expect(Object.keys(pkg).sort()).toEqual([
-            'Closer',
             'ConfirmationModal',
             'DataTable',
             'Dot',
@@ -20,8 +25,6 @@ describe('публичная поверхность пакета', () => {
             'NavigationMenuElement',
             'NotificationMessage',
             'PageCard',
-            'PickDay',
-            'Popup',
             'RussianMobileFilter',
             'Search',
             'SelectDateInterval',

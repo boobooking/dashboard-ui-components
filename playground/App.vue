@@ -10,22 +10,6 @@
         </section>
 
         <section>
-            <h2>Popup</h2>
-            <button type="button" class="demo-button" @click="popupIsOpen = !popupIsOpen">Открыть меню</button>
-            <popup v-model="popupIsOpen">
-                <div class="menu">Содержимое меню</div>
-            </popup>
-        </section>
-
-        <section>
-            <h2>PickDay</h2>
-            <div class="field">
-                <pick-day v-model="day" placeholder-text="от"/>
-            </div>
-            <p>Значение: {{ day === '' ? '(пусто)' : day }}</p>
-        </section>
-
-        <section>
             <h2>RussianMobileFilter</h2>
             <russian-mobile-filter v-model="phone" header="Телефон" @changed="phoneCommits++"/>
             <p>Значение: {{ phone === '' ? '(пусто)' : phone }}, запросов: {{ phoneCommits }}</p>
@@ -74,12 +58,6 @@
             <h2>ErrorMessages</h2>
             <error-messages :messages="errorObject"/>
             <error-messages class="demo-gap" :messages="errorArray" type="dangerous"/>
-        </section>
-
-        <section>
-            <h2>Closer</h2>
-            <closer class="closer-demo" @clicked="closerClicks++"/>
-            <p>Нажатий: {{ closerClicks }}</p>
         </section>
 
         <section>
@@ -214,7 +192,6 @@
         <section>
             <h2>lang="en"</h2>
             <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
-            <pick-day v-model="day" lang="en"/>
             <download-link url="/export.xlsx" lang="en"/>
             <dropdown-button-with-action lang="en" :actions="[{ label: 'Another action', onSelect: countSelection }]">
                 <template #button><span class="demo-action">Action</span></template>
@@ -260,16 +237,13 @@
 
 <script>
 import {
-    Popup,
     Dot,
-    PickDay,
     RussianMobileFilter,
     Search,
     SelectDateInterval,
     SelectSingle,
     SmallBadge,
     ErrorMessages,
-    Closer,
     DownloadLink,
     ConfirmationModal,
     DropdownButtonWithAction,
@@ -282,16 +256,13 @@ import { lastNavigation } from './navigation-log.js';
 
 export default {
     components: {
-        Popup,
         Dot,
-        PickDay,
         RussianMobileFilter,
         Search,
         SelectDateInterval,
         SelectSingle,
         SmallBadge,
         ErrorMessages,
-        Closer,
         DownloadLink,
         ConfirmationModal,
         DropdownButtonWithAction,
@@ -309,12 +280,10 @@ export default {
 
     data() {
         return {
-            popupIsOpen: false,
             englishModalIsOpen: false,
             confirmationNotice: '',
             warningNotice: '',
             dangerousNotice: '',
-            day: '',
             phone: '',
             phoneCommits: 0,
             search: '',
@@ -335,7 +304,6 @@ export default {
                 'Слишком длинные ключи: xxxxxxxx…',
                 'Ключи уже загружены в другие сертификаты: abc-123',
             ],
-            closerClicks: 0,
             warningModalIsOpen: false,
             dangerousModalIsOpen: false,
             modalConfirms: 0,

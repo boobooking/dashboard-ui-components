@@ -5,7 +5,6 @@ import { h } from 'vue'
 // открытом состоянии, чтобы на сервере рендерилось и оно. Компонент без
 // фикстуры роняет tests/ssr.test.js.
 export const ssrFixtures = {
-    Closer: {},
     ConfirmationModal: { props: { isOpen: true, actionButtonText: 'Удалить', confirmationHeading: 'Удалить запись?', confirmationText: 'Действие нельзя отменить.' } },
     DataTable: {
         props: {
@@ -25,8 +24,6 @@ export const ssrFixtures = {
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
     PageCard: { props: { fallbackUrl: '/list' }, slots: { default: () => h('h3', 'Заголовок') } },
-    PickDay: { props: { modelValue: '15.03.2026', placeholderText: 'от' } },
-    Popup: { props: { modelValue: true }, slots: { default: () => h('div', 'Меню') } },
     RussianMobileFilter: { props: { header: 'Телефон', modelValue: '79031234567' } },
     Search: { props: { header: 'Поиск', modelValue: 'запрос' } },
     SelectDateInterval: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },

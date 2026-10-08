@@ -3,7 +3,6 @@
    должны получать его от ресета пакета — иначе голая страница перестанет
    ловить его отсутствие. */
 .page,
-.field,
 .demo-button,
 .demo-row,
 .demo-card,
@@ -51,37 +50,17 @@
     cursor: pointer;
 }
 
-.menu {
-    padding: 8px 12px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-}
-
-.field {
-    width: 220px;
-    height: 40px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-}
-
 .demo-row {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-/* Классы на корнях компонентов пакета: так страница задаёт им размер и
-   отступ, как это делает приложение. Стили оболочки вне слоёв и перебивают
-   ресет пакета. */
+/* Классы на корнях компонентов пакета: так страница задаёт им отступ, как
+   это делает приложение. Стили оболочки вне слоёв и перебивают ресет
+   пакета. */
 .demo-gap {
     margin-top: 8px;
-}
-
-.closer-demo {
-    width: 32px;
-    height: 32px;
 }
 
 /* Содержимое слотов — разметка страницы, как у приложения, где в слоты
