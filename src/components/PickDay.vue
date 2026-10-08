@@ -1,52 +1,69 @@
 <template>
     <div class="bb-dashboard-ui bb:flex bb:flex-col">
         <div class="bb:relative bb:flex bb:h-full bb:cursor-pointer bb:leading-none">
-            <button
-                ref="trigger"
-                type="button"
-                class="bb:flex bb:w-full bb:items-center bb:focus:outline-hidden"
-                :class="{ 'bb:z-20': popupIsOpen }"
-                @click="popupIsOpen = !popupIsOpen"
+            <!-- Календарь — PopoverPanel под полем: открывает и закрывает его
+                 браузер по popovertarget кнопки. Обёртка кнопки занимает
+                 место кнопки рядом с ластиком. -->
+            <popover-panel
+                class="bb:flex bb:w-full"
+                v-model="popupIsOpen"
+                align="start"
+                panel-class="bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"
             >
-                <label class="bb:min-w-24 bb:w-full bb:h-full">
-                    <!-- Геометрия поля выписана явно: базовый слой пакета обнуляет
-                         отступы и рамку, а раньше их неявно задавал @tailwindcss/forms
-                         приложения. py-2 pr-3 и рамка в 1 px — те же значения, что
-                         давал плагин. Левого отступа нет намеренно: отступ колонки
-                         задаёт родитель, а два сложившихся отступа уводили дату правее
-                         заголовка. placeholder:text-sm держит подсказку на ступень
-                         крупнее заголовка фильтра; размер получает только подсказка,
-                         выбранная дата остаётся крупнее. -->
-                    <input
-                        :disabled="popupIsOpen"
-                        ref="field"
-                        type="text"
-                        :value="dayValue"
-                        :placeholder="placeholderText"
-                        class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:outline-hidden"
-                    />
-                </label>
-            </button>
+                <template #trigger="trigger">
+                    <button
+                        ref="trigger"
+                        type="button"
+                        :id="trigger.id"
+                        :popovertarget="trigger.popovertarget"
+                        class="bb:flex bb:w-full bb:items-center bb:focus:outline-hidden"
+                    >
+                        <!-- Клик по полю достаётся кнопке: у <label> и поля своё
+                             поведение активации, и клик по тексту даты или
+                             подсказке до popovertarget кнопки не дошёл бы. -->
+                        <label class="bb:min-w-24 bb:w-full bb:h-full bb:pointer-events-none">
+                            <!-- Геометрия поля выписана явно: базовый слой пакета обнуляет
+                                 отступы и рамку, а раньше их неявно задавал @tailwindcss/forms
+                                 приложения. py-2 pr-3 и рамка в 1 px — те же значения, что
+                                 давал плагин. Левого отступа нет намеренно: отступ колонки
+                                 задаёт родитель, а два сложившихся отступа уводили дату правее
+                                 заголовка. placeholder:text-sm держит подсказку на ступень
+                                 крупнее заголовка фильтра; размер получает только подсказка,
+                                 выбранная дата остаётся крупнее. -->
+                            <input
+                                :disabled="popupIsOpen"
+                                ref="field"
+                                type="text"
+                                :value="dayValue"
+                                :placeholder="placeholderText"
+                                class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:outline-hidden"
+                            />
+                        </label>
+                    </button>
+                </template>
+                <template #default>
+                    <!-- Pikaday рисует календарь в этот контейнер; раскладку
+                         держит он, а не панель: утилита отображения на панели
+                         перебила бы display: none закрытой панели. -->
+                    <div ref="container" class="bb:flex"></div>
+                </template>
+            </popover-panel>
 
             <eraser v-if="needsEraser" @click="clearPicker" class="bb:z-10 bb:h-full bb:pr-2"/>
         </div>
-
-        <popup v-model="popupIsOpen">
-            <div ref="container" class="bb:flex bb:mt-1 bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"></div>
-        </popup>
     </div>
 </template>
 
 <script>
 import "pikaday/css/pikaday.css";
-import Popup from "./Popup.vue";
+import PopoverPanel from "./PopoverPanel.vue";
 import Eraser from "./Eraser.vue";
 import { formatDay, parseDay } from "../date.js";
 import { withLang } from "../lang.js";
 
 export default {
     components: {
-        Popup,
+        PopoverPanel,
         Eraser,
     },
 

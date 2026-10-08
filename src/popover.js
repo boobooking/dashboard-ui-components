@@ -1,7 +1,8 @@
 // Всплывающий элемент на Popover API: браузер выводит его в верхний слой
 // поверх страницы, и его не обрезает ни одна обёртка с прокруткой.
-// Внутренний модуль пакета: им ставят на место меню PopoverMenu — меню
-// DropdownButtonWithAction и HamburgerMenu.
+// Внутренний модуль пакета: им ставит на место панель PopoverPanel — меню
+// DropdownButtonWithAction и HamburgerMenu, список SelectSingle и календарь
+// PickDay.
 
 // Зазор от кнопки и отступ от края окна, px.
 const GAP = 4

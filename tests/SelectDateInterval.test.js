@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it } from 'vitest'
-import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
+import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
 
@@ -18,5 +19,37 @@ describe('SelectDateInterval', () => {
 
         expect(errors).toEqual([])
         expect(wrapper.emitted('changed')).toBeUndefined()
+    })
+})
+
+describe('SelectDateInterval: календари на Popover API', () => {
+    let uninstallPopover
+
+    beforeEach(() => {
+        uninstallPopover = installPopoverStub()
+    })
+
+    afterEach(() => {
+        uninstallPopover()
+    })
+
+    async function settle() {
+        await flushToggles()
+        await flushPromises()
+    }
+
+    it('открытие календаря «до» закрывает календарь «от»', async () => {
+        const wrapper = mount(SelectDateInterval, { props: { header: 'Период' }, attachTo: document.body })
+        const [from, to] = wrapper.findAll('button[popovertarget]')
+        const [fromPanel, toPanel] = wrapper.findAll('[popover]')
+
+        await from.trigger('click')
+        await settle()
+        expect(fromPanel.element.matches(':popover-open')).toBe(true)
+
+        await to.trigger('click')
+        await settle()
+        expect(toPanel.element.matches(':popover-open')).toBe(true)
+        expect(fromPanel.element.matches(':popover-open')).toBe(false)
     })
 })
