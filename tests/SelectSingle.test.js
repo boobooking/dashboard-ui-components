@@ -297,6 +297,15 @@ describe('SelectSingle: список на Popover API', () => {
         expect(panelOf(wrapper).classes()).toContain('bb:text-inherit')
     })
 
+    // Длинный список прокручен до конца: следующий жест колеса или
+    // трекпада ушёл бы на страницу, и её прокрутка закрыла бы список.
+    // Прокрутку happy-dom не считает: тест закрепляет класс.
+    it('прокрутка в конце длинного списка не уходит на страницу', () => {
+        const wrapper = mountSelect()
+
+        expect(panelOf(wrapper).classes()).toContain('bb:overscroll-contain')
+    })
+
     // Так делает Safari: по клику фокус на кнопку не ставится, и при
     // закрытии popover браузер возвращает его туда, где он был до
     // открытия, — на body, раньше, чем придёт toggle.

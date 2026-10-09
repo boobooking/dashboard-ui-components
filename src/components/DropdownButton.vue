@@ -5,7 +5,8 @@
                  браузер по popovertarget кнопки. Обёртка кнопки занимает
                  место кнопки рядом с ластиком. Цвет текста панель наследует
                  от страницы: у [popover] браузер ставит свой, а у пунктов
-                 списка цвета нет. -->
+                 списка цвета нет. Прокрутка в конце длинного списка
+                 не уходит на страницу: её прокрутка закрыла бы список. -->
             <popover-panel
                 class="bb:flex bb:w-full bb:h-full"
                 :model-value="isOpen"
@@ -13,7 +14,7 @@
                 arrows
                 :find-selected="findSelected"
                 return-focus
-                panel-class="bb:bg-white bb:text-inherit bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"
+                panel-class="bb:bg-white bb:text-inherit bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg bb:overscroll-contain"
                 @update:model-value="$emit('update:isOpen', $event)"
             >
                 <template #trigger="trigger">
