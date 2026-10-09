@@ -142,6 +142,36 @@ function classTokens(source, fileName) {
     return tokens.filter(Boolean)
 }
 
+// Утилита отображения на панели PopoverPanel, в том числе с вариантом вроде
+// bb:sm:block, перебила бы display: none закрытого popover: закрытая панель
+// была бы видна.
+const DISPLAY = /^bb:(?:[a-z0-9-]+:)*(?:block|inline-block|inline|flex|inline-flex|grid|inline-grid|table|contents|flow-root|hidden)$/
+
+// Утилиты отображения в panel-class (и :panel-class) вызывающих компонентов.
+function panelDisplayUtilities(source) {
+    const { descriptor, errors } = parse(source)
+    if (errors.length > 0) throw errors[0]
+
+    const tokens = []
+    walk(descriptor.template.ast, (node) => {
+        if (node.type !== ELEMENT) return
+
+        for (const prop of node.props) {
+            if (prop.type === ATTRIBUTE && (prop.name === 'panel-class' || prop.name === 'panelClass') && prop.value) {
+                tokens.push(...prop.value.content.split(/\s+/))
+            }
+
+            if (prop.type === DIRECTIVE && prop.name === 'bind' && prop.arg?.isStatic
+                && (prop.arg.content === 'panel-class' || prop.arg.content === 'panelClass')) {
+                const expression = babelParse(`(${prop.exp.content})`).program.body[0].expression
+                tokens.push(...classLiterals(expression, '').flatMap((literal) => literal.split(/\s+/)))
+            }
+        }
+    })
+
+    return tokens.filter((token) => DISPLAY.test(token))
+}
+
 const files = vueFiles(componentsDir)
 
 describe('префикс bb у утилит в разметке компонентов', () => {
@@ -175,4 +205,18 @@ describe('исключение для panelClass', () => {
 
         expect(classTokens(caller, 'PickDay.vue')).toEqual(['bb:border', 'flex'])
     })
+})
+
+describe('panel-class без утилит отображения', () => {
+    it('утилита отображения в panel-class находится, и с вариантом тоже', () => {
+        const caller = '<template><popover-panel panel-class="bb:border bb:flex bb:sm:block bb:flex-col"></popover-panel></template>'
+
+        expect(panelDisplayUtilities(caller)).toEqual(['bb:flex', 'bb:sm:block'])
+    })
+
+    for (const file of files) {
+        it(path.relative(componentsDir, file), () => {
+            expect(panelDisplayUtilities(fs.readFileSync(file, 'utf8'))).toEqual([])
+        })
+    }
 })
