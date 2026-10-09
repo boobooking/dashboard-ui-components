@@ -1027,6 +1027,27 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
     })
 
+    it('меню, открытое родителем, пропало вместе с действиями — родитель узнаёт о закрытии', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
+        await wrapper.setProps({ modelValue: true })
+        await settle()
+
+        await wrapper.setProps({ actions: [] })
+        await settle()
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+    })
+
+    it('меню, открытое при монтировании, пропало вместе с действиями — родитель узнаёт о закрытии', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions, modelValue: true } })
+        await settle()
+
+        await wrapper.setProps({ actions: [] })
+        await settle()
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+    })
+
     // Наблюдатель пропажи меню срабатывает после рендера: входящее
     // «закрыто» к этому времени уже принято, и ответное событие не уходит.
     it('действия опустели и закрытие пришло от родителя одновременно — ответного события нет', async () => {
