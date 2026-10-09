@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { canControlPopover, closeOnScrollAndResize, isPopoverOpen, placePopover } from '../src/popover.js'
+import { canControlPopover, closeOnScrollAndResize, fitPopover, isPopoverOpen, placePopover } from '../src/popover.js'
 
 // У happy-dom clientWidth и clientHeight корня — нули: окно задаётся явно.
 function viewport(width, height) {
@@ -33,15 +33,36 @@ describe('placePopover', () => {
         expect(popover.style.maxWidth).toBe('')
     })
 
-    it('открывает вверх, когда сверху места больше', () => {
+    it('помещается снизу — вниз, даже если сверху места больше', () => {
         viewport(1000, 800)
         const popover = document.createElement('div')
 
         placePopover(anchorAt({ top: 700, bottom: 720, left: 900, right: 920 }), popover)
 
+        expect(popover.style.top).toBe('724px')
+        expect(popover.style.bottom).toBe('auto')
+        expect(popover.style.maxHeight).toBe('68px')
+    })
+
+    it('не поместился снизу — вверх, когда сверху места больше', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 700, bottom: 720, left: 900, right: 920 }), popover, { fitsBelow: false })
+
         expect(popover.style.top).toBe('auto')
         expect(popover.style.bottom).toBe('104px')
         expect(popover.style.maxHeight).toBe('688px')
+    })
+
+    it('не поместился снизу, но сверху места меньше — вниз', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 120, left: 900, right: 920 }), popover, { fitsBelow: false })
+
+        expect(popover.style.top).toBe('124px')
+        expect(popover.style.maxHeight).toBe('668px')
     })
 
     it('не прижимает правый край ближе 8 px к краю окна', () => {
@@ -86,15 +107,36 @@ describe('placePopover', () => {
         expect(popover.style.maxWidth).toBe('892px')
     })
 
-    it('align start: у правого края окна — правым краем по кнопке, ширина — местом слева', () => {
+    it('align start: помещается справа — левым краем по кнопке, даже если слева места больше', () => {
         viewport(1000, 800)
         const popover = document.createElement('div')
 
         placePopover(anchorAt({ top: 100, bottom: 140, left: 700, right: 920 }), popover, { align: 'start' })
 
+        expect(popover.style.left).toBe('700px')
+        expect(popover.style.right).toBe('auto')
+        expect(popover.style.maxWidth).toBe('292px')
+    })
+
+    it('align start: не поместился справа — правым краем по кнопке, ширина — местом слева', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 700, right: 920 }), popover, { align: 'start', fitsRight: false })
+
         expect(popover.style.left).toBe('auto')
         expect(popover.style.right).toBe('80px')
         expect(popover.style.maxWidth).toBe('912px')
+    })
+
+    it('align start: не поместился справа, но слева места меньше — левым краем по кнопке', () => {
+        viewport(1000, 800)
+        const popover = document.createElement('div')
+
+        placePopover(anchorAt({ top: 100, bottom: 140, left: 100, right: 320 }), popover, { align: 'start', fitsRight: false })
+
+        expect(popover.style.left).toBe('100px')
+        expect(popover.style.maxWidth).toBe('892px')
     })
 
     it('align start: maxWidth ограничивает ширину вместе с местом', () => {
@@ -123,6 +165,70 @@ describe('placePopover', () => {
         expect(popover.style.left).toBe('auto')
         expect(popover.style.right).toBe('80px')
         expect(popover.style.maxWidth).toBe('')
+    })
+})
+
+describe('fitPopover', () => {
+    // У happy-dom размеры элемента и содержимого — нули: они задаются явно.
+    // Содержимое больше рамки — элемент не поместился на отведённом месте.
+    function sized(popover, { width, height, contentWidth = width, contentHeight = height }) {
+        Object.defineProperty(popover, 'clientWidth', { configurable: true, value: width })
+        Object.defineProperty(popover, 'clientHeight', { configurable: true, value: height })
+        Object.defineProperty(popover, 'scrollWidth', { configurable: true, value: contentWidth })
+        Object.defineProperty(popover, 'scrollHeight', { configurable: true, value: contentHeight })
+        return popover
+    }
+
+    it('поместился — место не меняется', () => {
+        viewport(1000, 800)
+        const anchor = anchorAt({ top: 700, bottom: 720, left: 700, right: 920 })
+        const popover = sized(document.createElement('div'), { width: 200, height: 60 })
+
+        placePopover(anchor, popover, { align: 'start' })
+        fitPopover(anchor, popover, { align: 'start' })
+
+        expect(popover.style.top).toBe('724px')
+        expect(popover.style.left).toBe('700px')
+    })
+
+    it('не поместился снизу, сверху места больше — вверх', () => {
+        viewport(1000, 800)
+        const anchor = anchorAt({ top: 700, bottom: 720, left: 700, right: 920 })
+        const popover = sized(document.createElement('div'), { width: 200, height: 68, contentHeight: 120 })
+
+        placePopover(anchor, popover, { align: 'start' })
+        fitPopover(anchor, popover, { align: 'start' })
+
+        expect(popover.style.top).toBe('auto')
+        expect(popover.style.bottom).toBe('104px')
+        expect(popover.style.maxHeight).toBe('688px')
+        expect(popover.style.left).toBe('700px')
+    })
+
+    it('не поместился справа, слева места больше — правым краем по кнопке', () => {
+        viewport(1000, 800)
+        const anchor = anchorAt({ top: 100, bottom: 140, left: 700, right: 920 })
+        const popover = sized(document.createElement('div'), { width: 292, height: 207, contentWidth: 360 })
+
+        placePopover(anchor, popover, { align: 'start' })
+        fitPopover(anchor, popover, { align: 'start' })
+
+        expect(popover.style.left).toBe('auto')
+        expect(popover.style.right).toBe('80px')
+        expect(popover.style.maxWidth).toBe('912px')
+        expect(popover.style.top).toBe('144px')
+    })
+
+    it('дробный размер на пиксель больше рамки — поместился', () => {
+        viewport(1000, 800)
+        const anchor = anchorAt({ top: 700, bottom: 720, left: 700, right: 920 })
+        const popover = sized(document.createElement('div'), { width: 200, height: 60, contentWidth: 201, contentHeight: 61 })
+
+        placePopover(anchor, popover, { align: 'start' })
+        fitPopover(anchor, popover, { align: 'start' })
+
+        expect(popover.style.top).toBe('724px')
+        expect(popover.style.left).toBe('700px')
     })
 })
 

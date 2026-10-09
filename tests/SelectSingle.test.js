@@ -248,16 +248,34 @@ describe('SelectSingle: список на Popover API', () => {
             expect(panelOf(wrapper).element.style.top).toBe('144px')
         })
 
-        it('у нижнего края окна — вверх, высота ограничена местом до края', async () => {
+        it('у нижнего края окна помещается — вниз', async () => {
             viewport(1000, 800)
             const wrapper = mountSelect()
             triggerOf(wrapper).element.getBoundingClientRect = () => ({ top: 700, bottom: 740, left: 50, right: 290 })
 
             await open(wrapper)
+            await new Promise((resolve) => requestAnimationFrame(resolve))
 
-            expect(panelOf(wrapper).element.style.top).toBe('auto')
-            expect(panelOf(wrapper).element.style.bottom).toBe('104px')
-            expect(panelOf(wrapper).element.style.maxHeight).toBe('688px')
+            expect(panelOf(wrapper).element.style.top).toBe('744px')
+            expect(panelOf(wrapper).element.style.bottom).toBe('auto')
+        })
+
+        // Поместился ли список, видно только после его появления: размеры
+        // задаются явно, у happy-dom они — нули.
+        it('у нижнего края окна не помещается — после появления вверх, высота ограничена местом до края', async () => {
+            viewport(1000, 800)
+            const wrapper = mountSelect()
+            triggerOf(wrapper).element.getBoundingClientRect = () => ({ top: 700, bottom: 740, left: 50, right: 290 })
+            const panel = panelOf(wrapper).element
+            Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 48 })
+            Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: 120 })
+
+            await open(wrapper)
+            await new Promise((resolve) => requestAnimationFrame(resolve))
+
+            expect(panel.style.top).toBe('auto')
+            expect(panel.style.bottom).toBe('104px')
+            expect(panel.style.maxHeight).toBe('688px')
         })
     })
 

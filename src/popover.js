@@ -21,16 +21,17 @@ export function isPopoverOpen(element) {
 // Место элемента у кнопки. align "end" — правый край элемента по правому
 // краю кнопки: кнопки меню стоят у правого края строк и ячеек, и элемент
 // растёт влево, к середине страницы. align "start" — левый край по левому
-// краю кнопки, как у списка и календаря поля; если справа места меньше, чем
-// слева, элемент прижимается правым краем: у правого края окна он ушёл бы
-// за экран, а верхний слой не прокручивается. По вертикали — туда, где
-// больше места; высота ограничена этим местом. Ширина у "start" ограничена
-// местом с той стороны, куда элемент растёт, и у обоих — maxWidth, если он
-// задан. Размер самого элемента для расчёта не нужен, поэтому функцию зовут
-// в beforetoggle, до его появления: он открывается сразу на своём месте.
-// Координаты ставятся все каждый раз: прошлое открытие могло быть у другой
-// кнопки или другой стороной.
-export function placePopover(anchor, popover, { maxWidth = null, align = 'end' } = {}) {
+// краю кнопки, как у списка и календаря поля. По вертикали — под кнопкой.
+// Элемент, который так не поместился (fitsBelow, fitsRight — false),
+// открывается туда, где места больше: вверх и у "start" — правым краем по
+// правому краю кнопки; у края окна он ушёл бы за экран, а верхний слой
+// не прокручивается. Высота ограничена местом с той стороны, куда элемент
+// открылся, ширина у "start" — местом с той стороны, куда он растёт, и у
+// обоих — maxWidth, если он задан. Поместился ли элемент, видно только
+// после его появления (fitPopover), поэтому в beforetoggle, до появления,
+// функцию зовут без fitsBelow и fitsRight. Координаты ставятся все каждый
+// раз: прошлое открытие могло быть у другой кнопки или другой стороной.
+export function placePopover(anchor, popover, { maxWidth = null, align = 'end', fitsBelow = true, fitsRight = true } = {}) {
     const rect = anchor.getBoundingClientRect()
     const viewportWidth = document.documentElement.clientWidth
     const viewportHeight = document.documentElement.clientHeight
@@ -39,10 +40,10 @@ export function placePopover(anchor, popover, { maxWidth = null, align = 'end' }
     const right = Math.max(VIEWPORT_MARGIN, viewportWidth - rect.right)
     const spaceRight = Math.max(0, viewportWidth - left - VIEWPORT_MARGIN)
     const spaceLeft = Math.max(0, viewportWidth - right - VIEWPORT_MARGIN)
-    const growsRight = align === 'start' && spaceRight >= spaceLeft
+    const growsRight = align === 'start' && (fitsRight || spaceRight >= spaceLeft)
     const spaceBelow = Math.max(0, viewportHeight - rect.bottom - GAP - VIEWPORT_MARGIN)
     const spaceAbove = Math.max(0, rect.top - GAP - VIEWPORT_MARGIN)
-    const opensBelow = spaceBelow >= spaceAbove
+    const opensBelow = fitsBelow || spaceBelow >= spaceAbove
 
     // Меню без maxWidth ширину задаёт себе само (bb:w-56).
     let width = ''
@@ -61,6 +62,21 @@ export function placePopover(anchor, popover, { maxWidth = null, align = 'end' }
         maxHeight: `${opensBelow ? spaceBelow : spaceAbove}px`,
         maxWidth: width,
     })
+}
+
+// Второй шаг размещения — после появления элемента и до первой отрисовки:
+// элемент, содержимое которого не поместилось под кнопкой или, у "start",
+// справа, placePopover ставит заново, туда, где места больше. Пиксель
+// запаса — на дробные размеры: scrollWidth и scrollHeight округлены.
+export function fitPopover(anchor, popover, options = {}) {
+    const fitsBelow = popover.scrollHeight <= popover.clientHeight + 1
+    const fitsRight = popover.scrollWidth <= popover.clientWidth + 1
+
+    if (fitsBelow && fitsRight) {
+        return
+    }
+
+    placePopover(anchor, popover, { ...options, fitsBelow, fitsRight })
 }
 
 // Прокрутка любого блока страницы и изменение размера окна закрывают элемент:

@@ -38,7 +38,7 @@
 
 <script>
 import { useId } from "vue";
-import { canControlPopover, closeOnScrollAndResize, isPopoverOpen, placePopover } from "../popover.js";
+import { canControlPopover, closeOnScrollAndResize, fitPopover, isPopoverOpen, placePopover } from "../popover.js";
 import { moveMenuFocus } from "../menuFocus.js";
 
 // Выпадающая панель у кнопки на Popover API: открытие и закрытие, место у
@@ -209,11 +209,23 @@ export default {
         },
 
         // Место панели — по кнопке из слота, а не по обёртке: обёртка может
-        // быть шире кнопки. При закрытии запоминается, был ли фокус внутри:
-        // к toggle браузер его уже переставит.
+        // быть шире кнопки. Поместилась ли панель, видно после её появления:
+        // кадр анимации приходит до первой отрисовки, и панель, которой
+        // не хватило места, встаёт на другое место незаметно. При закрытии
+        // запоминается, был ли фокус внутри: к toggle браузер его уже
+        // переставит.
         onBeforeToggle(event) {
             if (event.newState === "open") {
-                placePopover(document.getElementById(this.buttonId), this.$refs.panel, { maxWidth: this.maxWidth, align: this.align });
+                const button = document.getElementById(this.buttonId);
+                const options = { maxWidth: this.maxWidth, align: this.align };
+                placePopover(button, this.$refs.panel, options);
+                requestAnimationFrame(() => {
+                    const panel = this.$refs.panel;
+
+                    if (isPopoverOpen(panel)) {
+                        fitPopover(button, panel, options);
+                    }
+                });
                 return;
             }
 
