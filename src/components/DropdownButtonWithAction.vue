@@ -154,12 +154,18 @@ export default {
         // PopoverMenu размонтирован и о закрытии открытого меню уже
         // не сообщит, сообщает кнопка. Меню, пропавшее при оставшейся
         // кнопке, о закрытии сообщает само. При одном действии меню нет,
-        // и пропажа последнего действия ничего не закрывает.
-        hasMenu(hasMenu) {
-            if (!hasMenu && !this.hasActions && this.menuIsOpen) {
-                this.menuIsOpen = false;
-                this.$emit("update:modelValue", false);
-            }
+        // и пропажа последнего действия ничего не закрывает. Наблюдатель —
+        // после рендера (flush: "post"): входящее значение, пришедшее
+        // вместе с новыми действиями, к этому времени уже принято, и
+        // закрытие, которое прислал сам родитель, ему не возвращается.
+        hasMenu: {
+            flush: "post",
+            handler(hasMenu) {
+                if (!hasMenu && !this.hasActions && this.menuIsOpen) {
+                    this.menuIsOpen = false;
+                    this.$emit("update:modelValue", false);
+                }
+            },
         },
     },
 
