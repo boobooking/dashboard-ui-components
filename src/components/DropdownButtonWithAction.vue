@@ -47,7 +47,7 @@
 
 <script>
 import { withLang } from "../lang.js";
-import { isMenuItem, toMenuItems } from "../menuItems.js";
+import { isMenuItem, toMenuItems, warnsRemovedDanger } from "../menuItems.js";
 import PopoverMenu from "./PopoverMenu.vue";
 
 export default {
@@ -55,13 +55,13 @@ export default {
         PopoverMenu,
     },
 
-    mixins: [withLang],
+    mixins: [withLang, warnsRemovedDanger("DropdownButtonWithAction")],
 
     emits: ["update:modelValue"],
 
     props: {
         // Пункты меню: { label, href } — переход, { label, onSelect } —
-        // действие, danger: true — опасный пункт.
+        // действие, color: 'yellow' или 'red' — цвет.
         actions: {
             type: Array,
             default: () => [],

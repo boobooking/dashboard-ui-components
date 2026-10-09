@@ -241,6 +241,7 @@ describe('HamburgerMenu: проверка пунктов', () => {
         { name: 'элемент null', item: null },
         { name: 'нет label', item: { href: '#users' } },
         { name: 'ни href, ни onSelect', item: { label: 'Выйти' } },
+        { name: 'неверный color', item: { label: 'Удалить', color: 'green', onSelect: () => {} } },
     ])('неверный пункт ($name) — ровно одно предупреждение валидатора и без ошибок', ({ item }) => {
         const { warnings, errors } = mountChecked([...profileActions(), item])
 
@@ -249,11 +250,107 @@ describe('HamburgerMenu: проверка пунктов', () => {
         expect(errors).toEqual([])
     })
 
-    it('верные пункты, и опасный тоже, — без предупреждений', () => {
-        const { warnings, errors } = mountChecked([...profileActions(), { label: 'Удалить', danger: true, onSelect: () => {} }])
+    it('верные пункты, и цветные тоже, — без предупреждений', () => {
+        const { warnings, errors } = mountChecked([
+            ...profileActions(),
+            { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
+            { label: 'Удалить', color: 'red', onSelect: () => {} },
+        ])
 
         expect(warnings).toEqual([])
         expect(errors).toEqual([])
+    })
+})
+
+describe('HamburgerMenu: цвета пунктов', () => {
+    it('обычный, жёлтый и красный пункт — свой цвет текста и подсветки', () => {
+        const wrapper = mount(HamburgerMenu, {
+            attachTo: document.body,
+            props: {
+                actions: [
+                    { label: 'Администраторы', href: '#users' },
+                    { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
+                    { label: 'Удалить', color: 'red', onSelect: () => {} },
+                ],
+            },
+        })
+
+        const [plain, yellow, red] = itemsOf(wrapper).map((item) => item.classes())
+        expect(plain).toEqual(expect.arrayContaining(['bb:text-gray-700', 'bb:focus:bg-gray-100', 'bb:focus:text-gray-900']))
+        expect(yellow).toEqual(expect.arrayContaining(['bb:text-yellow-800', 'bb:focus:bg-yellow-100']))
+        expect(yellow).not.toContain('bb:text-gray-700')
+        expect(red).toEqual(expect.arrayContaining(['bb:text-red-700', 'bb:focus:bg-red-50']))
+        expect(red).not.toContain('bb:bg-red-400')
+    })
+})
+
+describe('HamburgerMenu: убранное поле danger', () => {
+    const MESSAGE = "[dashboard-ui-components] HamburgerMenu: поле danger убрано, красный пункт — color: 'red'"
+    const withDanger = () => [...profileActions(), { label: 'Удалить', danger: true, onSelect: () => {} }]
+    let warn
+
+    beforeEach(() => {
+        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        warn.mockRestore()
+        vi.unstubAllEnvs()
+    })
+
+    // Неверный пункт Vue отмечает своим предупреждением; warnHandler его
+    // перехватывает, и вывод тестов остаётся чистым.
+    function mountWith(actions) {
+        const warnings = []
+        const wrapper = mount(HamburgerMenu, {
+            attachTo: document.body,
+            props: { actions },
+            global: { config: { warnHandler: (message) => warnings.push(message) } },
+        })
+
+        return { wrapper, warnings }
+    }
+
+    it('пункт с danger рисуется обычным, Vue отмечает его, а в консоль уходит одно предупреждение с заменой', () => {
+        const { wrapper, warnings } = mountWith(withDanger())
+
+        expect(itemsOf(wrapper)[3].classes()).toContain('bb:text-gray-700')
+        expect(warnings.some((message) => message.includes(VALIDATOR_WARNING))).toBe(true)
+        expect(warn).toHaveBeenCalledTimes(1)
+        expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('тот же список заново при перерисовке родителя — предупреждение не повторяется', async () => {
+        const { wrapper } = mountWith(withDanger())
+
+        await wrapper.setProps({ actions: withDanger() })
+        await wrapper.setProps({ actions: withDanger() })
+
+        expect(warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('danger, появившийся после монтирования, даёт предупреждение', async () => {
+        const { wrapper } = mountWith(profileActions())
+        expect(warn).not.toHaveBeenCalled()
+
+        await wrapper.setProps({ actions: withDanger() })
+
+        expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('пункт с danger и color рисуется обычным: пункт с danger неверен целиком', () => {
+        const { wrapper } = mountWith([...profileActions(), { label: 'Удалить', danger: true, color: 'red', onSelect: () => {} }])
+
+        expect(itemsOf(wrapper)[3].classes()).toContain('bb:text-gray-700')
+        expect(itemsOf(wrapper)[3].classes()).not.toContain('bb:text-red-700')
+    })
+
+    it('в продакшен-сборке предупреждения нет', () => {
+        vi.stubEnv('NODE_ENV', 'production')
+
+        mountWith(withDanger())
+
+        expect(warn).not.toHaveBeenCalled()
     })
 })
 

@@ -175,7 +175,7 @@
                             <small-badge :text="row.status" :color="row.statusColor"/>
                         </template>
                         <template #cell-actions>
-                            <dropdown-button-with-action :actions="[{ label: 'Удалить', danger: true, onSelect: countSelection }]">
+                            <dropdown-button-with-action :actions="[{ label: 'Удалить', color: 'red', onSelect: countSelection }]">
                                 <template #button><span class="demo-action">Редактировать</span></template>
                             </dropdown-button-with-action>
                         </template>
@@ -375,7 +375,7 @@ export default {
             return [
                 { label: 'Поменять пароль', href: '#password' },
                 { label: 'Отправить письмо с новым паролем на старый и новый адрес', onSelect: this.countSelection },
-                { label: 'Удалить', danger: true, onSelect: this.countSelection },
+                { label: 'Удалить', color: 'red', onSelect: this.countSelection },
             ];
         },
 

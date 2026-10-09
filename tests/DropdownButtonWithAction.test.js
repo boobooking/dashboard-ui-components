@@ -262,16 +262,24 @@ describe('DropdownButtonWithAction без привязки', () => {
         }
     })
 
-    it('пункты задают цвет текста сами: у popover в верхнем слое свой color', () => {
+    it('пункты задают цвет текста сами — обычный, жёлтый, красный: у popover в верхнем слое свой color', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             slots,
-            props: { actions: [{ label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', danger: true, onSelect: () => {} }] },
+            props: {
+                actions: [
+                    { label: 'Поменять пароль', href: '#password' },
+                    { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
+                    { label: 'Удалить', color: 'red', onSelect: () => {} },
+                ],
+            },
         })
 
-        const [link, danger] = menuOf(wrapper).findAll('[role="menuitem"]')
-        expect(link.classes()).toContain('bb:text-gray-700')
-        expect(danger.classes()).toContain('bb:text-white')
+        const [plain, yellow, red] = menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.classes())
+        expect(plain).toEqual(expect.arrayContaining(['bb:text-gray-700', 'bb:focus:bg-gray-100']))
+        expect(yellow).toEqual(expect.arrayContaining(['bb:text-yellow-800', 'bb:focus:bg-yellow-100']))
+        expect(red).toEqual(expect.arrayContaining(['bb:text-red-700', 'bb:focus:bg-red-50']))
+        expect(red).not.toContain('bb:bg-red-400')
     })
 
     it('без действий стрелки и панели нет', () => {
@@ -421,7 +429,7 @@ describe('DropdownButtonWithAction: стрелки', () => {
     // Переход и действие: стрелки ходят и по ссылкам, и по кнопкам.
     const twoActions = [
         { label: 'Поменять пароль', href: '#password' },
-        { label: 'Удалить', danger: true, onSelect: () => {} },
+        { label: 'Удалить', color: 'red', onSelect: () => {} },
     ]
 
     function press(key) {
@@ -495,7 +503,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             slots,
-            props: { actions: [{ label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', danger: true, onSelect: () => {} }] },
+            props: { actions: [{ label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', color: 'red', onSelect: () => {} }] },
         })
 
         const [link, button] = itemsOf(wrapper)
@@ -657,7 +665,7 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         { name: 'пустой href и onSelect', item: { label: 'Удалить', href: '', onSelect: fn } },
         { name: 'href null и onSelect', item: { label: 'Удалить', href: null, onSelect: fn } },
         { name: 'onSelect-строка без href', item: { label: 'Удалить', onSelect: 'ошибка' } },
-        { name: 'danger-строка', item: { label: 'Удалить', danger: 'да', onSelect: fn } },
+        { name: 'неверный color', item: { label: 'Удалить', color: 'green', onSelect: fn } },
     ])('неверный пункт ($name) — предупреждение Vue', ({ item }) => {
         const { warnings } = mountChecked([{ label: 'Верный', onSelect: fn }, item])
 
@@ -667,8 +675,8 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
     it.each([
         { name: 'переход', item: { label: 'Открыть', href: '#open' } },
         { name: 'действие', item: { label: 'Удалить', onSelect: fn } },
-        { name: 'переход с danger', item: { label: 'Открыть', href: '#open', danger: true } },
-        { name: 'действие с danger: false', item: { label: 'Удалить', danger: false, onSelect: fn } },
+        { name: 'переход с color: red', item: { label: 'Открыть', href: '#open', color: 'red' } },
+        { name: 'действие с color: yellow', item: { label: 'Удалить', color: 'yellow', onSelect: fn } },
         { name: 'поле со значением undefined', item: { label: 'Открыть', href: '#open', onSelect: undefined } },
     ])('верный пункт ($name) — без предупреждений', ({ item }) => {
         const { warnings } = mountChecked([item])
@@ -774,6 +782,63 @@ describe('DropdownButtonWithAction: убранный слот actions', () => {
         vi.stubEnv('NODE_ENV', 'production')
 
         mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot })
+
+        expect(warn).not.toHaveBeenCalled()
+    })
+})
+
+describe('DropdownButtonWithAction: убранное поле danger', () => {
+    const MESSAGE = "[dashboard-ui-components] DropdownButtonWithAction: поле danger убрано, красный пункт — color: 'red'"
+    const VALIDATOR_WARNING = 'Invalid prop: custom validator check failed for prop "actions"'
+    const withDanger = () => [...actions, { label: 'Опасное', danger: true, onSelect: () => {} }]
+    let warn
+
+    beforeEach(() => {
+        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        warn.mockRestore()
+        vi.unstubAllEnvs()
+    })
+
+    // Неверный пункт Vue отмечает своим предупреждением; warnHandler его
+    // перехватывает, и вывод тестов остаётся чистым.
+    function mountWith(value) {
+        const warnings = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            slots,
+            props: { actions: value },
+            global: { config: { warnHandler: (message) => warnings.push(message) } },
+        })
+
+        return { wrapper, warnings }
+    }
+
+    it('пункт с danger рисуется обычным, Vue отмечает его, а в консоль уходит одно предупреждение с заменой', () => {
+        const { wrapper, warnings } = mountWith(withDanger())
+        const items = menuOf(wrapper).findAll('[role="menuitem"]')
+
+        expect(items[items.length - 1].classes()).toContain('bb:text-gray-700')
+        expect(warnings.some((message) => message.includes(VALIDATOR_WARNING))).toBe(true)
+        expect(warn).toHaveBeenCalledTimes(1)
+        expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('тот же список заново при перерисовке родителя — предупреждение не повторяется', async () => {
+        const { wrapper } = mountWith(withDanger())
+
+        await wrapper.setProps({ actions: withDanger() })
+        await wrapper.setProps({ actions: withDanger() })
+
+        expect(warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('в продакшен-сборке предупреждения нет', () => {
+        vi.stubEnv('NODE_ENV', 'production')
+
+        mountWith(withDanger())
 
         expect(warn).not.toHaveBeenCalled()
     })
