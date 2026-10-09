@@ -303,45 +303,56 @@ ConfirmationModal нет v-model».
 
 ### DropdownButtonWithAction
 
-Кнопка с меню дополнительных действий: основная часть — слот `button`, стрелка
-справа открывает меню из пунктов пропа `actions`. Без пунктов стрелки нет, и
-кнопка скругляется с обеих сторон.
+Кнопка из списка действий `actions`. Первое действие — основная кнопка,
+остальные — меню за стрелкой справа. Одно действие — кнопка без стрелки;
+без действий компонент ничего не рисует.
 
     <dropdown-button-with-action
         v-model="menuIsOpen"
         :actions="[
+            { label: 'Редактировать', href: route('user.edit', { user: row.getId() }) },
             { label: 'Поменять пароль', href: route('user.password.edit', { user: row.getId() }) },
-            { label: 'Удалить', danger: true, onSelect: () => prepareUserDelete(row) },
+            { label: 'Удалить', color: 'red', onSelect: () => prepareUserDelete(row) },
         ]"
-    >
-        <template #button>…основное действие…</template>
-    </dropdown-button-with-action>
+    />
 
 | Проп | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
-| `actions` | `Array` | `[]` | Пункты меню, см. ниже |
+| `actions` | `Array` | `[]` | Действия, см. ниже |
 | `modelValue` | `Boolean` | `false` | Открыто ли меню |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` |
 
-Пункт меню — объект одной из двух форм: переход (`href` без `onSelect`) или
+Действие — объект одной из двух форм: переход (`href` без `onSelect`) или
 действие (`onSelect` без `href`). Поле со значением `undefined` считается
 отсутствующим.
 
 | Поле | Тип | Описание |
 | --- | --- | --- |
-| `label` | `String`, обязательно | Текст пункта |
+| `label` | `String`, обязательно | Текст кнопки или пункта меню |
 | `href` | `String` | Переход: обычный клик уходит в `navigate` плагина `dashboardUi`, клик с Cmd/Ctrl/Shift и средней кнопкой — браузеру; без `navigate` — обычная ссылка |
-| `onSelect` | `Function` | Действие: вызывается без аргументов при выборе пункта |
-| `danger` | `Boolean` | Опасный пункт — красный; по умолчанию `false` |
+| `onSelect` | `Function` | Действие: вызывается без аргументов |
+| `color` | `"yellow"` или `"red"` | Цвет; без поля — обычный |
+
+Основная кнопка работает как пункт меню: переход — ссылка, действие —
+кнопка, и `onSelect` вызывает сам компонент — по клику, Enter и пробелу.
+Своего события клика у кнопки нет: странице не нужно ловить клик и
+разбираться в разметке компонента.
+
+Цвет первого действия красит основную кнопку вместе со стрелкой, цвет
+пункта меню — только этот пункт. Обычная кнопка — белая с серой рамкой,
+жёлтая и красная — светлый фон, рамка и текст своего цвета. Обычный пункт
+меню — серый текст, при подсветке серый фон; жёлтый и красный — текст
+своего цвета, при подсветке светлый фон того же цвета.
 
 Неверный список Vue отмечает предупреждением о пропе в режиме разработки,
 а компонент не падает: элементы-необъекты пропускает, кнопка без функции
-`onSelect` только закрывает меню. `null` — пустой список.
+`onSelect` по клику ничего не вызывает, пункт без неё только закрывает
+меню. `null` — пустой список.
 
-Вид пунктов задаёт компонент: страница передаёт данные, а не разметку,
-и классов пунктам не даёт. Обычный пункт — серый текст, при подсветке —
-серый фон; опасный — красный фон, при подсветке темнее. Слота `actions`
-нет с версии 0.14.0 — см. «Обновление с 0.13».
+Вид кнопки и пунктов задаёт компонент: страница передаёт данные, а не
+разметку, и классов не даёт. Слота `button` и поля `danger` нет с версии
+0.15.0 — см. «Обновление с 0.14»; слота `actions` — с 0.14.0, см.
+«Обновление с 0.13».
 
 Событие: `update:modelValue` — только когда меню открыл или закрыл сам
 компонент или браузер: клик по стрелке, клик вне меню, Escape, клик
@@ -391,9 +402,9 @@ ConfirmationModal нет v-model».
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` |
 
 Пункты, их проверка и вид — как у `DropdownButtonWithAction`: переход —
-`{ label, href }`, действие — `{ label, onSelect }`, опасный пункт —
-`danger: true`. Выход запросом DELETE — действие: Inertia пакет
-не импортирует, `router.delete` вызывает страница.
+`{ label, href }`, действие — `{ label, onSelect }`, цвет —
+`color: 'yellow'` или `color: 'red'`. Выход запросом DELETE — действие:
+Inertia пакет не импортирует, `router.delete` вызывает страница.
 
 Событий и `v-model` нет: меню открывают и закрывают кнопка, клик вне меню,
 Escape, клик по пункту, прокрутка и изменение размера окна. Меню
@@ -754,9 +765,10 @@ Inertia SSR), а серверная разметка гидратируется 
   `navigate` плагина. Ни Inertia, ни роутер пакет не импортирует. Исключение —
   `DownloadLink`: это обычная ссылка браузера, скачивающая файл, и через
   `navigate` она не идёт. Через `navigate` ходят `DataTable` (его пагинация),
-  `NavigationMenuElement` и пункты-переходы `DropdownButtonWithAction` и
-  `HamburgerMenu`. Крестик `PageCard` — кнопка, а не ссылка: адрес возврата
-  он тоже отдаёт `navigate`.
+  `NavigationMenuElement`, основная кнопка-переход и пункты-переходы
+  `DropdownButtonWithAction` и пункты-переходы `HamburgerMenu`. Крестик
+  `PageCard` — кнопка, а не ссылка: адрес возврата он тоже отдаёт
+  `navigate`.
 - Компонент обращается к `window`, `document` и другим API браузера только
   в `mounted()`, `beforeUnmount()` и обработчиках событий; загрузка модуля,
   `data()`, `computed` и рендер работают без браузера. Так пакет
@@ -867,6 +879,84 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 - Меню `DropdownButtonWithAction` и `HamburgerMenu` открывается под
   кнопкой, а вверх — только если снизу не помещается и сверху места
   больше. В 0.14 меню в нижней половине окна открывалось вверх всегда.
+- `DropdownButtonWithAction` строится из списка действий: первое действие —
+  основная кнопка, остальные — меню. Слота `button` нет: переданный слот
+  не рисуется, а в режиме разработки в консоль уходит предупреждение.
+  Отступы и шрифт основной кнопки задаёт компонент (`px-4 py-2 text-sm
+  font-medium`). Было:
+
+      <dropdown-button-with-action
+          :actions="[
+              { label: 'Поменять пароль', href: route('user.password.edit', { user: row.getId() }) },
+              { label: 'Удалить', danger: true, onSelect: () => prepareUserDelete(row) },
+          ]"
+      >
+          <template v-slot:button>
+              <Link class="block px-4 py-2 text-sm font-medium text-gray-700" :href="route('user.edit', { user: row.getId() })">
+                  Редактировать
+              </Link>
+          </template>
+      </dropdown-button-with-action>
+
+  Стало:
+
+      <dropdown-button-with-action
+          :actions="[
+              { label: 'Редактировать', href: route('user.edit', { user: row.getId() }) },
+              { label: 'Поменять пароль', href: route('user.password.edit', { user: row.getId() }) },
+              { label: 'Удалить', color: 'red', onSelect: () => prepareUserDelete(row) },
+          ]"
+      />
+
+- Кнопка без меню — одно действие. Было:
+
+      <dropdown-button-with-action>
+          <template v-slot:button>
+              <Link class="block px-4 py-2 text-sm font-medium text-gray-700" :href="showGroupLink(row)">
+                  Посмотреть
+              </Link>
+          </template>
+      </dropdown-button-with-action>
+
+  Стало:
+
+      <dropdown-button-with-action :actions="[{ label: 'Посмотреть', href: showGroupLink(row) }]" />
+
+- Основное действие-функция больше не ловится на корне компонента:
+  `onSelect` первого действия вызывает сам компонент — по клику, Enter и
+  пробелу. Было:
+
+      <dropdown-button-with-action
+          :actions="[{ label: 'Зафиксировать как неотправленное', onSelect: () => askUnsent(row) }]"
+          v-on:click="retryFromDropdown($event, row)"
+      >
+          <template v-slot:button>
+              <span class="block px-2 py-1 text-sm text-gray-700">Отправить заново</span>
+          </template>
+      </dropdown-button-with-action>
+
+      retryFromDropdown(event, sms) {
+          if (event.currentTarget.firstElementChild.contains(event.target)) {
+              this.askRetry(sms);
+          }
+      },
+
+  Стало:
+
+      <dropdown-button-with-action
+          :actions="[
+              { label: 'Отправить заново', onSelect: () => askRetry(row) },
+              { label: 'Зафиксировать как неотправленное', onSelect: () => askUnsent(row) },
+          ]"
+      />
+
+  `retryFromDropdown` удаляется: он полагался на разметку пакета.
+- Поле `danger` заменено цветом: `danger: true` → `color: 'red'`. Пункт
+  с `danger` рисуется обычным, а в режиме разработки в консоль уходит
+  предупреждение с заменой. Новый цвет — `color: 'yellow'`. Цвета есть
+  и у пунктов `HamburgerMenu`.
+- Красный пункт меню — мягкий: красный текст, при подсветке светлый
+  красный фон, а не заливка `red-400` с белым текстом.
 - `0.15.0` не подтянется по `^0.14.0`: для версий `0.x` знак `^` пропускает
   только патчи. Обновление — `npm install @boobooking/dashboard-ui-components@^0.15.0`.
 
