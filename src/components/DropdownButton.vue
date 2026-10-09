@@ -3,7 +3,9 @@
         <div class="bb:relative bb:flex bb:w-full bb:h-full">
             <!-- Список — PopoverPanel под кнопкой: открывает и закрывает его
                  браузер по popovertarget кнопки. Обёртка кнопки занимает
-                 место кнопки рядом с ластиком. -->
+                 место кнопки рядом с ластиком. Цвет текста панель наследует
+                 от страницы: у [popover] браузер ставит свой, а у пунктов
+                 списка цвета нет. -->
             <popover-panel
                 class="bb:flex bb:w-full bb:h-full"
                 :model-value="isOpen"
@@ -11,7 +13,7 @@
                 arrows
                 :find-selected="findSelected"
                 return-focus
-                panel-class="bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"
+                panel-class="bb:bg-white bb:text-inherit bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"
                 @update:model-value="$emit('update:isOpen', $event)"
             >
                 <template #trigger="trigger">

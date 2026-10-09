@@ -288,6 +288,15 @@ describe('SelectSingle: список на Popover API', () => {
         expect(panelOf(wrapper).classes().filter((name) => DISPLAY.test(name))).toEqual([])
     })
 
+    // У [popover] браузер ставит color: CanvasText, а у пунктов списка
+    // своего цвета нет: без наследования их текст был бы чёрным, а не цвета
+    // страницы. Цвет happy-dom не считает: тест закрепляет класс.
+    it('панель берёт цвет текста страницы, а не браузера', () => {
+        const wrapper = mountSelect()
+
+        expect(panelOf(wrapper).classes()).toContain('bb:text-inherit')
+    })
+
     // Так делает Safari: по клику фокус на кнопку не ставится, и при
     // закрытии popover браузер возвращает его туда, где он был до
     // открытия, — на body, раньше, чем придёт toggle.
