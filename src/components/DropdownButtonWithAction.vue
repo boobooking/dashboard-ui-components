@@ -10,9 +10,10 @@
             <slot name="button"></slot>
         </button>
         <!-- Меню, его пункты и поведение — PopoverMenu; здесь только стрелка,
-             которая его открывает. -->
+             которая его открывает. Обёртка стрелки — flex: стрелка
+             растягивается по высоте основной кнопки, которую задаёт слот. -->
         <popover-menu
-            class="bb:-ml-px bb:block"
+            class="bb:-ml-px bb:flex"
             :actions="actions"
             :model-value="modelValue"
             @update:model-value="$emit('update:modelValue', $event)"

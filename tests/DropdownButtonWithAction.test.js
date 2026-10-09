@@ -283,6 +283,19 @@ describe('DropdownButtonWithAction без привязки', () => {
         expect(arrowOf(wrapper)).toBeUndefined()
         expect(wrapper.find('[role="menu"]').exists()).toBe(false)
     })
+
+    // Высоту стрелки задаёт её содержимое, высоту основной кнопки — слот
+    // приложения. В блочной обёртке стрелка осталась бы своей высоты, и её
+    // нижняя рамка не совпала бы с рамкой основной кнопки. Раскладку
+    // happy-dom не считает: высоты проверяются в браузере, тест закрепляет
+    // класс.
+    it('обёртка стрелки — flex: стрелка растягивается по высоте основной кнопки', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+
+        const classes = [...arrowOf(wrapper).element.parentElement.classList]
+        expect(classes).toContain('bb:flex')
+        expect(classes).not.toContain('bb:block')
+    })
 })
 
 describe('DropdownButtonWithAction с привязкой', () => {

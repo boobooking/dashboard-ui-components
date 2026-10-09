@@ -66,7 +66,7 @@ describe('PopoverPanel', () => {
             slots: { button: () => 'Редактировать' },
         })
 
-        expect(wrapper.get('button[popovertarget]').element.parentElement.className).toBe('bb:relative bb:-ml-px bb:block')
+        expect(wrapper.get('button[popovertarget]').element.parentElement.className).toBe('bb:relative bb:-ml-px bb:flex')
     })
 
     it('panel-role="menu" — роль, вертикальная ориентация и имя от кнопки', () => {
