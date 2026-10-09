@@ -303,6 +303,29 @@ describe('SelectSingle: список на Popover API', () => {
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
     })
 
+    // Список закрылся прокруткой страницы, и кнопка могла уже уйти из окна.
+    // Возврат фокуса не прокручивает страницу к ней: Safari иначе дёрнул бы
+    // страницу против прокрутки пользователя.
+    it('возврат фокуса на кнопку не прокручивает страницу', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        press('ArrowDown')
+        const button = triggerOf(wrapper).element
+        const focusOptions = []
+        const focus = button.focus
+        button.focus = function (options) {
+            focusOptions.push(options)
+            return focus.call(this, options)
+        }
+
+        document.dispatchEvent(new Event('scroll'))
+        document.activeElement.blur()
+        await settle()
+
+        expect(document.activeElement).toBe(button)
+        expect(focusOptions).toEqual([{ preventScroll: true }])
+    })
+
     it('фокус, ушедший при закрытии на другой элемент, остаётся там', async () => {
         const wrapper = mountSelect()
         const field = document.createElement('input')

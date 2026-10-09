@@ -254,7 +254,9 @@ export default {
         },
 
         // Вернуть фокус на кнопку, если он был внутри закрытой панели и
-        // теперь потерян: на body или всё ещё на скрытом пункте.
+        // теперь потерян: на body или всё ещё на скрытом пункте. Страница
+        // к кнопке не прокручивается: панель могла закрыться прокруткой,
+        // и кнопка уже ушла из окна.
         restoreFocus(panel) {
             const focusWasInside = this.focusWasInside;
             this.focusWasInside = false;
@@ -266,7 +268,7 @@ export default {
             const active = document.activeElement;
             const isLost = active === null || active === document.body || (panel !== undefined && panel !== null && panel.contains(active));
             if (isLost) {
-                document.getElementById(this.buttonId)?.focus();
+                document.getElementById(this.buttonId)?.focus({ preventScroll: true });
             }
         },
 
