@@ -38,7 +38,7 @@
 
 ## Review Focus
 
-- Действий не осталось, пока меню открыто, а родитель держит его под `v-model`: кнопка пропадает целиком вместе с `PopoverMenu`, а `PopoverPanel` при размонтировании о закрытии не сообщает — родитель должен узнать о закрытии от самой кнопки. Тест — Task 2 («список опустел при открытом меню…»).
+- Действий не осталось, пока меню открыто, а родитель держит его под `v-model`: кнопка пропадает целиком вместе с `PopoverMenu`, а `PopoverPanel` при размонтировании о закрытии не сообщает — родитель должен узнать о закрытии от самой кнопки, ровно один раз. А при одном действии меню нет, и входящее «открыто» с последующей пропажей действия события не даёт. Тесты — Task 2 («список опустел при открытом меню…», «при одном действии входящее «открыто», затем действий не осталось…»).
 - Первое действие сменило вид (переход → действие), пока кнопка на странице: основная кнопка становится `<button>` и выполняет новое действие, а не старый переход. Тест — Task 2.
 - Список действий записан прямо в шаблоне родителя и создаётся заново при каждой его перерисовке: предупреждение о `danger` не повторяется. Тест — Task 1.
 - Неверное первое действие — без `href` и `onSelect`: кнопка рисуется, клик ничего не вызывает, ошибок нет. Тест — Task 2.
@@ -170,6 +170,13 @@ describe('HamburgerMenu: убранное поле danger', () => {
         await wrapper.setProps({ actions: withDanger() })
 
         expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('пункт с danger и color рисуется обычным: пункт с danger неверен целиком', () => {
+        const { wrapper } = mountWith([...profileActions(), { label: 'Удалить', danger: true, color: 'red', onSelect: () => {} }])
+
+        expect(itemsOf(wrapper)[3].classes()).toContain('bb:text-gray-700')
+        expect(itemsOf(wrapper)[3].classes()).not.toContain('bb:text-red-700')
     })
 
     it('в продакшен-сборке предупреждения нет', () => {
@@ -315,7 +322,7 @@ npx vitest run tests/HamburgerMenu.test.js tests/DropdownButtonWithAction.test.j
 grep -E "×|Tests " $W/t1-red.log | head -20
 ```
 
-Expected: `exit 1`. Падают: цвета пунктов в обоих файлах (нет классов `bb:text-yellow-800`, `bb:text-red-700`), «неверный color» в обоих (валидатор цвет не проверяет), тесты убранного `danger` (валидатор `danger` принимает, предупреждения нет). Остальные проходят.
+Expected: `exit 1`. Падают: цвета пунктов в обоих файлах (нет классов `bb:text-yellow-800`, `bb:text-red-700`), «неверный color» в обоих (валидатор цвет не проверяет), тесты убранного `danger` (валидатор `danger` принимает, предупреждения нет), в том числе «пункт с danger и color рисуется обычным» (сейчас `danger: true` красит пункт заливкой `bb:bg-red-400`; после правки тест ловит `itemColor`, который не учёл бы `danger`). Остальные проходят.
 
 - [ ] **Step 4: `src/menuItems.js`**
 
@@ -367,8 +374,14 @@ export function toMenuItems(actions) {
     return actions.filter((item) => typeof item === 'object' && item !== null)
 }
 
-// Цвет пункта для его классов: без color и с неверным color — обычный.
+// Цвет пункта для его классов. Без color, с неверным color и с убранным
+// полем danger — обычный: такой пункт валидатор отклоняет, и рисуется он
+// обычным, какой бы color у него ни был.
 export function itemColor(item) {
+    if (item.danger !== undefined) {
+        return null
+    }
+
     return COLORS.includes(item.color) ? item.color : null
 }
 
@@ -510,7 +523,7 @@ git add src/menuItems.js src/components/PopoverMenu.vue src/components/Hamburger
 git commit -m "feat: задавать цвет пункта меню полем color вместо danger"
 ```
 
-Expected: `exit 0` (`Tests  90 passed (90)`: 27 `HamburgerMenu` и 63 `DropdownButtonWithAction`); `tests exit 0`, `Tests  523 passed (523)`; `0`; `build exit 0`.
+Expected: `exit 0` (`Tests  91 passed (91)`: 28 `HamburgerMenu` и 63 `DropdownButtonWithAction`); `tests exit 0`, `Tests  524 passed (524)`; `0`; `build exit 0`.
 
 ---
 
@@ -879,6 +892,17 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         expect(wrapper.emitted('update:modelValue')).toBeUndefined()
         expect(errors).toEqual([])
     })
+
+    it('при одном действии входящее «открыто», затем действий не осталось — события нет: меню не было', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main], modelValue: true } })
+        await settle()
+
+        await wrapper.setProps({ actions: [] })
+        await settle()
+
+        expect(document.body.querySelector('a, button')).toBeNull()
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
 })
 
 describe('DropdownButtonWithAction: убранный слот button', () => {
@@ -1072,7 +1096,7 @@ export default {
 
     data() {
         return {
-            // Открыто ли меню — по его событиям и по входящему значению:
+            // Последнее значение меню — из его событий и входящего значения:
             // меню, пропавшее вместе с последним действием, о закрытии
             // уже не сообщит.
             menuIsOpen: this.modelValue,
@@ -1111,10 +1135,13 @@ export default {
             this.menuIsOpen = isOpen;
         },
 
-        // Действий не осталось — кнопка пропадает вместе с открытым меню,
-        // и о закрытии родителю сообщает она сама.
-        hasActions(hasActions) {
-            if (!hasActions && this.menuIsOpen) {
+        // Меню пропало вместе со всей кнопкой — действий не осталось:
+        // PopoverMenu размонтирован и о закрытии открытого меню уже
+        // не сообщит, сообщает кнопка. Меню, пропавшее при оставшейся
+        // кнопке, о закрытии сообщает само. При одном действии меню нет,
+        // и пропажа последнего действия ничего не закрывает.
+        hasMenu(hasMenu) {
+            if (!hasMenu && !this.hasActions && this.menuIsOpen) {
                 this.menuIsOpen = false;
                 this.$emit("update:modelValue", false);
             }
@@ -1170,7 +1197,7 @@ npx vitest run tests/DropdownButtonWithAction.test.js tests/PopoverPanel.test.js
 grep -E "Test Files|Tests |×" $W/t2-green.log
 ```
 
-Expected: `exit 0`, все семь файлов проходят; в `DropdownButtonWithAction.test.js` — 83 теста.
+Expected: `exit 0`, все семь файлов проходят; в `DropdownButtonWithAction.test.js` — 84 теста.
 
 - [ ] **Step 7: Весь набор, сборка, коммит**
 
@@ -1184,7 +1211,7 @@ git add src/menuItems.js src/components/PopoverMenu.vue src/components/DropdownB
 git commit -m "feat: строить DropdownButtonWithAction из списка действий: первое — основная кнопка"
 ```
 
-Expected: `tests exit 0`, `Tests  543 passed (543)`; `0`; `build exit 0`. Playground на этом шаге ещё передаёт слот `button` — он не рисуется; Playground переводится в Task 3.
+Expected: `tests exit 0`, `Tests  545 passed (545)`; `0`; `build exit 0`. Playground на этом шаге ещё передаёт слот `button` — он не рисуется; Playground переводится в Task 3.
 
 ---
 
@@ -1693,7 +1720,8 @@ git commit -m "chore: поднять версию пакета до 0.15.0"
 ## Отличия от спеки
 
 - Предупреждение о `danger` — примесь `warnsRemovedDanger(componentName)` в `src/menuItems.js`, общая для `DropdownButtonWithAction` и `HamburgerMenu`; спека §6 называет только модуль.
+- `itemColor` возвращает обычный цвет и для пункта с `danger`, даже если у него есть `color`: спека §4.6 обещает такому пункту обычный вид.
 - `isLinkItem` переезжает из метода `PopoverMenu` в `src/menuItems.js`: тем же правилом пользуется основная кнопка. Метод `isLink` в `PopoverMenu` остаётся и зовёт `isLinkItem`.
-- Действий не осталось при открытом меню: `PopoverPanel` при размонтировании о закрытии не сообщает, поэтому `DropdownButtonWithAction` помнит, открыто ли меню (`menuIsOpen`), и сообщает о закрытии сам (спека §4.3 называет поведение, но не способ).
+- Действий не осталось при открытом меню: `PopoverPanel` при размонтировании о закрытии не сообщает, поэтому `DropdownButtonWithAction` помнит последнее значение меню (`menuIsOpen`) и, когда меню пропадает вместе со всей кнопкой (наблюдатель `hasMenu`), сообщает о закрытии сам (спека §4.3 называет поведение, но не способ). Меню, пропавшее при оставшейся кнопке, сообщает о закрытии через `PopoverPanel`, как раньше.
 - У основной кнопки `bb:cursor-pointer`, как у пунктов меню; спека §5 курсор не называет.
 - Ожидаемые числа тестов в задачах посчитаны заранее; если исполнитель получит другое — сверить, откуда разница, и записать решение в журнал.
