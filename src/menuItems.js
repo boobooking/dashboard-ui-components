@@ -63,9 +63,10 @@ export function itemColor(item) {
 // Пункт с убранным полем danger валидатор отклоняет без объяснения, поэтому
 // компонент называет замену сам. Один раз на экземпляр: список, записанный
 // в шаблоне родителя, создаётся заново при каждой его перерисовке, и
-// предупреждение повторялось бы на каждую. Проверку process.env.NODE_ENV
-// подменяет бандлер проекта, как у самого Vue: в продакшен-сборке
-// предупреждения нет.
+// предупреждение повторялось бы на каждую. Наблюдатель глубокий: пункт
+// с danger, добавленный в тот же массив, тоже замечен. Проверку
+// process.env.NODE_ENV подменяет бандлер проекта, как у самого Vue:
+// в продакшен-сборке предупреждения нет.
 export function warnsRemovedDanger(componentName) {
     return {
         data() {
@@ -77,6 +78,7 @@ export function warnsRemovedDanger(componentName) {
         watch: {
             actions: {
                 immediate: true,
+                deep: true,
                 handler(actions) {
                     if (process.env.NODE_ENV === 'production' || this.dangerWarned) {
                         return

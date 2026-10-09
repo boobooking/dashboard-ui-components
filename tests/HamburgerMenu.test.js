@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, nextTick, reactive } from 'vue'
 import HamburgerMenu from '../src/components/HamburgerMenu.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import { dashboardUi } from '../src/plugin.js'
@@ -334,6 +334,17 @@ describe('HamburgerMenu: убранное поле danger', () => {
         expect(warn).not.toHaveBeenCalled()
 
         await wrapper.setProps({ actions: withDanger() })
+
+        expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('danger, добавленный в тот же массив, даёт предупреждение', async () => {
+        const actions = reactive(profileActions())
+        mountWith(actions)
+        expect(warn).not.toHaveBeenCalled()
+
+        actions.push({ label: 'Удалить', danger: true, onSelect: () => {} })
+        await nextTick()
 
         expect(warn).toHaveBeenCalledWith(MESSAGE)
     })
