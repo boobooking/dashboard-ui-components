@@ -105,22 +105,28 @@
 
         <section>
             <h2>DropdownButtonWithAction</h2>
+            <h3>Одно действие: кнопка без стрелки в цвете действия</h3>
             <div class="demo-row">
-                <dropdown-button-with-action :actions="menuActions">
-                    <template #button><span class="demo-action">Без привязки</span></template>
-                </dropdown-button-with-action>
-                <dropdown-button-with-action v-model="dropdownIsOpen" :actions="[{ label: 'Действие', onSelect: countSelection }]">
-                    <template #button><span class="demo-action">С v-model</span></template>
-                </dropdown-button-with-action>
-                <dropdown-button-with-action>
-                    <template #button><span class="demo-action">Без действий</span></template>
-                </dropdown-button-with-action>
+                <dropdown-button-with-action :actions="[{ label: 'Посмотреть', href: '#view' }]"/>
+                <dropdown-button-with-action :actions="[{ label: 'Отправить заново', color: 'yellow', onSelect: countSelection }]"/>
+                <dropdown-button-with-action :actions="[{ label: 'Delete', color: 'red', onSelect: countSelection }]"/>
+            </div>
+
+            <h3>Несколько действий: первое — кнопка, стрелка открывает остальные</h3>
+            <div class="demo-row">
+                <dropdown-button-with-action :actions="menuActions"/>
+                <dropdown-button-with-action :actions="retryActions"/>
+                <dropdown-button-with-action :actions="deleteActions"/>
+                <dropdown-button-with-action
+                    v-model="dropdownIsOpen"
+                    :actions="[{ label: 'С v-model', onSelect: countSelection }, { label: 'Действие', onSelect: countSelection }]"
+                />
             </div>
             <p>
                 Меню с v-model: {{ dropdownIsOpen ? 'открыто' : 'закрыто' }}
                 <button type="button" class="demo-button" @click="dropdownIsOpen = !dropdownIsOpen">Переключить снаружи</button>
             </p>
-            <p>Выбрано действий: {{ menuSelections }}</p>
+            <p>Выбрано действий: {{ menuSelections }}, последний переход: {{ lastNavigation || '—' }}</p>
         </section>
 
         <section>
@@ -154,9 +160,7 @@
                     <small-badge :text="row.status" :color="row.statusColor"/>
                 </template>
                 <template #cell-actions>
-                    <dropdown-button-with-action :actions="menuActions">
-                        <template #button><span class="demo-action">Редактировать</span></template>
-                    </dropdown-button-with-action>
+                    <dropdown-button-with-action :actions="menuActions"/>
                 </template>
             </data-table>
             <p>Последний переход: {{ lastNavigation || '—' }}</p>
@@ -175,9 +179,7 @@
                             <small-badge :text="row.status" :color="row.statusColor"/>
                         </template>
                         <template #cell-actions>
-                            <dropdown-button-with-action :actions="[{ label: 'Удалить', color: 'red', onSelect: countSelection }]">
-                                <template #button><span class="demo-action">Редактировать</span></template>
-                            </dropdown-button-with-action>
+                            <dropdown-button-with-action :actions="[{ label: 'Редактировать', href: '#edit' }, { label: 'Удалить', color: 'red', onSelect: countSelection }]"/>
                         </template>
                     </data-table>
                 </div>
@@ -216,9 +218,7 @@
             <h2>lang="en"</h2>
             <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
             <download-link url="/export.xlsx" lang="en"/>
-            <dropdown-button-with-action lang="en" :actions="[{ label: 'Another action', onSelect: countSelection }]">
-                <template #button><span class="demo-action">Action</span></template>
-            </dropdown-button-with-action>
+            <dropdown-button-with-action lang="en" :actions="[{ label: 'Action', onSelect: countSelection }, { label: 'Another action', onSelect: countSelection }]"/>
             <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
             <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
             <confirmation-modal
@@ -367,24 +367,44 @@ export default {
             return Array.from({ length: 30 }, (_, index) => ({ id: `c${index + 1}`, name: `Сертификат ${index + 1}` }));
         },
 
-        // Как меню страницы администраторов: переход и опасное действие.
-        // Длинный пункт показывает перенос строки в меню шириной w-56.
-        // Переход — по hash: в голом окружении без navigate страница
-        // не уходит.
+        // Как кнопка страницы администраторов: основная кнопка — переход,
+        // в меню обычный, жёлтый и красный пункты. Длинный пункт показывает
+        // перенос строки в меню шириной w-56. Переходы — по hash: в голом
+        // окружении без navigate страница не уходит.
         menuActions() {
             return [
+                { label: 'Редактировать', href: '#edit' },
                 { label: 'Поменять пароль', href: '#password' },
-                { label: 'Отправить письмо с новым паролем на старый и новый адрес', onSelect: this.countSelection },
+                { label: 'Отправить письмо с новым паролем на старый и новый адрес', color: 'yellow', onSelect: this.countSelection },
                 { label: 'Удалить', color: 'red', onSelect: this.countSelection },
             ];
         },
 
-        // Как меню профиля в шапке проектов: два перехода и выход действием.
-        // Переходы — по hash, как у menuActions.
+        // Как кнопка отправок certificates: основное действие — функция,
+        // жёлтое.
+        retryActions() {
+            return [
+                { label: 'Отправить заново', color: 'yellow', onSelect: this.countSelection },
+                { label: 'Зафиксировать как неотправленное', onSelect: this.countSelection },
+            ];
+        },
+
+        // Красное основное действие и переход в меню.
+        deleteActions() {
+            return [
+                { label: 'Удалить', color: 'red', onSelect: this.countSelection },
+                { label: 'Поменять пароль', href: '#password' },
+            ];
+        },
+
+        // Как меню профиля в шапке проектов: два перехода и выход действием;
+        // жёлтый пункт показывает цвет пунктов HamburgerMenu. Переходы —
+        // по hash, как у menuActions.
         profileActions() {
             return [
                 { label: 'Администраторы', href: '#users' },
                 { label: 'Поменять пароль', href: '#password' },
+                { label: 'Выйти на всех устройствах', color: 'yellow', onSelect: this.countProfileSelection },
                 { label: 'Выйти', onSelect: this.countProfileSelection },
             ];
         },
