@@ -21,15 +21,20 @@ afterEach(() => {
     uninstallPopover()
 })
 
-const slots = {
-    button: () => h('span', 'Редактировать'),
-}
+// Основное действие — переход: основная кнопка с ним — ссылка.
+const main = { label: 'Редактировать', href: '#edit' }
 
-// Одно действие: большинству тестов нужен только факт, что пункт есть.
-const actions = [{ label: 'Удалить', onSelect: () => {} }]
+// Основная кнопка и один пункт меню: большинству тестов нужен только факт,
+// что меню есть.
+const actions = [main, { label: 'Удалить', onSelect: () => {} }]
 
 function arrowOf(wrapper) {
     return wrapper.findAll('button').find((button) => button.text().includes('Открыть меню'))
+}
+
+// Основная кнопка — ссылка или кнопка вне меню и без popovertarget.
+function mainOf(wrapper) {
+    return wrapper.findAll('a, button').find((element) => element.attributes('popovertarget') === undefined && element.element.closest('[role="menu"]') === null)
 }
 
 function menuOf(wrapper) {
@@ -70,7 +75,6 @@ const Rows = {
                 modelValue: this.active === row,
                 'onUpdate:modelValue': (opened) => (opened ? this.opened(row) : this.closed()),
             },
-            slots,
         )))
     },
 }
@@ -81,7 +85,7 @@ function row(wrapper, name) {
 
 describe('DropdownButtonWithAction без привязки', () => {
     it('стрелка с popovertarget открывает и закрывает меню', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         expect(arrowOf(wrapper).attributes('popovertarget')).toBe(menuOf(wrapper).attributes('id'))
         expect(menuOf(wrapper).attributes('popover')).toBe('auto')
@@ -96,7 +100,7 @@ describe('DropdownButtonWithAction без привязки', () => {
     })
 
     it('на клик по стрелке эмитит update:modelValue один раз', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         await arrowOf(wrapper).trigger('click')
         await settle()
@@ -105,7 +109,7 @@ describe('DropdownButtonWithAction без привязки', () => {
     })
 
     it('на закрытие по Escape эмитит false', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         await arrowOf(wrapper).trigger('click')
         await settle()
@@ -117,7 +121,7 @@ describe('DropdownButtonWithAction без привязки', () => {
     })
 
     it('на клик вне меню эмитит false', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         await arrowOf(wrapper).trigger('click')
         await settle()
@@ -128,7 +132,7 @@ describe('DropdownButtonWithAction без привязки', () => {
     })
 
     it('клик по пункту меню закрывает меню и эмитит false', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         await arrowOf(wrapper).trigger('click')
         await settle()
@@ -140,7 +144,7 @@ describe('DropdownButtonWithAction без привязки', () => {
     })
 
     it('прокрутка вне меню и изменение размера окна закрывают меню, прокрутка меню — нет', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         await arrowOf(wrapper).trigger('click')
         await settle()
@@ -162,7 +166,7 @@ describe('DropdownButtonWithAction без привязки', () => {
     it('у стрелки возле левого края окна меню сужается до места слева', async () => {
         Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 })
         Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 800 })
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
         arrowOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 120, left: 120, right: 140 })
 
         try {
@@ -201,7 +205,6 @@ describe('DropdownButtonWithAction без привязки', () => {
         const errors = []
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
             props: { actions },
             global: { config: { errorHandler: (error) => errors.push(error) } },
         })
@@ -222,7 +225,7 @@ describe('DropdownButtonWithAction без привязки', () => {
 
     it('размонтирование открытого меню снимает слушатели прокрутки и размера окна', async () => {
         const record = recordWindowListeners()
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         try {
             await arrowOf(wrapper).trigger('click')
@@ -241,7 +244,7 @@ describe('DropdownButtonWithAction без привязки', () => {
 
     it('открытие, закрытие, повторное открытие и размонтирование не оставляют слушателей', async () => {
         const record = recordWindowListeners()
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         try {
             await arrowOf(wrapper).trigger('click')
@@ -265,9 +268,9 @@ describe('DropdownButtonWithAction без привязки', () => {
     it('пункты задают цвет текста сами — обычный, жёлтый, красный: у popover в верхнем слое свой color', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
             props: {
                 actions: [
+                    main,
                     { label: 'Поменять пароль', href: '#password' },
                     { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
                     { label: 'Удалить', color: 'red', onSelect: () => {} },
@@ -282,23 +285,13 @@ describe('DropdownButtonWithAction без привязки', () => {
         expect(red).not.toContain('bb:bg-red-400')
     })
 
-    it('без действий стрелки и панели нет', () => {
-        const wrapper = mount(DropdownButtonWithAction, {
-            attachTo: document.body,
-            slots: { button: slots.button },
-        })
-
-        expect(arrowOf(wrapper)).toBeUndefined()
-        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
-    })
-
     // Высоту стрелки задаёт её содержимое, высоту основной кнопки — слот
     // приложения. В блочной обёртке стрелка осталась бы своей высоты, и её
     // нижняя рамка не совпала бы с рамкой основной кнопки. Раскладку
     // happy-dom не считает: высоты проверяются в браузере, тест закрепляет
     // класс.
     it('обёртка стрелки — flex: стрелка растягивается по высоте основной кнопки', () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         const classes = [...arrowOf(wrapper).element.parentElement.classList]
         expect(classes).toContain('bb:flex')
@@ -311,7 +304,6 @@ describe('DropdownButtonWithAction с привязкой', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             props: { modelValue: false, actions },
-            slots,
         })
 
         await wrapper.setProps({ modelValue: true })
@@ -329,7 +321,6 @@ describe('DropdownButtonWithAction с привязкой', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             props: { modelValue: false, actions },
-            slots,
         })
 
         // Оба значения — до отложенного toggle: браузер пришлёт одно
@@ -346,7 +337,6 @@ describe('DropdownButtonWithAction с привязкой', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             props: { modelValue: true, actions },
-            slots,
         })
         await settle()
 
@@ -412,7 +402,6 @@ describe('DropdownButtonWithAction без Popover API', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             props: { modelValue: false, actions },
-            slots,
             global: { config: { errorHandler: (error) => errors.push(error) } },
         })
 
@@ -448,7 +437,7 @@ describe('DropdownButtonWithAction: стрелки', () => {
         { key: 'ArrowDown', want: 'Поменять пароль' },
         { key: 'ArrowUp', want: 'Удалить' },
     ])('в открытом меню $key переводит фокус на «$want» и не прокручивает страницу', async ({ key, want }) => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions: twoActions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, ...twoActions] } })
         await openMenu(wrapper)
 
         const event = press(key)
@@ -458,14 +447,14 @@ describe('DropdownButtonWithAction: стрелки', () => {
     })
 
     it('в закрытом меню стрелки прокручивают страницу', () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions: twoActions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, ...twoActions] } })
         arrowOf(wrapper).element.focus()
 
         expect(press('ArrowDown').defaultPrevented).toBe(false)
     })
 
     it('после закрытия меню стрелки снова прокручивают страницу', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions: twoActions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, ...twoActions] } })
         await openMenu(wrapper)
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
@@ -502,8 +491,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     it('переход рисуется ссылкой, действие — кнопкой', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
-            props: { actions: [{ label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', color: 'red', onSelect: () => {} }] },
+            props: { actions: [main, { label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', color: 'red', onSelect: () => {} }] },
         })
 
         const [link, button] = itemsOf(wrapper)
@@ -517,7 +505,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
 
     it('клик по действию вызывает onSelect один раз без аргументов и закрывает меню', async () => {
         const onSelect = vi.fn()
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions: [{ label: 'Удалить', onSelect }] } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, { label: 'Удалить', onSelect }] } })
         await openMenu(wrapper)
 
         await itemsOf(wrapper)[0].trigger('click')
@@ -532,8 +520,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     it('клик по переходу уходит в navigate плагина и закрывает меню', async () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
-            props: { actions: [{ label: 'Поменять пароль', href: '#password' }] },
+            props: { actions: [main, { label: 'Поменять пароль', href: '#password' }] },
             global: inApp,
         })
         await openMenu(wrapper)
@@ -548,8 +535,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     it('клик по переходу с Cmd остаётся браузеру, а меню закрывается', async () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
-            props: { actions: [{ label: 'Поменять пароль', href: '#password' }] },
+            props: { actions: [main, { label: 'Поменять пароль', href: '#password' }] },
             global: inApp,
         })
         await openMenu(wrapper)
@@ -564,25 +550,24 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     it.each([
         { name: 'пустой список', value: [] },
         { name: 'null', value: null },
-    ])('$name — стрелки и меню нет, предупреждений нет', ({ value }) => {
+    ])('$name — ничего не рисуется, предупреждений нет', ({ value }) => {
         const warnings = []
-        const wrapper = mount(DropdownButtonWithAction, {
+        mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
             props: { actions: value },
             global: { config: { warnHandler: (message) => warnings.push(message) } },
         })
 
-        expect(arrowOf(wrapper)).toBeUndefined()
-        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
+        expect(document.body.querySelector('a, button')).toBeNull()
+        expect(document.body.querySelector('[role="menu"]')).toBeNull()
         expect(warnings).toEqual([])
     })
 
     it('новый список при открытом меню виден сразу, и стрелки ходят по нему', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions: [{ label: 'Старый', onSelect: () => {} }] } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, { label: 'Старый', onSelect: () => {} }] } })
         await openMenu(wrapper)
 
-        await wrapper.setProps({ actions: [{ label: 'Первый новый', onSelect: () => {} }, { label: 'Второй новый', onSelect: () => {} }] })
+        await wrapper.setProps({ actions: [main, { label: 'Первый новый', onSelect: () => {} }, { label: 'Второй новый', onSelect: () => {} }] })
         arrowOf(wrapper).element.focus()
         press('ArrowUp')
 
@@ -593,7 +578,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     // Браузер, удаляя открытый popover из документа, toggle не присылает:
     // слушатели снимает и о закрытии сообщает сам компонент.
     it('список опустел при открытом меню: стрелки снова прокручивают страницу, родитель узнаёт о закрытии', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
         await openMenu(wrapper)
 
         await wrapper.setProps({ actions: [] })
@@ -607,7 +592,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     // toggle об открытии приходит отложенно, и список может опустеть раньше:
     // меню к этому времени уже нет в DOM, и открытым его считать нельзя.
     it('список опустел до запоздавшего toggle об открытии: родитель не узнаёт об открытии, стрелки прокручивают страницу', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         await arrowOf(wrapper).trigger('click')
         await wrapper.setProps({ actions: [] })
@@ -621,7 +606,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     // Наблюдатель modelValue срабатывает до рендера: если пункты и открытие
     // пришли разом, меню в этот момент ещё нет в DOM.
     it('пункты и открытие пришли одновременно — меню открыто, ответного события нет', async () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { modelValue: false, actions: [] } })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { modelValue: false, actions: [] } })
 
         await wrapper.setProps({ actions, modelValue: true })
         await settle()
@@ -640,7 +625,6 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         const errors = []
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
             props: { actions: value },
             global: {
                 config: {
@@ -694,9 +678,11 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         ])
         const rendered = () => menuOf(wrapper).findAll('[role="menuitem"]')
 
-        expect(rendered().map((item) => [item.element.tagName, item.text()])).toEqual([['BUTTON', 'A'], ['BUTTON', 'B'], ['A', 'C']])
+        expect([mainOf(wrapper).element.tagName, mainOf(wrapper).text()]).toEqual(['BUTTON', 'A'])
+        expect(rendered().map((item) => [item.element.tagName, item.text()])).toEqual([['BUTTON', 'B'], ['A', 'C']])
 
-        for (const index of [0, 1, 2]) {
+        await mainOf(wrapper).trigger('click')
+        for (const index of [0, 1]) {
             await arrowOf(wrapper).trigger('click')
             await settle()
             await rendered()[index].trigger('click')
@@ -722,7 +708,7 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
 
     it('onSelect, бросивший исключение, отдаёт ошибку Vue и не оставляет меню открытым', async () => {
         const failure = new Error('сбой обработчика')
-        const { wrapper, errors } = mountChecked([{ label: 'Удалить', onSelect: () => { throw failure } }])
+        const { wrapper, errors } = mountChecked([main, { label: 'Удалить', onSelect: () => { throw failure } }])
         await arrowOf(wrapper).trigger('click')
         await settle()
 
@@ -737,7 +723,7 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
     // клика его вернул; иначе отказ уходит в unhandledrejection.
     it('асинхронный onSelect с отказом отдаёт ошибку Vue, а меню закрывается сразу', async () => {
         const failure = new Error('сбой асинхронного обработчика')
-        const { wrapper, errors } = mountChecked([{ label: 'Удалить', onSelect: async () => { throw failure } }])
+        const { wrapper, errors } = mountChecked([main, { label: 'Удалить', onSelect: async () => { throw failure } }])
         await arrowOf(wrapper).trigger('click')
         await settle()
 
@@ -762,10 +748,10 @@ describe('DropdownButtonWithAction: убранный слот actions', () => {
         vi.unstubAllEnvs()
     })
 
-    const withSlot = { ...slots, actions: () => h('a', { href: '#', class: 'from-slot' }, 'Из слота') }
+    const withSlot = { actions: () => h('a', { href: '#', class: 'from-slot' }, 'Из слота') }
 
     it('переданный слот не рисуется, а в консоль уходит предупреждение', () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot })
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
 
         expect(wrapper.find('.from-slot').exists()).toBe(false)
         expect(warn).toHaveBeenCalledTimes(1)
@@ -773,7 +759,7 @@ describe('DropdownButtonWithAction: убранный слот actions', () => {
     })
 
     it('без слота предупреждения нет', () => {
-        mount(DropdownButtonWithAction, { attachTo: document.body, slots, props: { actions } })
+        mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
 
         expect(warn).not.toHaveBeenCalled()
     })
@@ -781,7 +767,7 @@ describe('DropdownButtonWithAction: убранный слот actions', () => {
     it('в продакшен-сборке предупреждения нет', () => {
         vi.stubEnv('NODE_ENV', 'production')
 
-        mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot })
+        mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
 
         expect(warn).not.toHaveBeenCalled()
     })
@@ -808,7 +794,6 @@ describe('DropdownButtonWithAction: убранное поле danger', () => {
         const warnings = []
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            slots,
             props: { actions: value },
             global: { config: { warnHandler: (message) => warnings.push(message) } },
         })
@@ -839,6 +824,269 @@ describe('DropdownButtonWithAction: убранное поле danger', () => {
         vi.stubEnv('NODE_ENV', 'production')
 
         mountWith(withDanger())
+
+        expect(warn).not.toHaveBeenCalled()
+    })
+})
+
+describe('DropdownButtonWithAction: кнопка из действий', () => {
+    const navigation = []
+    const inApp = { plugins: [[dashboardUi, { navigate: (href) => navigation.push(href) }]] }
+
+    beforeEach(() => {
+        navigation.length = 0
+    })
+
+    it('без действий ничего не рисуется', () => {
+        mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [] } })
+
+        expect(document.body.querySelector('a, button')).toBeNull()
+        expect(document.body.querySelector('[role="menu"]')).toBeNull()
+    })
+
+    it('одно действие — одна кнопка без стрелки и меню, скруглённая с обеих сторон', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main] } })
+
+        expect(arrowOf(wrapper)).toBeUndefined()
+        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
+        expect(mainOf(wrapper).text()).toBe('Редактировать')
+        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(['bb:rounded-md', 'bb:px-4', 'bb:py-2', 'bb:text-sm', 'bb:font-medium']))
+        expect(mainOf(wrapper).classes()).not.toContain('bb:rounded-l-md')
+    })
+
+    it('несколько действий — первое основная кнопка, остальные в меню по порядку', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [main, { label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', onSelect: () => {} }] },
+        })
+
+        expect(mainOf(wrapper).text()).toBe('Редактировать')
+        expect(mainOf(wrapper).classes()).toContain('bb:rounded-l-md')
+        expect(menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.text())).toEqual(['Поменять пароль', 'Удалить'])
+    })
+
+    it('основная кнопка-переход — ссылка: клик уходит в navigate плагина', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main] }, global: inApp })
+
+        expect(mainOf(wrapper).element.tagName).toBe('A')
+        expect(mainOf(wrapper).attributes('href')).toBe('#edit')
+        await mainOf(wrapper).trigger('click')
+
+        expect(navigation).toEqual(['#edit'])
+    })
+
+    it('основная кнопка-переход: клик с Cmd остаётся браузеру', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main] }, global: inApp })
+
+        await mainOf(wrapper).trigger('click', { metaKey: true })
+
+        expect(navigation).toEqual([])
+    })
+
+    it('основная кнопка-переход без navigate — обычная ссылка: клик не перехватывается', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main] } })
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+
+        mainOf(wrapper).element.dispatchEvent(event)
+
+        expect(event.defaultPrevented).toBe(false)
+    })
+
+    it('основная кнопка-действие вызывает onSelect один раз без аргументов', async () => {
+        const onSelect = vi.fn()
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [{ label: 'Отправить заново', onSelect }] } })
+
+        expect(mainOf(wrapper).element.tagName).toBe('BUTTON')
+        expect(mainOf(wrapper).attributes('type')).toBe('button')
+        await mainOf(wrapper).trigger('click')
+
+        expect(onSelect).toHaveBeenCalledTimes(1)
+        expect(onSelect).toHaveBeenCalledWith()
+    })
+
+    it('onSelect основной кнопки, бросивший исключение, отдаёт ошибку Vue', async () => {
+        const failure = new Error('сбой обработчика')
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Отправить заново', onSelect: () => { throw failure } }] },
+            global: { config: { errorHandler: (error) => errors.push(error) } },
+        })
+
+        await mainOf(wrapper).trigger('click')
+
+        expect(errors).toEqual([failure])
+    })
+
+    // Vue передаёт в errorHandler отклонённый Promise, только если обработчик
+    // клика его вернул; иначе отказ уходит в unhandledrejection.
+    it('асинхронный onSelect основной кнопки с отказом отдаёт ошибку Vue', async () => {
+        const failure = new Error('сбой асинхронного обработчика')
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Отправить заново', onSelect: async () => { throw failure } }] },
+            global: { config: { errorHandler: (error) => errors.push(error) } },
+        })
+
+        mainOf(wrapper).element.click()
+        await flushPromises()
+
+        expect(errors).toEqual([failure])
+    })
+
+    it('первое действие без href и onSelect — кнопка, клик по ней ничего не вызывает и не роняет компонент', async () => {
+        const warnings = []
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Пустое' }, { label: 'Удалить', onSelect: () => {} }] },
+            global: { config: { warnHandler: (message) => warnings.push(message), errorHandler: (error) => errors.push(error) } },
+        })
+
+        expect(mainOf(wrapper).element.tagName).toBe('BUTTON')
+        await mainOf(wrapper).trigger('click')
+
+        expect(errors).toEqual([])
+        expect(warnings.some((message) => message.includes('Invalid prop: custom validator check failed for prop "actions"'))).toBe(true)
+    })
+
+    it('первое действие сменилось с перехода на действие — основная кнопка выполняет новое действие', async () => {
+        const onSelect = vi.fn()
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main] }, global: inApp })
+
+        await wrapper.setProps({ actions: [{ label: 'Отправить заново', onSelect }] })
+        await mainOf(wrapper).trigger('click')
+
+        expect(mainOf(wrapper).element.tagName).toBe('BUTTON')
+        expect(mainOf(wrapper).text()).toBe('Отправить заново')
+        expect(onSelect).toHaveBeenCalledTimes(1)
+        expect(navigation).toEqual([])
+    })
+
+    it.each([
+        {
+            name: 'обычное',
+            color: undefined,
+            mainClasses: ['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-700', 'bb:hover:bg-gray-50'],
+            arrowClasses: ['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-500', 'bb:hover:bg-gray-50'],
+        },
+        {
+            name: 'жёлтое',
+            color: 'yellow',
+            mainClasses: ['bb:bg-yellow-100', 'bb:border-yellow-300', 'bb:text-yellow-800', 'bb:hover:bg-yellow-200'],
+            arrowClasses: ['bb:bg-yellow-100', 'bb:border-yellow-300', 'bb:text-yellow-800', 'bb:hover:bg-yellow-200'],
+        },
+        {
+            name: 'красное',
+            color: 'red',
+            mainClasses: ['bb:bg-red-50', 'bb:border-red-300', 'bb:text-red-700', 'bb:hover:bg-red-100'],
+            arrowClasses: ['bb:bg-red-50', 'bb:border-red-300', 'bb:text-red-700', 'bb:hover:bg-red-100'],
+        },
+    ])('первое действие $name — основная кнопка и стрелка его цвета', ({ color, mainClasses, arrowClasses }) => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ ...main, color }, { label: 'Удалить', onSelect: () => {} }] },
+        })
+
+        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(mainClasses))
+        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(arrowClasses))
+    })
+
+    it('цвет пункта меню основную кнопку и стрелку не красит', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [main, { label: 'Удалить', color: 'red', onSelect: () => {} }] },
+        })
+
+        expect(mainOf(wrapper).classes()).toContain('bb:bg-white')
+        expect(mainOf(wrapper).classes()).not.toContain('bb:bg-red-50')
+        expect(arrowOf(wrapper).classes()).toContain('bb:bg-white')
+    })
+
+    // Видно ли кольцо, happy-dom не считает: тест закрепляет классы,
+    // нажатия Tab, Enter и пробела проверяются в браузере.
+    it('у основной кнопки кольцо фокуса, как у стрелки', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
+        const ring = ['bb:focus:z-10', 'bb:focus:outline-hidden', 'bb:focus:ring-1', 'bb:focus:ring-indigo-500', 'bb:focus:border-indigo-500']
+
+        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(ring))
+        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(ring))
+    })
+
+    it('при открытом меню осталось одно действие: меню пропадает, родитель узнаёт о закрытии', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
+        await arrowOf(wrapper).trigger('click')
+        await settle()
+
+        await wrapper.setProps({ actions: [main] })
+        await settle()
+
+        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
+        expect(mainOf(wrapper).text()).toBe('Редактировать')
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
+    })
+
+    it('при одном действии входящее «открыто» ни на что не влияет, ответного события нет', async () => {
+        const errors = []
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [main], modelValue: true },
+            global: { config: { errorHandler: (error) => errors.push(error) } },
+        })
+        await settle()
+
+        expect(wrapper.find('[role="menu"]').exists()).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+        expect(errors).toEqual([])
+    })
+
+    it('при одном действии входящее «открыто», затем действий не осталось — события нет: меню не было', async () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main], modelValue: true } })
+        await settle()
+
+        await wrapper.setProps({ actions: [] })
+        await settle()
+
+        expect(document.body.querySelector('a, button')).toBeNull()
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+})
+
+describe('DropdownButtonWithAction: убранный слот button', () => {
+    const MESSAGE = '[dashboard-ui-components] DropdownButtonWithAction: слот button убран, основная кнопка — первый пункт actions'
+    let warn
+
+    beforeEach(() => {
+        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        warn.mockRestore()
+        vi.unstubAllEnvs()
+    })
+
+    const withSlot = { button: () => h('span', { class: 'from-slot' }, 'Из слота') }
+
+    it('переданный слот не рисуется, а в консоль уходит предупреждение', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
+
+        expect(wrapper.find('.from-slot').exists()).toBe(false)
+        expect(mainOf(wrapper).text()).toBe('Редактировать')
+        expect(warn).toHaveBeenCalledTimes(1)
+        expect(warn).toHaveBeenCalledWith(MESSAGE)
+    })
+
+    it('без слота предупреждения нет', () => {
+        mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
+
+        expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('в продакшен-сборке предупреждения нет', () => {
+        vi.stubEnv('NODE_ENV', 'production')
+
+        mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
 
         expect(warn).not.toHaveBeenCalled()
     })

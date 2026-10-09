@@ -62,8 +62,7 @@ describe('PopoverPanel', () => {
     it('классы DropdownButtonWithAction доходят до обёртки стрелки сквозь PopoverMenu', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            props: { actions: [{ label: 'Удалить', onSelect: () => {} }] },
-            slots: { button: () => 'Редактировать' },
+            props: { actions: [{ label: 'Редактировать', href: '#edit' }, { label: 'Удалить', onSelect: () => {} }] },
         })
 
         expect(wrapper.get('button[popovertarget]').element.parentElement.className).toBe('bb:relative bb:-ml-px bb:flex')

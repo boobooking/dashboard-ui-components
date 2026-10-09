@@ -43,6 +43,12 @@ export function toMenuItems(actions) {
     return actions.filter((item) => typeof item === 'object' && item !== null)
 }
 
+// Ссылка — только при непустом строковом href; у ссылки onSelect
+// не вызывается.
+export function isLinkItem(item) {
+    return typeof item.href === 'string' && item.href !== ''
+}
+
 // Цвет пункта для его классов. Без color, с неверным color и с убранным
 // полем danger — обычный: такой пункт валидатор отклоняет, и рисуется он
 // обычным, какой бы color у него ни был.

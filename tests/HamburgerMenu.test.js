@@ -359,7 +359,7 @@ describe('HamburgerMenu: на странице', () => {
         const Page = {
             render: () => h('div', [
                 h(HamburgerMenu, { actions: profileActions() }),
-                h(DropdownButtonWithAction, { actions: [{ label: 'Удалить', onSelect: () => {} }] }, { button: () => 'Редактировать' }),
+                h(DropdownButtonWithAction, { actions: [{ label: 'Редактировать', href: '#edit' }, { label: 'Удалить', onSelect: () => {} }] }),
             ]),
         }
         const page = mount(Page, { attachTo: document.body })

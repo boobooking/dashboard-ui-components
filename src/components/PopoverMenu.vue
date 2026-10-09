@@ -57,7 +57,7 @@
 
 <script>
 import { withNavigation } from "../navigation.js";
-import { itemColor, toMenuItems } from "../menuItems.js";
+import { isLinkItem, itemColor, toMenuItems } from "../menuItems.js";
 import PopoverPanel from "./PopoverPanel.vue";
 
 // Меню из пунктов actions на PopoverPanel: пункты и вид панели меню. Кнопку,
@@ -105,7 +105,7 @@ export default {
         // Ссылка — только при непустом строковом href; у ссылки onSelect
         // не вызывается.
         isLink(item) {
-            return typeof item.href === "string" && item.href !== "";
+            return isLinkItem(item);
         },
 
         // Кнопка без функции onSelect по клику только закрывает меню.
