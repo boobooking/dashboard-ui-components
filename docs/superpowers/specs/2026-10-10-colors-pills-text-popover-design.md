@@ -31,7 +31,7 @@
 - `InfoPill`, `ActionPill`, иконки `Refresh`, `Clock`, `Eye`, функция
   `downloadFile`, `TextPopover`;
 - в `DataTable` полоска строки `rowStripe` вместо заливки `rowColor`;
-- два пропа `PopoverPanel` для подсказки;
+- два пропа и событие `toggle` у `PopoverPanel` для подсказки;
 - удаление `SmallBadge`, `DownloadLink`, `rowColor` и legacy-предупреждений
   об убранном API;
 - README, Playground, тесты; приёмка в Chrome и Safari; версия `0.16.0`
@@ -123,6 +123,7 @@ Tailwind пакета смотрит только `src/components` (`@source '..
 | Legacy-предупреждения об убранном API удаляются; об убранном говорят только разделы миграции README | владелец |
 | `TextPopover` переписывается на `PopoverPanel`; функциональность сохраняется | владелец |
 | Пустой текст — `TextPopover` не рисует ничего | владелец |
+| Запрет выделения — по событию `toggle` `PopoverPanel` о фактическом состоянии, а не по `update:modelValue` с подавленным эхом | ревью спеки |
 | Две спеки и два плана: пакет, затем certificates; cashback и payments — свои задачи | дизайн, часть 5, одобрена |
 
 ## 4. Список цветов — `src/colors.js`
@@ -384,7 +385,10 @@ exportOrders() {
 | `modelValue` | `Boolean` | `false` | Открыта ли подсказка; `v-model` необязателен |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` — через `withLang` |
 
-Событие `update:modelValue` — при каждом открытии и закрытии.
+Событие `update:modelValue` — когда подсказка открылась или закрылась сама:
+кнопкой, кликом вне, Escape, прокруткой, изменением размера окна, опустевшим
+текстом. Входящее значение эхом не возвращается — как у меню
+`DropdownButtonWithAction`.
 
 **Устройство.** Корень — `PopoverPanel`:
 
@@ -399,7 +403,8 @@ exportOrders() {
     :panel-label="texts.fullText"
     panel-focusable
     panel-class="bb:p-3 bb:rounded-md bb:border bb:border-gray-200 bb:bg-white bb:shadow-lg bb:text-left bb:text-sm bb:leading-5 bb:text-gray-700 bb:whitespace-normal bb:break-words bb:overscroll-contain bb:select-text bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
-    @update:model-value="onToggle"
+    @update:model-value="$emit('update:modelValue', $event)"
+    @toggle="onPanelToggle"
 >
     <template #trigger="{ id, popovertarget }">
         <button
@@ -423,30 +428,52 @@ exportOrders() {
 и Escape; место у кнопки (`placePopover`, `fitPopover`); закрытие прокруткой
 вне панели и изменением размера окна; входящий `modelValue`; закрытие
 и событие `update:modelValue(false)`, когда текст опустел при открытой
-подсказке (`hasContent: false`).
+подсказке (`hasContent: false`); событие `toggle` о фактическом состоянии
+панели (ниже).
 
 Своё у `TextPopover`:
 
 - `isEmpty` — `text` не строка или пустая строка;
-- `onToggle(isOpen)` — запрет выделения страницы (`lockPageSelection`,
-  `unlockPageSelection`, общий счётчик модуля, как сейчас) и
-  `$emit('update:modelValue', isOpen)`;
+- `onPanelToggle(isOpen)` — запрет выделения страницы: `lockPageSelection()`
+  при `true`, `unlockPageSelection()` при `false` (общий счётчик модуля, как
+  сейчас);
 - `beforeUnmount` — `unlockPageSelection()`.
+
+Запрет выделения привязан к `toggle`, а не к `update:modelValue`:
+`PopoverPanel` не возвращает родителю входящий `modelValue`, и по
+`update:modelValue` подсказка, открытая через `v-model`, не запретила бы
+выделение, а открытая кнопкой и закрытая через `v-model` — не сняла бы
+запрет до размонтирования.
 
 Запрет выделения переносится из certificates без изменений: пока открыта хотя
 бы одна подсказка, `<html>` получает `user-select: none`; прежние стили
 запоминает первая взявшая запрет, возвращает последняя отпустившая.
 
-**Новые пропы `PopoverPanel`.**
+**Новое в `PopoverPanel`.**
 
 | Проп | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
 | `panelLabel` | `String` | `null` | Доступное имя панели: `aria-label`, и тогда без `aria-labelledby` |
 | `panelFocusable` | `Boolean` | `false` | `tabindex="0"` у панели: длинное содержимое прокручивается с клавиатуры |
 
-Меню, список `SelectSingle` и календарь их не передают — для них ничего
-не меняется. Пропы внутреннего компонента, правило `is*`/`with*` к ним
-не применяется, как к `arrows`, `closeOnClick`, `returnFocus`.
+Событие `toggle(isOpen)` — панель фактически открылась или закрылась, по
+любой причине, в том числе по входящему `modelValue`. Подавление эха
+`update:modelValue` на `toggle` не распространяется:
+
+- `created()` — `this.panelShown = false`: открыта ли панель в браузере
+  сейчас, по последнему событию;
+- `onToggle()` — после расчёта фактического `isOpen`: если `isOpen` не равно
+  `panelShown`, `panelShown = isOpen` и `$emit('toggle', isOpen)`; затем,
+  как сейчас, сравнение с `panelIsOpen` и `update:modelValue`;
+- обработчик `hasContent` при `false`: браузер не присылает `toggle`, удаляя
+  открытую панель из DOM, — если `panelShown`, то `panelShown = false`
+  и `$emit('toggle', false)`;
+- без Popover API событий `toggle` нет: панель видна в потоке всегда.
+
+Меню, список `SelectSingle` и календарь новых пропов не передают и `toggle`
+не слушают — для них ничего не меняется. Пропы внутреннего компонента,
+правило `is*`/`with*` к ним не применяется, как к `arrows`, `closeOnClick`,
+`returnFocus`.
 
 **Что меняется для пользователя.** Подсказка открывается по правилу меню:
 вниз, если помещается, иначе туда, где места больше. Пустой текст — нет ни
@@ -517,8 +544,8 @@ exportOrders() {
 | `Dot` (в существующем или новом файле) | `mark` каждого цвета; `withPulse` |
 | `DataTable.test.js` | тесты `rowColor` заменяются: полоска в первой видимой ячейке при цвете; нет при `null`, неизвестном цвете, не функции; строки полосатые всегда; бейджи — `InfoPill` `indigo` |
 | `DropdownButtonWithAction.test.js`, `HamburgerMenu.test.js` | шесть цветов кнопки, стрелки и пункта; пункт с `danger` — обычный, без предупреждения; тесты предупреждений удаляются |
-| `PopoverPanel.test.js` | `panelLabel` — `aria-label` без `aria-labelledby`; без него — как сейчас; `panelFocusable` — `tabindex="0"` |
-| `TextPopover.test.js` (новый) | пустой и `null` текст — ничего; открытие кнопкой; `v-model` открывает и закрывает; опустевший текст закрывает и шлёт `update:modelValue(false)`; запрет выделения при открытии, снятие при закрытии, двух подсказках и размонтировании; имя области «Полный текст»; `tabindex="0"`; язык `en` |
+| `PopoverPanel.test.js` | `panelLabel` — `aria-label` без `aria-labelledby`; без него — как сейчас; `panelFocusable` — `tabindex="0"`; `toggle(true)` при открытии кнопкой, при `modelValue: true` на монтировании и при смене `modelValue` на `true`; `toggle(false)` при закрытии кнопкой, при `modelValue: false` после открытия кнопкой и при пропаже содержимого у открытой панели; без `toggle`, когда состояние не изменилось; эхо `update:modelValue` по-прежнему подавлено |
+| `TextPopover.test.js` (новый) | пустой и `null` текст — ничего; открытие кнопкой; `v-model` открывает и закрывает без эха; опустевший текст закрывает и шлёт `update:modelValue(false)`; запрет выделения: при `modelValue: true` на монтировании, при открытии кнопкой и через `v-model`; снятие: при закрытии кнопкой, через `v-model` после открытия кнопкой, при опустевшем тексте, при размонтировании; две подсказки — запрет держится, пока открыта хоть одна; имя области «Полный текст»; `tabindex="0"`; язык `en` |
 | `i18n.test.js` | случаи `DownloadLink` удаляются; `TextPopover` на `ru`, `en`, по плагину |
 | `exports.test.js` | новый список экспортов, `downloadFile` — функция |
 | `ssrFixtures.js` | `InfoPill`, `ActionPill`, `TextPopover` вместо `SmallBadge`, `DownloadLink` |
