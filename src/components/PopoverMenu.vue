@@ -29,11 +29,7 @@
                     :href="item.href"
                     role="menuitem"
                     class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
-                    :class="{
-                        'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900': color(item) === null,
-                        'bb:text-yellow-800 bb:focus:bg-yellow-100': color(item) === 'yellow',
-                        'bb:text-red-700 bb:focus:bg-red-50': color(item) === 'red',
-                    }"
+                    :class="color(item) === null ? 'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
                     @click="followLink($event, item.href)"
                     v-text="item.label"
                 ></a>
@@ -42,11 +38,7 @@
                     type="button"
                     role="menuitem"
                     class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
-                    :class="{
-                        'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900': color(item) === null,
-                        'bb:text-yellow-800 bb:focus:bg-yellow-100': color(item) === 'yellow',
-                        'bb:text-red-700 bb:focus:bg-red-50': color(item) === 'red',
-                    }"
+                    :class="color(item) === null ? 'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
                     @click="select(item)"
                     v-text="item.label"
                 ></button>
@@ -56,6 +48,7 @@
 </template>
 
 <script>
+import { withColors } from "../colors.js";
 import { withNavigation } from "../navigation.js";
 import { isLinkItem, itemColor, toMenuItems } from "../menuItems.js";
 import PopoverPanel from "./PopoverPanel.vue";
@@ -69,13 +62,13 @@ export default {
         PopoverPanel,
     },
 
-    mixins: [withNavigation],
+    mixins: [withNavigation, withColors],
 
     emits: ["update:modelValue"],
 
     props: {
         // Пункты меню: { label, href } — переход, { label, onSelect } —
-        // действие, color: 'yellow' или 'red' — цвет. Тип и пункты проверяют
+        // действие, color — имя из общего списка цветов. Тип и пункты проверяют
         // публичные компоненты: проверка и здесь давала бы каждое
         // предупреждение дважды.
         actions: {

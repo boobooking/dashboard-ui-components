@@ -20,7 +20,7 @@
 
 <script>
 import { withLang } from "../lang.js";
-import { isMenuItem, warnsRemovedDanger } from "../menuItems.js";
+import { isMenuItem } from "../menuItems.js";
 import PopoverMenu from "./PopoverMenu.vue";
 
 export default {
@@ -28,12 +28,12 @@ export default {
         PopoverMenu,
     },
 
-    mixins: [withLang, warnsRemovedDanger("HamburgerMenu")],
+    mixins: [withLang],
 
     props: {
         // Пункты меню — как у DropdownButtonWithAction: { label, href } —
-        // переход, { label, onSelect } — действие, color: 'yellow' или
-        // 'red' — цвет.
+        // переход, { label, onSelect } — действие, color — имя из общего
+        // списка цветов.
         actions: {
             type: Array,
             default: () => [],

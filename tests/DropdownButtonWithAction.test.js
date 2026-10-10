@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
+import { COLOR_NAMES, colorClass } from '../src/colors.js'
 import { dashboardUi } from '../src/plugin.js'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
@@ -281,8 +282,19 @@ describe('DropdownButtonWithAction без привязки', () => {
         const [plain, yellow, red] = menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.classes())
         expect(plain).toEqual(expect.arrayContaining(['bb:text-gray-700', 'bb:focus:bg-gray-100']))
         expect(yellow).toEqual(expect.arrayContaining(['bb:text-yellow-800', 'bb:focus:bg-yellow-100']))
-        expect(red).toEqual(expect.arrayContaining(['bb:text-red-700', 'bb:focus:bg-red-50']))
+        expect(red).toEqual(expect.arrayContaining(['bb:text-red-800', 'bb:focus:bg-red-100']))
         expect(red).not.toContain('bb:bg-red-400')
+    })
+
+    it.each(COLOR_NAMES)('пункт меню цвета %s — классы menuItem из списка, без обычных', (color) => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [main, { label: 'Пункт', color, onSelect: () => {} }] },
+        })
+        const classes = menuOf(wrapper).get('[role="menuitem"]').classes()
+
+        expect(classes).toEqual(expect.arrayContaining(colorClass(color, 'menuItem').split(' ')))
+        expect(classes).not.toContain('bb:text-gray-700')
     })
 
     // Высоту стрелки задаёт её значок, высоту основной кнопки — её текст
@@ -649,7 +661,7 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         { name: 'пустой href и onSelect', item: { label: 'Удалить', href: '', onSelect: fn } },
         { name: 'href null и onSelect', item: { label: 'Удалить', href: null, onSelect: fn } },
         { name: 'onSelect-строка без href', item: { label: 'Удалить', onSelect: 'ошибка' } },
-        { name: 'неверный color', item: { label: 'Удалить', color: 'green', onSelect: fn } },
+        { name: 'неверный color', item: { label: 'Удалить', color: 'blue', onSelect: fn } },
     ])('неверный пункт ($name) — предупреждение Vue', ({ item }) => {
         const { warnings } = mountChecked([{ label: 'Верный', onSelect: fn }, item])
 
@@ -661,6 +673,8 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         { name: 'действие', item: { label: 'Удалить', onSelect: fn } },
         { name: 'переход с color: red', item: { label: 'Открыть', href: '#open', color: 'red' } },
         { name: 'действие с color: yellow', item: { label: 'Удалить', color: 'yellow', onSelect: fn } },
+        { name: 'действие с color: purple', item: { label: 'Отметить', color: 'purple', onSelect: fn } },
+        { name: 'пункт с лишним полем danger', item: { label: 'Удалить', danger: true, onSelect: fn } },
         { name: 'поле со значением undefined', item: { label: 'Открыть', href: '#open', onSelect: undefined } },
     ])('верный пункт ($name) — без предупреждений', ({ item }) => {
         const { warnings } = mountChecked([item])
@@ -735,8 +749,7 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
     })
 })
 
-describe('DropdownButtonWithAction: убранный слот actions', () => {
-    const MESSAGE = '[dashboard-ui-components] DropdownButtonWithAction: слот actions убран, пункты меню передаются пропом actions'
+describe('DropdownButtonWithAction: без предупреждений об убранном API', () => {
     let warn
 
     beforeEach(() => {
@@ -745,86 +758,37 @@ describe('DropdownButtonWithAction: убранный слот actions', () => {
 
     afterEach(() => {
         warn.mockRestore()
-        vi.unstubAllEnvs()
     })
 
-    const withSlot = { actions: () => h('a', { href: '#', class: 'from-slot' }, 'Из слота') }
-
-    it('переданный слот не рисуется, а в консоль уходит предупреждение', () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
-
-        expect(wrapper.find('.from-slot').exists()).toBe(false)
-        expect(warn).toHaveBeenCalledTimes(1)
-        expect(warn).toHaveBeenCalledWith(MESSAGE)
-    })
-
-    it('без слота предупреждения нет', () => {
-        mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
-
-        expect(warn).not.toHaveBeenCalled()
-    })
-
-    it('в продакшен-сборке предупреждения нет', () => {
-        vi.stubEnv('NODE_ENV', 'production')
-
-        mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
-
-        expect(warn).not.toHaveBeenCalled()
-    })
-})
-
-describe('DropdownButtonWithAction: убранное поле danger', () => {
-    const MESSAGE = "[dashboard-ui-components] DropdownButtonWithAction: поле danger убрано, красный пункт — color: 'red'"
-    const VALIDATOR_WARNING = 'Invalid prop: custom validator check failed for prop "actions"'
-    const withDanger = () => [...actions, { label: 'Опасное', danger: true, onSelect: () => {} }]
-    let warn
-
-    beforeEach(() => {
-        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    })
-
-    afterEach(() => {
-        warn.mockRestore()
-        vi.unstubAllEnvs()
-    })
-
-    // Неверный пункт Vue отмечает своим предупреждением; warnHandler его
-    // перехватывает, и вывод тестов остаётся чистым.
-    function mountWith(value) {
-        const warnings = []
+    it('пункт с полем danger — обычный пункт; красный — по color', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            props: { actions: value },
-            global: { config: { warnHandler: (message) => warnings.push(message) } },
+            props: {
+                actions: [
+                    main,
+                    { label: 'Опасное', danger: true, onSelect: () => {} },
+                    { label: 'Удалить', danger: true, color: 'red', onSelect: () => {} },
+                ],
+            },
+        })
+        const [plain, red] = menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.classes())
+
+        expect(plain).toContain('bb:text-gray-700')
+        expect(red).toContain('bb:text-red-800')
+        expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('слоты actions и button не рисуются и не дают предупреждений', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions },
+            slots: {
+                actions: () => h('a', { href: '#', class: 'from-slot' }, 'Из слота'),
+                button: () => h('span', { class: 'from-slot' }, 'Из слота'),
+            },
         })
 
-        return { wrapper, warnings }
-    }
-
-    it('пункт с danger рисуется обычным, Vue отмечает его, а в консоль уходит одно предупреждение с заменой', () => {
-        const { wrapper, warnings } = mountWith(withDanger())
-        const items = menuOf(wrapper).findAll('[role="menuitem"]')
-
-        expect(items[items.length - 1].classes()).toContain('bb:text-gray-700')
-        expect(warnings.some((message) => message.includes(VALIDATOR_WARNING))).toBe(true)
-        expect(warn).toHaveBeenCalledTimes(1)
-        expect(warn).toHaveBeenCalledWith(MESSAGE)
-    })
-
-    it('тот же список заново при перерисовке родителя — предупреждение не повторяется', async () => {
-        const { wrapper } = mountWith(withDanger())
-
-        await wrapper.setProps({ actions: withDanger() })
-        await wrapper.setProps({ actions: withDanger() })
-
-        expect(warn).toHaveBeenCalledTimes(1)
-    })
-
-    it('в продакшен-сборке предупреждения нет', () => {
-        vi.stubEnv('NODE_ENV', 'production')
-
-        mountWith(withDanger())
-
+        expect(wrapper.find('.from-slot').exists()).toBe(false)
         expect(warn).not.toHaveBeenCalled()
     })
 })
@@ -964,33 +928,26 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         expect(navigation).toEqual([])
     })
 
-    it.each([
-        {
-            name: 'обычное',
-            color: undefined,
-            mainClasses: ['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-700', 'bb:hover:bg-gray-50'],
-            arrowClasses: ['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-500', 'bb:hover:bg-gray-50'],
-        },
-        {
-            name: 'жёлтое',
-            color: 'yellow',
-            mainClasses: ['bb:bg-yellow-100', 'bb:border-yellow-300', 'bb:text-yellow-800', 'bb:hover:bg-yellow-200'],
-            arrowClasses: ['bb:bg-yellow-100', 'bb:border-yellow-300', 'bb:text-yellow-800', 'bb:hover:bg-yellow-200'],
-        },
-        {
-            name: 'красное',
-            color: 'red',
-            mainClasses: ['bb:bg-red-50', 'bb:border-red-300', 'bb:text-red-700', 'bb:hover:bg-red-100'],
-            arrowClasses: ['bb:bg-red-50', 'bb:border-red-300', 'bb:text-red-700', 'bb:hover:bg-red-100'],
-        },
-    ])('первое действие $name — основная кнопка и стрелка его цвета', ({ color, mainClasses, arrowClasses }) => {
+    it('первое действие без цвета — белая основная кнопка и стрелка', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [main, { label: 'Удалить', onSelect: () => {} }] },
+        })
+
+        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-700', 'bb:hover:bg-gray-50']))
+        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-500', 'bb:hover:bg-gray-50']))
+    })
+
+    it.each(COLOR_NAMES)('первое действие цвета %s — основная кнопка и стрелка с классами button', (color) => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
             props: { actions: [{ ...main, color }, { label: 'Удалить', onSelect: () => {} }] },
         })
+        const expected = colorClass(color, 'button').split(' ')
 
-        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(mainClasses))
-        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(arrowClasses))
+        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(expected))
+        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(expected))
+        expect(mainOf(wrapper).classes()).not.toContain('bb:bg-white')
     })
 
     it('цвет пункта меню основную кнопку и стрелку не красит', () => {
@@ -1000,7 +957,7 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         })
 
         expect(mainOf(wrapper).classes()).toContain('bb:bg-white')
-        expect(mainOf(wrapper).classes()).not.toContain('bb:bg-red-50')
+        expect(mainOf(wrapper).classes()).not.toContain('bb:bg-red-100')
         expect(arrowOf(wrapper).classes()).toContain('bb:bg-white')
     })
 
@@ -1083,44 +1040,5 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
 
         expect(document.body.querySelector('a, button')).toBeNull()
         expect(wrapper.emitted('update:modelValue')).toBeUndefined()
-    })
-})
-
-describe('DropdownButtonWithAction: убранный слот button', () => {
-    const MESSAGE = '[dashboard-ui-components] DropdownButtonWithAction: слот button убран, основная кнопка — первый пункт actions'
-    let warn
-
-    beforeEach(() => {
-        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    })
-
-    afterEach(() => {
-        warn.mockRestore()
-        vi.unstubAllEnvs()
-    })
-
-    const withSlot = { button: () => h('span', { class: 'from-slot' }, 'Из слота') }
-
-    it('переданный слот не рисуется, а в консоль уходит предупреждение', () => {
-        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
-
-        expect(wrapper.find('.from-slot').exists()).toBe(false)
-        expect(mainOf(wrapper).text()).toBe('Редактировать')
-        expect(warn).toHaveBeenCalledTimes(1)
-        expect(warn).toHaveBeenCalledWith(MESSAGE)
-    })
-
-    it('без слота предупреждения нет', () => {
-        mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
-
-        expect(warn).not.toHaveBeenCalled()
-    })
-
-    it('в продакшен-сборке предупреждения нет', () => {
-        vi.stubEnv('NODE_ENV', 'production')
-
-        mount(DropdownButtonWithAction, { attachTo: document.body, slots: withSlot, props: { actions } })
-
-        expect(warn).not.toHaveBeenCalled()
     })
 })

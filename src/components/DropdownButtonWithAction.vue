@@ -13,13 +13,10 @@
             v-if="isLink(mainAction)"
             :href="mainAction.href"
             class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
-            :class="{
-                'bb:rounded-l-md': hasMenu,
-                'bb:rounded-md': !hasMenu,
-                'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50': mainColor === null,
-                'bb:bg-yellow-100 bb:border-yellow-300 bb:text-yellow-800 bb:hover:bg-yellow-200': mainColor === 'yellow',
-                'bb:bg-red-50 bb:border-red-300 bb:text-red-700 bb:hover:bg-red-100': mainColor === 'red',
-            }"
+            :class="[
+                { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
+                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
+            ]"
             @click="followLink($event, mainAction.href)"
             v-text="mainAction.label"
         ></a>
@@ -27,13 +24,10 @@
             v-else
             type="button"
             class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
-            :class="{
-                'bb:rounded-l-md': hasMenu,
-                'bb:rounded-md': !hasMenu,
-                'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50': mainColor === null,
-                'bb:bg-yellow-100 bb:border-yellow-300 bb:text-yellow-800 bb:hover:bg-yellow-200': mainColor === 'yellow',
-                'bb:bg-red-50 bb:border-red-300 bb:text-red-700 bb:hover:bg-red-100': mainColor === 'red',
-            }"
+            :class="[
+                { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
+                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
+            ]"
             @click="select(mainAction)"
             v-text="mainAction.label"
         ></button>
@@ -53,11 +47,7 @@
                     :id="trigger.id"
                     :popovertarget="trigger.popovertarget"
                     class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:text-sm bb:font-medium bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
-                    :class="{
-                        'bb:bg-white bb:border-gray-300 bb:text-gray-500 bb:hover:bg-gray-50': mainColor === null,
-                        'bb:bg-yellow-100 bb:border-yellow-300 bb:text-yellow-800 bb:hover:bg-yellow-200': mainColor === 'yellow',
-                        'bb:bg-red-50 bb:border-red-300 bb:text-red-700 bb:hover:bg-red-100': mainColor === 'red',
-                    }"
+                    :class="mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-500 bb:hover:bg-gray-50' : colorClass(mainColor, 'button')"
                 >
                     <span class="bb:sr-only">{{ texts.openMenu }}</span>
                     <svg
@@ -80,8 +70,9 @@
 </template>
 
 <script>
+import { withColors } from "../colors.js";
 import { withLang } from "../lang.js";
-import { isLinkItem, isMenuItem, itemColor, toMenuItems, warnsRemovedDanger } from "../menuItems.js";
+import { isLinkItem, isMenuItem, itemColor, toMenuItems } from "../menuItems.js";
 import { withNavigation } from "../navigation.js";
 import PopoverMenu from "./PopoverMenu.vue";
 
@@ -90,14 +81,14 @@ export default {
         PopoverMenu,
     },
 
-    mixins: [withLang, withNavigation, warnsRemovedDanger("DropdownButtonWithAction")],
+    mixins: [withLang, withNavigation, withColors],
 
     emits: ["update:modelValue"],
 
     props: {
         // Действия: первое — основная кнопка, остальные — пункты меню.
         // { label, href } — переход, { label, onSelect } — действие,
-        // color: 'yellow' или 'red' — цвет.
+        // color — имя из общего списка цветов.
         actions: {
             type: Array,
             default: () => [],
@@ -167,23 +158,6 @@ export default {
                 }
             },
         },
-    },
-
-    created() {
-        // Слот actions убран: пункты задаёт проп. Меню проекта, который ещё
-        // передаёт разметку, осталось бы без пунктов молча. Проверку
-        // process.env.NODE_ENV подменяет бандлер проекта, как у самого Vue:
-        // в продакшен-сборке её и предупреждения нет.
-        if (process.env.NODE_ENV !== "production" && this.$slots.actions) {
-            console.warn("[dashboard-ui-components] DropdownButtonWithAction: слот actions убран, пункты меню передаются пропом actions");
-        }
-
-        // Слот button убран: основная кнопка — первое действие. Кнопка
-        // проекта, который ещё передаёт разметку, молча потеряла бы своё
-        // основное действие.
-        if (process.env.NODE_ENV !== "production" && this.$slots.button) {
-            console.warn("[dashboard-ui-components] DropdownButtonWithAction: слот button убран, основная кнопка — первый пункт actions");
-        }
     },
 
     methods: {
