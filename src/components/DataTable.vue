@@ -14,7 +14,7 @@
             class="bb:flex bb:justify-center bb:items-center bb:space-x-2"
             :class="isCard ? '' : 'bb:my-4'"
         >
-            <small-badge v-if="badgeText !== null" :text="badgeText" color="indigo"/>
+            <info-pill v-if="badgeText !== null" :text="badgeText" color="indigo"/>
             <slot v-if="hasRecords" name="results-actions"></slot>
         </div>
 
@@ -105,7 +105,7 @@
 
 <script>
 import Pagination from "./Pagination.vue";
-import SmallBadge from "./SmallBadge.vue";
+import InfoPill from "./InfoPill.vue";
 import { withLang } from "../lang.js";
 
 const ALIGNS = ["left", "center", "right"];
@@ -140,7 +140,7 @@ function nonEmptyText(value) {
 export default {
     components: {
         Pagination,
-        SmallBadge,
+        InfoPill,
     },
 
     mixins: [withLang],

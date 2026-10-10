@@ -22,6 +22,7 @@ describe('публичная поверхность пакета', () => {
             'DropdownButtonWithAction',
             'ErrorMessages',
             'HamburgerMenu',
+            'InfoPill',
             'NavigationMenuElement',
             'NotificationMessage',
             'PageCard',
@@ -29,7 +30,6 @@ describe('публичная поверхность пакета', () => {
             'Search',
             'SelectDateInterval',
             'SelectSingle',
-            'SmallBadge',
             'dashboardUi',
         ])
     })

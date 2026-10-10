@@ -21,6 +21,7 @@ export const ssrFixtures = {
     DropdownButtonWithAction: { props: { actions: [{ label: 'Действие', href: '#' }, { label: 'Другое действие', href: '#' }] } },
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
     HamburgerMenu: { props: { actions: [{ label: 'Выйти', href: '#' }] } },
+    InfoPill: { props: { text: 'Новый', color: 'green' } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
     PageCard: { props: { fallbackUrl: '/list' }, slots: { default: () => h('h3', 'Заголовок') } },
@@ -28,5 +29,4 @@ export const ssrFixtures = {
     Search: { props: { header: 'Поиск', modelValue: 'запрос' } },
     SelectDateInterval: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
     SelectSingle: { props: { header: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
-    SmallBadge: { props: { text: 'Новый', color: 'green' } },
 }

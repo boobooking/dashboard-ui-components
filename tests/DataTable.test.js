@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick } from 'vue'
 import DataTable from '../src/components/DataTable.vue'
+import InfoPill from '../src/components/InfoPill.vue'
 
 enableAutoUnmount(afterEach)
 
@@ -280,6 +281,14 @@ describe('DataTable: бейдж, пустое состояние, пагинац
         await nextTick()
 
         expect(wrapper.find('.export').exists()).toBe(true)
+    })
+
+    it('бейджи «Найдено» и пустого списка — InfoPill цвета indigo', () => {
+        const found = mountTable({ meta, links, foundText: 'Найдено ордеров' })
+        const empty = mountTable({ rows: [], emptyText: 'Не найдено ордеров' })
+
+        expect(found.getComponent(InfoPill).props()).toEqual({ text: 'Найдено ордеров: 40', color: 'indigo' })
+        expect(empty.getComponent(InfoPill).props()).toEqual({ text: 'Не найдено ордеров', color: 'indigo' })
     })
 })
 
