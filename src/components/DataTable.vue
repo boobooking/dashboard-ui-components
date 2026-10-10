@@ -51,17 +51,13 @@
                         <tr
                             v-for="(row, index) in normalizedRows"
                             :key="keyOf(row, index)"
-                            :class="{
-                                'bb:bg-white bb:even:bg-gray-50': colorOf(row) === null,
-                                'bb:bg-red-50': colorOf(row) === 'red',
-                                'bb:bg-green-50': colorOf(row) === 'green',
-                            }"
+                            class="bb:bg-white bb:even:bg-gray-50"
                         >
                             <!-- relative: абсолютные элементы слота встают
                                  внутри ячейки, а скрытые подписи sr-only
                                  не выходят из обёртки с прокруткой. -->
                             <td
-                                v-for="column in visibleColumns"
+                                v-for="(column, columnIndex) in visibleColumns"
                                 :key="column.key"
                                 class="bb:px-6 bb:py-4 bb:align-top bb:relative bb:text-sm bb:leading-5"
                                 :class="[
@@ -74,6 +70,17 @@
                                     { 'bb:w-px': column.narrow },
                                 ]"
                             >
+                                <!-- Полоска строки — в первой видимой ячейке: ячейка
+                                     relative, и полоска встаёт по её левому краю на
+                                     всю высоту строки. Набор mark общего списка
+                                     задаёт цвет текста, полоска берёт его через
+                                     bg-current. -->
+                                <span
+                                    v-if="columnIndex === 0 && rowStripes[index] !== null"
+                                    class="bb:absolute bb:left-0 bb:inset-y-0 bb:w-1 bb:bg-current"
+                                    :class="colorClass(rowStripes[index], 'mark')"
+                                    aria-hidden="true"
+                                ></span>
                                 <slot :name="`cell-${column.key}`" :row="row" :index="index">
                                     <div
                                         class="bb:font-medium"
@@ -107,9 +114,9 @@
 import Pagination from "./Pagination.vue";
 import InfoPill from "./InfoPill.vue";
 import { withLang } from "../lang.js";
+import { isColor, withColors } from "../colors.js";
 
 const ALIGNS = ["left", "center", "right"];
-const ROW_COLORS = ["red", "green"];
 
 // Описание столбца со страницы — к полному виду. Элемент без строкового key
 // пропускается: ему не дать ни слот, ни значение по умолчанию.
@@ -143,7 +150,7 @@ export default {
         InfoPill,
     },
 
-    mixins: [withLang],
+    mixins: [withLang, withColors],
 
     props: {
         // Строки списка: обычные объекты или модели страницы.
@@ -188,8 +195,9 @@ export default {
             default: "page",
             validator: (value) => ["page", "card"].indexOf(value) !== -1,
         },
-        // row => 'red' | 'green' | null: цвет строки вместо полосатости.
-        rowColor: {
+        // row => имя цвета из общего списка или null: полоска слева в первой
+        // ячейке строки. Строки полосатые всегда.
+        rowStripe: {
             type: Function,
             default: null,
         },
@@ -204,6 +212,12 @@ export default {
             const columns = Array.isArray(this.columns) ? this.columns : [];
 
             return columns.map(normalizeColumn).filter((column) => column !== null && column.visible);
+        },
+
+        // Цвет полоски каждой строки по её номеру: rowStripe вызывается
+        // один раз на строку за рендер.
+        rowStripes() {
+            return this.normalizedRows.map((row) => this.stripeOf(row));
         },
 
         isCard() {
@@ -258,14 +272,15 @@ export default {
             return key === null || key === undefined ? `row-${index}` : key;
         },
 
-        colorOf(row) {
-            if (typeof this.rowColor !== "function") {
+        // Не функция, null и имя вне списка — без полоски.
+        stripeOf(row) {
+            if (typeof this.rowStripe !== "function") {
                 return null;
             }
 
-            const color = this.rowColor(row);
+            const color = this.rowStripe(row);
 
-            return ROW_COLORS.includes(color) ? color : null;
+            return isColor(color) ? color : null;
         },
 
         // null и undefined — пустая ячейка.

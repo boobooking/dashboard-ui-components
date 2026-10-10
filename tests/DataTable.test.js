@@ -131,20 +131,56 @@ describe('DataTable: ячейки', () => {
 })
 
 describe('DataTable: строки', () => {
-    it('строки полосатые; rowColor красит строку без полосатости', () => {
-        const wrapper = mountTable({ rowColor: (row) => (row.uuid === 'a' ? 'red' : 'blue') })
-        const [first, second] = wrapper.findAll('tbody tr')
+    // Полоска — только для глаз: ни роли, ни текста у неё нет.
+    function stripeIn(cell) {
+        return cell.find('span[aria-hidden="true"]')
+    }
 
-        expect(first.classes()).toContain('bb:bg-red-50')
-        expect(first.classes()).not.toContain('bb:even:bg-gray-50')
-        expect(second.classes()).toContain('bb:bg-white')
-        expect(second.classes()).toContain('bb:even:bg-gray-50')
+    it('строки полосатые всегда', () => {
+        const wrapper = mountTable({ rowStripe: () => 'red' })
+
+        for (const row of wrapper.findAll('tbody tr')) {
+            expect(row.classes()).toEqual(['bb:bg-white', 'bb:even:bg-gray-50'])
+        }
     })
 
-    it('green из rowColor — зелёная строка', () => {
-        const wrapper = mountTable({ rowColor: () => 'green' })
+    it('rowStripe: полоска цвета mark в первой видимой ячейке строки', () => {
+        const wrapper = mountTable({
+            columns: [{ key: 'hidden', label: 'Скрытый', visible: false }, ...columns],
+            rowStripe: (row) => (row.uuid === 'a' ? 'red' : null),
+        })
 
-        expect(wrapper.findAll('tbody tr')[0].classes()).toContain('bb:bg-green-50')
+        const stripe = stripeIn(cellsOf(wrapper, 0)[0])
+        expect(stripe.exists()).toBe(true)
+        expect(stripe.classes()).toEqual(['bb:absolute', 'bb:left-0', 'bb:inset-y-0', 'bb:w-1', 'bb:bg-current', 'bb:text-red-500'])
+        expect(stripeIn(cellsOf(wrapper, 0)[1]).exists()).toBe(false)
+        expect(stripeIn(cellsOf(wrapper, 1)[0]).exists()).toBe(false)
+    })
+
+    it('полоска стоит перед содержимым слота первой ячейки', () => {
+        const wrapper = mountTable({ rowStripe: () => 'yellow' }, { 'cell-phone': ({ row }) => h('b', row.phone) })
+        const cell = cellsOf(wrapper, 0)[0]
+
+        expect(cell.element.firstElementChild.tagName).toBe('SPAN')
+        expect(cell.get('b').text()).toBe('+79990000001')
+    })
+
+    it.each([
+        ['null', () => null],
+        ['имя вне списка', () => 'blue'],
+        ['не строку', () => 42],
+    ])('rowStripe вернул %s — полоски нет', (_, rowStripe) => {
+        const wrapper = mountTable({ rowStripe })
+
+        expect(stripeIn(cellsOf(wrapper, 0)[0]).exists()).toBe(false)
+    })
+
+    it('rowStripe не функция — полоски нет, Vue отмечает тип', () => {
+        const warnings = []
+        const wrapper = mountTable({ rowStripe: 'red' }, {}, { warnings })
+
+        expect(stripeIn(cellsOf(wrapper, 0)[0]).exists()).toBe(false)
+        expect(warnings.some((message) => message.includes('Invalid prop: type check failed for prop "rowStripe"'))).toBe(true)
     })
 
     it.each([
