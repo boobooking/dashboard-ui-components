@@ -29,4 +29,5 @@ export const ssrFixtures = {
     Search: { props: { header: 'Поиск', modelValue: 'запрос' } },
     SelectDateInterval: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
     SelectSingle: { props: { header: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
+    TextPopover: { props: { text: 'Полный текст сообщения', modelValue: true } },
 }

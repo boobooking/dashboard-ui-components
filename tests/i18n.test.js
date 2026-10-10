@@ -10,6 +10,7 @@ import PageCard from '../src/components/PageCard.vue'
 import Pagination from '../src/components/Pagination.vue'
 import PickDay from '../src/components/PickDay.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
+import TextPopover from '../src/components/TextPopover.vue'
 
 enableAutoUnmount(afterEach)
 
@@ -112,6 +113,7 @@ describe('недопустимый lang: язык плагина, а не пад
         { name: 'PickDay, lang пустой и без плагина — русский', component: PickDay, props: { lang: '' }, global: {}, expected: 'Пн' },
         { name: 'SelectDateInterval, lang de и плагин en — English', component: SelectDateInterval, props: { header: 'Интервал', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Mon' },
         { name: 'DropdownButtonWithAction, lang de и плагин en — English', component: DropdownButtonWithAction, props: { lang: 'de', actions: [{ label: 'Основное', href: '#main' }, { label: 'Действие', href: '#' }] }, global: inApp({ lang: 'en' }), expected: 'Open menu' },
+        { name: 'TextPopover, lang de и плагин en — English', component: TextPopover, props: { text: 'Text', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Show text' },
     ]
 
     for (const testCase of cases) {

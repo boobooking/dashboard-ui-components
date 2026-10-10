@@ -32,6 +32,9 @@ export const messages = {
         back: 'Назад',
         // NotificationMessage: подпись крестика для скринридера.
         close: 'Закрыть',
+        // TextPopover: подпись кнопки для скринридера и имя области с текстом.
+        showText: 'Показать текст',
+        fullText: 'Полный текст',
     },
     en: {
         cancel: 'Cancel',
@@ -54,5 +57,7 @@ export const messages = {
         resultsAfter: 'results',
         back: 'Back',
         close: 'Close',
+        showText: 'Show text',
+        fullText: 'Full text',
     },
 }
