@@ -74,6 +74,13 @@
                     <td><dot :color="color"/></td>
                 </tr>
             </table>
+            <h3>Полоска строки</h3>
+            <data-table
+                :rows="stripeRows"
+                :columns="[{ key: 'name', label: 'имя' }]"
+                row-key="uuid"
+                :row-stripe="(row) => row.color"
+            />
             <p><button type="button" class="demo-button" @click="pillsLoading = !pillsLoading">isLoading у пилюль таблицы: {{ pillsLoading ? 'да' : 'нет' }}</button></p>
         </section>
 
@@ -95,7 +102,7 @@
 
         <section>
             <h2>TextPopover</h2>
-            <div class="demo-row">
+            <div class="demo-row demo-row-end">
                 <text-popover text="Короткий текст"/>
                 <text-popover :text="popoverText"/>
                 <text-popover text=""/>
@@ -343,6 +350,7 @@ export default {
             englishModalIsOpen: false,
             // Имена списка цветов пакета: таблица «Цвета».
             colors: ['gray', 'green', 'yellow', 'red', 'indigo', 'purple'],
+            stripeRows: [null, 'gray', 'green', 'yellow', 'red', 'indigo', 'purple'].map((color) => ({ uuid: String(color), name: color || 'без цвета', color })),
             pillsLoading: false,
             downloadLoading: false,
             downloadResult: '',
