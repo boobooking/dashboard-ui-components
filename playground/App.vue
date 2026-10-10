@@ -7,6 +7,7 @@
             <dot color="red"/>
             <dot color="green"/>
             <dot color="red" :with-pulse="true"/>
+            <dot v-for="color in colors" :key="color" :color="color"/>
         </section>
 
         <section>
@@ -55,15 +56,25 @@
         </section>
 
         <section>
-            <h2>SmallBadge</h2>
-            <div class="demo-row">
-                <small-badge text="Зелёный" color="green"/>
-                <small-badge text="Индиго" color="indigo"/>
-                <small-badge text="Серый" color="gray"/>
-                <small-badge text="Синий" color="blue"/>
-                <small-badge text="Красный" color="red"/>
-                <small-badge text="Жёлтый с длинным текстом" color="yellow"/>
-            </div>
+            <h2>Цвета</h2>
+            <table class="demo-colors">
+                <tr>
+                    <th>имя</th><th>InfoPill</th><th>ActionPill</th><th>кнопка, стрелка и пункт меню</th><th>Dot</th>
+                </tr>
+                <tr>
+                    <td>без цвета</td><td>—</td><td>—</td>
+                    <td><dropdown-button-with-action :actions="[{ label: 'Посмотреть', href: '#view' }, { label: 'Пункт', onSelect: countSelection }]"/></td>
+                    <td>—</td>
+                </tr>
+                <tr v-for="color in colors" :key="color">
+                    <td>{{ color }}</td>
+                    <td><info-pill :text="color === 'indigo' ? 'Найдено: 40' : 'статус'" :color="color"/></td>
+                    <td><action-pill icon="download" title="скачать xlsx" :color="color" :is-loading="pillsLoading" loading-text="формируется отчёт"/></td>
+                    <td><dropdown-button-with-action :actions="[{ label: 'Действие', color, onSelect: countSelection }, { label: 'Пункт', color, onSelect: countSelection }]"/></td>
+                    <td><dot :color="color"/></td>
+                </tr>
+            </table>
+            <p><button type="button" class="demo-button" @click="pillsLoading = !pillsLoading">isLoading у пилюль таблицы: {{ pillsLoading ? 'да' : 'нет' }}</button></p>
         </section>
 
         <section>
@@ -73,8 +84,28 @@
         </section>
 
         <section>
-            <h2>DownloadLink</h2>
-            <download-link url="#download" title="скачать xlsx"/>
+            <h2>ActionPill и downloadFile</h2>
+            <div class="demo-row">
+                <action-pill icon="download" title="скачать report.csv" loading-text="формируется отчёт" :is-loading="downloadLoading" @click="downloadSample('report.csv')"/>
+                <action-pill icon="download" title="скачать отсутствующий" loading-text="формируется отчёт" :is-loading="downloadLoading" @click="downloadSample('missing.csv')"/>
+                <action-pill icon="refresh" title="запросить статусы" loading-text="запрашиваем статусы" :is-loading="refreshLoading" @click="refreshForTwoSeconds"/>
+            </div>
+            <p>Скачивание: {{ downloadResult || '—' }}; запросов статусов: {{ refreshes }}</p>
+        </section>
+
+        <section>
+            <h2>TextPopover</h2>
+            <div class="demo-row">
+                <text-popover text="Короткий текст"/>
+                <text-popover :text="popoverText"/>
+                <text-popover text=""/>
+                <text-popover v-model="popoverIsOpen" :text="popoverText"/>
+            </div>
+            <p>
+                Подсказка с v-model: {{ popoverIsOpen ? 'открыта' : 'закрыта' }}
+                <button type="button" class="demo-button" @click="popoverIsOpen = !popoverIsOpen">Переключить снаружи</button>
+                <button type="button" class="demo-button" @click="popoverText = popoverText === '' ? 'Текст вернулся' : ''">Опустошить или вернуть текст</button>
+            </p>
         </section>
 
         <section>
@@ -154,10 +185,10 @@
                 empty-text="Не найдено ордеров"
             >
                 <template #results-actions>
-                    <download-link url="/export.xlsx" title="скачать xlsx"/>
+                    <action-pill icon="download" title="скачать xlsx" loading-text="формируется отчёт" :is-loading="downloadLoading" @click="downloadSample('report.csv')"/>
                 </template>
                 <template #cell-status="{ row }">
-                    <small-badge :text="row.status" :color="row.statusColor"/>
+                    <info-pill :text="row.status" :color="row.statusColor"/>
                 </template>
                 <template #cell-actions>
                     <dropdown-button-with-action :actions="menuActions"/>
@@ -176,7 +207,7 @@
                         found-text="Найдено ордеров"
                     >
                         <template #cell-status="{ row }">
-                            <small-badge :text="row.status" :color="row.statusColor"/>
+                            <info-pill :text="row.status" :color="row.statusColor"/>
                         </template>
                         <template #cell-actions>
                             <dropdown-button-with-action :actions="[{ label: 'Редактировать', href: '#edit' }, { label: 'Удалить', color: 'red', onSelect: countSelection }]"/>
@@ -185,12 +216,12 @@
                 </div>
             </div>
 
-            <h3>Скрытый столбец, цвет строки, без пагинации</h3>
+            <h3>Скрытый столбец, полоска строки, без пагинации</h3>
             <data-table
                 :rows="tableRows"
                 :columns="tableColumnsWithoutCost"
                 row-key="uuid"
-                :row-color="(row) => row.rowColor"
+                :row-stripe="(row) => row.stripe"
                 found-text="Найдено анкет"
             />
 
@@ -217,7 +248,7 @@
         <section>
             <h2>lang="en"</h2>
             <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
-            <download-link url="/export.xlsx" lang="en"/>
+            <text-popover lang="en" text="Full text in English"/>
             <dropdown-button-with-action lang="en" :actions="[{ label: 'Action', onSelect: countSelection }, { label: 'Another action', onSelect: countSelection }]"/>
             <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
             <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
@@ -266,9 +297,9 @@ import {
     Search,
     SelectDateInterval,
     SelectSingle,
-    SmallBadge,
+    InfoPill,
     ErrorMessages,
-    DownloadLink,
+    ActionPill,
     ConfirmationModal,
     DropdownButtonWithAction,
     HamburgerMenu,
@@ -276,6 +307,8 @@ import {
     NavigationMenuElement,
     PageCard,
     NotificationMessage,
+    TextPopover,
+    downloadFile,
 } from '../dist/index.js';
 import { lastNavigation } from './navigation-log.js';
 
@@ -286,9 +319,9 @@ export default {
         Search,
         SelectDateInterval,
         SelectSingle,
-        SmallBadge,
+        InfoPill,
         ErrorMessages,
-        DownloadLink,
+        ActionPill,
         ConfirmationModal,
         DropdownButtonWithAction,
         HamburgerMenu,
@@ -296,6 +329,7 @@ export default {
         NavigationMenuElement,
         PageCard,
         NotificationMessage,
+        TextPopover,
     },
 
     setup() {
@@ -307,6 +341,15 @@ export default {
     data() {
         return {
             englishModalIsOpen: false,
+            // Имена списка цветов пакета: таблица «Цвета».
+            colors: ['gray', 'green', 'yellow', 'red', 'indigo', 'purple'],
+            pillsLoading: false,
+            downloadLoading: false,
+            downloadResult: '',
+            refreshLoading: false,
+            refreshes: 0,
+            popoverText: 'Провайдер принял сообщение, итог доставки пока не получен. Длинный текст переносится по словам и прокручивается внутри подсказки, если не помещается по высоте окна.',
+            popoverIsOpen: false,
             confirmationNotice: '',
             warningNotice: '',
             dangerousNotice: '',
@@ -355,7 +398,7 @@ export default {
                 statusColor: index % 3 === 0 ? 'green' : 'gray',
                 comment: 'Провайдер принял сообщение, итог доставки пока не получен — длинное пояснение переносится',
                 createdAt: '06.10.2026',
-                rowColor: index === 1 ? 'red' : index === 2 ? 'green' : null,
+                stripe: [null, 'red', 'yellow', 'green', null, 'indigo', 'purple', 'gray', null, null][index],
             })),
         };
     },
@@ -430,6 +473,25 @@ export default {
     },
 
     methods: {
+        // Скачивание файла сборки playground; missing.csv — ошибка 404.
+        downloadSample(name) {
+            this.downloadResult = '';
+            this.downloadLoading = true;
+            downloadFile(name)
+                .then(() => { this.downloadResult = `скачан ${name}`; })
+                .catch((error) => { this.downloadResult = `ошибка: ${error.message}`; })
+                .finally(() => { this.downloadLoading = false; });
+        },
+
+        // Действие на две секунды — видно часы.
+        refreshForTwoSeconds() {
+            this.refreshLoading = true;
+            setTimeout(() => {
+                this.refreshLoading = false;
+                this.refreshes++;
+            }, 2000);
+        },
+
         // На экране одно уведомление: у всех трёх одно место в углу.
         showNotice(type) {
             this.confirmationNotice = type === 'confirmation' ? 'Письмо отправлено на адрес user@example.com' : '';

@@ -148,3 +148,10 @@
     display: flex;
     justify-content: flex-end;
 }
+
+.demo-colors td,
+.demo-colors th {
+    padding: 6px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
