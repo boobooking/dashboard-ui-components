@@ -63,11 +63,16 @@ const pageSelection = () => document.documentElement.style.userSelect
 
 describe('TextPopover: вид и открытие', () => {
     it.each([
-        ['пустая строка', ''],
-        ['null', null],
-    ])('%s — компонента нет', (_, text) => {
+        ['пустая строка', '', (warnings) => expect(warnings).toEqual([])],
+        ['null', null, (warnings) => {
+            // Обязательный проп String с null Vue ругается на тип, компонента всё равно нет.
+            expect(warnings.length).toBeGreaterThan(0)
+            expect(warnings.every((message) => message.includes('"text"'))).toBe(true)
+        }],
+    ])('%s — компонента нет', (_, text, expectWarnings) => {
         const warnings = []
         mountPopover({ text }, { warnings })
+        expectWarnings(warnings)
 
         expect(document.body.querySelector('button')).toBeNull()
         expect(document.body.querySelector('[popover]')).toBeNull()
