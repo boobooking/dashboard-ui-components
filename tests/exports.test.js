@@ -31,7 +31,12 @@ describe('публичная поверхность пакета', () => {
             'SelectDateInterval',
             'SelectSingle',
             'dashboardUi',
+            'downloadFile',
         ])
+    })
+
+    it('downloadFile — функция', () => {
+        expect(typeof pkg.downloadFile).toBe('function')
     })
 
     it('Pagination — внутренний, рисуется только внутри DataTable', () => {

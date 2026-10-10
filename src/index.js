@@ -3,6 +3,7 @@
 import './styles/index.css'
 
 export { dashboardUi } from './plugin.js'
+export { downloadFile } from './download.js'
 
 export { default as Dot } from './components/Dot.vue'
 export { default as RussianMobileFilter } from './components/RussianMobileFilter.vue'

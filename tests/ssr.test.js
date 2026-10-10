@@ -8,7 +8,8 @@ import { ssrFixtures } from './ssrFixtures.js'
 // Серверный рендер без браузера: загрузка пакета и рендер каждого
 // экспортируемого компонента не должны касаться window и document.
 
-const componentNames = Object.keys(pkg).filter((name) => name !== 'dashboardUi').sort()
+// Не компоненты: плагин и функция скачивания.
+const componentNames = Object.keys(pkg).filter((name) => !['dashboardUi', 'downloadFile'].includes(name)).sort()
 
 async function renderOnServer(name) {
     const warnings = []
