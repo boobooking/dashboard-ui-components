@@ -19,6 +19,7 @@
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 
 @source '../components';
+@source '../colors.js';
 
 /*
  * Ширина поля под маску «+7 (000) 000 00 00»: она почти вся из цифр, поэтому

@@ -65,6 +65,14 @@ function classLiterals(node, fileName) {
                 return []
             }
             throw new Error('форма Identifier в :class не проверяется — запишите классы литералами')
+        case 'CallExpression':
+            // colorClass(…) — классы из src/colors.js: их строки и префикс
+            // проверяет tests/colors.test.js. Любой другой вызов статически
+            // не проверить.
+            if (node.callee.type === 'Identifier' && node.callee.name === 'colorClass') {
+                return []
+            }
+            throw new Error('форма CallExpression в :class не проверяется — запишите классы литералами или возьмите colorClass')
         default:
             throw new Error(`форма ${node.type} в :class не проверяется — запишите классы литералами`)
     }
@@ -204,6 +212,20 @@ describe('исключение для panelClass', () => {
         const caller = '<template><popover-panel panel-class="bb:border flex"></popover-panel></template>'
 
         expect(classTokens(caller, 'PickDay.vue')).toEqual(['bb:border', 'flex'])
+    })
+})
+
+describe('исключение для colorClass', () => {
+    it(':class с вызовом colorClass принимается, строки проверяет tests/colors.test.js', () => {
+        const template = '<template><span class="bb:px-3" :class="[colorClass(color, \'pill\'), isOn ? \'bb:opacity-60\' : colorClass(color, \'pillHover\')]"></span></template>'
+
+        expect(classTokens(template, 'InfoPill.vue')).toEqual(['bb:px-3', 'bb:opacity-60'])
+    })
+
+    it('другой вызов в :class отклоняется', () => {
+        const template = '<template><span :class="classesOf(color)"></span></template>'
+
+        expect(() => classTokens(template, 'InfoPill.vue')).toThrow('форма CallExpression в :class не проверяется')
     })
 })
 
