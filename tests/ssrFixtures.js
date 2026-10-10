@@ -5,6 +5,7 @@ import { h } from 'vue'
 // открытом состоянии, чтобы на сервере рендерилось и оно. Компонент без
 // фикстуры роняет tests/ssr.test.js.
 export const ssrFixtures = {
+    ActionPill: { props: { title: 'скачать xlsx', icon: 'download', isLoading: true, loadingText: 'формируется отчёт' } },
     ConfirmationModal: { props: { isOpen: true, actionButtonText: 'Удалить', confirmationHeading: 'Удалить запись?', confirmationText: 'Действие нельзя отменить.' } },
     DataTable: {
         props: {
@@ -17,7 +18,6 @@ export const ssrFixtures = {
         },
     },
     Dot: { props: { color: 'green' } },
-    DownloadLink: { props: { url: '/export.xlsx' } },
     DropdownButtonWithAction: { props: { actions: [{ label: 'Действие', href: '#' }, { label: 'Другое действие', href: '#' }] } },
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
     HamburgerMenu: { props: { actions: [{ label: 'Выйти', href: '#' }] } },

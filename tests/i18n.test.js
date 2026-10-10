@@ -5,7 +5,6 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { messages } from '../src/i18n.js'
 import { dashboardUi } from '../src/plugin.js'
 import ConfirmationModal from '../src/components/ConfirmationModal.vue'
-import DownloadLink from '../src/components/DownloadLink.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import PageCard from '../src/components/PageCard.vue'
 import Pagination from '../src/components/Pagination.vue'
@@ -54,24 +53,6 @@ describe('ConfirmationModal: кнопка отмены', () => {
             const buttons = wrapper.findAll('button')
 
             expect(buttons[buttons.length - 1].text()).toBe(testCase.expected)
-        })
-    }
-})
-
-describe('DownloadLink: подпись', () => {
-    const cases = [
-        { name: 'без плагина — ru', global: {}, props: {}, expected: 'Скачать' },
-        { name: 'плагин en', global: inApp({ lang: 'en' }), props: {}, expected: 'Download' },
-        { name: 'явный title главнее языка', global: inApp({ lang: 'en' }), props: { title: 'скачать xls' }, expected: 'скачать xls' },
-    ]
-
-    for (const testCase of cases) {
-        it(testCase.name, () => {
-            const wrapper = mount(DownloadLink, { props: { url: '/export', ...testCase.props }, global: testCase.global })
-            const link = wrapper.get('a')
-
-            expect(link.text()).toBe(testCase.expected)
-            expect(link.attributes('title')).toBe(testCase.expected)
         })
     }
 })
@@ -128,7 +109,6 @@ describe('недопустимый lang: язык плагина, а не пад
         { name: 'ConfirmationModal, lang en-US и плагин en — English', component: ConfirmationModal, props: { isOpen: true, actionButtonText: 'OK', lang: 'en-US' }, global: inApp({ lang: 'en' }), expected: 'Cancel' },
         { name: 'Pagination, lang de и плагин en — English', component: Pagination, props: { ...paginationProps, lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Showing' },
         { name: 'Pagination, lang пустой и без плагина — русский', component: Pagination, props: { ...paginationProps, lang: '' }, global: {}, expected: 'Показаны результаты' },
-        { name: 'DownloadLink, lang de и плагин en — English', component: DownloadLink, props: { url: '/export', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Download' },
         { name: 'PickDay, lang пустой и без плагина — русский', component: PickDay, props: { lang: '' }, global: {}, expected: 'Пн' },
         { name: 'SelectDateInterval, lang de и плагин en — English', component: SelectDateInterval, props: { header: 'Интервал', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Mon' },
         { name: 'DropdownButtonWithAction, lang de и плагин en — English', component: DropdownButtonWithAction, props: { lang: 'de', actions: [{ label: 'Основное', href: '#main' }, { label: 'Действие', href: '#' }] }, global: inApp({ lang: 'en' }), expected: 'Open menu' },

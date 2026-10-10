@@ -11,7 +11,7 @@ export { default as SelectDateInterval } from './components/SelectDateInterval.v
 export { default as SelectSingle } from './components/SelectSingle.vue'
 export { default as InfoPill } from './components/InfoPill.vue'
 export { default as ErrorMessages } from './components/ErrorMessages.vue'
-export { default as DownloadLink } from './components/DownloadLink.vue'
+export { default as ActionPill } from './components/ActionPill.vue'
 export { default as ConfirmationModal } from './components/ConfirmationModal.vue'
 export { default as DropdownButtonWithAction } from './components/DropdownButtonWithAction.vue'
 export { default as HamburgerMenu } from './components/HamburgerMenu.vue'

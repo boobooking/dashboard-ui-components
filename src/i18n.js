@@ -9,7 +9,6 @@ export function isLang(value) {
 export const messages = {
     ru: {
         cancel: 'Отмена',
-        download: 'Скачать',
         openMenu: 'Открыть меню',
         previousMonth: 'Предыдущий месяц',
         nextMonth: 'Следующий месяц',
@@ -36,7 +35,6 @@ export const messages = {
     },
     en: {
         cancel: 'Cancel',
-        download: 'Download',
         openMenu: 'Open menu',
         previousMonth: 'Previous month',
         nextMonth: 'Next month',

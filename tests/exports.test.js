@@ -15,10 +15,10 @@ describe('публичная поверхность пакета', () => {
 
     it('ровно пятнадцать компонентов и плагин', () => {
         expect(Object.keys(pkg).sort()).toEqual([
+            'ActionPill',
             'ConfirmationModal',
             'DataTable',
             'Dot',
-            'DownloadLink',
             'DropdownButtonWithAction',
             'ErrorMessages',
             'HamburgerMenu',
