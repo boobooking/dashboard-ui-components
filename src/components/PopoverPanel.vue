@@ -26,7 +26,9 @@
             :class="panelClass"
             :role="panelRole"
             :aria-orientation="panelRole === 'menu' ? 'vertical' : null"
-            :aria-labelledby="buttonId"
+            :aria-labelledby="panelLabel === null ? buttonId : null"
+            :aria-label="panelLabel"
+            :tabindex="panelFocusable ? 0 : null"
             @beforetoggle="onBeforeToggle"
             @toggle="onToggle"
             @click="onClick"
@@ -47,7 +49,7 @@ import { moveMenuFocus } from "../menuFocus.js";
 // Внутренний компонент пакета: на нём стоят меню PopoverMenu, список
 // SelectSingle (DropdownButton) и календарь PickDay.
 export default {
-    emits: ["update:modelValue"],
+    emits: ["update:modelValue", "toggle"],
 
     props: {
         modelValue: {
@@ -95,6 +97,19 @@ export default {
         panelRole: {
             type: String,
             default: null,
+        },
+        // Своё доступное имя панели вместо имени кнопки: у подсказки
+        // TextPopover область — «Полный текст», а кнопка — «Показать текст».
+        panelLabel: {
+            type: String,
+            default: null,
+        },
+        // tabindex="0" у панели: длинное содержимое прокручивается
+        // с клавиатуры во всех браузерах — прокручиваемый блок сам получает
+        // фокус не везде.
+        panelFocusable: {
+            type: Boolean,
+            default: false,
         },
         // Фокус был внутри панели при закрытии — после закрытия он
         // возвращается на кнопку: иначе он пропал бы со страницы, и Tab
@@ -149,6 +164,7 @@ export default {
                 }
 
                 this.stopListening();
+                this.reportPanelShown(false);
 
                 if (this.panelIsOpen) {
                     this.panelIsOpen = false;
@@ -165,6 +181,10 @@ export default {
         this.stopArrows = null;
         // Был ли фокус внутри панели, когда она начала закрываться.
         this.focusWasInside = false;
+        // Открыта ли панель в браузере сейчас — по последнему событию toggle
+        // или пропаже содержимого. Не panelIsOpen: тот принимает входящее
+        // значение раньше, чем браузер его подтвердит.
+        this.panelShown = false;
     },
 
     mounted() {
@@ -200,6 +220,21 @@ export default {
             if (isPopoverOpen(panel)) {
                 panel.hidePopover();
             }
+        },
+
+        // Событие toggle — о фактическом состоянии панели по любой причине,
+        // в том числе по входящему modelValue: подавление эха
+        // update:modelValue его не касается. Только при изменении: браузер
+        // объединяет переключения подряд, и событие сообщает последнее
+        // наблюдаемое состояние, а не каждое краткое. При размонтировании
+        // события нет — подписчик убирает своё сам.
+        reportPanelShown(isOpen) {
+            if (this.panelShown === isOpen) {
+                return;
+            }
+
+            this.panelShown = isOpen;
+            this.$emit("toggle", isOpen);
         },
 
         onClick() {
@@ -240,6 +275,7 @@ export default {
         // фактическому состоянию панели, а не по newState: toggle мог прийти
         // после размонтирования, устареть или запоздать за содержимым,
         // которое пропало и унесло панель из DOM, — такая панель закрыта.
+        // Фактическое состояние уходит и событием toggle.
         onToggle() {
             this.stopListening();
 
@@ -256,6 +292,8 @@ export default {
             if (!isOpen) {
                 this.restoreFocus(panel);
             }
+
+            this.reportPanelShown(isOpen);
 
             if (isOpen === this.panelIsOpen) {
                 return;

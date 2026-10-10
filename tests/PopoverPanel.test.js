@@ -119,4 +119,131 @@ describe('PopoverPanel', () => {
         expect(document.body.querySelector('button')).toBeNull()
         expect(document.body.querySelector('[popover]')).toBeNull()
     })
+
+    it('panel-label — своё имя панели вместо имени кнопки', () => {
+        const wrapper = mountPanel({ props: { panelRole: 'region', panelLabel: 'Полный текст' } })
+
+        expect(panelOf(wrapper).attributes('aria-label')).toBe('Полный текст')
+        expect(panelOf(wrapper).attributes('aria-labelledby')).toBeUndefined()
+    })
+
+    it('без panel-label имя панели — от кнопки', () => {
+        const wrapper = mountPanel({ props: { panelRole: 'region' } })
+
+        expect(panelOf(wrapper).attributes('aria-label')).toBeUndefined()
+        expect(panelOf(wrapper).attributes('aria-labelledby')).toBe(buttonOf(wrapper).attributes('id'))
+    })
+
+    it('panel-focusable — tabindex="0" у панели, без него — нет', () => {
+        expect(panelOf(mountPanel({ props: { panelFocusable: true } })).attributes('tabindex')).toBe('0')
+        expect(panelOf(mountPanel()).attributes('tabindex')).toBeUndefined()
+    })
+})
+
+describe('PopoverPanel: событие toggle', () => {
+    // v-model, как у страницы: событие возвращается пропом.
+    function mountWithModel() {
+        const wrapper = mountPanel({
+            props: {
+                modelValue: false,
+                'onUpdate:modelValue': (value) => wrapper.setProps({ modelValue: value }),
+            },
+        })
+
+        return wrapper
+    }
+
+    it('кнопка открывает и закрывает — toggle(true), toggle(false)', async () => {
+        const wrapper = mountPanel()
+
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+
+        expect(wrapper.emitted('toggle')).toEqual([[true], [false]])
+    })
+
+    it('modelValue true на монтировании — toggle(true), эха update:modelValue нет', async () => {
+        const wrapper = mountPanel({ props: { modelValue: true } })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(true)
+        expect(wrapper.emitted('toggle')).toEqual([[true]])
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
+    it('входящий modelValue открывает и закрывает — toggle на каждое, эха нет', async () => {
+        const wrapper = mountPanel()
+
+        await wrapper.setProps({ modelValue: true })
+        await settle()
+        await wrapper.setProps({ modelValue: false })
+        await settle()
+
+        expect(wrapper.emitted('toggle')).toEqual([[true], [false]])
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
+    it('открыли кнопкой, закрыли через v-model — toggle(false)', async () => {
+        const wrapper = mountWithModel()
+
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        await wrapper.setProps({ modelValue: false })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(wrapper.emitted('toggle')).toEqual([[true], [false]])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true]])
+    })
+
+    it('состояние не изменилось — toggle нет', async () => {
+        const wrapper = mountPanel()
+
+        await wrapper.setProps({ modelValue: false })
+        await settle()
+
+        expect(wrapper.emitted('toggle')).toBeUndefined()
+    })
+
+    it('содержимое пропало у открытой панели — toggle(false) и update:modelValue(false)', async () => {
+        const wrapper = mountPanel()
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+
+        await wrapper.setProps({ hasContent: false })
+        await settle()
+
+        expect(wrapper.emitted('toggle')).toEqual([[true], [false]])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
+    })
+
+    it('открытие → пропажа содержимого → запоздавший браузерный toggle: второго toggle нет', async () => {
+        const wrapper = mountPanel()
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+
+        // Закрытие поставлено в очередь браузера, и тут же пропало содержимое:
+        // toggle закрытия приходит уже после пропажи.
+        await buttonOf(wrapper).trigger('click')
+        await wrapper.setProps({ hasContent: false })
+        await settle()
+
+        expect(wrapper.emitted('toggle')).toEqual([[true], [false]])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true], [false]])
+    })
+
+    it('размонтирование открытой панели — toggle(false) нет', async () => {
+        // @vue/test-utils очищает emitted() при размонтировании, поэтому вызовы пишет обработчик.
+        const toggles = []
+        const wrapper = mountPanel({ props: { onToggle: (isOpen) => toggles.push(isOpen) } })
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+
+        wrapper.unmount()
+        await settle()
+
+        expect(toggles).toEqual([true])
+    })
 })
