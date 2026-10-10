@@ -2697,13 +2697,13 @@ phone;status
 
 ```bash
 W=.superpowers/sdd/2026-10-10-colors-pills-text-popover
-npm run build > $W/t10-build.log 2>&1 && npx vite build --config vite.playground.config.js --outDir $W/pg --emptyOutDir --base ./ >> $W/t10-build.log 2>&1; echo "build exit $?"
+npm run build > $W/t10-build.log 2>&1 && npx vite build --config vite.playground.config.js --outDir "$PWD/$W/pg" --emptyOutDir --base ./ >> $W/t10-build.log 2>&1; echo "build exit $?"
 grep -iE "warn|error" $W/t10-build.log
 ls $W/pg
 rm -rf $W/pg
 ```
 
-Expected: `build exit 0`, grep — пусто, в `pg` есть `index.html`, `host.html`, `report.csv`.
+Expected: `build exit 0`, grep — пусто, в `pg` есть `index.html`, `host.html`, `report.csv`. `outDir` — абсолютный: `vite.playground.config.js` задаёт `root: 'playground'`, и относительный путь Vite отсчитал бы от него.
 
 - [ ] **Step 7: Коммит**
 
