@@ -460,14 +460,36 @@ exportOrders() {
 любой причине, в том числе по входящему `modelValue`. Подавление эха
 `update:modelValue` на `toggle` не распространяется:
 
+- `toggle` объявлено в `emits`;
 - `created()` — `this.panelShown = false`: открыта ли панель в браузере
-  сейчас, по последнему событию;
-- `onToggle()` — после расчёта фактического `isOpen`: если `isOpen` не равно
-  `panelShown`, `panelShown = isOpen` и `$emit('toggle', isOpen)`; затем,
-  как сейчас, сравнение с `panelIsOpen` и `update:modelValue`;
+  сейчас, по последнему событию. Отдельное поле, а не `panelIsOpen`:
+  `panelIsOpen` принимает входящее значение раньше, чем браузер его
+  подтвердит;
+- правило «событие только при изменении» — в одном методе:
+
+  ```js
+  reportPanelShown(isOpen) {
+      if (this.panelShown === isOpen) {
+          return;
+      }
+
+      this.panelShown = isOpen;
+      this.$emit("toggle", isOpen);
+  },
+  ```
+
+- `onToggle()` — после расчёта фактического `isOpen` вызывает
+  `reportPanelShown(isOpen)`; затем, как сейчас, сравнение с `panelIsOpen`
+  и `update:modelValue`;
 - обработчик `hasContent` при `false`: браузер не присылает `toggle`, удаляя
-  открытую панель из DOM, — если `panelShown`, то `panelShown = false`
-  и `$emit('toggle', false)`;
+  открытую панель из DOM, — вызывает `reportPanelShown(false)`. Запоздавший
+  браузерный `toggle` после этого застаёт `panelShown === false` и второго
+  события не даёт;
+- `toggle` сообщает последнее наблюдаемое состояние, а не каждое краткое
+  переключение: браузер объединяет переключения подряд, и открытие с
+  немедленным закрытием может не дать ни одного события;
+- при размонтировании `toggle(false)` нет: `TextPopover` снимает запрет
+  выделения сам в `beforeUnmount`;
 - без Popover API событий `toggle` нет: панель видна в потоке всегда.
 
 Меню, список `SelectSingle` и календарь новых пропов не передают и `toggle`
@@ -544,8 +566,8 @@ exportOrders() {
 | `Dot` (в существующем или новом файле) | `mark` каждого цвета; `withPulse` |
 | `DataTable.test.js` | тесты `rowColor` заменяются: полоска в первой видимой ячейке при цвете; нет при `null`, неизвестном цвете, не функции; строки полосатые всегда; бейджи — `InfoPill` `indigo` |
 | `DropdownButtonWithAction.test.js`, `HamburgerMenu.test.js` | шесть цветов кнопки, стрелки и пункта; пункт с `danger` — обычный, без предупреждения; тесты предупреждений удаляются |
-| `PopoverPanel.test.js` | `panelLabel` — `aria-label` без `aria-labelledby`; без него — как сейчас; `panelFocusable` — `tabindex="0"`; `toggle(true)` при открытии кнопкой, при `modelValue: true` на монтировании и при смене `modelValue` на `true`; `toggle(false)` при закрытии кнопкой, при `modelValue: false` после открытия кнопкой и при пропаже содержимого у открытой панели; без `toggle`, когда состояние не изменилось; эхо `update:modelValue` по-прежнему подавлено |
-| `TextPopover.test.js` (новый) | пустой и `null` текст — ничего; открытие кнопкой; `v-model` открывает и закрывает без эха; опустевший текст закрывает и шлёт `update:modelValue(false)`; запрет выделения: при `modelValue: true` на монтировании, при открытии кнопкой и через `v-model`; снятие: при закрытии кнопкой, через `v-model` после открытия кнопкой, при опустевшем тексте, при размонтировании; две подсказки — запрет держится, пока открыта хоть одна; имя области «Полный текст»; `tabindex="0"`; язык `en` |
+| `PopoverPanel.test.js` | `panelLabel` — `aria-label` без `aria-labelledby`; без него — как сейчас; `panelFocusable` — `tabindex="0"`; `toggle(true)` при открытии кнопкой, при `modelValue: true` на монтировании и при смене `modelValue` на `true`; `toggle(false)` при закрытии кнопкой, при `modelValue: false` после открытия кнопкой и при пропаже содержимого у открытой панели; без `toggle`, когда состояние не изменилось; открытие → пропажа содержимого → запоздавший браузерный `toggle`: одно `toggle(false)`, второго нет; без `toggle` при размонтировании; эхо `update:modelValue` по-прежнему подавлено |
+| `TextPopover.test.js` (новый) | пустой и `null` текст — ничего; открытие кнопкой; `v-model` открывает и закрывает без эха; опустевший текст закрывает и шлёт `update:modelValue(false)`; запрет выделения: при `modelValue: true` на монтировании, при открытии кнопкой и через `v-model`; снятие: при закрытии кнопкой, через `v-model` после открытия кнопкой, при опустевшем тексте, при размонтировании; открытие → опустевший текст → запоздавший браузерный `toggle`: счётчик запретов меняется один раз, стили `<html>` возвращаются; две подсказки — запрет держится, пока открыта хоть одна; имя области «Полный текст»; `tabindex="0"`; язык `en` |
 | `i18n.test.js` | случаи `DownloadLink` удаляются; `TextPopover` на `ru`, `en`, по плагину |
 | `exports.test.js` | новый список экспортов, `downloadFile` — функция |
 | `ssrFixtures.js` | `InfoPill`, `ActionPill`, `TextPopover` вместо `SmallBadge`, `DownloadLink` |
