@@ -10,6 +10,7 @@
                 class="bb:flex bb:w-full"
                 v-model="popupIsOpen"
                 align="start"
+                return-focus
                 panel-class="bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"
             >
                 <template #trigger="trigger">
@@ -69,6 +70,7 @@ import "pikaday/css/pikaday.css";
 import PopoverPanel from "./PopoverPanel.vue";
 import Eraser from "./Eraser.vue";
 import { formatDay, parseDay } from "../date.js";
+import { moveDayFocus, pickOnClick } from "../dayFocus.js";
 import { withLang } from "../lang.js";
 
 export default {
@@ -97,9 +99,12 @@ export default {
     },
 
     created() {
-        // Нереактивные поля: инстанс pikaday нельзя заворачивать в прокси Vue.
+        // Нереактивные поля: инстанс pikaday нельзя заворачивать в прокси Vue,
+        // а снятие слушателей клавиатуры в шаблоне не нужно.
         this.picker = null;
         this.isUnmounted = false;
+        this.stopPickOnClick = null;
+        this.stopDayFocus = null;
     },
 
     async mounted() {
@@ -135,10 +140,16 @@ export default {
                 this.$emit("changed");
             },
         });
+
+        // Календарь с клавиатуры: dayFocus.js.
+        this.stopPickOnClick = pickOnClick(this.$refs.container, () => this.$refs.trigger);
+        this.syncDayFocus();
     },
 
     beforeUnmount() {
         this.isUnmounted = true;
+        this.stopPickOnClick?.();
+        this.stopDayFocus?.();
         this.picker?.destroy();
     },
 
@@ -150,6 +161,10 @@ export default {
     },
 
     watch: {
+        popupIsOpen() {
+            this.syncDayFocus();
+        },
+
         // null и undefined — как пустая строка: родитель мог сбросить значение в null.
         modelValue(newValue) {
             const day = newValue ?? "";
@@ -160,6 +175,16 @@ export default {
     },
 
     methods: {
+        // Стрелки ведут фокус по дням, пока календарь открыт и создан.
+        syncDayFocus() {
+            this.stopDayFocus?.();
+            this.stopDayFocus = null;
+
+            if (this.popupIsOpen && this.picker !== null) {
+                this.stopDayFocus = moveDayFocus(this.$refs.container, this.picker);
+            }
+        },
+
         // Программная установка без onSelect: значение пришло снаружи, и возвращать
         // его родителю незачем — update:modelValue ушёл бы обратно эхом.
         syncPicker(value) {
