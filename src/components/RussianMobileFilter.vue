@@ -15,14 +15,17 @@
                         @keydown.enter="commit"
                         @paste.prevent="onPaste"
                     />
-                    <cross-button
-                        v-show="digits.length > 0"
-                        size="small"
-                        @mousedown.prevent
-                        @clicked="clear"
-                        class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
-                    />
                 </label>
+                <!-- Ластик рядом с <label>, а не внутри: браузер собирает имя
+                     поля из всего текста <label>, и подпись ластика «Очистить»
+                     стала бы именем поля. -->
+                <cross-button
+                    v-show="digits.length > 0"
+                    size="small"
+                    @mousedown.prevent
+                    @clicked="clear"
+                    class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
+                />
             </div>
         </div>
     </div>

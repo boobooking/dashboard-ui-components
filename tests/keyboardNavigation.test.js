@@ -244,3 +244,27 @@ describe('поле даты', () => {
         expect(wrapper.find('button[popovertarget]').get('.bb\\:sr-only').text()).toBe('от 05.10.2026')
     })
 })
+
+// Браузер собирает имя поля из всего текста его <label>, вместе со скрытыми
+// подписями кнопок внутри. Ластик внутри <label> отдал бы полю своё имя
+// «Очистить», поэтому кнопок в <label> поля нет.
+describe('имя поля', () => {
+    const fields = [
+        { name: 'Search', mount: () => mount(Search, { props: { header: 'Поиск', modelValue: 'abc' } }) },
+        { name: 'RussianMobileFilter', mount: () => mount(RussianMobileFilter, { props: { header: 'Телефон', modelValue: '+79991234567' }, attachTo: document.body }) },
+        { name: 'SelectDateInterval', mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', dateFrom: '01.10.2026', dateTo: '15.10.2026' } }) },
+    ]
+
+    for (const testCase of fields) {
+        it(`${testCase.name}: ластик не в <label> поля`, async () => {
+            const wrapper = testCase.mount()
+            await vi.dynamicImportSettled()
+            await flushPromises()
+
+            expect(crossButton(wrapper)?.exists()).toBe(true)
+            for (const input of wrapper.findAll('input')) {
+                expect(input.element.closest('label')?.querySelector('button') ?? null).toBeNull()
+            }
+        })
+    }
+})
