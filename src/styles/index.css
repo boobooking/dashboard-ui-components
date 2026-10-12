@@ -110,3 +110,30 @@
 .bb-dashboard-ui .pika-single {
     border: 0;
 }
+
+/*
+ * Фокус в календаре с клавиатуры (src/dayFocus.js) виден: pikaday.css снимает
+ * обводку у кнопок дней и стрелок месяцев, а списки месяца и года прячет
+ * прозрачными поверх подписи. День под фокусом — как под мышью, стрелка —
+ * яркая и в обводке, подпись — в обводке, пока фокус в её списке с клавиатуры.
+ * Мышь фокус сюда не ставит: Pikaday отменяет mousedown. Правила вне слоёв —
+ * по той же причине, что и правило выше.
+ */
+.bb-dashboard-ui .pika-button:focus {
+    color: #fff;
+    background: #ff8000;
+    box-shadow: none;
+    border-radius: 3px;
+}
+
+.bb-dashboard-ui .pika-prev:focus,
+.bb-dashboard-ui .pika-next:focus {
+    opacity: 1;
+    outline: 2px solid #ff8000;
+    border-radius: 3px;
+}
+
+.bb-dashboard-ui .pika-label:has(.pika-select:focus-visible) {
+    outline: 2px solid #ff8000;
+    border-radius: 3px;
+}
