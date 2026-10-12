@@ -11,7 +11,7 @@
                     />
                     <eraser
                         v-show="inputNeedsEraser"
-                        @click="clearInput"
+                        @clicked="clearInput"
                         class="bb:pr-2 bb:h-full"
                     />
                 </label>

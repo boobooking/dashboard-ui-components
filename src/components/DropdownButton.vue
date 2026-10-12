@@ -36,7 +36,7 @@
                     <slot></slot>
                 </template>
             </popover-panel>
-            <eraser v-if="needsEraser" @click="$emit('erased')" class="bb:pr-2 bb:h-full"></eraser>
+            <eraser v-if="needsEraser" @clicked="$emit('erased')" class="bb:pr-2 bb:h-full"></eraser>
         </div>
     </div>
 </template>

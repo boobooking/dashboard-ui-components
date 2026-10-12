@@ -60,7 +60,7 @@
                 </template>
             </popover-panel>
 
-            <eraser v-if="needsEraser" @click="clearPicker" class="bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
+            <eraser v-if="needsEraser" @clicked="clearPicker" class="bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
         </div>
     </div>
 </template>

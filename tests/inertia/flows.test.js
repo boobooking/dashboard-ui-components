@@ -6,10 +6,10 @@ import {
     back,
     blocked,
     clickCross,
-    cross,
     go,
     hanging,
     hasCross,
+    pressCross,
     settle,
     start,
     visit,
@@ -112,7 +112,7 @@ it('5b. переход назад отменён: карточка на экра
     await visit('/users/3/edit')
     hanging.add('/users?page=4')
 
-    cross().click()
+    await pressCross()
     await settle()
     router.cancelAll()
     await settle()

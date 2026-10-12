@@ -3,7 +3,7 @@
         type="button"
         tabindex="-1"
         class="bb-dashboard-ui bb:flex bb:items-center bb:justify-center bb:bg-transparent bb:cursor-pointer bb:text-gray-400 bb:focus:outline-hidden bb:hover:text-gray-600"
-        @click.prevent="$emit('clicked')"
+        @click.prevent="press"
     >
         <!-- Подпись для скринридера — в слоте. Содержимое кнопки не ловит
              указатель и без курсора-руки: см. README, «Клавиатурная
@@ -16,7 +16,12 @@
 </template>
 
 <script>
+import { withPress } from "../press.js";
+
+// Нажатие — с анимацией, clicked — после неё: src/press.js.
 export default {
+    mixins: [withPress],
+
     emits: ["clicked"],
 };
 </script>

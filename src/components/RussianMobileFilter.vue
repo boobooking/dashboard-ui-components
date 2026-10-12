@@ -18,7 +18,7 @@
                     <eraser
                         v-show="digits.length > 0"
                         @mousedown.prevent
-                        @click="clear"
+                        @clicked="clear"
                         class="bb:pr-2 bb:h-full"
                     />
                 </label>

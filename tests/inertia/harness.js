@@ -151,8 +151,16 @@ export const cross = () => [...document.querySelectorAll('button')]
 
 export const hasCross = () => cross() !== null
 
+// Нажатие крестика: переход начинается после анимации нажатия
+// (src/press.js), поэтому её дожидаемся.
+export async function pressCross() {
+    const button = cross()
+    button.click()
+    await Promise.all(button.getAnimations().map((animation) => animation.finished))
+}
+
 export async function clickCross() {
-    cross().click()
+    await pressCross()
     await settle()
 }
 

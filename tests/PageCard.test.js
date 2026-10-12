@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, reactive, ref } from 'vue'
 import PageCard from '../src/components/PageCard.vue'
 import { dashboardUi, injectSettings } from '../src/plugin.js'
@@ -98,7 +98,15 @@ function mountPage({ address = '/list', plugin = 'windows', props = {}, attrs = 
     const cross = () => wrapper.findAll('button').find((button) => button.find(CROSS_PATH).exists())
     const chain = () => wrapper.vm.uiSettings.windows.state.windows.map((item) => [item.key, item.returnAddress])
 
-    return { wrapper, page, current, navigate, open, goTo, card, cross, chain, errors, warnings }
+    // Нажатие крестика: переход — после анимации нажатия (src/press.js).
+    async function pressCross() {
+        const button = cross()
+        await button.trigger('click')
+        await Promise.all(button.element.getAnimations().map((animation) => animation.finished))
+        await flushPromises()
+    }
+
+    return { wrapper, page, current, navigate, open, goTo, card, cross, pressCross, chain, errors, warnings }
 }
 
 describe('PageCard: адрес возврата', () => {
@@ -106,7 +114,7 @@ describe('PageCard: адрес возврата', () => {
         const page = mountPage({ address: '/groups?status=sending' })
         await page.open('/groups/A/orders')
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(page.navigate).toHaveBeenCalledTimes(1)
         expect(page.navigate).toHaveBeenCalledWith('/groups?status=sending')
@@ -125,14 +133,15 @@ describe('PageCard: адрес возврата', () => {
         expect(page.warnings).toEqual([])
     })
 
-    it('двойной клик по крестику — два перехода на одну цель', async () => {
+    // Второй клик приходится на анимацию первого нажатия и не считается.
+    it('двойной клик по крестику — один переход', async () => {
         const page = mountPage()
         await page.open('/card')
 
         await page.cross().trigger('click')
-        await page.cross().trigger('click')
+        await page.pressCross()
 
-        expect(page.navigate.mock.calls).toEqual([['/list'], ['/list']])
+        expect(page.navigate.mock.calls).toEqual([['/list']])
     })
 
     it('уходящая карточка окно новой страницы не берёт', async () => {
@@ -164,7 +173,7 @@ describe('PageCard: без адреса возврата', () => {
         const page = mountPage({ address: '/card', show: true, props: { fallbackUrl: '/users' } })
         await settle()
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(page.navigate).toHaveBeenCalledWith('/users')
     })
@@ -175,7 +184,7 @@ describe('PageCard: без адреса возврата', () => {
 
         page.page.props.fallbackUrl = '/b'
         await settle()
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(page.chain()).toEqual([['/card', null]])
         expect(page.wrapper.vm.uiSettings.windows.state.windows[0].fallbackAddress).toBe('/b')
@@ -195,7 +204,7 @@ describe('PageCard: без адреса возврата', () => {
         const page = mountPage({ plugin: { navigate }, show: true, props: { fallbackUrl: '/users' } })
         await settle()
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(navigate).toHaveBeenCalledWith('/users')
     })
@@ -205,7 +214,7 @@ describe('PageCard: без адреса возврата', () => {
         const page = mountPage({ plugin: null, show: true, props: { fallbackUrl: '/users' } })
         await settle()
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(assign).toHaveBeenCalledWith('/users')
     })
@@ -218,7 +227,7 @@ describe('PageCard: без адреса возврата', () => {
         page.page.show = true
         await settle()
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(assign).toHaveBeenCalledWith('/list')
     })
@@ -232,7 +241,7 @@ describe('PageCard: ключ окна', () => {
         page.current.value = '/groups/B/orders'
         page.page.props.windowKey = 'group:B'
         await settle()
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(page.navigate).toHaveBeenCalledWith('/groups/A/orders')
         expect(page.warnings).toEqual([])
@@ -247,7 +256,7 @@ describe('PageCard: ключ окна', () => {
         await settle()
         page.page.props.windowKey = 'A'
         await settle()
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(warn).toHaveBeenCalledTimes(1)
         expect(warn.mock.calls[0][0]).toBe('PageCard: ключ окна сменился на «B» без смены страницы — карточка остаётся в окне «A»')
@@ -262,7 +271,7 @@ describe('PageCard: ключ окна', () => {
 
         page.page.props.windowKey = 'B'
         await settle()
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(warn).toHaveBeenCalledTimes(1)
         expect(page.chain()).toEqual([['A', '/list']])
@@ -274,7 +283,7 @@ describe('PageCard: ключ окна', () => {
         await page.open('/users/1/edit')
         await page.goTo('/users/2/edit')
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(page.navigate).toHaveBeenCalledWith('/users/1/edit')
         expect(page.warnings).toEqual([])
@@ -285,7 +294,7 @@ describe('PageCard: ключ окна', () => {
         await page.open('/users/1/edit')
         await page.goTo('/users/2/edit')
 
-        await page.cross().trigger('click')
+        await page.pressCross()
 
         expect(page.navigate).toHaveBeenCalledWith('/users/1/edit')
     })
