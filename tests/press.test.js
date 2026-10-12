@@ -1,8 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import Closer from '../src/components/Closer.vue'
-import Eraser from '../src/components/Eraser.vue'
+import CrossButton from '../src/components/CrossButton.vue'
 import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
@@ -43,12 +42,12 @@ const CROSS_PATH = 'path[d="M6 18L18 6M6 6l12 12"]'
 const crossButton = (wrapper) => wrapper.findAll('button').find((button) => button.find(CROSS_PATH).exists())
 
 const crosses = [
-    { name: 'Closer', mount: () => mount(Closer, { attachTo: document.body }) },
-    { name: 'Eraser', mount: () => mount(Eraser, { attachTo: document.body }) },
+    { size: 'small', mount: (options = {}) => mount(CrossButton, { props: { size: 'small' }, attachTo: document.body, ...options }) },
+    { size: 'large', mount: (options = {}) => mount(CrossButton, { props: { size: 'large' }, attachTo: document.body, ...options }) },
 ]
 
 for (const cross of crosses) {
-    describe(`${cross.name}: нажатие`, () => {
+    describe(`CrossButton, size ${cross.size}: нажатие`, () => {
         it('кнопка «вдавливается», clicked — после анимации', async () => {
             const animate = vi.spyOn(Element.prototype, 'animate')
             const wrapper = cross.mount()
@@ -97,8 +96,7 @@ for (const cross of crosses) {
 
         it('размонтирование во время анимации — без события и без ошибок', async () => {
             const errors = []
-            const wrapper = mount(cross.name === 'Closer' ? Closer : Eraser, {
-                attachTo: document.body,
+            const wrapper = cross.mount({
                 global: { config: { errorHandler: (error) => errors.push(error) } },
             })
             const element = wrapper.element

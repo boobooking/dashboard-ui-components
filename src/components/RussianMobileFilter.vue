@@ -15,11 +15,12 @@
                         @keydown.enter="commit"
                         @paste.prevent="onPaste"
                     />
-                    <eraser
+                    <cross-button
                         v-show="digits.length > 0"
+                        size="small"
                         @mousedown.prevent
                         @clicked="clear"
-                        class="bb:pr-2 bb:h-full"
+                        class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
                     />
                 </label>
             </div>
@@ -30,7 +31,7 @@
 <script>
 import IMask from "imask";
 import ElementHeader from "./ElementHeader.vue";
-import Eraser from "./Eraser.vue";
+import CrossButton from "./CrossButton.vue";
 import { normalizePhoneDigits, toDigits, toParam } from "../phone.js";
 
 const DEBOUNCE_MS = 400;
@@ -39,7 +40,7 @@ const MIN_DIGITS_FOR_DEBOUNCE = 3;
 export default {
     components: {
         ElementHeader,
-        Eraser,
+        CrossButton,
     },
 
     emits: ["update:modelValue", "changed"],

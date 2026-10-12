@@ -36,17 +36,17 @@
                     <slot></slot>
                 </template>
             </popover-panel>
-            <eraser v-if="needsEraser" @clicked="$emit('erased')" class="bb:pr-2 bb:h-full"></eraser>
+            <cross-button v-if="needsEraser" size="small" @clicked="$emit('erased')" class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"></cross-button>
         </div>
     </div>
 </template>
 
 <script>
 import PopoverPanel from "./PopoverPanel.vue";
-import Eraser from "./Eraser.vue";
+import CrossButton from "./CrossButton.vue";
 
 export default {
-    components: { PopoverPanel, Eraser },
+    components: { PopoverPanel, CrossButton },
 
     emits: ["update:isOpen", "erased"],
 

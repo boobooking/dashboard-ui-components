@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from 'vue'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import PickDay from '../src/components/PickDay.vue'
-import Eraser from '../src/components/Eraser.vue'
+import CrossButton from '../src/components/CrossButton.vue'
 import { formatDay } from '../src/date.js'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
@@ -179,14 +179,14 @@ describe('PickDay: календарь на Popover API', () => {
     it('пока календарь открыт, поле отключено, а ластика нет', async () => {
         const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
         await pikadayLoaded()
-        expect(wrapper.findComponent(Eraser).exists()).toBe(true)
+        expect(wrapper.findComponent(CrossButton).exists()).toBe(true)
         expect(wrapper.get('input').attributes('disabled')).toBeUndefined()
 
         await triggerOf(wrapper).trigger('click')
         await settle()
 
         expect(wrapper.get('input').attributes('disabled')).toBeDefined()
-        expect(wrapper.findComponent(Eraser).exists()).toBe(false)
+        expect(wrapper.findComponent(CrossButton).exists()).toBe(false)
     })
 
     // Кнопка лежит поверх поля, и в браузере клик по полю достаётся ей.

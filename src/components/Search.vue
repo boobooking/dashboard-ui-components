@@ -9,10 +9,11 @@
                         v-model.trim="search"
                         @input="startSearch"
                     />
-                    <eraser
+                    <cross-button
                         v-show="inputNeedsEraser"
+                        size="small"
                         @clicked="clearInput"
-                        class="bb:pr-2 bb:h-full"
+                        class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
                     />
                 </label>
             </div>
@@ -22,12 +23,12 @@
 
 <script>
 import ElementHeader from "./ElementHeader.vue";
-import Eraser from "./Eraser.vue";
+import CrossButton from "./CrossButton.vue";
 
 export default {
     components: {
         ElementHeader,
-        Eraser,
+        CrossButton,
     },
 
     emits: ["update:modelValue", "changed"],

@@ -7,9 +7,9 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty('Modal')
     })
 
-    // Части SelectSingle, SelectDateInterval и PageCard: проекты их
-    // не используют.
-    it.each(['Popup', 'PickDay', 'Closer'])('%s — внутренний, не экспортируется', (name) => {
+    // Части SelectSingle, SelectDateInterval, PageCard и фильтров: проекты
+    // их не используют.
+    it.each(['Popup', 'PickDay', 'CrossButton'])('%s — внутренний, не экспортируется', (name) => {
         expect(pkg).not.toHaveProperty(name)
     })
 

@@ -60,7 +60,7 @@
                 </template>
             </popover-panel>
 
-            <eraser v-if="needsEraser" @clicked="clearPicker" class="bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
+            <cross-button v-if="needsEraser" size="small" @clicked="clearPicker" class="bb:absolute bb:right-0 bb:top-0 bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
         </div>
     </div>
 </template>
@@ -68,7 +68,7 @@
 <script>
 import "pikaday/css/pikaday.css";
 import PopoverPanel from "./PopoverPanel.vue";
-import Eraser from "./Eraser.vue";
+import CrossButton from "./CrossButton.vue";
 import { formatDay, parseDay } from "../date.js";
 import { moveDayFocus, pickOnClick } from "../dayFocus.js";
 import { withLang } from "../lang.js";
@@ -76,7 +76,7 @@ import { withLang } from "../lang.js";
 export default {
     components: {
         PopoverPanel,
-        Eraser,
+        CrossButton,
     },
 
     mixins: [withLang],

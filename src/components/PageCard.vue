@@ -25,12 +25,13 @@
         <slot :close="close"></slot>
 
         <!-- После слота: в углу карточки крестик рисуется поверх содержимого.
-             tabindex перекрывает собственный атрибут Closer, доступное имя —
+             tabindex перекрывает собственный атрибут CrossButton, доступное имя —
              скрытая подпись в его слоте.
              Порог, от которого крестик снаружи, зависит от ширины: снаружи
              нужно 1rem зазора и 2rem крестика по обе стороны карточки. -->
-        <closer
+        <cross-button
             v-if="canClose"
+            size="large"
             class="bb:absolute bb:top-0 bb:right-0 bb:mt-4 bb:mr-4 bb:w-8 bb:h-8 bb:sm:mt-6 bb:rounded-md bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
             :class="{
                 'bb:md:right-auto bb:md:left-full bb:md:mr-0 bb:md:ml-4': resolvedWidth === 'xl',
@@ -39,12 +40,12 @@
             }"
             tabindex="0"
             @clicked="close"
-        >{{ texts.back }}</closer>
+        >{{ texts.back }}</cross-button>
     </div>
 </template>
 
 <script>
-import Closer from "./Closer.vue";
+import CrossButton from "./CrossButton.vue";
 import { withLang } from "../lang.js";
 import { assign, normalizeAddress, pathOf, release, setFallback, sync } from "../windows.js";
 
@@ -58,7 +59,7 @@ const WIDTHS = ["xl", "4xl", "7xl"];
 // @tailwindcss/forms. box-border задан явно — ресет его не даёт, а без
 // preflight приложения карточка с отступами стала бы шире.
 export default {
-    components: { Closer },
+    components: { CrossButton },
 
     mixins: [withLang],
 
