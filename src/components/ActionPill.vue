@@ -13,11 +13,12 @@
         @click="$emit('click')"
     >
         <!-- Пока идёт работа — часы вместо иконки действия. Неизвестная
-             иконка — пилюля без иконки. -->
-        <clock-icon v-if="isLoading"/>
-        <download-icon v-else-if="icon === 'download'"/>
-        <refresh-icon v-else-if="icon === 'refresh'"/>
-        <span class="bb:ml-1" v-text="label"></span>
+             иконка — пилюля без иконки. Содержимое кнопки не ловит указатель
+             и без курсора-руки: см. README, «Клавиатурная навигация». -->
+        <clock-icon v-if="isLoading" class="bb:pointer-events-none bb:cursor-default"/>
+        <download-icon v-else-if="icon === 'download'" class="bb:pointer-events-none bb:cursor-default"/>
+        <refresh-icon v-else-if="icon === 'refresh'" class="bb:pointer-events-none bb:cursor-default"/>
+        <span class="bb:ml-1 bb:pointer-events-none bb:cursor-default" v-text="label"></span>
     </button>
 </template>
 

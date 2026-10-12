@@ -49,9 +49,11 @@
                     class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:text-sm bb:font-medium bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
                     :class="mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-500 bb:hover:bg-gray-50' : colorClass(mainColor, 'button')"
                 >
-                    <span class="bb:sr-only">{{ texts.openMenu }}</span>
+                    <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
+                         см. README, «Клавиатурная навигация». -->
+                    <span class="bb:sr-only bb:pointer-events-none bb:cursor-default">{{ texts.openMenu }}</span>
                     <svg
-                        class="bb:h-5 bb:w-5"
+                        class="bb:h-5 bb:w-5 bb:pointer-events-none bb:cursor-default"
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20"
                         fill="currentColor"

@@ -7,7 +7,9 @@
                 class="bb:border-t-2 bb:border-transparent bb:pt-4 bb:pr-1 bb:inline-flex bb:items-center bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:text-gray-700 bb:hover:border-indigo-700"
                 @click="followLink($event, previousPageUrl)"
             >
-                <arrow-narrow-left class="bb:mr-3 bb:h-5 bb:w-5 bb:text-gray-400"/>
+                <!-- Содержимое ссылки не ловит указатель и без курсора-руки:
+                     см. README, «Клавиатурная навигация». -->
+                <arrow-narrow-left class="bb:mr-3 bb:h-5 bb:w-5 bb:text-gray-400 bb:pointer-events-none bb:cursor-default"/>
                 {{ texts.previousPage }}
             </a>
         </div>
@@ -24,7 +26,7 @@
                 @click="followLink($event, nextPageUrl)"
             >
                 {{ texts.nextPage }}
-                <arrow-narrow-right class="bb:ml-3 bb:h-5 bb:w-5 bb:text-gray-400"/>
+                <arrow-narrow-right class="bb:ml-3 bb:h-5 bb:w-5 bb:text-gray-400 bb:pointer-events-none bb:cursor-default"/>
             </a>
         </div>
     </nav>

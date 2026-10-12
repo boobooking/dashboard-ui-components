@@ -30,8 +30,10 @@
                             :class="{ 'bb:bg-red-50': isDangerous, 'bb:bg-yellow-50': isWarning, 'bb:bg-gray-50': isConfirmation }"
                             @click.prevent="$emit('update:modelValue', '')"
                         >
-                            <span class="bb:sr-only">{{ texts.close }}</span>
-                            <close/>
+                            <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
+                                 см. README, «Клавиатурная навигация». -->
+                            <span class="bb:sr-only bb:pointer-events-none bb:cursor-default">{{ texts.close }}</span>
+                            <close class="bb:pointer-events-none bb:cursor-default"/>
                         </button>
                     </div>
                 </div>

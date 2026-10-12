@@ -9,6 +9,7 @@ import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction
 import PageCard from '../src/components/PageCard.vue'
 import Pagination from '../src/components/Pagination.vue'
 import PickDay from '../src/components/PickDay.vue'
+import Search from '../src/components/Search.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
 import TextPopover from '../src/components/TextPopover.vue'
 
@@ -154,7 +155,7 @@ describe('недопустимый lang: крестик PageCard', () => {
         await nextTick()
 
         const cross = wrapper.findAll('button').find((button) => button.find('path[d="M6 18L18 6M6 6l12 12"]').exists())
-        expect(cross.attributes('aria-label')).toBe('Back')
+        expect(cross.get('.bb\\:sr-only').text()).toBe('Back')
         expect(errors).toEqual([])
         // Валидатор пропа по-прежнему предупреждает — и только он.
         expect(warnings.length).toBeGreaterThan(0)
@@ -199,6 +200,28 @@ describe('PickDay: календарь', () => {
 
             expect(header).toContain(testCase.expected)
             expect(header).not.toContain(testCase.absent)
+        })
+    }
+})
+
+describe('ластик фильтров: подпись', () => {
+    const cases = [
+        { name: 'Search без плагина — «Очистить»', mount: () => mount(Search, { props: { header: 'Поиск', modelValue: 'abc' } }), expected: 'Очистить' },
+        { name: 'Search, плагин en — «Clear»', mount: () => mount(Search, { props: { header: 'Поиск', modelValue: 'abc' }, global: inApp({ lang: 'en' }) }), expected: 'Clear' },
+        {
+            name: 'SelectDateInterval: проп lang en главнее плагина ru и доходит до ластика',
+            mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', lang: 'en', dateFrom: '01.10.2026' }, global: inApp({ lang: 'ru' }) }),
+            expected: 'Clear',
+        },
+    ]
+
+    for (const testCase of cases) {
+        it(testCase.name, async () => {
+            const wrapper = testCase.mount()
+            await pikadayLoaded()
+            const eraser = wrapper.findAll('button').find((button) => button.find('path[d="M6 18L18 6M6 6l12 12"]').exists())
+
+            expect(eraser.get('.bb\\:sr-only').text()).toBe(testCase.expected)
         })
     }
 })

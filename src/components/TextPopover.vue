@@ -22,8 +22,10 @@
                 :popovertarget="trigger.popovertarget"
                 class="bb:relative bb:text-gray-400 bb:hover:text-gray-600 bb:rounded-md bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
             >
-                <span class="bb:sr-only">{{ texts.showText }}</span>
-                <eye/>
+                <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
+                     см. README, «Клавиатурная навигация». -->
+                <span class="bb:sr-only bb:pointer-events-none bb:cursor-default">{{ texts.showText }}</span>
+                <eye class="bb:pointer-events-none bb:cursor-default"/>
             </button>
         </template>
         <template #default>{{ normalizedText }}</template>

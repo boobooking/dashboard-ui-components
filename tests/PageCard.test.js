@@ -384,7 +384,7 @@ describe('PageCard: карточка', () => {
             const page = mountPage({ plugin: testCase.plugin, show: true, props: { fallbackUrl: '/list', ...testCase.props } })
             await settle()
 
-            expect(page.cross().attributes('aria-label')).toBe(testCase.expected)
+            expect(page.cross().get('.bb\\:sr-only').text()).toBe(testCase.expected)
             expect(page.warnings).toEqual([])
         })
     }

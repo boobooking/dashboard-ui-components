@@ -145,10 +145,14 @@ export async function visit(href, options = {}) {
 
 export const address = () => window.location.pathname + window.location.search
 
-export const hasCross = () => document.querySelector('button[aria-label="Назад"]') !== null
+// Крестик карточки — кнопка с доступным именем «Назад» в скрытой подписи.
+export const cross = () => [...document.querySelectorAll('button')]
+    .find((button) => button.querySelector('.bb\\:sr-only')?.textContent === 'Назад') ?? null
+
+export const hasCross = () => cross() !== null
 
 export async function clickCross() {
-    document.querySelector('button[aria-label="Назад"]').click()
+    cross().click()
     await settle()
 }
 

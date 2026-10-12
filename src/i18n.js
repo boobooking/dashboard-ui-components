@@ -32,6 +32,8 @@ export const messages = {
         back: 'Назад',
         // NotificationMessage: подпись крестика для скринридера.
         close: 'Закрыть',
+        // Ластик фильтров: подпись для скринридера.
+        clear: 'Очистить',
         // TextPopover: подпись кнопки для скринридера и имя области с текстом.
         showText: 'Показать текст',
         fullText: 'Полный текст',
@@ -57,6 +59,7 @@ export const messages = {
         resultsAfter: 'results',
         back: 'Back',
         close: 'Close',
+        clear: 'Clear',
         showText: 'Show text',
         fullText: 'Full text',
     },

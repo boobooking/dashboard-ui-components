@@ -2,10 +2,10 @@
     <div class="bb-dashboard-ui bb:flex bb:flex-col">
         <div class="bb:relative bb:flex bb:h-full">
             <!-- Календарь — PopoverPanel под полем: открывает и закрывает его
-                 браузер по popovertarget кнопки. Обёртка кнопки занимает
-                 место кнопки рядом с ластиком. Курсор и межстрочный интервал
-                 поля — на кнопке, а не на обёртке: панель календаря лежит
-                 в обёртке и унаследовала бы их. -->
+                 браузер по popovertarget кнопки. Обёртка поля и кнопки
+                 занимает место рядом с ластиком. Курсор кнопки и межстрочный
+                 интервал поля — на них самих, а не на обёртке: панель
+                 календаря лежит в обёртке и унаследовала бы их. -->
             <popover-panel
                 class="bb:flex bb:w-full"
                 v-model="popupIsOpen"
@@ -13,35 +13,43 @@
                 panel-class="bb:bg-white bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg"
             >
                 <template #trigger="trigger">
+                    <!-- Кнопка лежит поверх поля, а не вокруг него: поле внутри
+                         кнопки Vimlike считал бы кнопкой вместо неё и отбрасывал
+                         как невидимое (см. README, «Клавиатурная навигация»).
+                         Кнопка — первой: в порядке табуляции она идёт до поля.
+                         Клик по полю достаётся кнопке. -->
                     <button
                         ref="trigger"
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
-                        class="bb:flex bb:w-full bb:items-center bb:cursor-pointer bb:leading-none bb:focus:outline-hidden"
+                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus:outline-hidden"
                     >
-                        <!-- Клик по полю достаётся кнопке: у <label> и поля своё
-                             поведение активации, и клик по тексту даты или
-                             подсказке до popovertarget кнопки не дошёл бы. -->
-                        <label class="bb:min-w-24 bb:w-full bb:h-full bb:pointer-events-none">
-                            <!-- Геометрия поля выписана явно: базовый слой пакета обнуляет
-                                 отступы и рамку, а раньше их неявно задавал @tailwindcss/forms
-                                 приложения. py-2 pr-3 и рамка в 1 px — те же значения, что
-                                 давал плагин. Левого отступа нет намеренно: отступ колонки
-                                 задаёт родитель, а два сложившихся отступа уводили дату правее
-                                 заголовка. placeholder:text-sm держит подсказку на ступень
-                                 крупнее заголовка фильтра; размер получает только подсказка,
-                                 выбранная дата остаётся крупнее. -->
-                            <input
-                                :disabled="popupIsOpen"
-                                ref="field"
-                                type="text"
-                                :value="dayValue"
-                                :placeholder="placeholderText"
-                                class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:outline-hidden"
-                            />
-                        </label>
+                        <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
+                             см. README, «Клавиатурная навигация». -->
+                        <span class="bb:sr-only bb:pointer-events-none bb:cursor-default" v-text="triggerLabel"></span>
                     </button>
+                    <!-- <label> и поле не ловят указатель и под кнопкой: у них
+                         своё поведение активации, и клик по тексту даты или
+                         подсказке до popovertarget кнопки не дошёл бы. -->
+                    <label class="bb:flex bb:w-full bb:items-center bb:leading-none bb:min-w-24 bb:pointer-events-none">
+                        <!-- Геометрия поля выписана явно: базовый слой пакета обнуляет
+                             отступы и рамку, а раньше их неявно задавал @tailwindcss/forms
+                             приложения. py-2 pr-3 и рамка в 1 px — те же значения, что
+                             давал плагин. Левого отступа нет намеренно: отступ колонки
+                             задаёт родитель, а два сложившихся отступа уводили дату правее
+                             заголовка. placeholder:text-sm держит подсказку на ступень
+                             крупнее заголовка фильтра; размер получает только подсказка,
+                             выбранная дата остаётся крупнее. -->
+                        <input
+                            :disabled="popupIsOpen"
+                            ref="field"
+                            type="text"
+                            :value="dayValue"
+                            :placeholder="placeholderText"
+                            class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:outline-hidden"
+                        />
+                    </label>
                 </template>
                 <template #default>
                     <!-- Pikaday рисует календарь в этот контейнер; раскладку
@@ -51,7 +59,7 @@
                 </template>
             </popover-panel>
 
-            <eraser v-if="needsEraser" @click="clearPicker" class="bb:z-10 bb:h-full bb:pr-2"/>
+            <eraser v-if="needsEraser" @click="clearPicker" class="bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
         </div>
     </div>
 </template>
@@ -182,6 +190,11 @@ export default {
     computed: {
         hasValue() {
             return (this.modelValue ?? "").length > 0;
+        },
+
+        // Доступное имя кнопки календаря: подсказка поля и дата, как их видно.
+        triggerLabel() {
+            return [this.placeholderText, this.dayValue].filter((part) => part !== "").join(" ");
         },
 
         needsEraser() {

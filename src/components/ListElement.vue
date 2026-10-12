@@ -4,8 +4,10 @@
         @click.prevent="toggle"
         class="bb:flex bb:w-full bb:bg-white bb:cursor-pointer bb:focus:outline-hidden bb:focus:bg-indigo-100"
     >
-        <span class="bb:flex bb:w-9 bb:h-9 bb:items-center bb:justify-center">
-            <svg v-show="isChecked" class="bb:w-5 bb:h-5 bb:fill-current bb:text-green-300" viewBox="0 0 20 20">
+        <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
+             см. README, «Клавиатурная навигация». -->
+        <span class="bb:flex bb:w-9 bb:h-9 bb:items-center bb:justify-center bb:pointer-events-none bb:cursor-default">
+            <svg v-show="isChecked" class="bb:w-5 bb:h-5 bb:fill-current bb:text-green-300" viewBox="0 0 20 20" aria-hidden="true">
                 <path
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                     clip-rule="evenodd"
@@ -13,7 +15,7 @@
                 />
             </svg>
         </span>
-        <span class="bb:flex bb:h-9 bb:justify-center bb:items-center bb:pr-6 bb:whitespace-nowrap bb:select-none" v-text="name" />
+        <span class="bb:flex bb:h-9 bb:justify-center bb:items-center bb:pr-6 bb:whitespace-nowrap bb:select-none bb:pointer-events-none bb:cursor-default" v-text="name" />
     </button>
 </template>
 

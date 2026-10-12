@@ -25,7 +25,8 @@
         <slot :close="close"></slot>
 
         <!-- После слота: в углу карточки крестик рисуется поверх содержимого.
-             tabindex и aria-label перекрывают собственные атрибуты Closer.
+             tabindex перекрывает собственный атрибут Closer, доступное имя —
+             скрытая подпись в его слоте.
              Порог, от которого крестик снаружи, зависит от ширины: снаружи
              нужно 1rem зазора и 2rem крестика по обе стороны карточки. -->
         <closer
@@ -37,9 +38,8 @@
                 'bb:2xl:right-auto bb:2xl:left-full bb:2xl:mr-0 bb:2xl:ml-4': resolvedWidth === '7xl',
             }"
             tabindex="0"
-            :aria-label="texts.back"
             @clicked="close"
-        />
+        >{{ texts.back }}</closer>
     </div>
 </template>
 

@@ -6,6 +6,7 @@ import {
     back,
     blocked,
     clickCross,
+    cross,
     go,
     hanging,
     hasCross,
@@ -111,7 +112,7 @@ it('5b. переход назад отменён: карточка на экра
     await visit('/users/3/edit')
     hanging.add('/users?page=4')
 
-    document.querySelector('button[aria-label="Назад"]').click()
+    cross().click()
     await settle()
     router.cancelAll()
     await settle()

@@ -24,8 +24,10 @@
                         :popovertarget="trigger.popovertarget"
                         class="bb:flex bb:w-full bb:h-full bb:items-center bb:focus:outline-hidden bb:cursor-pointer"
                     >
+                        <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
+                             см. README, «Клавиатурная навигация». -->
                         <span
-                            class="bb:flex bb:w-full bb:h-full bb:pl-3 bb:pr-12 bb:py-2 bb:items-center bb:whitespace-nowrap bb:leading-none"
+                            class="bb:flex bb:w-full bb:h-full bb:pl-3 bb:pr-12 bb:py-2 bb:items-center bb:whitespace-nowrap bb:leading-none bb:pointer-events-none bb:cursor-default"
                             v-text="title"
                         />
                     </button>
