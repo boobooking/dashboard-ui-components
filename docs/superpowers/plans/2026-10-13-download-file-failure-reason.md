@@ -46,12 +46,16 @@
 - Consumes: `downloadFile(url): Promise<void>` из `src/download.js` (`0.16.2`).
 - Produces: отказ `downloadFile` — `Error` с полями `redirectUrl: string | null` и `status: number | null`, либо ошибка `fetch` без этих полей. Сигнатура функции и экспорты не меняются.
 
-- [ ] **Step 1: Каталог логов**
+- [ ] **Step 1: Каталог логов и база ревью**
 
 ```bash
 W=.superpowers/sdd/2026-10-13-download-file-failure-reason
 mkdir -p "$W"
+git rev-parse HEAD > "$W/base-sha"
+cat "$W/base-sha"
 ```
+
+Полный SHA `HEAD` до Task 1 — неизменная база итогового ревью (Task 2): коммиты с отметками в плане, сделанные по ходу исполнения, её не сдвигают.
 
 - [ ] **Step 2: Хелпер `response` получает `url`**
 
@@ -168,12 +172,9 @@ beforeAll(async () => {
     origin = `http://127.0.0.1:${server.address().port}`
 })
 
-afterAll(async () => {
-    // fetch держит соединения keep-alive открытыми: без их закрытия close
-    // ждал бы таймаута соединений.
-    server.closeAllConnections()
-    await new Promise((resolve) => server.close(resolve))
-})
+// close закрывает и простаивающие соединения keep-alive, оставшиеся от fetch
+// (Node 19+), поэтому ждать их таймаута не приходится.
+afterAll(() => new Promise((resolve) => server.close(resolve)))
 
 describe('downloadFile: отказ на настоящем сервере', () => {
     it('302 на /login — redirectUrl с полным адресом страницы входа, status null', async () => {
@@ -361,7 +362,8 @@ Expected: `git status -s` пуст.
 - [ ] **Step 1: Пакет ревью**
 
 ```bash
-BASE=$(git log --format=%h -1 -- docs/superpowers/plans/2026-10-13-download-file-failure-reason.md)
+W=.superpowers/sdd/2026-10-13-download-file-failure-reason
+BASE=$(cat "$W/base-sha")
 git log --oneline $BASE..HEAD
 ```
 
@@ -425,26 +427,43 @@ Expected: `git status -s` пуст.
 
 - [ ] **Step 1: Пуш и `Test`**
 
-После слова владельца:
+После слова владельца. Запуск workflow появляется не сразу после пуша, поэтому он выбирается по полному SHA версионного коммита, а не последним в списке: последний может оказаться прежним запуском.
 
 ```bash
-git push origin main
 SHA=$(git rev-parse HEAD)
-gh run list --commit "$SHA" --workflow Test
+git push origin main
+for attempt in $(seq 1 24); do
+    TEST_ID=$(gh run list --workflow Test --commit "$SHA" --json databaseId --jq '.[0].databaseId')
+    [ -n "$TEST_ID" ] && break
+    sleep 5
+done
+echo "Test run: $TEST_ID"
+gh run watch "$TEST_ID" --exit-status; echo "test exit $?"
 ```
 
-Дождаться `completed success` у `Test` (оба джоба: `test` и `vue-floor`) по полному SHA версионного коммита: `gh run watch <id>`.
+Expected: номер запуска не пуст; `test exit 0` — оба джоба, `test` и `vue-floor`, успешны. Если оболочка не даёт `sleep` в переднем плане, тот же цикл ожидания запускается в фоне или через Monitor. Пустой номер после двух минут или `test exit` не `0` — остановиться и сообщить владельцу, тег не ставить.
 
 - [ ] **Step 2: Тег и публикация**
 
 ```bash
 git tag v0.16.3 "$SHA" && git push origin v0.16.3
-gh run list --workflow Publish --limit 1
+for attempt in $(seq 1 24); do
+    PUBLISH_ID=$(gh run list --workflow Publish --commit "$SHA" --json databaseId --jq '.[0].databaseId')
+    [ -n "$PUBLISH_ID" ] && break
+    sleep 5
+done
+echo "Publish run: $PUBLISH_ID"
+gh run watch "$PUBLISH_ID" --exit-status; echo "publish exit $?"
+```
+
+Expected: номер запуска не пуст; `publish exit 0`. Только после этого — проверки npm:
+
+```bash
 npm view @boobooking/dashboard-ui-components@0.16.3 version
 npm view @boobooking/dashboard-ui-components dist-tags.latest
 ```
 
-Дождаться `success` у `Publish` (`gh run watch <id>`). Expected: `0.16.3` и `0.16.3`.
+Expected: `0.16.3` и `0.16.3`.
 
 ---
 
