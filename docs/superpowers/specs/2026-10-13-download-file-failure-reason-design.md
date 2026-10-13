@@ -110,9 +110,12 @@ if (!response.ok) {
 Хелпер `response()` получает поле `url` (по умолчанию `''`). Блок «отказ»:
 
 - перенаправление: `redirectUrl` равен `url` ответа, `status` — `null`,
-  текст содержит «перенаправил», ссылка не кликнута;
-- 404 и 500: `status` — код, `redirectUrl` — `null`, текст содержит код,
-  файла нет;
+  `message` — полностью прежний текст, ссылка не кликнута;
+- перенаправление, которое закончилось ответом `404`: отказ как при
+  перенаправлении — `redirectUrl` равен `url` ответа, `status` — `null`;
+  тест держит порядок проверок;
+- 404 и 500: `status` — код, `redirectUrl` — `null`, `message` — полностью
+  прежний текст, файла нет;
 - сетевая ошибка: отказ тем же объектом, у него нет собственных свойств
   `redirectUrl` и `status`.
 
@@ -156,6 +159,8 @@ if (!response.ok) {
 > не импортирует ни Inertia, ни роутер. В приложении на Inertia:
 >
 > ```js
+> import { router } from '@inertiajs/vue3'
+>
 > exportOrders() {
 >     this.exportFailure = "";
 >     this.exportLoading = true;
@@ -198,7 +203,8 @@ if (!response.ok) {
 
 1. `feat:`-коммит: `src/download.js`, тесты, README, Playground;
 2. `npm test` — все тесты зелёные, вывод без предупреждений;
-   `npm run build`;
+   `npm run build`; сборка Playground (`vite.playground.config.js`) —
+   сборка библиотеки его не проверяет;
 3. итоговое ревью;
 4. `chore:`-коммит с `0.16.3` в `package.json` и двух местах
    `package-lock.json` — последним;
