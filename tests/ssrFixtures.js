@@ -25,6 +25,15 @@ export const ssrFixtures = {
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
     PageCard: { props: { fallbackUrl: '/list' }, slots: { default: () => h('h3', 'Заголовок') } },
+    PageTabs: {
+        props: {
+            tabs: [
+                { key: 'active', name: 'Активные', url: '/events' },
+                { key: 'archive', name: 'Архив', url: '/archive' },
+            ],
+            activeKey: 'archive',
+        },
+    },
     RussianMobileFilter: { props: { header: 'Телефон', modelValue: '79031234567' } },
     Search: { props: { header: 'Поиск', modelValue: 'запрос' } },
     SelectDateInterval: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },

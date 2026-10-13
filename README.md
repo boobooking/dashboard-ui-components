@@ -90,12 +90,12 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует шестнадцать компонентов: `Dot`, `RussianMobileFilter`,
+Пакет экспортирует семнадцать компонентов: `Dot`, `RussianMobileFilter`,
 `Search`, `SelectDateInterval`, `SelectSingle`, `InfoPill`,
 `ErrorMessages`, `ActionPill`, `ConfirmationModal`,
 `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
-`NavigationMenuElement`, `PageCard`, `NotificationMessage`, `TextPopover`,
-функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
+`NavigationMenuElement`, `PageTabs`, `PageCard`, `NotificationMessage`,
+`TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
 (`files: ["dist"]`) исходники не попадают, поэтому контракт каждого
 компонента — здесь и в playground, а не в исходном коде.
 
@@ -621,6 +621,33 @@ Escape, клик по пункту, прокрутка и изменение р�
 
 Ссылка — через `navigate` плагина. Событий нет.
 
+### PageTabs
+
+Табы второго уровня: ссылки на страницы одного раздела под шапкой —
+«Активные / Архив», «Ордера / Сертификаты / Sms».
+
+    <page-tabs :tabs="tabs" :active-key="activeTab" />
+
+    tabs() {
+        return [
+            { key: 'active', name: 'Активные', url: route('events') },
+            { key: 'archive', name: 'Архив', url: route('archive') },
+        ];
+    },
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `tabs` | `Array` | обязателен | `[{ key, name, url }]`: ключ, подпись и адрес таба — строки |
+| `activeKey` | `String` | `null` | Ключ открытого таба |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"` — имя навигации для скринридера |
+
+Ключ сравнивается с `activeKey` строго, поэтому ключи — строки. Открытый
+таб выделен фоном и `aria-current="page"`; если ключа нет в списке, не
+выделен ни один. Вид одинаков на любой ширине: ссылки в строку, без
+переноса. Отступы вокруг и кнопки рядом — разметка страницы.
+
+Ссылки — через `navigate` плагина. Событий нет.
+
 ### PageCard
 
 Карточка отдельной страницы — формы или просмотра записи — по центру
@@ -835,6 +862,7 @@ sm:rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: ф�
 | `SelectDateInterval` — подсказки полей | от / до | from / to |
 | Ластик `Search`, `RussianMobileFilter`, `SelectSingle` (язык плагина) и `SelectDateInterval` — подпись для скринридера | Очистить | Clear |
 | `DataTable` — пагинация | Предыдущая / Следующая / Показаны результаты X - Y из Z | Previous / Next / Showing X - Y of Z results |
+| `PageTabs` — имя навигации для скринридера | Закладки | Tabs |
 | `PageCard` — доступное имя крестика | Назад | Back |
 | `NotificationMessage` — подпись крестика для скринридера | Закрыть | Close |
 | `TextPopover` — подпись кнопки и имя области | Показать текст / Полный текст | Show text / Full text |
@@ -919,8 +947,8 @@ Inertia SSR), а серверная разметка гидратируется 
 - Ссылка компонента — настоящий `<a href>`; обычный клик — через
   `followLink($event, href)` миксина `withNavigation`, который отдаёт его
   `navigate` плагина. Ни Inertia, ни роутер пакет не импортирует. Через `navigate` ходят
-  `DataTable` (его пагинация), `NavigationMenuElement`, основная
-  кнопка-переход и пункты-переходы `DropdownButtonWithAction` и
+  `DataTable` (его пагинация), `NavigationMenuElement`, `PageTabs`,
+  основная кнопка-переход и пункты-переходы `DropdownButtonWithAction` и
   пункты-переходы `HamburgerMenu`. Крестик `PageCard` — кнопка, а не ссылка:
   адрес возврата он тоже отдаёт `navigate`.
 - Компонент обращается к `window`, `document` и другим API браузера только
@@ -953,11 +981,21 @@ Inertia SSR), а серверная разметка гидратируется 
 `v-model` обещал бы двустороннюю связь, которой нет, поэтому видимость
 передаётся пропом `isOpen`.
 
+## Почему у PageTabs нет v-model
+
+Открытый таб `PageTabs` сам не меняет: клик по ссылке ведёт на другую
+страницу, и открытый таб приносит она — пропом `activeKey`. Пока новая
+страница не пришла, выделен прежний таб, как у пунктов шапки
+`NavigationMenuElement`.
+
+`v-model` обещал бы, что компонент меняет значение сам, поэтому открытый
+таб передаётся пропом `activeKey`.
+
 ## Playground
 
     npm run playground
 
-Поднимает демо-страницы со всеми шестнадцатью компонентами в двух окружениях:
+Поднимает демо-страницы со всеми семнадцатью компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не

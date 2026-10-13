@@ -18,6 +18,7 @@ export { default as DropdownButtonWithAction } from './components/DropdownButton
 export { default as HamburgerMenu } from './components/HamburgerMenu.vue'
 export { default as DataTable } from './components/DataTable.vue'
 export { default as NavigationMenuElement } from './components/NavigationMenuElement.vue'
+export { default as PageTabs } from './components/PageTabs.vue'
 export { default as PageCard } from './components/PageCard.vue'
 export { default as NotificationMessage } from './components/NotificationMessage.vue'
 export { default as TextPopover } from './components/TextPopover.vue'

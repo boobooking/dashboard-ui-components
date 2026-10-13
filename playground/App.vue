@@ -253,11 +253,18 @@
         </section>
 
         <section>
+            <h2>PageTabs</h2>
+            <page-tabs :tabs="pageTabs" active-key="certificates"/>
+            <p>Последний переход: {{ lastNavigation || '—' }}</p>
+        </section>
+
+        <section>
             <h2>lang="en"</h2>
             <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
             <text-popover lang="en" text="Full text in English"/>
             <dropdown-button-with-action lang="en" :actions="[{ label: 'Action', onSelect: countSelection }, { label: 'Another action', onSelect: countSelection }]"/>
             <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
+            <page-tabs lang="en" :tabs="pageTabs" active-key="orders"/>
             <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
             <confirmation-modal
                 :is-open="englishModalIsOpen"
@@ -312,6 +319,7 @@ import {
     HamburgerMenu,
     DataTable,
     NavigationMenuElement,
+    PageTabs,
     PageCard,
     NotificationMessage,
     TextPopover,
@@ -334,6 +342,7 @@ export default {
         HamburgerMenu,
         DataTable,
         NavigationMenuElement,
+        PageTabs,
         PageCard,
         NotificationMessage,
         TextPopover,
@@ -348,6 +357,12 @@ export default {
     data() {
         return {
             englishModalIsOpen: false,
+            // Табы PageTabs: адреса условные, переход виден в строке «Последний переход».
+            pageTabs: [
+                { key: 'orders', name: 'Ордера', url: '/tabs/orders' },
+                { key: 'certificates', name: 'Сертификаты', url: '/tabs/certificates' },
+                { key: 'messages', name: 'Sms', url: '/tabs/messages' },
+            ],
             // Имена списка цветов пакета: таблица «Цвета».
             colors: ['gray', 'green', 'yellow', 'red', 'indigo', 'purple'],
             stripeRows: [null, 'gray', 'green', 'yellow', 'red', 'indigo', 'purple'].map((color) => ({ uuid: String(color), name: color || 'без цвета', color })),

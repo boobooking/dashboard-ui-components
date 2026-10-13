@@ -37,6 +37,8 @@ export const messages = {
         // TextPopover: подпись кнопки для скринридера и имя области с текстом.
         showText: 'Показать текст',
         fullText: 'Полный текст',
+        // PageTabs: имя навигации для скринридера.
+        tabs: 'Закладки',
     },
     en: {
         cancel: 'Cancel',
@@ -62,5 +64,6 @@ export const messages = {
         clear: 'Clear',
         showText: 'Show text',
         fullText: 'Full text',
+        tabs: 'Tabs',
     },
 }
