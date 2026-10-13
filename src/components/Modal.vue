@@ -3,7 +3,7 @@
          display none раньше, чем доиграют переходы оверлея и панели, а в скрытом
          поддереве переходы не запускаются. Закрытым он не перехватывает клики. -->
     <div class="bb-dashboard-ui bb:fixed bb:inset-0 bb:overflow-y-auto bb:z-20" :class="{ 'bb:pointer-events-none': !isOpen }">
-        <div class="bb:flex bb:items-end bb:justify-center bb:min-h-screen bb:pt-4 bb:px-4 bb:pb-20 bb:text-center bb:sm:block bb:sm:p-0">
+        <div class="bb:min-h-screen bb:text-center">
             <!-- Overlay -->
             <transition
                 enter-active-class="bb:ease-out bb:duration-300"
@@ -19,22 +19,22 @@
             </transition>
 
             <!-- This element is to trick the browser into centering the modal contents. -->
-            <span class="bb:hidden bb:sm:inline-block bb:sm:align-middle bb:sm:h-screen"></span>
+            <span class="bb:inline-block bb:align-middle bb:h-screen"></span>
 
             <!-- Modal panel. relative поднимает панель над оверлеем: оба лежат в
                  одном контексте наложения, и без позиционирования панель рисуется
                  раньше — оверлей затеняет её и перехватывает клики. -->
             <transition
                 enter-active-class="bb:ease-out bb:duration-300"
-                enter-from-class="bb:opacity-0 bb:translate-y-4 bb:sm:translate-y-0 bb:sm:scale-95"
-                enter-to-class="bb:opacity-100 bb:translate-y-0 bb:sm:scale-100"
+                enter-from-class="bb:opacity-0 bb:scale-95"
+                enter-to-class="bb:opacity-100 bb:scale-100"
                 leave-active-class="bb:ease-in bb:duration-200"
-                leave-from-class="bb:opacity-100 bb:translate-y-0 bb:sm:scale-100"
-                leave-to-class="bb:opacity-0 bb:translate-y-4 bb:sm:translate-y-0 bb:sm:scale-95"
+                leave-from-class="bb:opacity-100 bb:scale-100"
+                leave-to-class="bb:opacity-0 bb:scale-95"
             >
                 <div
                     v-show="isOpen"
-                    class="bb:relative bb:inline-block bb:align-bottom bb:bg-white bb:rounded-lg bb:text-left bb:overflow-visible bb:shadow-xl bb:transition-all bb:sm:my-8 bb:sm:align-middle bb:sm:max-w-lg bb:sm:w-full"
+                    class="bb:relative bb:inline-block bb:align-middle bb:my-8 bb:max-w-lg bb:w-full bb:bg-white bb:rounded-lg bb:text-left bb:overflow-visible bb:shadow-xl bb:transition-all"
                     role="dialog"
                     aria-modal="true"
                     :aria-labelledby="headingId"

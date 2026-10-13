@@ -25,7 +25,7 @@
         <div v-if="normalizedRows.length > 0" :class="isCard && hasBadgeRow() ? 'bb:mt-4' : ''">
             <div
                 class="bb:overflow-x-auto"
-                :class="isCard ? 'bb:border-t bb:border-gray-200' : 'bb:shadow-sm bb:border-b bb:border-gray-200 bb:sm:rounded-lg'"
+                :class="isCard ? 'bb:border-t bb:border-gray-200' : 'bb:shadow-sm bb:border-b bb:border-gray-200 bb:rounded-lg'"
             >
                 <table class="bb:min-w-full bb:divide-y bb:divide-gray-200 bb:border-collapse">
                     <thead>

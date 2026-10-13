@@ -1,11 +1,11 @@
 <template>
     <div
-        class="bb:box-border bb:relative bb:my-6 bb:mx-auto bb:bg-white bb:shadow-xl bb:sm:rounded-lg"
+        class="bb:box-border bb:relative bb:my-6 bb:mx-auto bb:bg-white bb:shadow-xl bb:rounded-lg"
         :class="[
             {
-                'bb:sm:max-w-xl': resolvedWidth === 'xl',
-                'bb:sm:max-w-4xl': resolvedWidth === '4xl',
-                'bb:sm:max-w-7xl': resolvedWidth === '7xl',
+                'bb:max-w-xl': resolvedWidth === 'xl',
+                'bb:max-w-4xl': resolvedWidth === '4xl',
+                'bb:max-w-7xl': resolvedWidth === '7xl',
             },
             canClose
                 ? {
@@ -32,7 +32,7 @@
         <cross-button
             v-if="canClose"
             size="large"
-            class="bb:absolute bb:top-0 bb:right-0 bb:mt-4 bb:mr-4 bb:w-8 bb:h-8 bb:sm:mt-6 bb:rounded-md bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
+            class="bb:absolute bb:top-0 bb:right-0 bb:mt-6 bb:mr-4 bb:w-8 bb:h-8 bb:rounded-md bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
             :class="{
                 'bb:md:right-auto bb:md:left-full bb:md:mr-0 bb:md:ml-4': resolvedWidth === 'xl',
                 'bb:lg:right-auto bb:lg:left-full bb:lg:mr-0 bb:lg:ml-4': resolvedWidth === '4xl',

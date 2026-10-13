@@ -333,7 +333,7 @@ describe('DataTable: варианты', () => {
         const page = mountTable()
         expect(scrollerOf(page).className).toContain('bb:overflow-x-auto')
         expect(scrollerOf(page).className).toContain('bb:shadow-sm')
-        expect(scrollerOf(page).className).toContain('bb:sm:rounded-lg')
+        expect(scrollerOf(page).className).toContain('bb:rounded-lg')
 
         const card = mountTable({ variant: 'card' })
         expect(scrollerOf(card).className).toContain('bb:overflow-x-auto')

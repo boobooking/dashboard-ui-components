@@ -1,6 +1,6 @@
 <template>
     <div
-        class="bb-dashboard-ui bb:fixed bb:inset-0 bb:flex bb:items-end bb:justify-center bb:px-4 bb:py-6 bb:pointer-events-none bb:sm:p-6 bb:sm:items-start bb:sm:justify-end"
+        class="bb-dashboard-ui bb:fixed bb:inset-0 bb:flex bb:items-start bb:justify-end bb:p-6 bb:pointer-events-none"
         :role="isDangerous ? 'alert' : 'status'"
     >
         <!-- Живая область есть всегда: скринридер объявляет изменение области,

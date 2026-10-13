@@ -1,5 +1,5 @@
 <template>
-    <nav v-if="hasResults" class="bb-dashboard-ui bb:px-4 bb:flex bb:items-center bb:justify-between bb:sm:px-0">
+    <nav v-if="hasResults" class="bb-dashboard-ui bb:flex bb:items-center bb:justify-between">
         <div class="bb:-mt-px bb:w-0 bb:flex-1 bb:flex">
             <a
                 v-if="previousPageUrl !== null"
@@ -13,7 +13,7 @@
                 {{ texts.previousPage }}
             </a>
         </div>
-        <div v-if="hasRange" class="bb:hidden bb:md:-mt-px bb:md:flex bb:text-gray-400 bb:text-sm bb:leading-5">
+        <div v-if="hasRange" class="bb:-mt-px bb:flex bb:text-gray-400 bb:text-sm bb:leading-5">
             {{ texts.resultsBefore }}
             <span class="bb:font-medium bb:text-gray-900 bb:mx-1">{{ from }} - {{ to }}</span> {{ texts.resultsOf }}
             <span class="bb:font-medium bb:text-gray-900 bb:mx-1">{{ total }}</span> {{ texts.resultsAfter }}

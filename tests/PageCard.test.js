@@ -302,10 +302,10 @@ describe('PageCard: ключ окна', () => {
 
 describe('PageCard: карточка', () => {
     const widthCases = [
-        { width: undefined, card: 'bb:sm:max-w-xl', closer: ['bb:md:right-auto', 'bb:md:left-full', 'bb:md:mr-0', 'bb:md:ml-4'], space: 'bb:md:[--bb-closer-space:0px]' },
-        { width: 'xl', card: 'bb:sm:max-w-xl', closer: ['bb:md:right-auto', 'bb:md:left-full', 'bb:md:mr-0', 'bb:md:ml-4'], space: 'bb:md:[--bb-closer-space:0px]' },
-        { width: '4xl', card: 'bb:sm:max-w-4xl', closer: ['bb:lg:right-auto', 'bb:lg:left-full', 'bb:lg:mr-0', 'bb:lg:ml-4'], space: 'bb:lg:[--bb-closer-space:0px]' },
-        { width: '7xl', card: 'bb:sm:max-w-7xl', closer: ['bb:2xl:right-auto', 'bb:2xl:left-full', 'bb:2xl:mr-0', 'bb:2xl:ml-4'], space: 'bb:2xl:[--bb-closer-space:0px]' },
+        { width: undefined, card: 'bb:max-w-xl', closer: ['bb:md:right-auto', 'bb:md:left-full', 'bb:md:mr-0', 'bb:md:ml-4'], space: 'bb:md:[--bb-closer-space:0px]' },
+        { width: 'xl', card: 'bb:max-w-xl', closer: ['bb:md:right-auto', 'bb:md:left-full', 'bb:md:mr-0', 'bb:md:ml-4'], space: 'bb:md:[--bb-closer-space:0px]' },
+        { width: '4xl', card: 'bb:max-w-4xl', closer: ['bb:lg:right-auto', 'bb:lg:left-full', 'bb:lg:mr-0', 'bb:lg:ml-4'], space: 'bb:lg:[--bb-closer-space:0px]' },
+        { width: '7xl', card: 'bb:max-w-7xl', closer: ['bb:2xl:right-auto', 'bb:2xl:left-full', 'bb:2xl:mr-0', 'bb:2xl:ml-4'], space: 'bb:2xl:[--bb-closer-space:0px]' },
     ]
 
     for (const testCase of widthCases) {
@@ -328,7 +328,7 @@ describe('PageCard: карточка', () => {
         const page = mountPage({ plugin: null, show: true, expectsWarnings: true, props: { fallbackUrl: '/list', width: 'wide' } })
         await settle()
 
-        expect(page.card().classes()).toContain('bb:sm:max-w-xl')
+        expect(page.card().classes()).toContain('bb:max-w-xl')
         expect(page.warnings).toHaveLength(1)
         expect(page.warnings[0]).toContain('width')
     })
@@ -337,7 +337,7 @@ describe('PageCard: карточка', () => {
         const page = mountPage({ plugin: null, show: true })
         await settle()
 
-        for (const name of ['bb:box-border', 'bb:relative', 'bb:my-6', 'bb:mx-auto', 'bb:bg-white', 'bb:shadow-xl', 'bb:sm:rounded-lg']) {
+        for (const name of ['bb:box-border', 'bb:relative', 'bb:my-6', 'bb:mx-auto', 'bb:bg-white', 'bb:shadow-xl', 'bb:rounded-lg']) {
             expect(page.card().classes()).toContain(name)
         }
         expect(page.card().classes()).not.toContain('bb-dashboard-ui')
@@ -377,7 +377,7 @@ describe('PageCard: карточка', () => {
 
         expect(page.card().element.lastElementChild).toBe(page.cross().element)
         expect(page.cross().attributes('tabindex')).toBe('0')
-        for (const name of ['bb:absolute', 'bb:sm:mt-6', 'bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500']) {
+        for (const name of ['bb:absolute', 'bb:mt-6', 'bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500']) {
             expect(page.cross().classes()).toContain(name)
         }
     })
