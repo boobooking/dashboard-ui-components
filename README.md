@@ -332,14 +332,43 @@ exportOrders() {
 ```
 
 - Запрос — `GET` с cookie сессии (`credentials: 'same-origin'`).
-- Promise отклоняется: при ответе не `2xx` (код в тексте ошибки), при
-  перенаправлении — обычно на страницу входа после истёкшей сессии — и при
-  сетевой ошибке.
+- Promise отклоняется:
+  - при перенаправлении — обычно на страницу входа после истёкшей сессии:
+    у ошибки `redirectUrl` — адрес, куда в итоге привёл сервер, `status` —
+    `null`;
+  - при ответе не `2xx`: `status` — код ответа, `redirectUrl` — `null`;
+  - при сетевой ошибке — ошибкой `fetch`, без этих полей.
 - Имя файла — из `Content-Disposition` (`filename*=UTF-8''…`, затем
   `filename`), без него — последний сегмент пути адреса, без пути —
   `download`.
 - Таймаута нет; уход со страницы скачивание не прерывает. Файл до
   сохранения целиком в памяти вкладки.
+
+Ссылка при истёкшей сессии привела бы браузер на страницу входа. Чтобы
+страница вела себя так же, она сама переходит по `redirectUrl`: пакет
+не импортирует ни Inertia, ни роутер. В приложении на Inertia:
+
+```js
+import { router } from '@inertiajs/vue3'
+
+exportOrders() {
+    this.exportFailure = "";
+    this.exportLoading = true;
+
+    downloadFile(this.exportUrl)
+        .catch((error) => {
+            if (error.redirectUrl) {
+                router.visit(error.redirectUrl);
+                return;
+            }
+
+            this.exportFailure = "Попробуйте ещё раз";
+        })
+        .finally(() => {
+            this.exportLoading = false;
+        });
+}
+```
 
 ### ConfirmationModal
 

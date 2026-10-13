@@ -487,7 +487,7 @@ export default {
             this.downloadLoading = true;
             downloadFile(name)
                 .then(() => { this.downloadResult = `скачан ${name}`; })
-                .catch((error) => { this.downloadResult = `ошибка: ${error.message}`; })
+                .catch((error) => { this.downloadResult = typeof error.status === 'number' ? `ошибка ${error.status}` : `ошибка: ${error.message}`; })
                 .finally(() => { this.downloadLoading = false; });
         },
 

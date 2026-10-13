@@ -49,13 +49,15 @@ export async function downloadFile(url) {
     const response = await fetch(url, { credentials: 'same-origin' })
 
     // Сервер перенаправил — обычно на страницу входа после истёкшей сессии:
-    // без проверки под видом файла сохранилась бы её разметка.
+    // без проверки под видом файла сохранилась бы её разметка. redirectUrl —
+    // куда в итоге привёл сервер: страница может отправить пользователя туда
+    // же, куда отправила бы ссылка.
     if (response.redirected) {
-        throw new Error(`downloadFile: сервер перенаправил запрос ${url}`)
+        throw Object.assign(new Error(`downloadFile: сервер перенаправил запрос ${url}`), { redirectUrl: response.url, status: null })
     }
 
     if (!response.ok) {
-        throw new Error(`downloadFile: ответ ${response.status} на ${url}`)
+        throw Object.assign(new Error(`downloadFile: ответ ${response.status} на ${url}`), { redirectUrl: null, status: response.status })
     }
 
     const name = nameFromDisposition(response.headers.get('Content-Disposition')) ?? nameFromPath(url) ?? 'download'

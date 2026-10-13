@@ -9,13 +9,13 @@ const original = {}
 let clicks
 let fetchMock
 
-function response({ status = 200, redirected = false, disposition = null } = {}) {
+function response({ status = 200, redirected = false, disposition = null, url = '' } = {}) {
     const headers = new Headers()
     if (disposition !== null) {
         headers.set('Content-Disposition', disposition)
     }
 
-    return { ok: status >= 200 && status < 300, status, redirected, headers, blob: async () => new Blob(['xlsx']) }
+    return { ok: status >= 200 && status < 300, status, redirected, url, headers, blob: async () => new Blob(['xlsx']) }
 }
 
 beforeEach(() => {
@@ -81,26 +81,51 @@ describe('downloadFile: запрос и файл', () => {
 })
 
 describe('downloadFile: отказ', () => {
-    it.each([404, 500])('ответ %s — отказ с кодом, файла нет', async (status) => {
+    it.each([404, 500])('ответ %s — отказ с кодом в status, файла нет', async (status) => {
         fetchMock.mockResolvedValue(response({ status }))
 
-        await expect(downloadFile('/export')).rejects.toThrow(String(status))
+        const error = await downloadFile('/export').catch((failure) => failure)
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error.message).toBe(`downloadFile: ответ ${status} на /export`)
+        expect(error.status).toBe(status)
+        expect(error.redirectUrl).toBeNull()
         expect(URL.createObjectURL).not.toHaveBeenCalled()
         expect(clicks).toEqual([])
     })
 
-    it('перенаправление (истёкшая сессия) — отказ, страница входа не сохраняется', async () => {
-        fetchMock.mockResolvedValue(response({ redirected: true, disposition: null }))
+    it('перенаправление (истёкшая сессия) — отказ с адресом в redirectUrl, страница входа не сохраняется', async () => {
+        fetchMock.mockResolvedValue(response({ redirected: true, url: 'https://dashboard.test/login' }))
 
-        await expect(downloadFile('/export')).rejects.toThrow('перенаправил')
+        const error = await downloadFile('/export').catch((failure) => failure)
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error.message).toBe('downloadFile: сервер перенаправил запрос /export')
+        expect(error.redirectUrl).toBe('https://dashboard.test/login')
+        expect(error.status).toBeNull()
+        expect(URL.createObjectURL).not.toHaveBeenCalled()
         expect(clicks).toEqual([])
     })
 
-    it('сетевая ошибка — отказ той же ошибкой', async () => {
+    it('перенаправление, закончившееся ответом 404, — отказ как при перенаправлении', async () => {
+        fetchMock.mockResolvedValue(response({ status: 404, redirected: true, url: 'https://dashboard.test/gone' }))
+
+        const error = await downloadFile('/export').catch((failure) => failure)
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error.message).toBe('downloadFile: сервер перенаправил запрос /export')
+        expect(error.redirectUrl).toBe('https://dashboard.test/gone')
+        expect(error.status).toBeNull()
+        expect(clicks).toEqual([])
+    })
+
+    it('сетевая ошибка — отказ той же ошибкой, без полей причины', async () => {
         const failure = new TypeError('Failed to fetch')
         fetchMock.mockRejectedValue(failure)
 
         await expect(downloadFile('/export')).rejects.toBe(failure)
+        expect(Object.hasOwn(failure, 'redirectUrl')).toBe(false)
+        expect(Object.hasOwn(failure, 'status')).toBe(false)
         expect(clicks).toEqual([])
     })
 })
