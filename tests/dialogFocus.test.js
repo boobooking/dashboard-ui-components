@@ -180,22 +180,24 @@ describe('holdDialogFocus: возврат фокуса', () => {
         }
     })
 
-    it('прежнего элемента уже нет — фокус не трогается', () => {
+    // Возвращать некуда: закрытая панель видна ещё 200 мс анимации ухода,
+    // и Enter нажал бы её кнопку — фокус с неё снимается.
+    it('прежнего элемента уже нет — фокус снят с панели', () => {
         release = holdDialogFocus(panel, () => {})
         opener.remove()
 
         release()
 
-        expect(focused()).toBe('A')
+        expect(focused()).toBe('body')
     })
 
-    it('прежним был body — фокус не трогается', () => {
+    it('прежним был body — фокус снят с панели', () => {
         opener.blur()
         release = holdDialogFocus(panel, () => {})
 
         release()
 
-        expect(focused()).toBe('A')
+        expect(focused()).toBe('body')
     })
 
     it('после возврата Tab и Escape не перехватываются', () => {

@@ -54,6 +54,8 @@ export function holdDialogFocus(panel, onEscape) {
     // который страница поставила в другое место, не забирается. Прежнего
     // элемента может уже не быть — строку, из меню которой открыли диалог,
     // удалили. Страница к нему не прокручивается, как в PopoverPanel.
+    // Возвращать некуда — фокус снимается с панели: закрытая модалка видна
+    // ещё время анимации ухода, и Enter нажал бы её кнопку.
     return () => {
         if (released) {
             return
@@ -67,6 +69,8 @@ export function holdDialogFocus(panel, onEscape) {
         const canReturn = previous !== null && previous !== document.body && previous.isConnected
         if (isLost && canReturn) {
             previous.focus({ preventScroll: true })
+        } else if (panel.contains(active)) {
+            active.blur()
         }
     }
 }

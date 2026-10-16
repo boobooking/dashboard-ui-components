@@ -176,6 +176,19 @@ describe('ConfirmationModal: фокус', () => {
         expect(document.activeElement).toBe(opener)
     })
 
+    // Так открывает модалку клик мышью в Safari: фокус на кнопку не ставится.
+    // Закрытая панель видна ещё 200 мс, и Enter не должен нажать её кнопку.
+    it('возвращать некуда: после закрытия фокус не в модалке', async () => {
+        opener.blur()
+        const wrapper = mountModal(false)
+        await wrapper.setProps({ isOpen: true })
+        await nextFrame()
+        wrapper.findAll('button').find((button) => button.text() === 'Удалить').element.focus()
+        await wrapper.setProps({ isOpen: false })
+
+        expect(wrapper.get('[role="dialog"]').element.contains(document.activeElement)).toBe(false)
+    })
+
     it('размонтирована открытой: Escape событий не даёт, фокус на прежней кнопке', async () => {
         const onActionCanceled = vi.fn()
         const wrapper = mountModal(true, onActionCanceled)
