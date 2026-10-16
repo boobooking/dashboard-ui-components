@@ -120,6 +120,7 @@
             <div class="demo-row">
                 <button type="button" class="demo-button" @click="warningModalIsOpen = true">Жёлтая</button>
                 <button type="button" class="demo-button" @click="dangerousModalIsOpen = true">Красная</button>
+                <dropdown-button-with-action :actions="modalMenuActions"/>
             </div>
             <p>Подтверждений: {{ modalConfirms }}, отмен: {{ modalCancels }}</p>
             <confirmation-modal
@@ -443,6 +444,15 @@ export default {
                 { label: 'Поменять пароль', href: '#password' },
                 { label: 'Отправить письмо с новым паролем на старый и новый адрес', color: 'yellow', onSelect: this.countSelection },
                 { label: 'Удалить', color: 'red', onSelect: this.countSelection },
+            ];
+        },
+
+        // Как строка списка payments: пункт меню открывает красную модалку.
+        // По нему видно, где фокус после выбора пункта и после закрытия.
+        modalMenuActions() {
+            return [
+                { label: 'Изменить', href: '#edit' },
+                { label: 'Удалить', color: 'red', onSelect: () => { this.dangerousModalIsOpen = true; } },
             ];
         },
 

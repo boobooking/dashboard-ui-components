@@ -1,5 +1,6 @@
 <template>
-    <modal :is-open="isOpen" :heading-id="headingId">
+    <!-- Escape в открытой модалке — то же, что кнопка отмены. -->
+    <modal :is-open="isOpen" :heading-id="headingId" @escape="$emit('actionCanceled')">
         <!-- Панель Modal не обрезает содержимое, поэтому внешние углы блоков
              скругляются здесь тем же радиусом: иначе их фон закрыл бы скругление панели. -->
         <div class="bb:flex bb:bg-white bb:rounded-t-lg bb:p-6 bb:pb-4">
@@ -33,9 +34,12 @@
             >
                 {{ actionButtonText }}
             </button>
+            <!-- Фокус открытой модалки — на отмене: Enter сразу после
+                 открытия действие не выполнит. -->
             <button
                 type="button"
                 class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-gray-300 bb:shadow-xs bb:px-4 bb:py-2 bb:bg-white bb:text-sm bb:font-medium bb:text-gray-700 bb:hover:bg-gray-50 bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:focus:ring-indigo-500 bb:ml-3"
+                data-dialog-focus
                 @click.prevent="$emit('actionCanceled')"
             >
                 {{ cancelButtonText ?? texts.cancel }}
