@@ -75,6 +75,7 @@ describe('holdDialogFocus: Tab', () => {
         { name: 'Shift+Tab с первого — по кругу на последний', from: 'A', shiftKey: true, want: 'C' },
         { name: 'Shift+Tab со второго — на первый', from: 'B', shiftKey: true, want: 'A' },
         { name: 'Shift+Tab вне панели — на последний', from: 'opener', shiftKey: true, want: 'C' },
+        { name: 'Shift+Tab с body — на последний', from: 'body', shiftKey: true, want: 'C' },
     ])('$name', ({ from, shiftKey, want }) => {
         release = holdDialogFocus(panel, () => {})
         if (from === 'opener') {
