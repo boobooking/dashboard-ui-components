@@ -8,8 +8,16 @@
 .demo-card,
 .demo-card-column,
 .demo-header,
-.demo-end {
+.demo-end,
+.demo-form {
     box-sizing: border-box;
+}
+
+.demo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 36rem;
 }
 
 .page {

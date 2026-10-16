@@ -90,9 +90,9 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует семнадцать компонентов: `Dot`, `RussianMobileFilter`,
+Пакет экспортирует восемнадцать компонентов: `Dot`, `RussianMobileFilter`,
 `Search`, `SelectDateInterval`, `SelectSingle`, `InfoPill`,
-`ErrorMessages`, `ActionPill`, `ConfirmationModal`,
+`ErrorMessages`, `FormInput`, `ActionPill`, `ConfirmationModal`,
 `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
 `NavigationMenuElement`, `PageTabs`, `PageCard`, `NotificationMessage`,
 `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
@@ -163,6 +163,57 @@ Enter, пробелом, расширением клавиатурной нав�
 События: `update:modelValue` и `changed` — оба на каждый ввод. Значение,
 изменённое родителем, поле показывает сразу и без событий: ответный
 `update:modelValue` вернул бы родителю его же значение.
+
+### FormInput
+
+Поле формы с подписью над ним. Значение забирает форма: у поля нет
+события `changed`.
+
+    <form-input v-model="name" label="Имя" :is-required="markNameRequired" />
+    <form-input v-model="email" label="Email" type="email" :is-required="markEmailRequired" />
+    <form-input v-model="password" label="Пароль" type="password" :is-required="markPasswordRequired" />
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `modelValue` | `String` | `""` | Значение поля |
+| `label` | `String` | обязателен | Подпись над полем |
+| `type` | `String` | `"text"` | `"text"`, `"email"`, `"password"`, `"tel"`, `"url"` или `"search"` |
+| `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+
+Событие `update:modelValue` уходит на каждый ввод со строкой из поля как
+есть: пробелы не обрезаются, это решение формы. Значение, изменённое
+родителем, поле показывает сразу и без события. Набор через IME
+(composition) отдаёт значение по его окончании.
+
+Другой `type`, не из списка, отклоняется предупреждением Vue, а поле
+рисуется с `type="text"`.
+
+`class` и `style` ложатся на корень компонента, все остальные атрибуты
+и слушатели (`autocomplete`, `placeholder`, `name`, `disabled`, `@blur`,
+`@keydown.enter`) — на `<input>`. `id` поля создаётся сам, `for` подписи
+указывает на него, поэтому две копии на странице не делят один `id`.
+Атрибут `id` от формы заменяет созданный и в поле, и в `for`.
+
+Красная точка значит «не заполнено»; когда её показывать, решает форма.
+Основной способ: точки появляются после попытки отправить, ввод в поле
+снимает свою.
+
+    watch: {
+        name() { this.markNameRequired = this.name.length === 0 },
+    },
+    methods: {
+        create() {
+            this.markNameRequired = this.name.length === 0
+            // то же для остальных полей
+        },
+    },
+
+Способ «сразу», точка видна, пока поле пусто:
+
+    <form-input v-model="number" label="Номер" :is-required="number.trim() === ''" />
+
+`isRequired` только показывает точку: атрибут `required` и `aria-*` полю
+он не ставит.
 
 ### SelectDateInterval
 
@@ -1006,7 +1057,7 @@ Inertia SSR), а серверная разметка гидратируется 
 
     npm run playground
 
-Поднимает демо-страницы со всеми семнадцатью компонентами в двух окружениях:
+Поднимает демо-страницы со всеми восемнадцатью компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не

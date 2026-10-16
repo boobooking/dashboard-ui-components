@@ -22,6 +22,22 @@
             <p>Значение: {{ search === '' ? '(пусто)' : search }}</p>
         </section>
 
+        <!-- Основной способ: точки появляются после «Создать», ввод в поле снимает свою;
+             номер закрывающего документа показывает точку «сразу», пока поле пусто. -->
+        <section>
+            <h2>FormInput</h2>
+            <div class="demo-form">
+                <form-input v-model="adminName" label="Имя" :is-required="markAdminName"/>
+                <form-input v-model="adminEmail" label="Email" type="email" :is-required="markAdminEmail"/>
+                <form-input v-model="adminPassword" label="Пароль" type="password" autocomplete="new-password" :is-required="markAdminPassword"/>
+                <div class="demo-row">
+                    <button type="button" class="demo-button" @click="createAdmin">Создать</button>
+                </div>
+                <p>Значения: «{{ adminName }}», «{{ adminEmail }}», «{{ adminPassword }}»</p>
+                <form-input v-model="documentNumber" label="Номер закрывающего документа" :is-required="documentNumber.trim() === ''"/>
+            </div>
+        </section>
+
         <section>
             <h2>SelectDateInterval</h2>
             <select-date-interval
@@ -314,6 +330,7 @@ import {
     SelectSingle,
     InfoPill,
     ErrorMessages,
+    FormInput,
     ActionPill,
     ConfirmationModal,
     DropdownButtonWithAction,
@@ -337,6 +354,7 @@ export default {
         SelectSingle,
         InfoPill,
         ErrorMessages,
+        FormInput,
         ActionPill,
         ConfirmationModal,
         DropdownButtonWithAction,
@@ -357,6 +375,13 @@ export default {
 
     data() {
         return {
+            adminName: '',
+            adminEmail: '',
+            adminPassword: '',
+            documentNumber: '',
+            markAdminName: false,
+            markAdminEmail: false,
+            markAdminPassword: false,
             englishModalIsOpen: false,
             // Табы PageTabs: адреса условные, переход виден в строке «Последний переход».
             pageTabs: [
@@ -505,7 +530,28 @@ export default {
         },
     },
 
+    watch: {
+        adminName() {
+            this.markAdminName = this.adminName.length === 0;
+        },
+
+        adminEmail() {
+            this.markAdminEmail = this.adminEmail.length === 0;
+        },
+
+        adminPassword() {
+            this.markAdminPassword = this.adminPassword.length === 0;
+        },
+    },
+
     methods: {
+        // Точки у пустых полей формы появляются после попытки создать.
+        createAdmin() {
+            this.markAdminName = this.adminName.length === 0;
+            this.markAdminEmail = this.adminEmail.length === 0;
+            this.markAdminPassword = this.adminPassword.length === 0;
+        },
+
         // Скачивание файла сборки playground; missing.csv — ошибка 404.
         downloadSample(name) {
             this.downloadResult = '';
