@@ -951,10 +951,11 @@ Expected: `exit 0`, `index.html 200`, `host.html 200`. Сборка certificates
 
 - [ ] **Step 2: Chrome**
 
-chrome-devtools: новая вкладка https://certificates.test/build/ui-playground/index.html, `resize_page` 1280×900. Состояние после каждого действия — `evaluate_script` с функцией:
+chrome-devtools: новая вкладка https://certificates.test/build/ui-playground/index.html, `resize_page` 1280×900. Состояние после каждого действия — `evaluate_script` с функцией ниже. Она сначала ждёт 300 мс: закрытая панель видна ещё 200 мс анимации ухода, и раньше закрытие не проверить.
 
 ```js
-() => {
+async () => {
+    await new Promise((resolve) => setTimeout(resolve, 300))
     const describe = (element) => {
         if (element === null) return 'null'
         if (element === document.body) return 'body'
@@ -987,7 +988,7 @@ chrome-devtools: новая вкладка https://certificates.test/build/ui-pl
 2. Enter → `open: null`, отмен +1, `active` — стрелка меню.
 3. Снова шаг 1. Tab → `«Удалить»`, Tab → `«Отмена»`, Shift+Tab → `«Удалить»`; затем ещё шесть Tab — после каждого `inDialog: true`.
 4. Escape → `open: null`, отмен +1, `active` — стрелка меню.
-5. Мышь: `take_snapshot`, `click` по стрелке меню, `click` по пункту «Удалить» → `active: "Отмена"`. Вместо клика по затемнению — `evaluate_script` `() => { document.activeElement.blur(); return document.activeElement === document.body }` (chrome-devtools не кликает по координатам; сам клик по затемнению — в WebKit, Step 3); Tab → `active: "Удалить"`, `inDialog: true`; Escape.
+5. Мышь: `take_snapshot`, `click` по стрелке меню, `click` по пункту «Удалить» → `active: "Отмена"`. Вместо клика по затемнению — `evaluate_script` `() => { document.activeElement.blur(); return document.activeElement === document.body }` (chrome-devtools не кликает по координатам; сам клик по затемнению — в WebKit, Step 3) → `true`, затем состояние: `open: "Удаление администратора"`, `inDialog: false`; Tab → `active: "Удалить"`, `inDialog: true`; Escape.
 6. `click` по «Жёлтая» → `open: "Начать отправку?"`, `active: "Отмена"`; Escape → `open: null`, `active: "Жёлтая"`. То же для «Красная» → `active: "Красная"` после Escape.
 7. `list_console_messages` — ни ошибок, ни предупреждений.
 
@@ -1038,16 +1039,21 @@ const scenarios = [
     {
         name: 'меню → Удалить',
         action: 'Удалить',
+        heading: 'Удаление администратора',
         open: async () => {
             await section.locator('[popovertarget]').click()
             await section.getByRole('menuitem', { name: 'Удалить' }).click()
         },
     },
-    { name: 'Жёлтая', action: 'Начать отправку', open: () => section.getByRole('button', { name: 'Жёлтая' }).click() },
-    { name: 'Красная', action: 'Удалить', open: () => section.getByRole('button', { name: 'Красная' }).click() },
+    { name: 'Жёлтая', action: 'Начать отправку', heading: 'Начать отправку?', open: () => section.getByRole('button', { name: 'Жёлтая' }).click() },
+    { name: 'Красная', action: 'Удалить', heading: 'Удаление администратора', open: () => section.getByRole('button', { name: 'Красная' }).click() },
 ]
 
 for (const scenario of scenarios) {
+    // Закрытая панель видна ещё 200 мс анимации ухода: закрытие проверяется
+    // и следующее открытие начинается, когда панель скрыта.
+    const closed = () => page.getByRole('dialog', { name: scenario.heading, includeHidden: true }).waitFor({ state: 'hidden' })
+
     await scenario.open()
     await frames()
     await expectState(`${scenario.name}: открыта, фокус на «Отмена»`, (s) => s.open && s.active === 'Отмена')
@@ -1063,24 +1069,31 @@ for (const scenario of scenarios) {
     await expectState(`${scenario.name}: Shift+Tab → «Отмена»`, (s) => s.inDialog && s.active === 'Отмена')
 
     await page.keyboard.press('Enter')
-    await frames()
+    await closed()
     await expectState(`${scenario.name}: Enter на «Отмена» — закрыта`, (s) => !s.open)
     await expectState(`${scenario.name}: фокус после закрытия`, null)
 
     await scenario.open()
     await frames()
     await page.keyboard.press('Escape')
-    await frames()
+    await closed()
     await expectState(`${scenario.name}: Escape — закрыта`, (s) => !s.open)
 
+    // Клик по затемнению. Если WebKit оставил фокус в модалке, это
+    // записывается, и фокус уводится из модалки явно: проверяется возврат
+    // фокуса Tab-ом снаружи.
     await scenario.open()
     await frames()
     await page.mouse.click(10, 10)
-    await expectState(`${scenario.name}: клик по затемнению`, null)
+    if ((await state()).inDialog) {
+        lines.push(`INFO ${scenario.name}: после клика по затемнению фокус остался в модалке, уведён blur()`)
+        await page.evaluate(() => document.activeElement.blur())
+    }
+    await expectState(`${scenario.name}: после клика по затемнению — открыта, фокус вне модалки`, (s) => s.open && !s.inDialog)
     await page.keyboard.press('Tab')
-    await expectState(`${scenario.name}: Tab после клика по затемнению — первая кнопка`, (s) => s.inDialog && s.active === scenario.action)
+    await expectState(`${scenario.name}: Tab снаружи — первая кнопка модалки`, (s) => s.inDialog && s.active === scenario.action)
     await page.keyboard.press('Escape')
-    await frames()
+    await closed()
     await expectState(`${scenario.name}: Escape — закрыта`, (s) => !s.open)
 }
 
@@ -1095,7 +1108,7 @@ node "$PW/webkit-acceptance.mjs" > "$PW/webkit.log" 2>&1; echo "webkit exit $?"
 grep -c '^FAIL' "$PW/webkit.log"; grep -E '^(INFO|counters|problems)' "$PW/webkit.log"
 ```
 
-Expected: `webkit exit 0`, `0` строк `FAIL`; `counters: Подтверждений: N, отмен: M+9` относительно начала (по три отмены на сценарий); `problems: none`. Строки `INFO` — фокус после закрытия и после клика по затемнению: в WebKit клик фокус на кнопку не ставит, поэтому после закрытия ожидается `body` (возвращать некуда); записать как есть. Лог и итог — в `$W/acceptance.md`.
+Expected: `webkit exit 0`, `0` строк `FAIL`; `counters: Подтверждений: 0, отмен: 9` (по три отмены на сценарий); `problems: none`. Строки `INFO` записываются как есть: фокус после закрытия — в WebKit клик фокус на кнопку не ставит, поэтому ожидается `body` (возвращать некуда); фокус, оставшийся в модалке после клика по затемнению, — поведение WebKit, после него фокус уводится `blur()`. Лог и итог — в `$W/acceptance.md`.
 
 Расхождение с ожиданием — остановиться: это отличие от спеки, его согласовывают до правок.
 
