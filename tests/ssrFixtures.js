@@ -20,6 +20,7 @@ export const ssrFixtures = {
     Dot: { props: { color: 'green' } },
     DropdownButtonWithAction: { props: { actions: [{ label: 'Действие', href: '#' }, { label: 'Другое действие', href: '#' }] } },
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
+    FormInput: { props: { label: 'Имя', modelValue: 'Анна', isRequired: true } },
     HamburgerMenu: { props: { actions: [{ label: 'Выйти', href: '#' }] } },
     InfoPill: { props: { text: 'Новый', color: 'green' } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
