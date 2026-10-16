@@ -207,12 +207,12 @@ git commit -m "feat: добавить компонент FormInput"
 npm test -- --dir tests --reporter=verbose > $W/t2-suite.log 2>&1; echo "tests exit $?"
 grep -cE '\[Vue warn\]|stderr \||\(node:[0-9]+\)|Warning: |Unhandled' $W/t2-suite.log
 npm run build > $W/t2-build.log 2>&1 && npx vite build --config vite.playground.config.js --outDir $S/playground-check --emptyOutDir --base ./ > $W/t2-playground.log 2>&1; echo "build exit $?"
-grep -n "семнадцат" README.md
+grep -nE "(^|[^о])семнадцат" README.md
 git add playground/App.vue playground/shell.css README.md
 git commit -m "docs: показать FormInput в Playground и описать в README"
 ```
 
-Expected: `tests exit 0`, `0`, `build exit 0`; `grep` по «семнадцат» пуст.
+Expected: `tests exit 0`, `0`, `build exit 0`; `grep` пуст — ни «семнадцать», ни «семнадцатью» не осталось («восемнадцать» содержит «семнадцат», поэтому шаблон исключает предшествующую «о»).
 
 ---
 
