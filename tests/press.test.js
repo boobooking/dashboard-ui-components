@@ -160,4 +160,23 @@ describe('ластики фильтров: очистка после нажат�
             expect(wrapper.emitted(event)).toEqual([[testCase.expected]])
         })
     }
+
+    // Запрос поиска — внутреннее состояние SelectMultiple, не значение:
+    // событий у компонента нет, очистку видно по полю.
+    it('SelectMultiple — ластик поиска', async () => {
+        const wrapper = mount(SelectMultiple, { props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: [], withSearch: true }, attachTo: document.body })
+        const field = wrapper.get('input')
+        await field.setValue('а')
+        const eraser = crossButton(wrapper)
+
+        await eraser.trigger('click')
+
+        expect(field.element.value).toBe('а')
+
+        await pressFinished(eraser.element)
+
+        expect(field.element.value).toBe('')
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+        expect(wrapper.emitted('changed')).toBeUndefined()
+    })
 })

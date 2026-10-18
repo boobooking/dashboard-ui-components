@@ -124,6 +124,19 @@ describe('CrossButton у тех, кто его использует', () => {
             place: ['bb:absolute', 'bb:top-0', 'bb:right-0', 'bb:h-full', 'bb:pr-2'],
         },
         {
+            name: 'SelectMultiple — ластик поиска',
+            mount: () => {
+                const wrapper = mount(SelectMultiple, {
+                    props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: [], withSearch: true },
+                    attachTo: document.body,
+                })
+                wrapper.get('input').setValue('а')
+                return wrapper
+            },
+            icon: ['bb:w-6', 'bb:h-6'],
+            place: ['bb:absolute', 'bb:top-0', 'bb:right-0', 'bb:h-full', 'bb:pr-2'],
+        },
+        {
             name: 'SelectSingle — ластик',
             mount: () => mount(SelectSingle, {
                 props: { header: 'Вендор', items: [{ id: 'a', name: 'Сбер' }], modelValue: 'a' },

@@ -86,6 +86,19 @@ const cases = [
         label: null,
     },
     {
+        name: 'SelectMultiple — ластик поиска',
+        mount: () => {
+            const wrapper = mount(SelectMultiple, {
+                props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: [], withSearch: true },
+                attachTo: document.body,
+            })
+            wrapper.get('input').setValue('а')
+            return wrapper
+        },
+        button: crossButton,
+        label: 'Очистить',
+    },
+    {
         name: 'SelectSingle — ластик',
         mount: () => mount(SelectSingle, {
             props: { header: 'Вендор', items: [{ id: 'a', name: 'Сбер' }], modelValue: 'a' },

@@ -41,6 +41,10 @@ export const messages = {
         tabs: 'Закладки',
         // SelectMultiple: надпись при нескольких выбранных, «Выбрано: 3».
         selected: 'Выбрано',
+        // SelectMultiple: подсказка и доступное имя поля поиска.
+        search: 'Поиск',
+        // SelectMultiple: строка вместо пунктов, когда поиск ничего не нашёл.
+        nothingFound: 'Ничего не найдено',
     },
     en: {
         cancel: 'Cancel',
@@ -69,5 +73,7 @@ export const messages = {
         tabs: 'Tabs',
         // SelectMultiple: надпись при нескольких выбранных, «Selected: 3».
         selected: 'Selected',
+        search: 'Search',
+        nothingFound: 'Nothing found',
     },
 }

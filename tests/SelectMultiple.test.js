@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, nextTick } from 'vue'
+import PopoverPanel from '../src/components/PopoverPanel.vue'
 import SelectMultiple from '../src/components/SelectMultiple.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
@@ -62,8 +63,9 @@ function isOpen(wrapper) {
     return panelOf(wrapper).element.matches(':popover-open')
 }
 
-function press(key) {
-    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+// options — другие поля события: модификаторы, isComposing.
+function press(key, options = {}) {
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...options })
     document.activeElement.dispatchEvent(event)
     return event
 }
@@ -374,8 +376,10 @@ function labelOf(wrapper) {
     return triggerOf(wrapper).text()
 }
 
+const CROSS_PATH = 'path[d="M6 18L18 6M6 6l12 12"]'
+
 function eraserOf(wrapper) {
-    return wrapper.findAll('button').find((button) => button.find('path[d="M6 18L18 6M6 6l12 12"]').exists())
+    return wrapper.findAll('button').find((button) => button.find(CROSS_PATH).exists())
 }
 
 async function pressFinished(element) {
@@ -383,8 +387,9 @@ async function pressFinished(element) {
     await flushPromises()
 }
 
+// Кнопки пунктов: в панели с поиском есть ещё ластик поля.
 function itemButtons(wrapper) {
-    return panelOf(wrapper).findAll('button')
+    return panelOf(wrapper).findAll('button').filter((button) => !button.find(CROSS_PATH).exists())
 }
 
 describe('SelectMultiple: выбор нескольких пунктов', () => {
@@ -523,5 +528,311 @@ describe('SelectMultiple: выбор нескольких пунктов', () =>
         const wrapper = mountSelect({ modelValue: ['a'], lang: 'en' })
 
         expect(eraserOf(wrapper).text()).toBe('Clear')
+    })
+})
+
+describe('SelectMultiple: поиск', () => {
+    function fieldOf(wrapper) {
+        return panelOf(wrapper).get('input')
+    }
+
+    // Ластик поля — в панели, ластик значения — рядом с кнопкой списка.
+    function searchEraserOf(wrapper) {
+        return panelOf(wrapper).findAll('button').find((button) => button.find(CROSS_PATH).exists())
+    }
+
+    function itemNames(wrapper) {
+        return itemButtons(wrapper).map((button) => button.text())
+    }
+
+    // Остановка стрелок: поле или пункт с этим именем.
+    function stopOf(wrapper, name) {
+        return name === 'поле'
+            ? fieldOf(wrapper).element
+            : itemButtons(wrapper).find((button) => button.text() === name).element
+    }
+
+    it('без withSearch поля нет', () => {
+        const wrapper = mountSelect()
+
+        expect(panelOf(wrapper).find('input').exists()).toBe(false)
+    })
+
+    it.each([
+        { name: 'по-русски', props: {}, expected: 'Поиск' },
+        { name: 'lang en', props: { lang: 'en' }, expected: 'Search' },
+    ])('поле: $name', ({ props, expected }) => {
+        const field = fieldOf(mountSelect({ withSearch: true, ...props }))
+
+        expect(field.attributes('type')).toBe('text')
+        expect(field.attributes('autocomplete')).toBe('off')
+        expect(field.attributes('placeholder')).toBe(expected)
+        expect(field.attributes('aria-label')).toBe(expected)
+    })
+
+    it('фильтр без учёта регистра и с обрезкой', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('  ВТО ')
+
+        expect(itemNames(wrapper)).toEqual(['Второй'])
+
+        await fieldOf(wrapper).setValue('   ')
+
+        expect(itemNames(wrapper)).toEqual(['Первый', 'Второй', 'Третий'])
+    })
+
+    it.each([
+        { name: 'по-русски', props: {}, expected: 'Ничего не найдено' },
+        { name: 'lang en', props: { lang: 'en' }, expected: 'Nothing found' },
+    ])('ничего не найдено: $name', async ({ props, expected }) => {
+        const wrapper = mountSelect({ withSearch: true, ...props })
+        await open(wrapper)
+
+        expect(panelOf(wrapper).text()).not.toContain(expected)
+
+        await fieldOf(wrapper).setValue('zzz')
+
+        expect(panelOf(wrapper).text()).toContain(expected)
+        expect(itemButtons(wrapper)).toEqual([])
+    })
+
+    it('ластик поля: виден при непустом запросе, очищает его, фокус остаётся в поле', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        const field = fieldOf(wrapper)
+        const eraser = searchEraserOf(wrapper)
+
+        expect(eraser.element.style.display).toBe('none')
+
+        await field.setValue('вто')
+
+        expect(eraser.element.style.display).toBe('')
+
+        eraser.element.focus()
+        await eraser.trigger('click')
+        await pressFinished(eraser.element)
+
+        expect(field.element.value).toBe('')
+        expect(document.activeElement).toBe(field.element)
+    })
+
+    it('при открытии фокус в поле, страница не прокручивается', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        const field = fieldOf(wrapper).element
+        const focusOptions = []
+        const focus = field.focus
+        field.focus = function (options) {
+            focusOptions.push(options)
+            return focus.call(this, options)
+        }
+
+        await open(wrapper)
+
+        expect(document.activeElement).toBe(field)
+        expect(focusOptions).toEqual([{ preventScroll: true }])
+    })
+
+    it('при монтировании фокус не в поле', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await settle()
+
+        expect(document.activeElement).not.toBe(fieldOf(wrapper).element)
+    })
+
+    it('запрос сбрасывается при закрытии, но не при клике по пункту', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+
+        await itemButtons(wrapper)[0].trigger('click')
+        await settle()
+
+        expect(fieldOf(wrapper).element.value).toBe('й')
+
+        await triggerOf(wrapper).trigger('click')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(fieldOf(wrapper).element.value).toBe('')
+    })
+
+    it('выбранные пункты, скрытые фильтром, считаются в надписи', async () => {
+        const wrapper = mountSelect({ withSearch: true, modelValue: ['a', 'b'] })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('тре')
+
+        expect(itemNames(wrapper)).toEqual(['Третий'])
+        expect(labelOf(wrapper)).toBe('Выбрано: 2')
+    })
+
+    it('Enter в поле не отправляет форму', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        fieldOf(wrapper).element.focus()
+
+        expect(press('Enter').defaultPrevented).toBe(true)
+    })
+
+    it.each([
+        { name: 'из поля вниз — первый пункт', from: 'поле', key: 'ArrowDown', to: 'Первый' },
+        { name: 'из поля вверх — последний пункт', from: 'поле', key: 'ArrowUp', to: 'Третий' },
+        { name: 'с первого пункта вверх — поле', from: 'Первый', key: 'ArrowUp', to: 'поле' },
+        { name: 'с последнего пункта вниз — поле', from: 'Третий', key: 'ArrowDown', to: 'поле' },
+    ])('круг стрелок через поле: $name', async ({ from, key, to }) => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        stopOf(wrapper, from).focus()
+
+        press(key)
+
+        expect(document.activeElement).toBe(stopOf(wrapper, to))
+    })
+
+    it('ластик поля вне стрелок и мыши', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+        fieldOf(wrapper).element.focus()
+
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+
+        await searchEraserOf(wrapper).trigger('mousemove')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+    })
+
+    it('набор символа на пункте уходит в поле', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+        press('ArrowDown')
+
+        const event = press('x')
+
+        expect(event.defaultPrevented).toBe(true)
+
+        await nextTick()
+        const field = fieldOf(wrapper).element
+
+        expect(document.activeElement).toBe(field)
+        expect(field.value).toBe('йx')
+        expect(field.selectionStart).toBe(2)
+        expect(field.selectionEnd).toBe(2)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
+    it('Backspace на пункте стирает последний символ запроса в поле', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+        press('ArrowDown')
+
+        const event = press('Backspace')
+        await nextTick()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(fieldOf(wrapper).element.value).toBe('')
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
+    it.each([
+        { name: 'Ctrl', key: 'a', options: { ctrlKey: true } },
+        { name: 'Cmd', key: 'a', options: { metaKey: true } },
+        { name: 'Alt', key: 'a', options: { altKey: true } },
+        { name: 'пробел', key: ' ', options: {} },
+        { name: 'набор методом ввода', key: 'a', options: { isComposing: true } },
+    ])('на пункте не уходит в поле: $name', async ({ key, options }) => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        press('ArrowDown')
+
+        const event = press(key, options)
+        await nextTick()
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(fieldOf(wrapper).element.value).toBe('')
+        expect(document.activeElement.textContent).toBe('Первый')
+    })
+
+    it('без поиска набор на пункте не перехватывается', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        press('ArrowDown')
+
+        expect(press('x').defaultPrevented).toBe(false)
+    })
+
+    it.each([
+        { name: 'с поиском — держится', props: { withSearch: true }, expected: true },
+        { name: 'без поиска — нет', props: {}, expected: false },
+    ])('размер панели: $name', ({ props, expected }) => {
+        const wrapper = mountSelect(props)
+
+        expect(wrapper.findComponent(PopoverPanel).props('keepSize')).toBe(expected)
+    })
+
+    it('lang en: подпись ластика поля — Clear', () => {
+        const wrapper = mountSelect({ withSearch: true, lang: 'en' })
+
+        expect(searchEraserOf(wrapper).text()).toBe('Clear')
+    })
+
+    it('пункты пропали при запросе: список закрыт, вернувшиеся открываются с пустым полем', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+
+        await wrapper.setProps({ items: [] })
+        await settle()
+
+        expect(wrapper.find('[popover]').exists()).toBe(false)
+        expect(wrapper.vm.isOpen).toBe(false)
+
+        await wrapper.setProps({ items })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+
+        await open(wrapper)
+
+        expect(fieldOf(wrapper).element.value).toBe('')
+    })
+
+    it('две копии: открытие второй закрывает первую и сбрасывает её запрос', async () => {
+        const Page = {
+            render: () => h('div', [
+                h(SelectMultiple, { header: 'Вендор', items, withSearch: true }),
+                h(SelectMultiple, { header: 'Сертификат', items, withSearch: true }),
+            ]),
+        }
+        const page = mount(Page, { attachTo: document.body, global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } } })
+        const [first, second] = page.findAllComponents(SelectMultiple)
+        await first.find('button').trigger('click')
+        await settle()
+        await first.get('input').setValue('вто')
+
+        await second.find('button').trigger('click')
+        await settle()
+
+        expect(first.get('[popover]').element.matches(':popover-open')).toBe(false)
+        expect(first.get('input').element.value).toBe('')
+        expect(second.get('input').element.value).toBe('')
+    })
+
+    it('Escape из поля закрывает список, фокус возвращается на кнопку', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        fieldOf(wrapper).element.focus()
+
+        press('Escape')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
     })
 })
