@@ -78,8 +78,8 @@ export default {
     },
 
     methods: {
-        // Методы, а не computed: $attrs не реактивен для computed, а метод
-        // в рендере видит новые атрибуты.
+        // Методы, как forwardedAttrs() у PageCard: шаблон вызывает их
+        // в каждом рендере.
         inputId() {
             return this.$attrs.id ?? this.generatedId;
         },
