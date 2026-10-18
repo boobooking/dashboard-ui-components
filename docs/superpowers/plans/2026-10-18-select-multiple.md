@@ -82,7 +82,7 @@ Expected: SHA коммита этого плана; `git status -s` пуст (`.
 | открытая вверх держит и высоту | кнопка `{ top: 700, bottom: 740, left: 50, right: 290 }`, окно 1000×800, `clientHeight` 48, `scrollHeight` 120 → `style.top` `'auto'`, `minWidth` `'240px'`, `minHeight` `'300px'` |
 | при следующем открытии — заново | открыть, закрыть кнопкой, `offsetWidth` 180, открыть → `minWidth` `'180px'` |
 | без keep-size размер не держится | `minWidth` `''`, `minHeight` `''` |
-| find-stops доходит до стрелок | `findStops: () => []`, открыть, ArrowDown → `defaultPrevented` `false` (без `findStops` — `true`) |
+| find-stops доходит до стрелок | `arrows: true`, `findStops: () => []`, открыть, ArrowDown → `defaultPrevented` `false`; контроль — `arrows: true` без `findStops`: `true` |
 
 `DropdownButton` отдельно не тестируется: его проброс проверяют тесты `SelectMultiple` (Task 2, 3).
 
@@ -144,12 +144,12 @@ git commit -m "feat: дать панели остановки стрелок, у
 | повторный клик убирает | `['a', 'c']`, клик «Первый» → `[[['c']]]`, `changed` один раз |
 | `id` вне пунктов сохраняются | `['x']`: надпись `''`, ластика нет; клик «Первый» → `[[['x', 'a']]]` |
 | надпись | `[]` → `''`; `['b']` → `Второй`; `['a', 'b']` → `Выбрано: 2`; `['a', 'x']` → `Первый`; `lang: 'en'`, `['a', 'b']` → `Selected: 2` (текст кнопки `[popovertarget]`) |
-| клик список не закрывает | открыть, ArrowDown, `click()` пункта → `isOpen` `true`, `vm.isOpen` `true`, `document.activeElement` — тот же пункт, у него `aria-pressed="true"` |
+| клик список не закрывает | открыть, ArrowDown, `click()` пункта → `isOpen` `true`, `vm.isOpen` `true`, `document.activeElement` — тот же пункт; значение возвращается компоненту — `setProps({ modelValue: wrapper.emitted('update:modelValue')[0][0] })`, `settle` → у пункта `aria-pressed="true"`, фокус на нём, список открыт |
 | отсчёт от первого выбранного | `['c', 'a']`, открыть, ArrowDown → «Второй» |
 | `aria-pressed` | `['b']` → у пунктов `false`, `true`, `false` |
 | `modelValue: null` | ничего не выбрано, надпись `''`, `warnings` `[]` |
 | дубли и не массив | `['a', 'a']` → клик «Первый» → `[[[]]]`; `modelValue: 'a'` → не падает, предупреждение `Invalid prop: type check failed for prop "modelValue"`, надпись `''` |
-| новый массив тех же пунктов при открытом списке | `['b']`, открыть, ArrowDown ×2 (фокус «Второй»), `setProps({ items: items.map((item) => ({ ...item })) })`, `settle` → список открыт, фокус на «Второй», `aria-pressed` `false`, `true`, `false` |
+| новый массив тех же пунктов при открытом списке | `['b']`, открыть, фокус на кнопку «Второй» (`focus()`), `setProps({ items: items.map((item) => ({ ...item })) })`, `settle` → список открыт, фокус на «Второй», `aria-pressed` `false`, `true`, `false` |
 | ластик — `[]` и `changed` | `['a']`, ластик (`CrossButton` вне панели), окончание анимации, как `pressFinished` в `tests/press.test.js` → `update:modelValue` `[[[]]]`, `changed` `[[]]` |
 | `lang: 'en'` — подпись ластика | скрытая подпись ластика — `Clear` |
 
@@ -302,7 +302,7 @@ git commit -m "feat: добавить поиск в SelectMultiple"
 - `<select-multiple header="Бренд" :items="brandItems" v-model="brands" @changed="brandCommits++"/>` и строка `Выбрано: {{ brands.length === 0 ? '(ничего)' : brands.join(', ') }}, запросов: {{ brandCommits }}`;
 - `<h3>Длинный список с поиском: поле не двигается при наборе, у нижнего края окна — вверх</h3>` и `<select-multiple header="Мероприятие" :items="eventItems" v-model="events" with-search/>`.
 
-`data()`: `brandItems` — `[{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }]`, `brands: []`, `brandCommits: 0`, `events: []`. computed `eventItems` — 30 пунктов `{ id: 'e<n>', name }` с именами разной длины (`Мероприятие <n>`, у каждого третьего — с городом, у каждого пятого — длинное, около 40 символов), чтобы при наборе ширина панели заметно держалась.
+`data()`: `brandItems` — `[{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }]`, `brands: []`, `brandCommits: 0`, `events: []`. computed `eventItems` — 30 пунктов `{ id: 'e<n>', name }` с именами разной длины, все начинаются с «Мероприятие»: `Мероприятие <n>`, у каждого третьего — с городом, у каждого пятого — длинное, около 40 символов. Ширина панели при наборе заметно держится, а запрос `мер` совпадает со всеми пунктами (Task 5 Step 2).
 
 - [ ] **Step 2: README**
 
@@ -343,7 +343,7 @@ Expected: `exit 0`, оба `200` (при `404` — выложить заново
 
 - [ ] **Step 2: WebKit и набор с пункта**
 
-`$S/pw` — `playwright-core@1.63.0`; страница — собранный Playground через `python3 -m http.server` из `$S/playground-check` (Task 4). WebKit: сценарии 2 и 3 спеки §16. Chromium и WebKit: три сценария «Набор с пункта» спеки §16 — `page.keyboard`, каретка ставится `setSelectionRange(1, 1)` после набора `abc`. Результаты — в `$W/acceptance.md`. Песочница не даёт запустить браузер или слушать порт — тот же запуск вне песочницы.
+`$S/pw` — `playwright-core@1.63.0`; страница — собранный Playground через `python3 -m http.server` из `$S/playground-check` (Task 4). WebKit: сценарии 2 и 3 спеки §16. Chromium и WebKit: три сценария «Набор с пункта» спеки §16 на «Мероприятие» — `page.keyboard`; запрос `мер` совпадает с пунктами Playground («Мероприятие …»), каретка ставится `setSelectionRange(1, 1)` после набора; перед проверяемой клавишей (`x`, Backspace) утверждается, что фокус на кнопке пункта (`document.activeElement` — `button` внутри списка, не поле). Результаты — в `$W/acceptance.md`. Песочница не даёт запустить браузер или слушать порт — тот же запуск вне песочницы.
 
 - [ ] **Step 3: Перезапрос Inertia**
 
