@@ -72,6 +72,20 @@
         </section>
 
         <section>
+            <h2>SelectMultiple</h2>
+            <select-multiple
+                header="Бренд"
+                :items="brandItems"
+                v-model="brands"
+                @changed="brandCommits++"
+            />
+            <p>Выбрано: {{ brands.length === 0 ? '(ничего)' : brands.join(', ') }}, запросов: {{ brandCommits }}</p>
+
+            <h3>Длинный список с поиском: поле не двигается при наборе, у нижнего края окна — вверх</h3>
+            <select-multiple header="Мероприятие" :items="eventItems" v-model="events" with-search/>
+        </section>
+
+        <section>
             <h2>Цвета</h2>
             <table class="demo-colors">
                 <tr>
@@ -328,6 +342,7 @@ import {
     Search,
     SelectDateInterval,
     SelectSingle,
+    SelectMultiple,
     InfoPill,
     ErrorMessages,
     FormInput,
@@ -352,6 +367,7 @@ export default {
         Search,
         SelectDateInterval,
         SelectSingle,
+        SelectMultiple,
         InfoPill,
         ErrorMessages,
         FormInput,
@@ -417,6 +433,13 @@ export default {
             vendor: null,
             vendorCommits: 0,
             longItem: null,
+            brandItems: [
+                { id: 'rc', name: 'Royal Canin' },
+                { id: 'eukanuba', name: 'Eukanuba' },
+            ],
+            brands: [],
+            brandCommits: 0,
+            events: [],
             errorObject: {
                 email: 'Неверный email',
                 password: 'Пароль слишком короткий',
@@ -457,6 +480,27 @@ export default {
         // края, и он прокручивается внутри.
         longItems() {
             return Array.from({ length: 30 }, (_, index) => ({ id: `c${index + 1}`, name: `Сертификат ${index + 1}` }));
+        },
+
+        // Тридцать пунктов разной длины: каждый третий с городом, каждый
+        // пятый длинный. Все начинаются с «Мероприятие», запрос «мер»
+        // совпадает со всеми; по запросу «моск» остаются только пункты
+        // с городом, и панель сохраняет ширину.
+        eventItems() {
+            return Array.from({ length: 30 }, (_, index) => {
+                const number = index + 1;
+                let name = `Мероприятие ${number}`;
+
+                if (number % 3 === 0) {
+                    name = `Мероприятие ${number}, Москва`;
+                }
+
+                if (number % 5 === 0) {
+                    name = `Мероприятие ${number}: выставка в Санкт-Петербурге`;
+                }
+
+                return { id: `e${number}`, name };
+            });
         },
 
         // Как кнопка страницы администраторов: основная кнопка — переход,
