@@ -205,8 +205,10 @@
 - клик по пункту список **не закрывает**: следующий пункт выбирают
   сразу; фокус остаётся на пункте;
 - галочка — у каждого выбранного пункта;
-- пункт сообщает скринридеру, выбран ли он (`aria-pressed`); у пунктов
-  `SelectSingle` разметка не меняется;
+- пункт сообщает скринридеру, выбран ли он (`aria-pressed`): атрибут
+  ставит `SelectMultiple`, Vue переносит его на корневую кнопку
+  `ListElement`, сам `ListElement` не меняется; у пунктов `SelectSingle`
+  разметка прежняя;
 - без пунктов кнопки нет, заголовок остаётся — как у `SelectSingle`.
 
 ## 6. Поиск
@@ -384,7 +386,7 @@ Tab ходит по полю и пунктам в порядке разметк�
 `tests/utilityPrefix.test.js`, `tests/i18n.test.js`, `tests/ssr.test.js`
 и `tests/hydration.test.js` проверят новый компонент сами. Тесты
 `SelectSingle` и меню не меняются и остаются зелёными: общие модули
-(`menuFocus.js`, `DropdownButton`, `ListElement`) для них ведут себя
+(`menuFocus.js`, `DropdownButton`, `PopoverPanel`) для них ведут себя
 по-прежнему.
 
 ## 12. Playground
@@ -496,6 +498,13 @@ git worktree. Порядок:
 - **WebKit** (Playwright, как в заметках о браузерах проекта) — пункты
   2 и 3: Safari не ставит фокус на кнопку по клику и при закрытии
   уводит его на body.
+- **Набор с пункта** — Playwright Chromium и WebKit, настоящими
+  клавишами, «Мероприятие» с поиском:
+  1. запрос `abc`, каретка после `a`, стрелка вниз на пункт, `x` —
+     в поле строго `abcx`;
+  2. запрос `abc`, стрелка вниз на пункт, Backspace — в поле `ab`;
+  3. в обоих случаях фокус в поле, выбор пунктов не изменился,
+     `update:modelValue` не было.
 - **Перезапрос Inertia.** Стенд в scratchpad, как для `PageCard`
   и `PageTabs`: vite, пакет из `dist`, настоящий `@inertiajs/vue3`
   3.6.1, ответ с задержкой, как в `tests/inertia/harness.js`; страница
@@ -546,8 +555,6 @@ git worktree. Порядок:
   `src/components/PopoverPanel.vue` — размер панели при фильтре
   (раздел 6), только для `SelectMultiple`: панели `SelectSingle`, меню
   и календарей ведут себя по-прежнему;
-- `src/components/ListElement.vue` — `aria-pressed` для пунктов
-  `SelectMultiple`;
 - `tests/exports.test.js`, `tests/ssrFixtures.js`,
   `tests/keyboardNavigation.test.js`, `tests/CrossButton.test.js`,
   `tests/press.test.js`;
