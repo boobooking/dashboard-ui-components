@@ -13,7 +13,7 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно восемнадцать компонентов, плагин и downloadFile', () => {
+    it('ровно девятнадцать компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
             'ConfirmationModal',
@@ -31,6 +31,7 @@ describe('публичная поверхность пакета', () => {
             'RussianMobileFilter',
             'Search',
             'SelectDateInterval',
+            'SelectMultiple',
             'SelectSingle',
             'TextPopover',
             'dashboardUi',

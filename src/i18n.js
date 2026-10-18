@@ -39,6 +39,8 @@ export const messages = {
         fullText: 'Полный текст',
         // PageTabs: имя навигации для скринридера.
         tabs: 'Закладки',
+        // SelectMultiple: надпись при нескольких выбранных, «Выбрано: 3».
+        selected: 'Выбрано',
     },
     en: {
         cancel: 'Cancel',
@@ -65,5 +67,7 @@ export const messages = {
         showText: 'Show text',
         fullText: 'Full text',
         tabs: 'Tabs',
+        // SelectMultiple: надпись при нескольких выбранных, «Selected: 3».
+        selected: 'Selected',
     },
 }
