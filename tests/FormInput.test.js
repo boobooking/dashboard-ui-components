@@ -154,7 +154,7 @@ describe('FormInput', () => {
     it.each(['number', 'checkbox', 'date'])('type %s вне списка — предупреждение и type="text"', (type) => {
         const { wrapper, errors, warnings } = mountInput({ type })
 
-        expect(warnings.some((message) => message.includes('Invalid prop: custom validator check failed for prop "type"'))).toBe(true)
+        expect(warnings).toEqual([expect.stringContaining('Invalid prop: custom validator check failed for prop "type"')])
         expect(wrapper.find('input').attributes('type')).toBe('text')
         expect(errors).toEqual([])
     })
@@ -241,7 +241,7 @@ describe('FormInput', () => {
     it('label null — пустая подпись', () => {
         const { wrapper, errors, warnings } = mountInput({ label: null })
 
-        expect(warnings.some((message) => message.includes('Invalid prop: type check failed for prop "label"'))).toBe(true)
+        expect(warnings).toEqual([expect.stringContaining('Invalid prop: type check failed for prop "label"')])
         expect(errors).toEqual([])
         expect(wrapper.find('label').text()).toBe('')
     })
