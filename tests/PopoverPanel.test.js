@@ -247,3 +247,107 @@ describe('PopoverPanel: событие toggle', () => {
         expect(toggles).toEqual([true])
     })
 })
+
+// Размеры панели в happy-dom — нули, поэтому их задают явно. Место — как
+// в «место списка» SelectSingle.test.js.
+describe('PopoverPanel: keep-size', () => {
+    afterEach(() => {
+        delete document.documentElement.clientWidth
+        delete document.documentElement.clientHeight
+    })
+
+    function viewport(width, height) {
+        Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: width })
+        Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: height })
+    }
+
+    function size(panel, width, height) {
+        Object.defineProperty(panel, 'offsetWidth', { configurable: true, value: width })
+        Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: height })
+    }
+
+    function frame() {
+        return new Promise((resolve) => requestAnimationFrame(resolve))
+    }
+
+    async function openPanel(wrapper) {
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        await frame()
+    }
+
+    it('открытая вниз держит ширину, но не высоту', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        size(panelOf(wrapper).element, 240, 300)
+
+        await openPanel(wrapper)
+
+        expect(panelOf(wrapper).element.style.minWidth).toBe('240px')
+        expect(panelOf(wrapper).element.style.minHeight).toBe('')
+    })
+
+    it('открытая вверх держит и высоту', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 700, bottom: 740, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 48 })
+        Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: 120 })
+        size(panel, 240, 300)
+
+        await openPanel(wrapper)
+
+        expect(panel.style.top).toBe('auto')
+        expect(panel.style.minWidth).toBe('240px')
+        expect(panel.style.minHeight).toBe('300px')
+    })
+
+    it('при следующем открытии — заново', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        size(panel, 240, 300)
+        await openPanel(wrapper)
+
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        size(panel, 180, 300)
+        await openPanel(wrapper)
+
+        expect(panel.style.minWidth).toBe('180px')
+    })
+
+    it('без keep-size размер не держится', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel()
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        size(panelOf(wrapper).element, 240, 300)
+
+        await openPanel(wrapper)
+
+        expect(panelOf(wrapper).element.style.minWidth).toBe('')
+        expect(panelOf(wrapper).element.style.minHeight).toBe('')
+    })
+
+    it('find-stops доходит до стрелок', async () => {
+        const control = mountPanel({ props: { arrows: true } })
+        await buttonOf(control).trigger('click')
+        await settle()
+        const controlEvent = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })
+        document.body.dispatchEvent(controlEvent)
+        expect(controlEvent.defaultPrevented).toBe(true)
+        control.unmount()
+        await settle()
+
+        const wrapper = mountPanel({ props: { arrows: true, findStops: () => [] } })
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        const event = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })
+        document.body.dispatchEvent(event)
+
+        expect(event.defaultPrevented).toBe(false)
+    })
+})

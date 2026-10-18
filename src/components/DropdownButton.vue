@@ -13,9 +13,12 @@
                 align="start"
                 arrows
                 :find-selected="findSelected"
+                :find-stops="findStops"
+                :keep-size="keepSize"
                 return-focus
                 panel-class="bb:bg-white bb:text-inherit bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg bb:overscroll-contain"
                 @update:model-value="$emit('update:isOpen', $event)"
+                @toggle="$emit('toggle', $event)"
             >
                 <template #trigger="trigger">
                     <button
@@ -36,7 +39,7 @@
                     <slot></slot>
                 </template>
             </popover-panel>
-            <cross-button v-if="needsEraser" size="small" @clicked="$emit('erased')" class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"></cross-button>
+            <cross-button v-if="needsEraser" size="small" :lang="lang" @clicked="$emit('erased')" class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"></cross-button>
         </div>
     </div>
 </template>
@@ -48,7 +51,7 @@ import CrossButton from "./CrossButton.vue";
 export default {
     components: { PopoverPanel, CrossButton },
 
-    emits: ["update:isOpen", "erased"],
+    emits: ["update:isOpen", "erased", "toggle"],
 
     props: {
         isOpen: {
@@ -67,6 +70,21 @@ export default {
         findSelected: {
             type: Function,
             default: () => null,
+        },
+        // Остановки стрелок вместо всех кнопок и ссылок списка (PopoverPanel).
+        findStops: {
+            type: Function,
+            default: null,
+        },
+        // Список не сужается и открытый вверх не укорачивается (PopoverPanel).
+        keepSize: {
+            type: Boolean,
+            default: false,
+        },
+        // Язык подписи ластика; без него — язык страницы (CrossButton).
+        lang: {
+            type: String,
+            default: null,
         },
     },
 

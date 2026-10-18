@@ -83,6 +83,20 @@ export default {
             type: Function,
             default: () => null,
         },
+        // Остановки стрелок: функция возвращает элементы панели в порядке
+        // обхода. Без неё стрелки ходят по всем кнопкам и ссылкам. Нужна, когда
+        // в панели есть кнопка, на которую стрелки заходить не должны.
+        findStops: {
+            type: Function,
+            default: null,
+        },
+        // Панель держит размер, с которым открылась: поле поиска не двигается,
+        // пока фильтр убирает пункты. Ширина не уже прежней; открытая вверх
+        // не ниже прежней, иначе её верх уезжал бы вниз.
+        keepSize: {
+            type: Boolean,
+            default: false,
+        },
         // Клик внутри панели закрывает её — после обработчика пункта.
         closeOnClick: {
             type: Boolean,
@@ -253,12 +267,24 @@ export default {
             if (event.newState === "open") {
                 const button = document.getElementById(this.buttonId);
                 const options = { maxWidth: this.maxWidth, align: this.align };
+                if (this.keepSize) {
+                    this.$refs.panel.style.minWidth = "";
+                    this.$refs.panel.style.minHeight = "";
+                }
                 placePopover(button, this.$refs.panel, options);
                 requestAnimationFrame(() => {
                     const panel = this.$refs.panel;
 
                     if (isPopoverOpen(panel)) {
                         fitPopover(button, panel, options);
+
+                        if (this.keepSize) {
+                            panel.style.minWidth = `${panel.offsetWidth}px`;
+
+                            if (panel.style.top === "auto") {
+                                panel.style.minHeight = `${panel.offsetHeight}px`;
+                            }
+                        }
                     }
                 });
                 return;
@@ -285,7 +311,7 @@ export default {
                 this.stopClosing = closeOnScrollAndResize(panel, this.close);
 
                 if (this.arrows) {
-                    this.stopArrows = moveMenuFocus(panel, this.findSelected);
+                    this.stopArrows = moveMenuFocus(panel, this.findSelected, this.findStops);
                 }
             }
 

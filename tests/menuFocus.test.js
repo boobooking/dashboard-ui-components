@@ -142,3 +142,78 @@ describe('moveMenuFocus', () => {
         expect(focused()).toBe('')
     })
 })
+
+// Поле поиска над пунктами входит в круг стрелок, пункт B — нет.
+describe('moveMenuFocus: findStops', () => {
+    let field
+    let stops
+
+    beforeEach(() => {
+        field = document.createElement('input')
+        menu.prepend(field)
+        stops = () => [field, items[0], items[2]]
+    })
+
+    it('из поля вниз — первый стоп после поля', () => {
+        stop = moveMenuFocus(menu, () => null, () => stops())
+        field.focus()
+
+        const event = press('ArrowDown')
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(focused()).toBe('A')
+    })
+
+    it('с первого пункта вверх — в поле', () => {
+        stop = moveMenuFocus(menu, () => null, () => stops())
+        items[0].focus()
+
+        press('ArrowUp')
+
+        expect(document.activeElement).toBe(field)
+    })
+
+    it('с последнего вниз — в поле', () => {
+        stop = moveMenuFocus(menu, () => null, () => stops())
+        items[2].focus()
+
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(field)
+    })
+
+    it('пункт вне стопов пропускается', () => {
+        stop = moveMenuFocus(menu, () => null, () => stops())
+        items[0].focus()
+
+        press('ArrowDown')
+
+        expect(focused()).toBe('C')
+    })
+
+    it('фокус вне стопов — от выбранного', () => {
+        stop = moveMenuFocus(menu, () => items[0], () => stops())
+        outside.focus()
+
+        press('ArrowDown')
+
+        expect(focused()).toBe('C')
+    })
+
+    it('мышь над элементом вне стопов фокус не трогает', () => {
+        stop = moveMenuFocus(menu, () => null, () => stops())
+        items[0].focus()
+
+        items[1].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
+
+        expect(focused()).toBe('A')
+    })
+
+    it('пустые стопы — стрелка не гасится', () => {
+        stops = () => []
+        stop = moveMenuFocus(menu, () => null, () => stops())
+        outside.focus()
+
+        expect(press('ArrowDown').defaultPrevented).toBe(false)
+    })
+})

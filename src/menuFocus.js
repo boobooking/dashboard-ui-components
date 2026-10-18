@@ -17,14 +17,17 @@ const ITEMS = 'a[href], button'
 // если он есть: вниз — следующий за ним, вверх — предыдущий; без выбранного
 // вниз — первый пункт, вверх — последний. С краёв фокус уходит по кругу.
 // Движение мыши по пункту ставит фокус на него: стрелки продолжают от пункта
-// под курсором. Возвращает функцию, снимающую оба слушателя.
-export function moveMenuFocus(menu, findSelected = () => null) {
+// под курсором. Если задан findStops, стрелки ходят по его результату в его
+// порядке, а мышь ставит фокус только на элементы из него: так в круг войдёт
+// поле поиска над пунктами, а ластик поля, тоже кнопка, останется вне его.
+// Возвращает функцию, снимающую оба слушателя.
+export function moveMenuFocus(menu, findSelected = () => null, findStops = null) {
     const onKeydown = (event) => {
         if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
             return
         }
 
-        const items = [...menu.querySelectorAll(ITEMS)]
+        const items = findStops === null ? [...menu.querySelectorAll(ITEMS)] : findStops()
         if (items.length === 0) {
             return
         }
@@ -51,7 +54,7 @@ export function moveMenuFocus(menu, findSelected = () => null) {
     const onMousemove = (event) => {
         const item = event.target.closest(ITEMS)
 
-        if (item !== null) {
+        if (item !== null && (findStops === null || findStops().includes(item))) {
             item.focus({ preventScroll: true })
         }
     }
