@@ -267,6 +267,12 @@ describe('PopoverPanel: keep-size', () => {
         panel.getBoundingClientRect = () => ({ width, height })
     }
 
+    // Высота окна панели и её содержимого: содержимое выше — переполнение.
+    function heights(panel, clientHeight, scrollHeight) {
+        Object.defineProperty(panel, 'clientHeight', { configurable: true, value: clientHeight })
+        Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: scrollHeight })
+    }
+
     function frame() {
         return new Promise((resolve) => requestAnimationFrame(resolve))
     }
@@ -330,6 +336,74 @@ describe('PopoverPanel: keep-size', () => {
         await openPanel(wrapper)
 
         expect(panel.style.minWidth).toBe('180px')
+    })
+
+    it('с переполнением место полосы прокрутки держится', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        heights(panel, 48, 120)
+        size(panel, 240, 48)
+
+        await openPanel(wrapper)
+
+        expect(panel.style.scrollbarGutter).toBe('stable')
+    })
+
+    it('без переполнения место полосы прокрутки не держится', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        heights(panel, 120, 120)
+        size(panel, 240, 120)
+
+        await openPanel(wrapper)
+
+        expect(panel.style.scrollbarGutter).toBe('')
+    })
+
+    it('повторное открытие сбрасывает ширину, высоту и место полосы прокрутки', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        const button = buttonOf(wrapper).element
+        button.getBoundingClientRect = () => ({ top: 700, bottom: 740, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        heights(panel, 48, 120)
+        size(panel, 240, 300)
+        await openPanel(wrapper)
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        button.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        heights(panel, 120, 120)
+        size(panel, 180, 120)
+
+        await buttonOf(wrapper).trigger('click')
+
+        expect([panel.style.minWidth, panel.style.minHeight, panel.style.scrollbarGutter]).toEqual(['', '', ''])
+
+        await settle()
+        await frame()
+
+        expect([panel.style.minWidth, panel.style.minHeight, panel.style.scrollbarGutter]).toEqual(['180px', '', ''])
+    })
+
+    it('keep-size выключили у закрытой панели — при открытии размер сброшен', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 700, bottom: 740, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        heights(panel, 48, 120)
+        size(panel, 240, 300)
+        await openPanel(wrapper)
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+
+        await wrapper.setProps({ keepSize: false })
+        await openPanel(wrapper)
+
+        expect([panel.style.minWidth, panel.style.minHeight, panel.style.scrollbarGutter]).toEqual(['', '', ''])
     })
 
     it('без keep-size размер не держится', async () => {

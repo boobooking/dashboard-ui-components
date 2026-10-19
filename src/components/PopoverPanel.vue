@@ -92,7 +92,8 @@ export default {
         },
         // Панель держит размер, с которым открылась: поле поиска не двигается,
         // пока фильтр убирает пункты. Ширина не уже прежней; открытая вверх
-        // не ниже прежней, иначе её верх уезжал бы вниз.
+        // не ниже прежней, иначе её верх уезжал бы вниз. Место полосы
+        // прокрутки, которая была при открытии, остаётся за ней.
         keepSize: {
             type: Boolean,
             default: false,
@@ -267,10 +268,11 @@ export default {
             if (event.newState === "open") {
                 const button = document.getElementById(this.buttonId);
                 const options = { maxWidth: this.maxWidth, align: this.align };
-                if (this.keepSize) {
-                    this.$refs.panel.style.minWidth = "";
-                    this.$refs.panel.style.minHeight = "";
-                }
+                // Размер прошлого открытия сбрасывается при любом keepSize:
+                // keepSize мог выключиться, пока панель была закрыта.
+                this.$refs.panel.style.minWidth = "";
+                this.$refs.panel.style.minHeight = "";
+                this.$refs.panel.style.scrollbarGutter = "";
                 placePopover(button, this.$refs.panel, options);
                 requestAnimationFrame(() => {
                     const panel = this.$refs.panel;
@@ -278,10 +280,19 @@ export default {
                     if (isPopoverOpen(panel)) {
                         fitPopover(button, panel, options);
 
+                        // Полоса прокрутки при открытии была — её место
+                        // остаётся за ней: фильтр уберёт пункты, полоса
+                        // пропадёт, и без этого содержимое стало бы шире,
+                        // а поле поиска сдвинулось бы. Место ставится до
+                        // измерения, и удерживается размер вместе с ним.
                         // Размер — из getBoundingClientRect: offsetWidth
                         // и offsetHeight округляют дробные px, и с ними
                         // панель могла бы стать на долю пикселя меньше.
                         if (this.keepSize) {
+                            if (panel.scrollHeight > panel.clientHeight) {
+                                panel.style.scrollbarGutter = "stable";
+                            }
+
                             const rect = panel.getBoundingClientRect();
                             panel.style.minWidth = `${rect.width}px`;
 
