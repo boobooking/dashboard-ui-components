@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue'
 import PopoverPanel from '../src/components/PopoverPanel.vue'
@@ -1108,15 +1108,31 @@ describe('SelectMultiple: Tab внутри списка', () => {
         expect(pressTab().defaultPrevented).toBe(false)
     })
 
-    it('после пропажи пунктов Tab не перехватывается', async () => {
+    it('после пропажи пунктов слушатели keydown снимаются', async () => {
+        const added = []
+        const removed = []
+        const add = vi.spyOn(document, 'addEventListener').mockImplementation(function (type, handler, capture) {
+            added.push([type, handler, capture])
+            return EventTarget.prototype.addEventListener.call(this, type, handler, capture)
+        })
+        const remove = vi.spyOn(document, 'removeEventListener').mockImplementation(function (type, handler, capture) {
+            removed.push([type, handler, capture])
+            return EventTarget.prototype.removeEventListener.call(this, type, handler, capture)
+        })
         const wrapper = mountSelect({ withSearch: true })
         await open(wrapper)
+        const keydowns = added.filter(([type, , capture]) => type === 'keydown' && capture === true)
+
+        expect(keydowns).toHaveLength(2)
 
         await wrapper.setProps({ items: [] })
         await settle()
-        document.body.focus()
+        add.mockRestore()
+        remove.mockRestore()
 
-        expect(document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }))).toBe(true)
+        for (const handler of keydowns) {
+            expect(removed).toContainEqual(handler)
+        }
     })
 
     it('поиск включили и выключили при открытом списке: остановки текущие', async () => {
