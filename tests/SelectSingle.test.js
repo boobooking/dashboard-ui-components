@@ -445,7 +445,7 @@ describe('SelectSingle: Tab внутри списка', () => {
         expect(pressTab().defaultPrevented).toBe(false)
     })
 
-    it('после пропажи пунктов слушатель keydown снимается', async () => {
+    it('после пропажи пунктов слушатели keydown снимаются', async () => {
         const added = []
         const removed = []
         const add = vi.spyOn(document, 'addEventListener').mockImplementation(function (type, handler, capture) {
@@ -460,7 +460,7 @@ describe('SelectSingle: Tab внутри списка', () => {
         await open(wrapper)
         const keydowns = added.filter(([type, , capture]) => type === 'keydown' && capture === true)
 
-        expect(keydowns.length).toBeGreaterThan(0)
+        expect(keydowns).toHaveLength(2)
 
         await wrapper.setProps({ items: [] })
         await settle()
