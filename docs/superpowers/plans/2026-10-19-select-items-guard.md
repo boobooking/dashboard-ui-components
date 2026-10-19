@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** `SelectSingle` и `SelectMultiple` не падают на любом `items`; выпуск `0.19.1`.
+**Goal:** `SelectSingle` и `SelectMultiple` не падают на `items` не массиве и на элементах-необъектах внутри массива; выпуск `0.19.1`.
 
 **Architecture:** в каждом компоненте вычисляемое `itemList` отбрасывает не-массив и элементы-необъекты; всё остальное уже строится от `itemList`.
 
@@ -33,8 +33,8 @@
 
 - [ ] **Step 1: Тесты.**
   - `SelectSingle`, `it.each` по значениям `{ a: 1 }`, `'строка'`, `5`: монтирование не падает (`errors` пуст), кнопки списка нет, одно предупреждение Vue `Invalid prop: type check failed for prop "items"` (по образцу существующего теста `items: null` в `tests/SelectSingle.test.js`).
-  - `SelectSingle`, `items: [null, { id: 'a', name: 'Первый' }, undefined, 'мусор', { id: 'b', name: 'Второй' }]`, `modelValue: 'b'`: в списке ровно две кнопки пунктов «Первый», «Второй»; надпись — «Второй»; клик по «Первый» — `update:modelValue` `['a']`; ошибок и предупреждений нет.
-  - `SelectMultiple`, те же `items`, `modelValue: ['a', 'b']`, `withSearch: true`: две кнопки пунктов; надпись — `Выбрано: 2`; клик по «Первый» — `update:modelValue` `[['b']]`; набор `'вто'` в поле поиска — видна одна кнопка «Второй»; ошибок и предупреждений нет.
+  - `SelectSingle`, «выбранный среди мусора»: монтирование с `items: [{ id: 'a', name: 'Первый' }, { id: 'b', name: 'Второй' }]`, `modelValue: 'b'`; затем `setProps({ items: [null, { id: 'a', name: 'Первый' }, undefined, 'мусор', { id: 'b', name: 'Второй' }] })`: в открытом списке ровно две кнопки пунктов «Первый», «Второй», галочка — у «Второй»; надпись — «Второй»; клик по «Первый» — `wrapper.emitted('update:modelValue')` равно `[['a']]`, `emitted('changed')` — `[[]]`; ошибок и предупреждений нет.
+  - `SelectMultiple`, `items` — тот же смешанный массив, `modelValue: ['a', 'b']`, `withSearch: true`: надпись — `Выбрано: 2`; открыть список — две кнопки пунктов; набор `'вто'` в поле поиска — видна одна кнопка «Второй»; закрыть (Escape) и открыть снова — две кнопки; клик по «Первый» — `wrapper.emitted('update:modelValue')` равно `[[['b']]]`, `emitted('changed')` — `[[]]`; ошибок и предупреждений нет.
 - [ ] **Step 2: Тесты падают** — ожидаемо `TypeError` (`Cannot read properties of null`) и ошибки рендера `SelectSingle` на не-массиве.
 - [ ] **Step 3: Реализация** по Interfaces.
 - [ ] **Step 4: README** — абзац `items` у `SelectSingle` (раздел `SelectSingle`, после таблицы пропов или в абзаце «`items` — массив объектов…») и фраза у `SelectMultiple` «`null` и `undefined` в `items` — пустой список» — по спеке §3.
