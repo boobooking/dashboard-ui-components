@@ -61,7 +61,7 @@
                 </template>
             </popover-panel>
 
-            <cross-button v-if="needsEraser" size="small" @clicked="clearPicker" class="bb:absolute bb:right-0 bb:top-0 bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
+            <cross-button v-if="needsEraser" ref="eraser" size="small" @clicked="clearPicker" class="bb:absolute bb:right-0 bb:top-0 bb:z-10 bb:h-full bb:pr-2" :lang="resolvedLang"/>
         </div>
     </div>
 </template>
@@ -223,7 +223,18 @@ export default {
             this.picker.setDate(date, true);
         },
 
+        // Ластик пропадает после очистки, и фокус с клавиатуры упал бы на body:
+        // возвращаем его на кнопку календаря. Касание и мышь :focus-visible не дают,
+        // и экранная клавиатура не выезжает.
+        moveFocusFromEraser() {
+            const eraser = this.$refs.eraser.$el;
+            if (document.activeElement === eraser && eraser.matches(":focus-visible")) {
+                this.$refs.trigger.focus({ preventScroll: true });
+            }
+        },
+
         clearPicker() {
+            this.moveFocusFromEraser();
             this.$emit("update:modelValue", "");
             this.dayValue = "";
             this.picker?.clear();

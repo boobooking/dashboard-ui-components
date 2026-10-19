@@ -23,6 +23,7 @@
             >
                 <template #trigger="trigger">
                     <button
+                        ref="trigger"
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
@@ -40,7 +41,7 @@
                     <slot></slot>
                 </template>
             </popover-panel>
-            <cross-button v-if="needsEraser" size="small" :lang="lang" @clicked="$emit('erased')" class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"></cross-button>
+            <cross-button v-if="needsEraser" ref="eraser" size="small" :lang="lang" @clicked="erase" class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"></cross-button>
         </div>
     </div>
 </template>
@@ -101,6 +102,19 @@ export default {
             }
 
             return this.hasValue;
+        },
+    },
+
+    methods: {
+        // Ластик пропадает после очистки, и фокус с клавиатуры упал бы на body:
+        // возвращаем его на кнопку списка. Касание и мышь :focus-visible не дают,
+        // и экранная клавиатура не выезжает.
+        erase() {
+            const eraser = this.$refs.eraser.$el;
+            if (document.activeElement === eraser && eraser.matches(":focus-visible")) {
+                this.$refs.trigger.focus({ preventScroll: true });
+            }
+            this.$emit("erased");
         },
     },
 };

@@ -5,6 +5,7 @@
             <div class="bb:relative bb:flex bb:h-full bb:w-full">
                 <label class="bb:flex bb:w-full bb:h-full bb:items-center bb:justify-center">
                     <input
+                        ref="input"
                         class="bb:flex bb:w-full bb:h-full bb:px-3 bb:py-2 bb:cursor-pointer bb:truncate bb:focus:outline-hidden bb:border-none"
                         v-model.trim="search"
                         @input="startSearch"
@@ -15,6 +16,7 @@
                      стала бы именем поля. -->
                 <cross-button
                     v-show="inputNeedsEraser"
+                    ref="eraser"
                     size="small"
                     @clicked="clearInput"
                     class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
@@ -77,7 +79,18 @@ export default {
     },
 
     methods: {
+        // Ластик пропадает после очистки, и фокус с клавиатуры упал бы на body:
+        // возвращаем его на поле поиска. Касание и мышь :focus-visible не дают,
+        // и экранная клавиатура не выезжает.
+        moveFocusFromEraser() {
+            const eraser = this.$refs.eraser.$el
+            if (document.activeElement === eraser && eraser.matches(':focus-visible')) {
+                this.$refs.input.focus({ preventScroll: true })
+            }
+        },
+
         clearInput() {
+            this.moveFocusFromEraser()
             this.search = ''
             this.startSearch()
         },

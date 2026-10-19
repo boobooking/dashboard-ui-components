@@ -505,3 +505,65 @@ describe('PickDay: календарь на Popover API', () => {
         })
     })
 })
+
+async function mountFilled() {
+    const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
+    await pikadayLoaded()
+    return wrapper
+}
+
+describe('PickDay: фокус после ластика', () => {
+    // Фокус на ластике — как после Tab; в happy-dom :focus-visible равен :focus.
+    async function pressEraser(wrapper, { visible = true, moveFocusTo = null } = {}) {
+        const eraser = wrapper.findComponent(CrossButton)
+        const control = wrapper.get('button[popovertarget]').element
+        const focus = vi.spyOn(control, 'focus')
+        if (!visible) {
+            const matches = eraser.element.matches.bind(eraser.element)
+            vi.spyOn(eraser.element, 'matches').mockImplementation((selector) => (selector === ':focus-visible' ? false : matches(selector)))
+        }
+        eraser.element.focus()
+
+        await eraser.trigger('click')
+        moveFocusTo?.focus()
+        await Promise.all(eraser.element.getAnimations().map((animation) => animation.finished))
+        await flushPromises()
+
+        return focus
+    }
+
+    it('с клавиатуры фокус уходит на своё управление, события — по одному', async () => {
+        const wrapper = await mountFilled()
+
+        const focus = await pressEraser(wrapper)
+
+        expect(document.activeElement).toBe(wrapper.get('button[popovertarget]').element)
+        expect(focus).toHaveBeenCalledTimes(1)
+        expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+        expect(wrapper.emitted('update:modelValue')).toEqual([['']])
+        expect(wrapper.emitted('changed')).toHaveLength(1)
+    })
+
+    it('без :focus-visible фокус не переводится', async () => {
+        const wrapper = await mountFilled()
+
+        const focus = await pressEraser(wrapper, { visible: false })
+
+        expect(focus).not.toHaveBeenCalled()
+        expect(wrapper.emitted('update:modelValue')).toEqual([['']])
+        expect(wrapper.emitted('changed')).toHaveLength(1)
+    })
+
+    it('фокус ушёл с ластика до конца анимации: очистка выполнена, фокус на месте', async () => {
+        const wrapper = await mountFilled()
+        const outside = document.createElement('button')
+        document.body.appendChild(outside)
+
+        const focus = await pressEraser(wrapper, { moveFocusTo: outside })
+
+        expect(focus).not.toHaveBeenCalled()
+        expect(document.activeElement).toBe(outside)
+        expect(wrapper.emitted('update:modelValue')).toEqual([['']])
+        expect(wrapper.emitted('changed')).toHaveLength(1)
+    })
+})

@@ -21,6 +21,7 @@
                      стала бы именем поля. -->
                 <cross-button
                     v-show="digits.length > 0"
+                    ref="eraser"
                     size="small"
                     @mousedown.prevent
                     @clicked="clear"
@@ -213,7 +214,18 @@ export default {
             this.scheduleCommit();
         },
 
+        // Ластик пропадает после очистки, и фокус с клавиатуры упал бы на body:
+        // возвращаем его на поле ввода. Касание и мышь :focus-visible не дают,
+        // и экранная клавиатура не выезжает.
+        moveFocusFromEraser() {
+            const eraser = this.$refs.eraser.$el;
+            if (document.activeElement === eraser && eraser.matches(':focus-visible')) {
+                this.$refs.input.focus({ preventScroll: true });
+            }
+        },
+
         clear() {
+            this.moveFocusFromEraser();
             this.applyUserDigits('');
             this.commit();
         },
