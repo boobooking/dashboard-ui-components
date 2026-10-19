@@ -333,7 +333,15 @@ describe('PopoverPanel: keep-size', () => {
         await buttonOf(wrapper).trigger('click')
         await settle()
         size(panel, 180, 300)
-        await openPanel(wrapper)
+
+        // Сброс виден до кадра: заглушка размера от min-width не зависит,
+        // и после кадра ширина 180px была бы и без сброса.
+        await buttonOf(wrapper).trigger('click')
+
+        expect(panel.style.minWidth).toBe('')
+
+        await settle()
+        await frame()
 
         expect(panel.style.minWidth).toBe('180px')
     })
