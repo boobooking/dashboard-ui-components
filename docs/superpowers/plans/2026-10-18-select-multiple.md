@@ -488,6 +488,69 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 ---
 
+### Task 6c: Tab внутри открытого списка `SelectSingle`
+
+Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §3.
+
+**Files:** Modify `src/components/SelectSingle.vue`, `README.md`; Test `tests/SelectSingle.test.js`.
+
+**Interfaces:** `SelectSingle` передаёт `dropdown-button` `:find-tab-stops="itemStops"`; `itemStops()` — кнопки пунктов из `$refs.list` (`:scope > button`).
+
+- [ ] **Step 1: Тесты** (`tests/SelectSingle.test.js`, новый `describe('SelectSingle: Tab внутри списка')`): открыть, фокус на «Первый», Tab → «Второй», с «Третий» Tab → «Первый», с «Первый» Shift+Tab → «Третий», `defaultPrevented` `true`; фокус на кнопке фильтра при открытом списке — Tab → «Первый», Shift+Tab → «Третий»; Ctrl/Alt/Meta+Tab — `defaultPrevented` `false`; после закрытия (Escape) Tab не перехватывается; при пропаже пунктов слушатель снят (как в SelectMultiple: шпионы `add/removeEventListener`). Остальные тесты файла не меняются.
+- [ ] **Step 2: Тесты падают.**
+- [ ] **Step 3: Реализация** по Interfaces.
+- [ ] **Step 4: README**, раздел `SelectSingle`, «С клавиатуры»: Tab и Shift+Tab по кругу внутри открытого списка, наружу — после закрытия.
+- [ ] **Step 5: Весь набор и сборка** — как в Task 3 Step 4.
+- [ ] **Step 6: Коммит** — `feat: держать Tab внутри открытого списка SelectSingle`.
+
+---
+
+### Task 6d: Ластики фильтров в порядке Tab
+
+Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §4.
+
+**Files:** Modify `src/components/CrossButton.vue` и родители ластиков — `DropdownButton.vue`, `Search.vue`, `RussianMobileFilter.vue`, `PickDay.vue`, `SelectMultiple.vue`; `README.md`; Test `tests/CrossButton.test.js`, `tests/keyboardNavigation.test.js` и тесты затронутых компонентов, где закреплены классы места ластика.
+
+**Interfaces:** у `CrossButton` нет `tabindex="-1"`; кольцо фокуса — `focus-visible` 2px `indigo-500` со скруглением — рисуется так, что иконка по центру кольца, при прежней зоне нажатия (решение — у исполнителя; например, кольцо на обёртке иконки через `group-focus-visible`). `PageCard` (у него уже `tabindex="0"` и своё кольцо) выглядит как прежде. Ластик поиска `SelectMultiple` перестаёт задавать `tabindex` и кольцо сам — берёт их у `CrossButton`; в круге Tab списка остаётся, в стрелках — нет.
+
+- [ ] **Step 1: Тесты**: у ластика каждого фильтра (`Search`, `RussianMobileFilter`, `SelectSingle`, `SelectMultiple` — на кнопке и в поле поиска, `SelectDateInterval`) нет `tabindex="-1"` и есть классы кольца; Enter/пробел нажимают ластик (через `click`, как сейчас в `press.test.js`); `PageCard` — классы и `tabindex` как прежде; таблица места ластиков в `CrossButton.test.js` — по новым классам.
+- [ ] **Step 2: Тесты падают.**
+- [ ] **Step 3: Реализация** по Interfaces.
+- [ ] **Step 4: README**: «Клавиатурная навигация» и разделы фильтров — ластики в порядке Tab, нажимаются Enter и пробелом; убрать «ластики вне порядка Tab».
+- [ ] **Step 5: Весь набор и сборка.**
+- [ ] **Step 6: Коммит** — `feat: пустить ластики фильтров в порядок Tab с видимым фокусом`.
+
+---
+
+### Task 6e: Календарь `SelectDateInterval` с клавиатуры
+
+Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §5 (кроме Safari).
+
+**Files:** Modify `src/components/PickDay.vue`, `README.md`; Test `tests/PickDay.test.js` (или `tests/SelectDateInterval.test.js`, где лежат похожие).
+
+**Interfaces:** у кнопки календаря — кольцо `focus-visible` (как у ластиков), видимое поверх поля; поле даты — `@keydown`: `ArrowDown`, `Enter`, `' '` без Ctrl/Alt/Meta и без `isComposing` → `preventDefault()` и открыть календарь (`popupIsOpen = true`); остальные клавиши — ручной ввод, как сейчас.
+
+- [ ] **Step 1: Тесты**: фокус в поле, ArrowDown / Enter / пробел → календарь открыт, `defaultPrevented` `true`, значение поля не изменилось; с модификаторами — не открывается; буква — не открывает, вводится; у кнопки календаря классы кольца.
+- [ ] **Step 2: Тесты падают.**
+- [ ] **Step 3: Реализация.**
+- [ ] **Step 4: README**, раздел `SelectDateInterval`, «С клавиатуры»: в поле даты стрелка вниз, Enter и пробел открывают календарь.
+- [ ] **Step 5: Весь набор и сборка.**
+- [ ] **Step 6: Коммит** — `feat: открывать календарь SelectDateInterval клавишами из поля даты`.
+
+---
+
+### Task 6f: Tab к полю «до» в Safari
+
+Спека: §5, последний пункт. Сначала причина: лог `focusin` из Safari владельца и опыт в WebKit; исправление — отдельный коммит `fix:` с тестом, если поведение можно закрепить в happy-dom; изменение порядка Tab или разметки — согласовать с Codex до правки.
+
+---
+
+### Task 6g: Повтор приёмки
+
+Playground заново; Chrome оба окружения и Playwright WebKit и Chromium: Tab по всем фильтрам Playground — каждый ластик достижим, кольцо видно, крестик по центру (снимки); `SelectSingle` — круг Tab; `SelectDateInterval` — порядок Tab, кольцо на кнопке календаря, стрелка вниз / Enter / пробел в поле открывают календарь; регрессия: сценарии спеки SelectMultiple §16. Затем — проверка владельцем в Safari (переход в «до», Tab, ластики) и на iPad.
+
+---
+
 ### Task 7: `main` и версия `0.19.0`
 
 - [ ] **Step 1: Ждать `0.18.0`**
