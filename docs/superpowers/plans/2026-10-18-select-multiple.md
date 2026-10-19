@@ -355,6 +355,38 @@ Expected: `exit 0`, оба `200` (при `404` — выложить заново
 
 ---
 
+### Task 5a: Исправления по приёмке (согласовано с Codex, reply-6)
+
+**Files:**
+- Modify: `src/components/DropdownButton.vue`, `src/components/SelectMultiple.vue`
+- Test: `tests/SelectMultiple.test.js`
+
+**Interfaces:**
+- Produces: `DropdownButton` — проп `withStableHeight: { type: Boolean, default: false }`; при `true` у span надписи кнопки — `bb:min-h-8` (кнопка одной высоты пустая и с надписью). `SelectMultiple` передаёт `with-stable-height` всегда, с поиском и без; `SelectSingle` — нет.
+
+- [ ] **Step 1: Тесты**
+
+| Тест | Утверждения |
+| --- | --- |
+| кнопка одной высоты | у span внутри `button[popovertarget]` `SelectMultiple` класс `bb:min-h-8`; у `SelectSingle` — нет |
+| фокус на пункте после клика, как в Safari | открыть, ArrowDown, `document.activeElement.blur()` (фокус на body), `click()` по «Первый» → `document.activeElement` — кнопка «Первый»; то же с `withSearch: true` |
+| фокус ставится до событий | в слушателе `update:modelValue` записать `document.activeElement` → это кнопка нажатого пункта |
+| Escape после клика | `blur()`, `click()` по пункту, Escape, `settle` → фокус на кнопке фильтра |
+
+- [ ] **Step 2: Тесты падают** — `npm test -- --dir tests tests/SelectMultiple.test.js`: новые тесты FAIL.
+
+- [ ] **Step 3: Реализация**
+- `DropdownButton.vue`: проп по Interfaces; условный класс в `:class` литералом.
+- `SelectMultiple.vue`: `itemClicked(item)` первой строкой — `focus({ preventScroll: true })` на кнопку пункта (индекс `item` в `visibleItems`, кнопка из `$refs.list`), затем оба события; комментарий — почему (Safari по клику фокус на кнопку не ставит). `dropdown-button` — `with-stable-height`.
+
+- [ ] **Step 4: Весь набор и сборка** — как в Task 3 Step 4: `tests exit 0`, 45 файлов, все passed; `0`; `build exit 0`.
+
+- [ ] **Step 5: Коммит** — `fix: держать высоту кнопки и фокус на пункте после клика в SelectMultiple`.
+
+- [ ] **Step 6: Повтор приёмки** — Playground заново (Task 5 Step 1), Chrome оба окружения: геометрия кнопки «Бренд» `пусто → имя → Выбрано: 2 → пусто` — высота одна, панель кнопку не закрывает; WebKit (Task 5 Step 2): без движения мыши `клик по пункту → символ` (символ в поле) и `клик по пункту → Escape` (фокус на кнопке фильтра), с поиском и без; Chromium — те же последовательности и сценарий 3 спеки §16. Результаты — в `$W/acceptance.md`.
+
+---
+
 ### Task 6: Итоговое ревью
 
 - [ ] **Step 1: Пакет ревью**
