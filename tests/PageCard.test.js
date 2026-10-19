@@ -376,9 +376,13 @@ describe('PageCard: карточка', () => {
         await settle()
 
         expect(page.card().element.lastElementChild).toBe(page.cross().element)
-        expect(page.cross().attributes('tabindex')).toBe('0')
-        for (const name of ['bb:absolute', 'bb:mt-6', 'bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500']) {
+        expect(page.cross().element.tabIndex).toBe(0)
+        for (const name of ['bb:absolute', 'bb:mt-6']) {
             expect(page.cross().classes()).toContain(name)
+        }
+        const iconClasses = Array.from(page.cross().get('svg').element.parentElement.classList)
+        for (const name of ['bb:group-focus-visible:ring-2', 'bb:group-focus-visible:ring-indigo-500']) {
+            expect(iconClasses).toContain(name)
         }
     })
 
