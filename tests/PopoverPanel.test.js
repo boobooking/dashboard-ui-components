@@ -467,4 +467,36 @@ describe('PopoverPanel: keep-size', () => {
 
         expect(event.defaultPrevented).toBe(false)
     })
+
+    it('find-tab-stops ведёт Tab, пока панель открыта', async () => {
+        const tab = () => {
+            const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })
+            document.activeElement.dispatchEvent(event)
+            return event
+        }
+
+        const control = mountPanel()
+        await buttonOf(control).trigger('click')
+        await settle()
+        buttonOf(control).element.focus()
+        expect(tab().defaultPrevented).toBe(false)
+        control.unmount()
+        await settle()
+
+        const wrapper = mountPanel({ props: { findTabStops: () => [wrapper.get('[popover] button').element] } })
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        buttonOf(wrapper).element.focus()
+        const event = tab()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).toBe(wrapper.get('[popover] button').element)
+
+        await buttonOf(wrapper).trigger('click')
+        await settle()
+        buttonOf(wrapper).element.focus()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(tab().defaultPrevented).toBe(false)
+    })
 })

@@ -986,3 +986,165 @@ describe('SelectMultiple: фокус после выбора пункта', () =
         expect(focused).toEqual([item, item])
     })
 })
+
+describe('SelectMultiple: Tab внутри списка', () => {
+    function fieldOf(wrapper) {
+        return panelOf(wrapper).find('input')
+    }
+
+    function searchEraserOf(wrapper) {
+        return panelOf(wrapper).findAll('button').find((button) => button.find(CROSS_PATH).exists())
+    }
+
+    function pressTab(shiftKey = false) {
+        return press('Tab', { shiftKey })
+    }
+
+    // Название места фокуса: поле, ластик поля или текст пункта.
+    function placeOf(wrapper) {
+        const active = document.activeElement
+        if (fieldOf(wrapper).exists() && active === fieldOf(wrapper).element) {
+            return 'поле'
+        }
+
+        return active === searchEraserOf(wrapper)?.element ? 'ластик' : active.textContent
+    }
+
+    it('с поиском Tab ходит по кругу: поле, ластик, пункты', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('р')
+        fieldOf(wrapper).element.focus()
+        const visited = []
+
+        for (let step = 0; step < 6; step++) {
+            expect(pressTab().defaultPrevented).toBe(true)
+            visited.push(placeOf(wrapper))
+        }
+
+        expect(visited).toEqual(['ластик', 'Первый', 'Второй', 'Третий', 'поле', 'ластик'])
+
+        fieldOf(wrapper).element.focus()
+        pressTab(true)
+
+        expect(placeOf(wrapper)).toBe('Третий')
+    })
+
+    it('без запроса ластика в круге нет', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        fieldOf(wrapper).element.focus()
+
+        pressTab()
+
+        expect(placeOf(wrapper)).toBe('Первый')
+    })
+
+    it('без совпадений Tab ходит между полем и ластиком', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('zzz')
+        fieldOf(wrapper).element.focus()
+
+        pressTab()
+
+        expect(placeOf(wrapper)).toBe('ластик')
+
+        pressTab()
+
+        expect(placeOf(wrapper)).toBe('поле')
+    })
+
+    it('без поиска Tab ходит по пунктам по кругу', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+
+        expect(pressTab().defaultPrevented).toBe(true)
+        expect(placeOf(wrapper)).toBe('Первый')
+
+        pressTab(true)
+
+        expect(placeOf(wrapper)).toBe('Третий')
+
+        pressTab()
+
+        expect(placeOf(wrapper)).toBe('Первый')
+    })
+
+    it('ластик поля с клавиатуры очищает запрос, фокус в поле, список открыт', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('р')
+        const eraser = searchEraserOf(wrapper)
+        eraser.element.focus()
+
+        await eraser.trigger('click')
+        await pressFinished(eraser.element)
+
+        expect(fieldOf(wrapper).element.value).toBe('')
+        expect(isOpen(wrapper)).toBe(true)
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
+    it('ластик поля не в стрелках', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('р')
+        fieldOf(wrapper).element.focus()
+
+        press('ArrowDown')
+
+        expect(placeOf(wrapper)).toBe('Первый')
+    })
+
+    it('после закрытия Tab не перехватывается', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await triggerOf(wrapper).trigger('click')
+        await settle()
+        triggerOf(wrapper).element.focus()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(pressTab().defaultPrevented).toBe(false)
+    })
+
+    it('после пропажи пунктов Tab не перехватывается', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+
+        await wrapper.setProps({ items: [] })
+        await settle()
+        document.body.focus()
+
+        expect(document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }))).toBe(true)
+    })
+
+    it('поиск включили и выключили при открытом списке: остановки текущие', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+
+        await wrapper.setProps({ withSearch: true })
+        await settle()
+        triggerOf(wrapper).element.focus()
+        pressTab()
+
+        expect(placeOf(wrapper)).toBe('поле')
+
+        await wrapper.setProps({ withSearch: false })
+        await settle()
+        triggerOf(wrapper).element.focus()
+        pressTab()
+
+        expect(placeOf(wrapper)).toBe('Первый')
+    })
+
+    it('кольцо фокуса и tabindex ластика', async () => {
+        const wrapper = mountSelect({ withSearch: true, modelValue: ['a'] })
+        const fieldEraser = searchEraserOf(wrapper)
+
+        expect(fieldEraser.attributes('tabindex')).toBe('0')
+        expect(fieldEraser.classes()).toContain('bb:focus-visible:ring-2')
+        expect(fieldEraser.classes()).toContain('bb:focus-visible:ring-indigo-500')
+        expect(wrapper.findAll('button').at(-1).attributes('tabindex')).toBe('-1')
+    })
+})

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { moveMenuFocus } from '../src/menuFocus.js'
+import { holdTabFocus, moveMenuFocus } from '../src/menuFocus.js'
 
 // Меню из трёх пунктов и кнопка вне меню, с которой фокус уходит в меню.
 let outside
@@ -215,5 +215,64 @@ describe('moveMenuFocus: findStops', () => {
         outside.focus()
 
         expect(press('ArrowDown').defaultPrevented).toBe(false)
+    })
+})
+
+describe('holdTabFocus', () => {
+    function pressTab(shiftKey = false) {
+        const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true })
+        document.activeElement.dispatchEvent(event)
+        return event
+    }
+
+    it.each([
+        { name: 'с последнего Tab — по кругу на первый', from: 2, shiftKey: false, want: 'A' },
+        { name: 'с первого Shift+Tab — по кругу на последний', from: 0, shiftKey: true, want: 'C' },
+        { name: 'со второго Tab — на последний', from: 1, shiftKey: false, want: 'C' },
+        { name: 'со второго Shift+Tab — на первый', from: 1, shiftKey: true, want: 'A' },
+    ])('круг: $name', ({ from, shiftKey, want }) => {
+        stop = holdTabFocus(() => items)
+        items[from].focus()
+
+        const event = pressTab(shiftKey)
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(focused()).toBe(want)
+    })
+
+    it.each([
+        { name: 'Tab — на первый', shiftKey: false, want: 'A' },
+        { name: 'Shift+Tab — на последний', shiftKey: true, want: 'C' },
+    ])('фокус вне остановок: $name', ({ shiftKey, want }) => {
+        stop = holdTabFocus(() => items)
+        outside.focus()
+
+        pressTab(shiftKey)
+
+        expect(focused()).toBe(want)
+    })
+
+    it('пустые остановки — Tab не гасится', () => {
+        stop = holdTabFocus(() => [])
+        outside.focus()
+
+        expect(pressTab().defaultPrevented).toBe(false)
+    })
+
+    it('после снятия Tab не перехватывается', () => {
+        holdTabFocus(() => items)()
+        items[0].focus()
+
+        const event = pressTab()
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(focused()).toBe('A')
+    })
+
+    it.each(['ArrowDown', 'a'])('другие клавиши не перехватываются: %s', (key) => {
+        stop = holdTabFocus(() => items)
+        items[0].focus()
+
+        expect(press(key).defaultPrevented).toBe(false)
     })
 })

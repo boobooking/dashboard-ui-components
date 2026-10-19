@@ -68,3 +68,38 @@ export function moveMenuFocus(menu, findSelected = () => null, findStops = null)
         menu.removeEventListener('mousemove', onMousemove)
     }
 }
+
+// Tab и Shift+Tab ходят по остановкам findStops по кругу и не выпускают фокус
+// из них. Слушатель на document в фазе захвата — как у moveMenuFocus. Каждый
+// Tab ведёт модуль, а не браузер: Safari по умолчанию пропускает кнопки и
+// увёл бы фокус из списка. Фокус вне остановок — Tab ставит его на первую,
+// Shift+Tab — на последнюю. Без остановок Tab остаётся браузеру.
+// Возвращает функцию, снимающую слушатель.
+export function holdTabFocus(findStops) {
+    const onKeydown = (event) => {
+        if (event.key !== 'Tab') {
+            return
+        }
+
+        const stops = findStops()
+        if (stops.length === 0) {
+            return
+        }
+
+        event.preventDefault()
+
+        const step = event.shiftKey ? -1 : 1
+        const current = stops.indexOf(document.activeElement)
+        const next = current === -1
+            ? (step === 1 ? 0 : stops.length - 1)
+            : (current + step + stops.length) % stops.length
+
+        stops[next].focus()
+    }
+
+    document.addEventListener('keydown', onKeydown, true)
+
+    return () => {
+        document.removeEventListener('keydown', onKeydown, true)
+    }
+}

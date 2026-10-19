@@ -41,7 +41,7 @@
 <script>
 import { useId } from "vue";
 import { canControlPopover, closeOnScrollAndResize, fitPopover, isPopoverOpen, placePopover } from "../popover.js";
-import { moveMenuFocus } from "../menuFocus.js";
+import { holdTabFocus, moveMenuFocus } from "../menuFocus.js";
 
 // Выпадающая панель у кнопки на Popover API: открытие и закрытие, место у
 // кнопки, закрытие прокруткой и изменением размера окна, стрелки. Кнопку и
@@ -87,6 +87,13 @@ export default {
         // обхода. Без неё стрелки ходят по всем кнопкам и ссылкам. Нужна, когда
         // в панели есть кнопка, на которую стрелки заходить не должны.
         findStops: {
+            type: Function,
+            default: null,
+        },
+        // Остановки Tab: функция возвращает элементы панели в порядке обхода.
+        // Пока панель открыта, Tab и Shift+Tab ходят по ним по кругу и не
+        // выпускают фокус из панели. Без неё Tab ведёт браузер.
+        findTabStops: {
             type: Function,
             default: null,
         },
@@ -194,6 +201,8 @@ export default {
         this.stopClosing = null;
         // Снимает слушатель стрелок, пока панель открыта.
         this.stopArrows = null;
+        // Снимает слушатель Tab, пока панель открыта.
+        this.stopTab = null;
         // Был ли фокус внутри панели, когда она начала закрываться.
         this.focusWasInside = false;
         // Открыта ли панель в браузере сейчас — по последнему событию toggle
@@ -332,6 +341,10 @@ export default {
                 if (this.arrows) {
                     this.stopArrows = moveMenuFocus(panel, this.findSelected, this.findStops);
                 }
+
+                if (this.findTabStops !== null) {
+                    this.stopTab = holdTabFocus(this.findTabStops);
+                }
             }
 
             if (!isOpen) {
@@ -376,6 +389,11 @@ export default {
             if (this.stopArrows !== null) {
                 this.stopArrows();
                 this.stopArrows = null;
+            }
+
+            if (this.stopTab !== null) {
+                this.stopTab();
+                this.stopTab = null;
             }
         },
     },

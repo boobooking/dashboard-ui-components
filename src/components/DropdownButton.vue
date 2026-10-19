@@ -14,6 +14,7 @@
                 arrows
                 :find-selected="findSelected"
                 :find-stops="findStops"
+                :find-tab-stops="findTabStops"
                 :keep-size="keepSize"
                 return-focus
                 panel-class="bb:bg-white bb:text-inherit bb:border bb:border-gray-200 bb:rounded-md bb:shadow-lg bb:overscroll-contain"
@@ -73,6 +74,11 @@ export default {
         },
         // Остановки стрелок вместо всех кнопок и ссылок списка (PopoverPanel).
         findStops: {
+            type: Function,
+            default: null,
+        },
+        // Остановки Tab внутри открытого списка (PopoverPanel).
+        findTabStops: {
             type: Function,
             default: null,
         },

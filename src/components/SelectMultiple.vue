@@ -9,6 +9,7 @@
                 :has-value="selectedItems.length > 0"
                 :find-selected="arrowsOrigin"
                 :find-stops="searchStops"
+                :find-tab-stops="tabStops"
                 :keep-size="withSearch"
                 :lang="lang"
                 @erased="clear"
@@ -36,12 +37,16 @@
                             class="bb:w-full bb:pl-3 bb:pr-9 bb:py-2 bb:text-sm bb:bg-white bb:border bb:border-gray-300 bb:rounded-md bb:focus:outline-hidden bb:focus:border-indigo-500 bb:focus:ring-1 bb:focus:ring-indigo-500"
                             @keydown.enter.prevent
                         />
+                        <!-- tabindex перекрывает собственный атрибут CrossButton:
+                             ластик поля входит в круг Tab. -->
                         <cross-button
+                            ref="searchEraser"
                             v-show="query !== ''"
                             size="small"
                             :lang="lang"
                             @clicked="clearQuery"
-                            class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
+                            class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full bb:rounded-md bb:focus-visible:ring-2 bb:focus-visible:ring-inset bb:focus-visible:ring-indigo-500"
+                            tabindex="0"
                         />
                     </div>
                 </div>
@@ -257,13 +262,25 @@ export default {
         },
 
         // Остановки стрелок: поле, если оно есть, затем пункты. Ластик поля —
-        // тоже кнопка, но в круг не входит. Без совпадений пунктов нет —
+        // тоже кнопка, но в круг стрелок не входит. Без совпадений пунктов нет —
         // только поле. Функция одна и с поиском, и без него: панель берёт её
         // при открытии, а поиск могут включить и выключить при открытом списке.
         searchStops() {
             const field = this.$refs.search ? [this.$refs.search] : [];
 
             return [...field, ...this.itemElements()];
+        },
+
+        // Остановки Tab: поле, ластик поля, пока запрос не пуст, затем пункты.
+        // Ластик в Tab, но не в стрелках: стрелки ходят по выбору, а Tab
+        // должен дойти до каждой кнопки списка. Tab ведёт модуль, а не
+        // браузер: Safari пропускает кнопки (holdTabFocus). Функция одна и
+        // с поиском, и без него, как searchStops.
+        tabStops() {
+            const field = this.$refs.search ? [this.$refs.search] : [];
+            const eraser = this.$refs.search && this.query !== "" ? [this.$refs.searchEraser.$el] : [];
+
+            return [...field, ...eraser, ...this.itemElements()];
         },
 
         // Набор на пункте уходит в поле: мышь ставит фокус на пункт под
