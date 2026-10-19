@@ -909,8 +909,8 @@ describe('SelectMultiple: высота кнопки и фокус после к�
         const multiple = mountSelect()
         const single = mount(SelectSingle, { props: { header: 'Вендор', items } })
 
-        expect(multiple.get('button[popovertarget] span').classes()).toContain('bb:min-h-8')
-        expect(single.get('button[popovertarget] span').classes()).not.toContain('bb:min-h-8')
+        expect(multiple.get('button[popovertarget] span').classes()).toContain('bb:min-h-[calc(1em+1rem)]')
+        expect(single.get('button[popovertarget] span').classes()).not.toContain('bb:min-h-[calc(1em+1rem)]')
     })
 
     for (const withSearch of [false, true]) {
