@@ -93,6 +93,18 @@ describe('TextPopover: вид и открытие', () => {
         expect(wrapper.emitted('update:modelValue')).toEqual([[true]])
     })
 
+    it('кнопка центрирует иконку и держит кольцо фокуса', () => {
+        const wrapper = mountPopover()
+
+        expect(buttonOf(wrapper).classes()).toEqual(expect.arrayContaining([
+            'bb:inline-flex',
+            'bb:items-center',
+            'bb:justify-center',
+            'bb:self-center',
+            'bb:focus-visible:focus-ring',
+        ]))
+    })
+
     it('lang en — тексты по-английски', () => {
         const wrapper = mountPopover({ lang: 'en' })
 

@@ -20,7 +20,7 @@
                 type="button"
                 :id="trigger.id"
                 :popovertarget="trigger.popovertarget"
-                class="bb:relative bb:text-gray-400 bb:hover:text-gray-600 bb:rounded-md bb:focus-visible:focus-ring"
+                class="bb:relative bb:inline-flex bb:items-center bb:justify-center bb:self-center bb:text-gray-400 bb:hover:text-gray-600 bb:rounded-md bb:focus-visible:focus-ring"
             >
                 <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                      см. README, «Клавиатурная навигация». -->
