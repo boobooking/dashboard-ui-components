@@ -4,7 +4,6 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue'
 import PopoverPanel from '../src/components/PopoverPanel.vue'
 import SelectMultiple from '../src/components/SelectMultiple.vue'
-import SelectSingle from '../src/components/SelectSingle.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
