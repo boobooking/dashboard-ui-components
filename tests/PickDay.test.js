@@ -450,6 +450,34 @@ describe('PickDay: календарь на Popover API', () => {
                 expect(document.activeElement).toBe(triggerOf(wrapper).element)
             })
 
+            // Порядок обязателен: открытый календарь отключает поле, и фокус с него
+            // теряется, поэтому кнопка получает фокус до открытия.
+            it('фокус на кнопку ставится до открытия календаря', async () => {
+                const wrapper = await mountWithFocusedField()
+                const trigger = triggerOf(wrapper).element
+                const original = trigger.focus.bind(trigger)
+                const calls = []
+                vi.spyOn(trigger, 'focus').mockImplementation((options) => {
+                    calls.push({ options, openAtCall: wrapper.vm.popupIsOpen })
+                    original(options)
+                })
+
+                fieldKeydown(wrapper, key)
+
+                expect(calls).toEqual([{ options: { preventScroll: true }, openAtCall: false }])
+                expect(wrapper.vm.popupIsOpen).toBe(true)
+            })
+
+            it('с Shift календарь открывается', async () => {
+                const wrapper = await mountWithFocusedField()
+
+                const event = fieldKeydown(wrapper, key, { shiftKey: true })
+                await settle()
+
+                expect(event.defaultPrevented).toBe(true)
+                expect(isOpen(wrapper)).toBe(true)
+            })
+
             it.each([
                 ['Ctrl', { ctrlKey: true }],
                 ['Alt', { altKey: true }],
