@@ -56,7 +56,7 @@
                 >
                     <list-element
                         v-for="item in visibleItems"
-                        :name="item.name"
+                        :name="itemName(item)"
                         :key="item.id"
                         :is-checked="selectedIds.includes(item.id)"
                         :aria-pressed="selectedIds.includes(item.id)"
@@ -171,7 +171,7 @@ export default {
                 return this.itemList;
             }
 
-            return this.itemList.filter((item) => item.name.toLowerCase().includes(query));
+            return this.itemList.filter((item) => this.itemName(item).toLowerCase().includes(query));
         },
 
         hasItems() {
@@ -185,12 +185,19 @@ export default {
             }
 
             return this.selectedItems.length === 1
-                ? this.selectedItems[0].name
+                ? this.itemName(this.selectedItems[0])
                 : `${this.texts.selected}: ${this.selectedItems.length}`;
         },
     },
 
     methods: {
+        // Имя пункта строкой: null и undefined — пустое имя, число — его
+        // запись. Имя уходит в строковые пропы ListElement и DropdownButton,
+        // и число в них Vue встретил бы предупреждением.
+        itemName(item) {
+            return String(item.name ?? "");
+        },
+
         // Клик переключает пункт и список не закрывает: можно отметить
         // несколько пунктов подряд. Фокус ставится на пункт сам: Safari по
         // клику кнопке фокус не даёт и оставляет его на body, а набор после

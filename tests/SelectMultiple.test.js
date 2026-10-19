@@ -659,6 +659,30 @@ describe('SelectMultiple: поиск', () => {
         expect(fieldOf(wrapper).element.value).toBe('')
     })
 
+    it('имя пункта не строка: фильтр и надпись без ошибок и предупреждений', async () => {
+        const wrapper = mountSelect({
+            withSearch: true,
+            items: [...items, { id: 'd', name: null }, { id: 'e', name: 5 }],
+            'onUpdate:modelValue': (value) => wrapper.setProps({ modelValue: value }),
+        })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('пер')
+
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+        expect(itemNames(wrapper)).toEqual(['Первый'])
+
+        await fieldOf(wrapper).setValue('5')
+
+        expect(itemNames(wrapper)).toEqual(['5'])
+
+        await itemButtons(wrapper)[0].trigger('click')
+
+        expect(labelOf(wrapper)).toBe('5')
+        expect(warnings).toEqual([])
+    })
+
     it('выбранные пункты, скрытые фильтром, считаются в надписи', async () => {
         const wrapper = mountSelect({ withSearch: true, modelValue: ['a', 'b'] })
         await open(wrapper)
