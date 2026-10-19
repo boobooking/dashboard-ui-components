@@ -37,16 +37,13 @@
                             class="bb:w-full bb:pl-3 bb:pr-9 bb:py-2 bb:text-sm bb:bg-white bb:border bb:border-gray-300 bb:rounded-md bb:focus:outline-hidden bb:focus:border-indigo-500 bb:focus:ring-1 bb:focus:ring-indigo-500"
                             @keydown.enter.prevent
                         />
-                        <!-- tabindex перекрывает собственный атрибут CrossButton:
-                             ластик поля входит в круг Tab. -->
                         <cross-button
                             ref="searchEraser"
                             v-show="query !== ''"
                             size="small"
                             :lang="lang"
                             @clicked="clearQuery"
-                            class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full bb:rounded-md bb:focus-visible:ring-2 bb:focus-visible:ring-inset bb:focus-visible:ring-indigo-500"
-                            tabindex="0"
+                            class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
                         />
                     </div>
                 </div>

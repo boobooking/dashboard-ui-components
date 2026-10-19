@@ -1154,13 +1154,13 @@ describe('SelectMultiple: Tab внутри списка', () => {
         expect(placeOf(wrapper)).toBe('Первый')
     })
 
-    it('кольцо фокуса и tabindex ластика', async () => {
+    it('ластики без tabindex -1, кольцо фокуса у иконки', async () => {
         const wrapper = mountSelect({ withSearch: true, modelValue: ['a'] })
         const fieldEraser = searchEraserOf(wrapper)
 
-        expect(fieldEraser.attributes('tabindex')).toBe('0')
-        expect(fieldEraser.classes()).toContain('bb:focus-visible:ring-2')
-        expect(fieldEraser.classes()).toContain('bb:focus-visible:ring-indigo-500')
-        expect(wrapper.findAll('button').at(-1).attributes('tabindex')).toBe('-1')
+        for (const eraser of [fieldEraser, wrapper.findAll('button').at(-1)]) {
+            expect(eraser.attributes('tabindex')).toBeUndefined()
+            expect(Array.from(eraser.get('svg').element.parentElement.classList)).toContain('bb:group-focus-visible:ring-2')
+        }
     })
 })

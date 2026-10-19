@@ -63,6 +63,30 @@ describe('CrossButton', () => {
         expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb:flex', 'bb:items-center', 'bb:justify-center']))
     })
 
+    it('в порядке Tab: без tabindex -1', () => {
+        const wrapper = mount(CrossButton, { props: { size: 'small' } })
+
+        expect(wrapper.attributes('tabindex')).toBeUndefined()
+        expect(wrapper.classes()).toContain('bb:group')
+        expect(wrapper.classes()).toContain('bb:focus:outline-hidden')
+    })
+
+    it('кольцо фокуса — на обёртке иконки, по центру, без реакции на указатель', () => {
+        for (const size of ['small', 'large']) {
+            const wrapper = mount(CrossButton, { props: { size } })
+            const ring = wrapper.get('svg').element.parentElement
+
+            expect(ring).not.toBe(wrapper.element)
+            expect(Array.from(ring.classList)).toEqual(expect.arrayContaining([
+                'bb:rounded-md',
+                'bb:group-focus-visible:ring-2',
+                'bb:group-focus-visible:ring-indigo-500',
+                'bb:pointer-events-none',
+                'bb:cursor-default',
+            ]))
+        }
+    })
+
     it('цвет — серый 400, при наведении — 500', () => {
         const wrapper = mount(CrossButton, { props: { size: 'small' } })
 
@@ -162,6 +186,8 @@ describe('CrossButton у тех, кто его использует', () => {
 
             expect(button.get('svg').classes()).toEqual(expect.arrayContaining(testCase.icon))
             expect(button.classes()).toEqual(expect.arrayContaining(testCase.place))
+            expect(button.attributes('tabindex')).not.toBe('-1')
+            expect(Array.from(button.get('svg').element.parentElement.classList)).toContain('bb:group-focus-visible:ring-2')
         })
     }
 })
