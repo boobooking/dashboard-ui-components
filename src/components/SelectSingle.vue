@@ -8,6 +8,7 @@
                 v-if="hasItems"
                 :has-value="hasValue"
                 :find-selected="activeItemElement"
+                :find-tab-stops="itemStops"
                 @erased="clear"
             >
                 <!-- Рамку, фон, скругление и тень списка задаёт панель
@@ -128,6 +129,12 @@ export default {
             const index = this.itemList.indexOf(this.activeItem);
 
             return index === -1 ? null : this.$refs.list.querySelectorAll("button")[index];
+        },
+
+        // Остановки Tab: кнопки пунктов. Tab ведёт модуль, а не браузер:
+        // Safari пропускает кнопки (holdTabFocus).
+        itemStops() {
+            return this.$refs.list ? [...this.$refs.list.querySelectorAll(":scope > button")] : [];
         },
     },
 };

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import SelectSingle from '../src/components/SelectSingle.vue'
@@ -378,6 +378,97 @@ describe('SelectSingle: список на Popover API', () => {
             expect(document.activeElement).toBe(field)
         } finally {
             field.remove()
+        }
+    })
+})
+
+describe('SelectSingle: Tab внутри списка', () => {
+    function pressTab(init = {}) {
+        const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true, ...init })
+        document.activeElement.dispatchEvent(event)
+        return event
+    }
+
+    function itemButton(wrapper, name) {
+        return panelOf(wrapper).findAll('button').find((button) => button.text() === name)
+    }
+
+    it('Tab ходит по пунктам по кругу', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        itemButton(wrapper, 'Первый').element.focus()
+
+        expect(pressTab().defaultPrevented).toBe(true)
+        expect(document.activeElement.textContent).toBe('Второй')
+
+        itemButton(wrapper, 'Третий').element.focus()
+        pressTab()
+
+        expect(document.activeElement.textContent).toBe('Первый')
+
+        expect(pressTab({ shiftKey: true }).defaultPrevented).toBe(true)
+        expect(document.activeElement.textContent).toBe('Третий')
+    })
+
+    it('с кнопки фильтра Tab ведёт на первый пункт, Shift+Tab на последний', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+
+        pressTab()
+
+        expect(document.activeElement.textContent).toBe('Первый')
+
+        triggerOf(wrapper).element.focus()
+        pressTab({ shiftKey: true })
+
+        expect(document.activeElement.textContent).toBe('Третий')
+    })
+
+    it.each(['ctrlKey', 'altKey', 'metaKey'])('Tab с %s не перехватывается', async (modifier) => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        itemButton(wrapper, 'Первый').element.focus()
+
+        expect(pressTab({ [modifier]: true }).defaultPrevented).toBe(false)
+    })
+
+    it('после закрытия Tab не перехватывается', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        itemButton(wrapper, 'Первый').element.focus()
+
+        press('Escape')
+        await settle()
+        triggerOf(wrapper).element.focus()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(pressTab().defaultPrevented).toBe(false)
+    })
+
+    it('после пропажи пунктов слушатель keydown снимается', async () => {
+        const added = []
+        const removed = []
+        const add = vi.spyOn(document, 'addEventListener').mockImplementation(function (type, handler, capture) {
+            added.push([type, handler, capture])
+            return EventTarget.prototype.addEventListener.call(this, type, handler, capture)
+        })
+        const remove = vi.spyOn(document, 'removeEventListener').mockImplementation(function (type, handler, capture) {
+            removed.push([type, handler, capture])
+            return EventTarget.prototype.removeEventListener.call(this, type, handler, capture)
+        })
+        const wrapper = mountSelect()
+        await open(wrapper)
+        const keydowns = added.filter(([type, , capture]) => type === 'keydown' && capture === true)
+
+        expect(keydowns.length).toBeGreaterThan(0)
+
+        await wrapper.setProps({ items: [] })
+        await settle()
+        add.mockRestore()
+        remove.mockRestore()
+
+        for (const handler of keydowns) {
+            expect(removed).toContainEqual(handler)
         }
     })
 })
