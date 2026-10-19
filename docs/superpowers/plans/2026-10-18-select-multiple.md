@@ -442,6 +442,52 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 ---
 
+### Task 6b: Tab внутри открытого списка (решение владельца 2026-10-19)
+
+Владелец после проверки: Tab должен останавливаться на ластике поиска (стрелки его пропускают — так и остаётся), а пока список открыт, Tab и Shift+Tab ходят только внутри списка (спека §7, §8, §11, §16, §18). Согласовано с Codex (reply-12, Q-001 — видимый фокус ластика).
+
+**Files:**
+- Modify: `src/menuFocus.js`, `src/components/PopoverPanel.vue`, `src/components/DropdownButton.vue`, `src/components/SelectMultiple.vue`, `README.md`
+- Test: `tests/menuFocus.test.js`, `tests/PopoverPanel.test.js`, `tests/SelectMultiple.test.js`
+
+**Interfaces:**
+- Produces: `holdTabFocus(findStops)` в `src/menuFocus.js` — `findStops: () => Element[]`; слушатель `keydown` на `document` в фазе захвата, только `Tab` (с `shiftKey` и без): остановки пусты — ничего; иначе `preventDefault()` и фокус на следующую/предыдущую по кругу; фокус вне остановок — Tab на первую, Shift+Tab на последнюю. Возвращает функцию снятия.
+- Produces: `PopoverPanel` — проп `findTabStops: { type: Function, default: null }`: при открытии рядом со стрелками ставит `holdTabFocus(findTabStops)`, снимает в `stopListening`. `DropdownButton` — проп `findTabStops` (null), на `<popover-panel>`.
+- `SelectMultiple`: `tabStops()` — текущие DOM-элементы: поле (`$refs.search`), ластик поля (`$refs.searchEraser.$el`, только если поиск включён и запрос не пуст), затем `itemElements()`; без поиска — только пункты. `:find-tab-stops="tabStops"`. У ластика поля — `tabindex="0"` (перекрывает `tabindex="-1"` CrossButton, как у PageCard) и классы `bb:rounded-md bb:focus-visible:ring-2 bb:focus-visible:ring-inset bb:focus-visible:ring-indigo-500`.
+
+- [ ] **Step 1: Тесты**
+
+| Файл | Тест | Утверждения |
+| --- | --- | --- |
+| menuFocus | holdTabFocus: круг | стопы `[A, B, C]`: с C Tab → A; с A Shift+Tab → C; с B Tab → C; `defaultPrevented` `true` |
+| menuFocus | снаружи | фокус вне стопов: Tab → A, Shift+Tab → C |
+| menuFocus | пустые стопы | `defaultPrevented` `false` |
+| menuFocus | снятие | после вызова функции снятия Tab не перехватывается |
+| menuFocus | другие клавиши | ArrowDown, `a` — не перехватываются |
+| PopoverPanel | find-tab-stops доходит | открыть с `findTabStops: () => [пункт]`, Tab → `defaultPrevented` `true`, фокус на пункте; без пропа — `false`; после закрытия — `false` |
+| SelectMultiple | круг Tab с поиском | открыть, фокус в поле, `setValue('р')`: Tab → ластик поля, Tab → «Первый», … с последнего пункта Tab → поле; Shift+Tab с поля → последний пункт |
+| SelectMultiple | без запроса ластика нет | пустой запрос: с поля Tab → «Первый» |
+| SelectMultiple | без совпадений | `setValue('zzz')`: поле ↔ ластик |
+| SelectMultiple | без поиска | Tab по пунктам по кругу; с кнопки фильтра (фокус явно) Tab → «Первый», Shift+Tab → «Третий» |
+| SelectMultiple | ластик с клавиатуры | фокус на ластике, Enter (или `click()` по нему) → после анимации запрос `''`, список открыт, фокус в поле |
+| SelectMultiple | ластик не в стрелках | с поля ArrowDown → «Первый» при непустом запросе (как прежде) |
+| SelectMultiple | перехват снимается | после закрытия, после пропажи пунктов и при `setProps({ withSearch })` при открытом списке — Tab с кнопки фильтра не перехватывается (закрыто) / стопы текущие (открыто) |
+| SelectMultiple | кольцо фокуса ластика | у кнопки ластика поля классы `bb:focus-visible:ring-2` и `bb:focus-visible:ring-indigo-500`, `tabindex="0"`; у ластика на кнопке фильтра `tabindex="-1"` |
+
+- [ ] **Step 2: Тесты падают** — `npm test -- --dir tests tests/menuFocus.test.js tests/PopoverPanel.test.js tests/SelectMultiple.test.js`: новые FAIL.
+
+- [ ] **Step 3: Реализация** — по Interfaces; комментарии: почему Tab ведёт модуль (Safari пропускает кнопки), почему ластик в Tab, но не в стрелках.
+
+- [ ] **Step 4: README** — раздел `SelectMultiple`, «клавиатура»: Tab и Shift+Tab по кругу внутри открытого списка (поле, ластик поля, пока запрос не пуст, пункты), наружу — после закрытия; ластик поля в Tab, не в стрелках; строку «ластики вне порядка Tab» — только про ластик на кнопке фильтра.
+
+- [ ] **Step 5: Весь набор и сборка** — как в Task 3 Step 4.
+
+- [ ] **Step 6: Коммит** — `feat: держать Tab внутри открытого списка SelectMultiple и пускать его на ластик поиска`.
+
+- [ ] **Step 7: Повтор приёмки** — Playground заново; Chrome оба окружения и Playwright WebKit (Safari без «Tab ко всем элементам») и Chromium: круг Tab и Shift+Tab внутри списка с поиском и без, ластик в круге и с видимым кольцом (снимок), Enter на ластике; после Escape и выбора Tab идёт по странице; прежние сценарии §16 1–4 и «Набор с пункта». Для проверки стрелок снаружи фокус на кнопку фильтра ставится явно (Shift+Tab из поля теперь ведёт на последний пункт).
+
+---
+
 ### Task 7: `main` и версия `0.19.0`
 
 - [ ] **Step 1: Ждать `0.18.0`**
