@@ -381,9 +381,7 @@ describe('PageCard: карточка', () => {
             expect(page.cross().classes()).toContain(name)
         }
         const iconClasses = Array.from(page.cross().get('svg').element.parentElement.classList)
-        for (const name of ['bb:group-focus-visible:focus-ring']) {
-            expect(iconClasses).toContain(name)
-        }
+        expect(iconClasses).toContain('bb:group-focus-visible:focus-ring')
     })
 
     const labelCases = [
