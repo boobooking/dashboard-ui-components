@@ -180,6 +180,20 @@ function panelDisplayUtilities(source) {
     return tokens.filter((token) => DISPLAY.test(token))
 }
 
+// Вид фокуса задаёт утилита focus-ring (src/styles/index.css): компонент
+// выбирает только момент, а кольца, рамки и обводки под вариантами фокуса
+// у него нет. Исключения: outline-hidden (снимает браузерную обводку)
+// и border в NavigationMenuElement — полоска таба, не кольцо.
+const FOCUS_STATE = /^bb:(?:[a-z0-9-]+:)*(?:focus|focus-visible|group-focus-visible|focus-within):(?:[a-z0-9-]+:)*(?:ring|inset-ring|border|outline)(?:-|$)/
+
+function focusLookUtilities(tokens, fileName) {
+    return tokens.filter((token) => {
+        if (!FOCUS_STATE.test(token)) return false
+        if (token.endsWith(':outline-hidden')) return false
+        return !(fileName === 'NavigationMenuElement.vue' && /:border/.test(token))
+    })
+}
+
 const files = vueFiles(componentsDir)
 
 describe('префикс bb у утилит в разметке компонентов', () => {
@@ -193,6 +207,35 @@ describe('префикс bb у утилит в разметке компонен
                 .filter((token) => token !== 'bb-dashboard-ui' && !token.startsWith('bb:'))
 
             expect(unprefixed).toEqual([])
+        })
+    }
+})
+
+describe('вид фокуса не задаётся классами компонента', () => {
+    it('кольцо под focus: находится', () => {
+        const template = '<template><button class="bb:px-3 bb:focus:ring-2 bb:focus:outline-hidden bb:focus-visible:focus-ring"></button></template>'
+
+        expect(focusLookUtilities(classTokens(template, 'ActionPill.vue'), 'ActionPill.vue')).toEqual(['bb:focus:ring-2'])
+    })
+
+    it('рамка в NavigationMenuElement.vue допустима, в другом файле — нет', () => {
+        const template = '<template><a class="bb:focus:border-gray-300"></a></template>'
+
+        expect(focusLookUtilities(classTokens(template, 'NavigationMenuElement.vue'), 'NavigationMenuElement.vue')).toEqual([])
+        expect(focusLookUtilities(classTokens(template, 'PageTabs.vue'), 'PageTabs.vue')).toEqual(['bb:focus:border-gray-300'])
+    })
+
+    it('утилита focus-ring допустима', () => {
+        const template = '<template><a class="bb:focus:focus-ring bb:group-focus-visible:focus-ring"></a></template>'
+
+        expect(focusLookUtilities(classTokens(template, 'ActionPill.vue'), 'ActionPill.vue')).toEqual([])
+    })
+
+    for (const file of files) {
+        it(path.relative(componentsDir, file), () => {
+            const name = path.basename(file)
+
+            expect(focusLookUtilities(classTokens(fs.readFileSync(file, 'utf8'), name), name)).toEqual([])
         })
     }
 })

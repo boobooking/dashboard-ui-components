@@ -12,7 +12,7 @@
         <a
             v-if="isLink(mainAction)"
             :href="mainAction.href"
-            class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
+            class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
             :class="[
                 { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
                 mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
@@ -23,7 +23,7 @@
         <button
             v-else
             type="button"
-            class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
+            class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
             :class="[
                 { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
                 mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
@@ -46,7 +46,7 @@
                     type="button"
                     :id="trigger.id"
                     :popovertarget="trigger.popovertarget"
-                    class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:text-sm bb:font-medium bb:focus:z-10 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:border-indigo-500"
+                    class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:text-sm bb:font-medium bb:focus:z-10 bb:focus:focus-ring"
                     :class="mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-500 bb:hover:bg-gray-50' : colorClass(mainColor, 'button')"
                 >
                     <!-- Содержимое кнопки не ловит указатель и без курсора-руки:

@@ -402,7 +402,7 @@ describe('PickDay: календарь на Popover API', () => {
             const wrapper = mount(PickDay, { attachTo: document.body })
 
             expect(triggerOf(wrapper).classes()).toEqual(
-                expect.arrayContaining(['bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500', 'bb:focus:outline-hidden']),
+                expect.arrayContaining(['bb:focus-visible:focus-ring']),
             )
         })
 

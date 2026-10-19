@@ -8,7 +8,7 @@
         panel-role="region"
         :panel-label="texts.fullText"
         panel-focusable
-        panel-class="bb:p-3 bb:rounded-md bb:border bb:border-gray-200 bb:bg-white bb:shadow-lg bb:text-left bb:text-sm bb:leading-5 bb:text-gray-700 bb:whitespace-normal bb:break-words bb:overscroll-contain bb:select-text bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
+        panel-class="bb:p-3 bb:rounded-md bb:border bb:border-gray-200 bb:bg-white bb:shadow-lg bb:text-left bb:text-sm bb:leading-5 bb:text-gray-700 bb:whitespace-normal bb:break-words bb:overscroll-contain bb:select-text bb:focus-visible:focus-ring"
         @update:model-value="$emit('update:modelValue', $event)"
         @toggle="onPanelToggle"
     >
@@ -20,7 +20,7 @@
                 type="button"
                 :id="trigger.id"
                 :popovertarget="trigger.popovertarget"
-                class="bb:relative bb:text-gray-400 bb:hover:text-gray-600 bb:rounded-md bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
+                class="bb:relative bb:text-gray-400 bb:hover:text-gray-600 bb:rounded-md bb:focus-visible:focus-ring"
             >
                 <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                      см. README, «Клавиатурная навигация». -->

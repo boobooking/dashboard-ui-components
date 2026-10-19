@@ -9,7 +9,7 @@
             v-bind="{ ...inputAttrs() }"
             :id="inputId()"
             :type="inputType"
-            class="bb:mt-1 bb:block bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:px-3 bb:py-2 bb:text-sm bb:leading-5 bb:shadow-xs bb:focus:border-blue-300 bb:focus:ring-3 bb:focus:ring-blue-200/50 bb:focus:outline-hidden"
+            class="bb:mt-1 bb:block bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:px-3 bb:py-2 bb:text-sm bb:leading-5 bb:shadow-xs bb:focus:focus-ring"
         />
     </div>
 </template>

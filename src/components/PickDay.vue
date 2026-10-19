@@ -24,7 +24,7 @@
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
-                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
+                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus-visible:focus-ring"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                              см. README, «Клавиатурная навигация». -->

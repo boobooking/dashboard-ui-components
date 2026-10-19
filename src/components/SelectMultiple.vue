@@ -34,7 +34,7 @@
                             v-model="query"
                             :placeholder="texts.search"
                             :aria-label="texts.search"
-                            class="bb:w-full bb:pl-3 bb:pr-9 bb:py-2 bb:text-sm bb:bg-white bb:border bb:border-gray-300 bb:rounded-md bb:focus:outline-hidden bb:focus:border-indigo-500 bb:focus:ring-1 bb:focus:ring-indigo-500"
+                            class="bb:w-full bb:pl-3 bb:pr-9 bb:py-2 bb:text-sm bb:bg-white bb:border bb:border-gray-300 bb:rounded-md bb:focus:focus-ring"
                             @keydown.enter.prevent
                         />
                         <cross-button

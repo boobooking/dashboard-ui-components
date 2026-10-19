@@ -965,7 +965,7 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
     // нажатия Tab, Enter и пробела проверяются в браузере.
     it('у основной кнопки кольцо фокуса, как у стрелки', () => {
         const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
-        const ring = ['bb:focus:z-10', 'bb:focus:outline-hidden', 'bb:focus:ring-1', 'bb:focus:ring-indigo-500', 'bb:focus:border-indigo-500']
+        const ring = ['bb:focus:z-10', 'bb:focus:focus-ring']
 
         expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(ring))
         expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(ring))

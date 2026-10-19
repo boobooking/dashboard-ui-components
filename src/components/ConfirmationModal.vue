@@ -25,10 +25,10 @@
         <div class="bb:bg-gray-50 bb:rounded-b-lg bb:px-6 bb:py-3 bb:flex bb:flex-row-reverse">
             <button
                 type="button"
-                class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-transparent bb:shadow-xs bb:px-4 bb:py-2 bb:text-sm bb:font-medium bb:text-white bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:ml-3"
+                class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-transparent bb:shadow-xs bb:px-4 bb:py-2 bb:text-sm bb:font-medium bb:text-white bb:focus:focus-ring bb:ml-3"
                 :class="{
-                    'bb:bg-red-600 bb:hover:bg-red-700 bb:focus:ring-red-500': isDangerous,
-                    'bb:bg-yellow-400 bb:hover:bg-yellow-500 bb:focus:ring-yellow-300': isWarning,
+                    'bb:bg-red-600 bb:hover:bg-red-700': isDangerous,
+                    'bb:bg-yellow-400 bb:hover:bg-yellow-500': isWarning,
                 }"
                 @click.prevent="$emit('actionConfirmed')"
             >
@@ -38,7 +38,7 @@
                  открытия действие не выполнит. -->
             <button
                 type="button"
-                class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-gray-300 bb:shadow-xs bb:px-4 bb:py-2 bb:bg-white bb:text-sm bb:font-medium bb:text-gray-700 bb:hover:bg-gray-50 bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:focus:ring-indigo-500 bb:ml-3"
+                class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-gray-300 bb:shadow-xs bb:px-4 bb:py-2 bb:bg-white bb:text-sm bb:font-medium bb:text-gray-700 bb:hover:bg-gray-50 bb:focus:focus-ring bb:ml-3"
                 data-dialog-focus
                 @click.prevent="$emit('actionCanceled')"
             >

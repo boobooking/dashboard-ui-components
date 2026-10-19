@@ -10,7 +10,7 @@
         <span class="bb:sr-only bb:pointer-events-none bb:cursor-default"><slot>{{ texts.clear }}</slot></span>
         <!-- Кольцо фокуса — вокруг иконки, а не кнопки: у кнопки справа может
              быть отступ, и кольцо сдвинуло бы крестик от центра. -->
-        <span class="bb:flex bb:rounded-md bb:group-focus-visible:ring-2 bb:group-focus-visible:ring-indigo-500 bb:pointer-events-none bb:cursor-default">
+        <span class="bb:flex bb:rounded-md bb:group-focus-visible:focus-ring bb:pointer-events-none bb:cursor-default">
             <svg class="bb:stroke-current bb:pointer-events-none bb:cursor-default" :class="{ 'bb:w-6 bb:h-6': size === 'small', 'bb:w-8 bb:h-8': size === 'large' }" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>

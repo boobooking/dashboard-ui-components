@@ -331,7 +331,7 @@ describe('SelectMultiple: список на Popover API', () => {
         const wrapper = mountSelect()
 
         expect(triggerOf(wrapper).classes()).toEqual(
-            expect.arrayContaining(['bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500', 'bb:focus:outline-hidden']),
+            expect.arrayContaining(['bb:focus-visible:focus-ring']),
         )
     })
 
@@ -1168,7 +1168,7 @@ describe('SelectMultiple: Tab внутри списка', () => {
 
         for (const eraser of [fieldEraser, wrapper.findAll('button').at(-1)]) {
             expect(eraser.attributes('tabindex')).toBeUndefined()
-            expect(Array.from(eraser.get('svg').element.parentElement.classList)).toContain('bb:group-focus-visible:ring-2')
+            expect(Array.from(eraser.get('svg').element.parentElement.classList)).toContain('bb:group-focus-visible:focus-ring')
         }
     })
 })

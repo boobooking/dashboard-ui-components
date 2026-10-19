@@ -79,8 +79,7 @@ describe('CrossButton', () => {
             expect(ring).not.toBe(wrapper.element)
             expect(Array.from(ring.classList)).toEqual(expect.arrayContaining([
                 'bb:rounded-md',
-                'bb:group-focus-visible:ring-2',
-                'bb:group-focus-visible:ring-indigo-500',
+                'bb:group-focus-visible:focus-ring',
                 'bb:pointer-events-none',
                 'bb:cursor-default',
             ]))
@@ -187,7 +186,7 @@ describe('CrossButton у тех, кто его использует', () => {
             expect(button.get('svg').classes()).toEqual(expect.arrayContaining(testCase.icon))
             expect(button.classes()).toEqual(expect.arrayContaining(testCase.place))
             expect(button.attributes('tabindex')).not.toBe('-1')
-            expect(Array.from(button.get('svg').element.parentElement.classList)).toContain('bb:group-focus-visible:ring-2')
+            expect(Array.from(button.get('svg').element.parentElement.classList)).toContain('bb:group-focus-visible:focus-ring')
         })
     }
 })

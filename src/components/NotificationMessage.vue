@@ -26,7 +26,7 @@
                     <div class="bb:ml-4 bb:shrink-0 bb:flex">
                         <button
                             type="button"
-                            class="bb:rounded-md bb:inline-flex bb:text-gray-400 bb:hover:text-gray-500 bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:focus:ring-indigo-500"
+                            class="bb:rounded-md bb:inline-flex bb:text-gray-400 bb:hover:text-gray-500 bb:focus:focus-ring"
                             :class="{ 'bb:bg-red-50': isDangerous, 'bb:bg-yellow-50': isWarning, 'bb:bg-gray-50': isConfirmation }"
                             @click.prevent="$emit('update:modelValue', '')"
                         >

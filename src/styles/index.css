@@ -22,6 +22,20 @@
 @source '../colors.js';
 
 /*
+ * Единый вид фокуса пакета, как у FormInput: линия 1px blue-300 по краю
+ * элемента и ореол 3px blue-200 с прозрачностью 50%. Линия — outline со
+ * смещением внутрь: она ложится на рамку элемента, а в режиме принудительных
+ * цветов outline остаётся, в отличие от box-shadow. Ореол — кольцо. Компоненты
+ * выбирают только момент: bb:focus:focus-ring, bb:focus-visible:focus-ring,
+ * bb:group-focus-visible:focus-ring. Носитель утилиты не снимает обводку
+ * через focus:outline-hidden: это правило встало бы после утилиты и стёрло бы
+ * линию.
+ */
+@utility focus-ring {
+    @apply bb:outline-1 bb:outline-solid bb:outline-blue-300 bb:-outline-offset-1 bb:ring-3 bb:ring-blue-200/50;
+}
+
+/*
  * Ширина поля под маску «+7 (000) 000 00 00»: она почти вся из цифр, поэтому
  * меряется в ch и следует за шрифтом приложения. Слагаемое в пикселях — запас
  * под ластик: он прижат к правому краю поля и без запаса наезжал на хвост
@@ -115,7 +129,8 @@
  * Фокус в календаре с клавиатуры (src/dayFocus.js) виден: pikaday.css снимает
  * обводку у кнопок дней и стрелок месяцев, а списки месяца и года прячет
  * прозрачными поверх подписи. День под фокусом — как под мышью, стрелка —
- * яркая и в обводке, подпись — в обводке, пока фокус в её списке с клавиатуры.
+ * яркая и в кольце фокуса пакета, подпись — в нём же, пока фокус в её списке
+ * с клавиатуры.
  * Мышь фокус сюда не ставит: Pikaday отменяет mousedown. Правила вне слоёв —
  * по той же причине, что и правило выше.
  */
@@ -129,11 +144,11 @@
 .bb-dashboard-ui .pika-prev:focus,
 .bb-dashboard-ui .pika-next:focus {
     opacity: 1;
-    outline: 2px solid #ff8000;
+    @apply bb:focus-ring;
     border-radius: 3px;
 }
 
 .bb-dashboard-ui .pika-label:has(.pika-select:focus-visible) {
-    outline: 2px solid #ff8000;
+    @apply bb:focus-ring;
     border-radius: 3px;
 }
