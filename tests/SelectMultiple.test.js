@@ -453,25 +453,19 @@ describe('SelectMultiple: выбор нескольких пунктов', () =>
         expect(wrapper.get('[popovertarget]').text()).toBe(expected)
     })
 
-    it('клик по пункту список не закрывает, фокус остаётся на пункте', async () => {
-        const wrapper = mountSelect({ modelValue: ['c'] })
+    it('клик по пункту закрывает список, фокус возвращается на кнопку фильтра', async () => {
+        const wrapper = mountSelect()
         await open(wrapper)
         press('ArrowDown')
-        const item = document.activeElement
 
-        item.click()
+        itemButtons(wrapper)[0].element.click()
         await settle()
 
-        expect(isOpen(wrapper)).toBe(true)
-        expect(wrapper.vm.isOpen).toBe(true)
-        expect(document.activeElement).toBe(item)
-
-        await wrapper.setProps({ modelValue: wrapper.emitted('update:modelValue')[0][0] })
-        await settle()
-
-        expect(item.getAttribute('aria-pressed')).toBe('true')
-        expect(document.activeElement).toBe(item)
-        expect(isOpen(wrapper)).toBe(true)
+        expect(isOpen(wrapper)).toBe(false)
+        expect(wrapper.vm.isOpen).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toEqual([[['a']]])
+        expect(wrapper.emitted('changed')).toHaveLength(1)
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
     })
 
     it('отсчёт идёт от первого выбранного пункта', async () => {
@@ -655,20 +649,18 @@ describe('SelectMultiple: поиск', () => {
         expect(document.activeElement).not.toBe(fieldOf(wrapper).element)
     })
 
-    it('запрос сбрасывается при закрытии, но не при клике по пункту', async () => {
+    it('запрос сбрасывается и при выборе пункта', async () => {
         const wrapper = mountSelect({ withSearch: true })
         await open(wrapper)
-        await fieldOf(wrapper).setValue('й')
+        await fieldOf(wrapper).setValue('вто')
 
         await itemButtons(wrapper)[0].trigger('click')
         await settle()
 
-        expect(fieldOf(wrapper).element.value).toBe('й')
-
-        await triggerOf(wrapper).trigger('click')
-        await settle()
-
         expect(isOpen(wrapper)).toBe(false)
+
+        await open(wrapper)
+
         expect(fieldOf(wrapper).element.value).toBe('')
     })
 
@@ -961,29 +953,22 @@ describe('SelectMultiple: поиск', () => {
     })
 })
 
-describe('SelectMultiple: высота кнопки и фокус после клика', () => {
+describe('SelectMultiple: фокус после выбора пункта', () => {
     function itemButton(wrapper, name) {
         return wrapper.findAll('[popover] button').find((button) => button.text() === name)
     }
 
-    it('надпись кнопки держит минимальную высоту, у SelectSingle её нет', () => {
-        const multiple = mountSelect()
-        const single = mount(SelectSingle, { props: { header: 'Вендор', items } })
-
-        expect(multiple.get('button[popovertarget] span').classes()).toContain('bb:min-h-[calc(1em+1rem)]')
-        expect(single.get('button[popovertarget] span').classes()).not.toContain('bb:min-h-[calc(1em+1rem)]')
-    })
-
     for (const withSearch of [false, true]) {
-        it(`фокус на пункте после клика, как в Safari, withSearch: ${withSearch}`, async () => {
+        it(`в Safari фокус после выбора — на кнопке фильтра, withSearch: ${withSearch}`, async () => {
             const wrapper = mountSelect({ withSearch })
             await open(wrapper)
             press('ArrowDown')
             document.activeElement.blur()
 
             itemButton(wrapper, 'Первый').element.click()
+            await settle()
 
-            expect(document.activeElement).toBe(itemButton(wrapper, 'Первый').element)
+            expect(document.activeElement).toBe(triggerOf(wrapper).element)
         })
     }
 
@@ -1000,17 +985,5 @@ describe('SelectMultiple: высота кнопки и фокус после к�
 
         const item = itemButton(wrapper, 'Второй').element
         expect(focused).toEqual([item, item])
-    })
-
-    it('Escape после клика возвращает фокус на кнопку фильтра', async () => {
-        const wrapper = mountSelect()
-        await open(wrapper)
-        document.activeElement.blur()
-        itemButton(wrapper, 'Первый').element.click()
-
-        press('Escape')
-        await settle()
-
-        expect(document.activeElement).toBe(triggerOf(wrapper).element)
     })
 })

@@ -10,7 +10,6 @@
                 :find-selected="arrowsOrigin"
                 :find-stops="searchStops"
                 :keep-size="withSearch"
-                with-stable-height
                 :lang="lang"
                 @erased="clear"
                 @toggle="onToggle"
@@ -201,12 +200,13 @@ export default {
             return String(item.name ?? "");
         },
 
-        // Клик переключает пункт и список не закрывает: можно отметить
-        // несколько пунктов подряд. Фокус ставится на пункт сам: Safari по
-        // клику кнопке фокус не даёт и оставляет его на body, а набор после
-        // клика должен идти в поиск, и Escape — вернуть фокус на кнопку фильтра.
+        // Выбор пункта закрывает список. Фокус ставится на пункт до закрытия:
+        // Safari по клику кнопке фокус не даёт и оставляет его на body, а
+        // PopoverPanel возвращает фокус на кнопку фильтра, только если он
+        // был в панели.
         itemClicked(item) {
             this.itemElements()[this.visibleItems.indexOf(item)].focus({ preventScroll: true });
+            this.isOpen = false;
             this.$emit(
                 "update:modelValue",
                 this.selectedIds.includes(item.id)

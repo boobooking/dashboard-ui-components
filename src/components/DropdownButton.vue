@@ -31,7 +31,6 @@
                              см. README, «Клавиатурная навигация». -->
                         <span
                             class="bb:flex bb:w-full bb:h-full bb:pl-3 bb:pr-12 bb:py-2 bb:items-center bb:whitespace-nowrap bb:leading-none bb:pointer-events-none bb:cursor-default"
-                            :class="{ 'bb:min-h-[calc(1em+1rem)]': withStableHeight }"
                             v-text="title"
                         />
                     </button>
@@ -79,14 +78,6 @@ export default {
         },
         // Список не сужается и открытый вверх не укорачивается (PopoverPanel).
         keepSize: {
-            type: Boolean,
-            default: false,
-        },
-        // Кнопка одной высоты пустая и с надписью: выбор первого пункта
-        // не растит её под открытым списком. Наименьшая высота надписи —
-        // строка (leading-none, 1em) и отступы py-2 (1rem), при любом
-        // размере шрифта.
-        withStableHeight: {
             type: Boolean,
             default: false,
         },
