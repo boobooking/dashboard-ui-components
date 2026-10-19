@@ -267,7 +267,8 @@ describe('PopoverPanel: keep-size', () => {
         panel.getBoundingClientRect = () => ({ width, height })
     }
 
-    // Высота окна панели и её содержимого: содержимое выше — переполнение.
+    // Видимая высота панели и высота её содержимого: содержимое выше —
+    // переполнение.
     function heights(panel, clientHeight, scrollHeight) {
         Object.defineProperty(panel, 'clientHeight', { configurable: true, value: clientHeight })
         Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: scrollHeight })
@@ -381,6 +382,9 @@ describe('PopoverPanel: keep-size', () => {
         heights(panel, 48, 120)
         size(panel, 240, 300)
         await openPanel(wrapper)
+
+        expect([panel.style.minWidth, panel.style.minHeight, panel.style.scrollbarGutter]).toEqual(['240px', '300px', 'stable'])
+
         await buttonOf(wrapper).trigger('click')
         await settle()
         button.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
@@ -405,6 +409,9 @@ describe('PopoverPanel: keep-size', () => {
         heights(panel, 48, 120)
         size(panel, 240, 300)
         await openPanel(wrapper)
+
+        expect([panel.style.minWidth, panel.style.minHeight, panel.style.scrollbarGutter]).toEqual(['240px', '300px', 'stable'])
+
         await buttonOf(wrapper).trigger('click')
         await settle()
 
