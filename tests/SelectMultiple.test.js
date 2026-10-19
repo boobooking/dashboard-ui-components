@@ -4,6 +4,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue'
 import PopoverPanel from '../src/components/PopoverPanel.vue'
 import SelectMultiple from '../src/components/SelectMultiple.vue'
+import SelectSingle from '../src/components/SelectSingle.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
@@ -833,6 +834,56 @@ describe('SelectMultiple: поиск', () => {
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
+    })
+})
+
+describe('SelectMultiple: высота кнопки и фокус после клика', () => {
+    function itemButton(wrapper, name) {
+        return wrapper.findAll('[popover] button').find((button) => button.text() === name)
+    }
+
+    it('надпись кнопки держит минимальную высоту, у SelectSingle её нет', () => {
+        const multiple = mountSelect()
+        const single = mount(SelectSingle, { props: { header: 'Вендор', items } })
+
+        expect(multiple.get('button[popovertarget] span').classes()).toContain('bb:min-h-8')
+        expect(single.get('button[popovertarget] span').classes()).not.toContain('bb:min-h-8')
+    })
+
+    for (const withSearch of [false, true]) {
+        it(`фокус на пункте после клика, как в Safari, withSearch: ${withSearch}`, async () => {
+            const wrapper = mountSelect({ withSearch })
+            await open(wrapper)
+            press('ArrowDown')
+            document.activeElement.blur()
+
+            itemButton(wrapper, 'Первый').element.click()
+
+            expect(document.activeElement).toBe(itemButton(wrapper, 'Первый').element)
+        })
+    }
+
+    it('фокус ставится до событий', async () => {
+        const focused = []
+        const wrapper = mountSelect({ 'onUpdate:modelValue': () => focused.push(document.activeElement) })
+        await open(wrapper)
+        document.activeElement.blur()
+
+        itemButton(wrapper, 'Второй').element.click()
+
+        expect(focused).toEqual([itemButton(wrapper, 'Второй').element])
+    })
+
+    it('Escape после клика возвращает фокус на кнопку фильтра', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        document.activeElement.blur()
+        itemButton(wrapper, 'Первый').element.click()
+
+        press('Escape')
+        await settle()
+
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
     })
 })

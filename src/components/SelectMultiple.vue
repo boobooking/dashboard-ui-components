@@ -10,6 +10,7 @@
                 :find-selected="firstSelectedElement"
                 :find-stops="withSearch ? searchStops : null"
                 :keep-size="withSearch"
+                with-stable-height
                 :lang="lang"
                 @erased="clear"
                 @toggle="onToggle"
@@ -191,8 +192,13 @@ export default {
 
     methods: {
         // Клик переключает пункт и список не закрывает: можно отметить
-        // несколько пунктов подряд.
+        // несколько пунктов подряд. Фокус ставится на пункт сам: Safari по
+        // клику кнопке фокус не даёт и оставляет его на body, а набор после
+        // клика должен идти в поиск, и Escape — вернуть фокус на кнопку фильтра.
         itemClicked(item) {
+            this.$refs.list
+                .querySelectorAll("button")
+                [this.visibleItems.indexOf(item)].focus({ preventScroll: true });
             this.$emit(
                 "update:modelValue",
                 this.selectedIds.includes(item.id)
