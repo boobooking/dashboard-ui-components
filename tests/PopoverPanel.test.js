@@ -373,6 +373,23 @@ describe('PopoverPanel: keep-size', () => {
         expect(panel.style.scrollbarGutter).toBe('')
     })
 
+    // Пиксель запаса — на округление scrollHeight, как в fitPopover.
+    it.each([
+        { name: 'содержимое выше на 1px — округление, не держится', scrollHeight: 121, expected: '' },
+        { name: 'содержимое выше на 2px — переполнение, держится', scrollHeight: 122, expected: 'stable' },
+    ])('место полосы прокрутки: $name', async ({ scrollHeight, expected }) => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        const panel = panelOf(wrapper).element
+        heights(panel, 120, scrollHeight)
+        size(panel, 240, 120)
+
+        await openPanel(wrapper)
+
+        expect(panel.style.scrollbarGutter).toBe(expected)
+    })
+
     it('повторное открытие сбрасывает ширину, высоту и место полосы прокрутки', async () => {
         viewport(1000, 800)
         const wrapper = mountPanel({ props: { keepSize: true } })
