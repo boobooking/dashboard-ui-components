@@ -754,6 +754,40 @@ describe('SelectMultiple: поиск', () => {
         expect(document.activeElement.textContent).toBe('Третий')
     })
 
+    it('поиск выключили при открытом списке: запрос не действует, стрелки ходят по пунктам', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('вто')
+
+        await wrapper.setProps({ withSearch: false })
+        await settle()
+
+        expect(itemNames(wrapper)).toEqual(['Первый', 'Второй', 'Третий'])
+
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+        expect(errors).toEqual([])
+    })
+
+    it('поиск включили при открытом списке: поле в круге стрелок, ластик — нет', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+
+        await wrapper.setProps({ withSearch: true })
+        await settle()
+        stopOf(wrapper, 'Третий').focus()
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+
+        await fieldOf(wrapper).setValue('й')
+        stopOf(wrapper, 'Третий').focus()
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
     it('ластик поля вне стрелок и мыши', async () => {
         const wrapper = mountSelect({ withSearch: true })
         await open(wrapper)

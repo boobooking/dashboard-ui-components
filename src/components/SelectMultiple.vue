@@ -8,7 +8,7 @@
                 v-if="hasItems"
                 :has-value="selectedItems.length > 0"
                 :find-selected="arrowsOrigin"
-                :find-stops="withSearch ? searchStops : null"
+                :find-stops="searchStops"
                 :keep-size="withSearch"
                 with-stable-height
                 :lang="lang"
@@ -164,9 +164,11 @@ export default {
         },
 
         // Фильтр поиска: имя пункта содержит запрос без учёта регистра,
-        // запрос обрезан по краям. Пустой запрос — все пункты.
+        // запрос обрезан по краям. Пустой запрос — все пункты. Без поиска
+        // запрос не действует: он мог остаться от поля, которое убрали
+        // при открытом списке.
         visibleItems() {
-            const query = this.query.trim().toLowerCase();
+            const query = this.withSearch ? this.query.trim().toLowerCase() : "";
 
             if (query === "") {
                 return this.itemList;
@@ -250,12 +252,15 @@ export default {
             }
         },
 
-        // Остановки стрелок с поиском: поле, затем пункты. Ластик поля — тоже
-        // кнопка, но в круг не входит. Без совпадений пунктов нет — только поле.
+        // Остановки стрелок: поле, если оно есть, затем пункты. Ластик поля —
+        // тоже кнопка, но в круг не входит. Без совпадений пунктов нет —
+        // только поле. Функция одна и с поиском, и без него: панель берёт её
+        // при открытии, а поиск могут включить и выключить при открытом списке.
         searchStops() {
+            const field = this.$refs.search ? [this.$refs.search] : [];
             const items = this.$refs.list ? [...this.$refs.list.querySelectorAll("button")] : [];
 
-            return [this.$refs.search, ...items];
+            return [...field, ...items];
         },
 
         // Набор на пункте уходит в поле: мышь ставит фокус на пункт под
