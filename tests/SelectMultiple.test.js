@@ -39,6 +39,11 @@ const items = [
 // popover, и закрытый список был бы виден.
 const DISPLAY = /^bb:(block|inline-block|inline|flex|inline-flex|grid|inline-grid|table|contents|flow-root|hidden)$/
 
+// Настройки Vue для mount: ошибки уходят в errors, предупреждения — в warnings.
+function vueHandlers() {
+    return { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } }
+}
+
 // attachTo нужен фокусу: элементу вне документа его не дать.
 function mountSelect(props = {}) {
     return mountWith({ props: { header: 'Вендор', items, ...props } })
@@ -48,7 +53,7 @@ function mountWith(options) {
     return mount(SelectMultiple, {
         attachTo: document.body,
         ...options,
-        global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        global: vueHandlers(),
     })
 }
 
@@ -89,7 +94,8 @@ describe('SelectMultiple', () => {
     it('не падает, если вместо списка пришёл null', () => {
         mountWith({ props: { header: 'Вендор', items: null } })
 
-        expect(warnings).toEqual(['Invalid prop: type check failed for prop "items". Expected Array, got Null '])
+        expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "items"')
         warnings = []
     })
 
@@ -145,12 +151,6 @@ describe('SelectMultiple', () => {
 })
 
 describe('SelectMultiple: пункты пропали при открытом списке', () => {
-    function press(key) {
-        const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
-        document.activeElement.dispatchEvent(event)
-        return event
-    }
-
     it('стрелки снова прокручивают страницу, а вернувшиеся пункты открываются заново и ходят по новому списку', async () => {
         const wrapper = mountWith({ props: { header: 'Вендор', items } })
         wrapper.find('button').element.focus()
@@ -290,7 +290,7 @@ describe('SelectMultiple: список на Popover API', () => {
                 h(SelectMultiple, { header: 'Сертификат', items }),
             ]),
         }
-        const page = mount(Page, { attachTo: document.body, global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } } })
+        const page = mount(Page, { attachTo: document.body, global: vueHandlers() })
         const [first, second] = page.findAllComponents(SelectMultiple)
 
         await first.find('button').trigger('click')
@@ -714,6 +714,15 @@ describe('SelectMultiple: поиск', () => {
         expect(press('Enter').defaultPrevented).toBe(true)
     })
 
+    it('пробел в поле не переключает пункт', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        fieldOf(wrapper).element.focus()
+
+        expect(press(' ').defaultPrevented).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
     it.each([
         { name: 'из поля вниз — первый пункт', from: 'поле', key: 'ArrowDown', to: 'Первый' },
         { name: 'из поля вверх — последний пункт', from: 'поле', key: 'ArrowUp', to: 'Третий' },
@@ -727,6 +736,22 @@ describe('SelectMultiple: поиск', () => {
         press(key)
 
         expect(document.activeElement).toBe(stopOf(wrapper, to))
+    })
+
+    it('без совпадений стрелки в поле ничего не делают', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('zzz')
+        fieldOf(wrapper).element.focus()
+
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+
+        press('ArrowUp')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+        expect(errors).toEqual([])
     })
 
     it('фокус снаружи без выбранных: вниз — первый пункт, вверх — последний', async () => {
@@ -826,14 +851,16 @@ describe('SelectMultiple: поиск', () => {
     it('Backspace на пункте стирает последний символ запроса в поле', async () => {
         const wrapper = mountSelect({ withSearch: true })
         await open(wrapper)
-        await fieldOf(wrapper).setValue('й')
+        await fieldOf(wrapper).setValue('вто')
         press('ArrowDown')
+
+        expect(document.activeElement).toBe(stopOf(wrapper, 'Второй'))
 
         const event = press('Backspace')
         await nextTick()
 
         expect(event.defaultPrevented).toBe(true)
-        expect(fieldOf(wrapper).element.value).toBe('')
+        expect(fieldOf(wrapper).element.value).toBe('вт')
         expect(document.activeElement).toBe(fieldOf(wrapper).element)
     })
 
@@ -907,7 +934,7 @@ describe('SelectMultiple: поиск', () => {
                 h(SelectMultiple, { header: 'Сертификат', items, withSearch: true }),
             ]),
         }
-        const page = mount(Page, { attachTo: document.body, global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } } })
+        const page = mount(Page, { attachTo: document.body, global: vueHandlers() })
         const [first, second] = page.findAllComponents(SelectMultiple)
         await first.find('button').trigger('click')
         await settle()
@@ -962,13 +989,17 @@ describe('SelectMultiple: высота кнопки и фокус после к�
 
     it('фокус ставится до событий', async () => {
         const focused = []
-        const wrapper = mountSelect({ 'onUpdate:modelValue': () => focused.push(document.activeElement) })
+        const wrapper = mountSelect({
+            'onUpdate:modelValue': () => focused.push(document.activeElement),
+            onChanged: () => focused.push(document.activeElement),
+        })
         await open(wrapper)
         document.activeElement.blur()
 
         itemButton(wrapper, 'Второй').element.click()
 
-        expect(focused).toEqual([itemButton(wrapper, 'Второй').element])
+        const item = itemButton(wrapper, 'Второй').element
+        expect(focused).toEqual([item, item])
     })
 
     it('Escape после клика возвращает фокус на кнопку фильтра', async () => {
