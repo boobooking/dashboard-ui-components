@@ -567,3 +567,12 @@ describe('PickDay: фокус после ластика', () => {
         expect(wrapper.emitted('changed')).toHaveLength(1)
     })
 })
+
+describe('PickDay: единый фокус', () => {
+    it('поле даты показывает фокус утилитой пакета без outline-hidden', () => {
+        const classes = mount(PickDay, { props: { modelValue: '' } }).get('input').classes()
+
+        expect(classes).toContain('bb:focus:focus-ring')
+        expect(classes).not.toContain('bb:focus:outline-hidden')
+    })
+})

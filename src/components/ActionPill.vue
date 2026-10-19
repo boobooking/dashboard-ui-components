@@ -1,7 +1,7 @@
 <template>
     <button
         type="button"
-        class="bb-dashboard-ui bb:inline-flex bb:items-center bb:px-3 bb:py-1.5 bb:rounded-full bb:text-xs bb:font-medium bb:leading-none bb:select-none bb:whitespace-nowrap"
+        class="bb-dashboard-ui bb:inline-flex bb:items-center bb:px-3 bb:py-1.5 bb:rounded-full bb:text-xs bb:font-medium bb:leading-none bb:select-none bb:whitespace-nowrap bb:focus-visible:focus-ring"
         :class="[
             colorClass(color, 'pill'),
             isLoading ? 'bb:opacity-60 bb:cursor-not-allowed' : 'bb:cursor-pointer',

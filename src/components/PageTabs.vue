@@ -5,7 +5,7 @@
             :key="tab.key"
             :href="tab.url"
             :aria-current="tab.key === activeKey ? 'page' : null"
-            class="bb:px-3 bb:py-2 bb:font-medium bb:text-sm bb:rounded-md"
+            class="bb:px-3 bb:py-2 bb:font-medium bb:text-sm bb:rounded-md bb:focus-visible:focus-ring"
             :class="tab.key === activeKey ? 'bb:bg-indigo-100 bb:text-gray-700' : 'bb:text-gray-500 bb:hover:text-gray-700'"
             @click="followLink($event, tab.url)"
             v-text="tab.name"

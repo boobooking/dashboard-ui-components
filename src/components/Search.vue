@@ -6,7 +6,7 @@
                 <label class="bb:flex bb:w-full bb:h-full bb:items-center bb:justify-center">
                     <input
                         ref="input"
-                        class="bb:flex bb:w-full bb:h-full bb:px-3 bb:py-2 bb:cursor-pointer bb:truncate bb:focus:outline-hidden bb:border-none"
+                        class="bb:flex bb:w-full bb:h-full bb:px-3 bb:py-2 bb:cursor-pointer bb:truncate bb:focus:focus-ring bb:border-none"
                         v-model.trim="search"
                         @input="startSearch"
                     />

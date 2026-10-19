@@ -207,3 +207,15 @@ describe('PageTabs: язык', () => {
         })
     }
 })
+
+describe('PageTabs: единый фокус', () => {
+    it('каждая ссылка показывает фокус с клавиатуры утилитой пакета, открытый таб сохраняет фон', () => {
+        const { wrapper } = mountTabs(null)
+
+        const links = wrapper.findAll('a')
+        for (const link of links) {
+            expect(link.classes()).toContain('bb:focus-visible:focus-ring')
+        }
+        expect(links[1].classes()).toContain('bb:bg-indigo-100')
+    })
+})

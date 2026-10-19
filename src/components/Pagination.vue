@@ -4,7 +4,7 @@
             <a
                 v-if="previousPageUrl !== null"
                 :href="previousPageUrl"
-                class="bb:border-t-2 bb:border-transparent bb:pt-4 bb:pr-1 bb:inline-flex bb:items-center bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:text-gray-700 bb:hover:border-indigo-700"
+                class="bb:border-t-2 bb:border-transparent bb:pt-4 bb:pr-1 bb:inline-flex bb:items-center bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:text-gray-700 bb:hover:border-indigo-700 bb:focus-visible:focus-ring"
                 @click="followLink($event, previousPageUrl)"
             >
                 <!-- Содержимое ссылки не ловит указатель и без курсора-руки:
@@ -22,7 +22,7 @@
             <a
                 v-if="nextPageUrl !== null"
                 :href="nextPageUrl"
-                class="bb:border-t-2 bb:border-transparent bb:pt-4 bb:pl-1 bb:inline-flex bb:items-center bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:text-gray-700 bb:hover:border-indigo-700"
+                class="bb:border-t-2 bb:border-transparent bb:pt-4 bb:pl-1 bb:inline-flex bb:items-center bb:text-sm bb:font-medium bb:text-gray-500 bb:hover:text-gray-700 bb:hover:border-indigo-700 bb:focus-visible:focus-ring"
                 @click="followLink($event, nextPageUrl)"
             >
                 {{ texts.nextPage }}

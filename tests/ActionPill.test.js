@@ -140,3 +140,9 @@ describe('ActionPill: неверные значения', () => {
         expect(warnings.every((message) => message.includes('"title"'))).toBe(true)
     })
 })
+
+describe('ActionPill: единый фокус', () => {
+    it('показывает фокус с клавиатуры утилитой пакета', () => {
+        expect(mountPill().classes()).toContain('bb:focus-visible:focus-ring')
+    })
+})

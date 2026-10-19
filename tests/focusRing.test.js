@@ -98,7 +98,11 @@ function focusRingStrings(fileName) {
 describe('носители focus-ring', () => {
     const carriers = [
         ['FormInput.vue', 'bb:focus:focus-ring', 1],
-        ['PickDay.vue', 'bb:focus-visible:focus-ring', 1],
+        ['ActionPill.vue', 'bb:focus-visible:focus-ring', 1],
+        ['PageTabs.vue', 'bb:focus-visible:focus-ring', 1],
+        ['Pagination.vue', 'bb:focus-visible:focus-ring', 2],
+        ['Search.vue', 'bb:focus:focus-ring', 1],
+        ['RussianMobileFilter.vue', 'bb:focus:focus-ring', 1],
         ['DropdownButton.vue', 'bb:focus-visible:focus-ring', 1],
         ['SelectMultiple.vue', 'bb:focus:focus-ring', 1],
         ['CrossButton.vue', 'bb:group-focus-visible:focus-ring', 1],
@@ -116,6 +120,16 @@ describe('носители focus-ring', () => {
         for (const nodeTokens of tokens) {
             expect(nodeTokens).toContain(utility)
             expect(nodeTokens).not.toContain('bb:focus:outline-hidden')
+        }
+    })
+
+    it('PickDay: кнопка календаря — focus-visible, поле даты — focus, без focus:outline-hidden', () => {
+        const strings = focusRingStrings('PickDay.vue')
+        const utilities = strings.map((value) => value.split(/\s+/).filter((token) => token.endsWith('focus-ring')))
+
+        expect(utilities).toEqual([['bb:focus-visible:focus-ring'], ['bb:focus:focus-ring']])
+        for (const value of strings) {
+            expect(value.split(/\s+/)).not.toContain('bb:focus:outline-hidden')
         }
     })
 

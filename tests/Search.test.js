@@ -121,3 +121,12 @@ describe('Search: фокус после ластика', () => {
         expect(wrapper.emitted('changed')).toHaveLength(1)
     })
 })
+
+describe('Search: единый фокус', () => {
+    it('поле показывает фокус утилитой пакета без outline-hidden', () => {
+        const classes = mount(Search, { props: { header: 'Поиск', modelValue: '' } }).get('input').classes()
+
+        expect(classes).toContain('bb:focus:focus-ring')
+        expect(classes).not.toContain('bb:focus:outline-hidden')
+    })
+})

@@ -270,3 +270,15 @@ describe('Pagination: атрибуты и стиль', () => {
         expect(errors).toEqual([])
     })
 })
+
+describe('Pagination: единый фокус', () => {
+    it('обе ссылки показывают фокус с клавиатуры утилитой пакета', () => {
+        const { wrapper } = mountPagination({ props: { links: { prev: PREV, next: NEXT }, meta: META } })
+
+        const links = wrapper.findAll('a')
+        expect(links).toHaveLength(2)
+        for (const link of links) {
+            expect(link.classes()).toContain('bb:focus-visible:focus-ring')
+        }
+    })
+})
