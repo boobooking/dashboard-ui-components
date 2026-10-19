@@ -269,7 +269,8 @@ export default {
                 const button = document.getElementById(this.buttonId);
                 const options = { maxWidth: this.maxWidth, align: this.align };
                 // Размер прошлого открытия сбрасывается при любом keepSize:
-                // keepSize мог выключиться, пока панель была закрыта.
+                // keepSize мог выключиться после прошлого открытия, а
+                // удержанный размер остаётся на панели и после закрытия.
                 this.$refs.panel.style.minWidth = "";
                 this.$refs.panel.style.minHeight = "";
                 this.$refs.panel.style.scrollbarGutter = "";

@@ -312,8 +312,7 @@ describe('PopoverPanel: keep-size', () => {
         const wrapper = mountPanel({ props: { keepSize: true } })
         buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 700, bottom: 740, left: 50, right: 290 })
         const panel = panelOf(wrapper).element
-        Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 48 })
-        Object.defineProperty(panel, 'scrollHeight', { configurable: true, value: 120 })
+        heights(panel, 48, 120)
         size(panel, 240, 300)
 
         await openPanel(wrapper)
