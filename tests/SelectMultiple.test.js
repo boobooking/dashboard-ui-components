@@ -93,6 +93,19 @@ describe('SelectMultiple', () => {
         warnings = []
     })
 
+    // У строки есть length: без проверки на массив список счёл бы её пунктами.
+    it.each([
+        { name: 'объект', value: {} },
+        { name: 'строка', value: 'ab' },
+    ])('не падает, если вместо списка пришёл не массив: $name', ({ value }) => {
+        mountWith({ props: { header: 'Вендор', items: value } })
+
+        expect(errors).toEqual([])
+        expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "items"')
+        warnings = []
+    })
+
     it('в открытом списке стрелка вниз ведёт на первый пункт и не прокручивает страницу', async () => {
         const wrapper = mountSelect()
         await open(wrapper)

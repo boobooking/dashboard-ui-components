@@ -148,9 +148,10 @@ export default {
     },
 
     computed: {
-        // null и undefined — как пустой список: компонент не должен падать.
+        // null, undefined и не массив — как пустой список: компонент
+        // не должен падать.
         itemList() {
-            return this.items ?? [];
+            return Array.isArray(this.items) ? this.items : [];
         },
 
         // null и не массив — как пустое значение: компонент не должен падать.
