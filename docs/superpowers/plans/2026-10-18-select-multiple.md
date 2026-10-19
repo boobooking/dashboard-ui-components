@@ -539,9 +539,23 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 ---
 
+### Task 6h: `FormInput` в карточке `PageCard` на Playground
+
+Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §7.
+
+**Files:** Modify `playground/App.vue`, `playground/shell.css`.
+
+**Interfaces:** в демо `PageCard` вместо `<input class="page-card-demo-input" …>` — `<form-input v-model="pageCardTitle" label="Название" class="page-card-demo-field"/>`, в `data` — `pageCardTitle: 'Поле формы'`. В `shell.css` правила `.page-card-demo-input` и `.page-card-demo-input:focus` убираются, `.page-card-demo-field` — `margin-top: 16px`; комментарий над демо — про заголовок (поле теперь оформляет пакет). Компоненты пакета и тесты не меняются.
+
+- [ ] **Step 1: Правка** по Interfaces.
+- [ ] **Step 2: Весь набор и сборка Playground** — набор как в Task 3 Step 4; сборка Playground — как в Task 4 (`npx vite build --config vite.playground.config.js --outDir $S/playground-check --emptyOutDir --base ./`), `exit 0`.
+- [ ] **Step 3: Коммит** — `docs: показать FormInput в карточке PageCard на Playground`.
+
+---
+
 ### Task 6g: Повтор приёмки
 
-Playground заново; Chrome оба окружения и Playwright WebKit и Chromium: Tab по всем фильтрам Playground — каждый ластик достижим, кольцо видно, крестик по центру (снимки); `SelectSingle` — круг Tab; `SelectDateInterval` — порядок Tab, кольцо на кнопке календаря, стрелка вниз / Enter / пробел в поле открывают календарь; регрессия: сценарии спеки SelectMultiple §16. Затем — проверка владельцем в Safari (переход в «до», Tab, ластики) и на iPad.
+Playground заново; Chrome оба окружения и Playwright WebKit и Chromium: Tab по всем фильтрам Playground — каждый ластик достижим, кольцо видно, крестик по центру (снимки); `SelectSingle` — круг Tab; `SelectDateInterval` — порядок Tab, кольцо на кнопке календаря, стрелка вниз / Enter / пробел в поле открывают календарь; поле в карточке `PageCard` — фокус как у `FormInput` в его разделе, заголовок и крестик карточки как прежде (снимки, оба окружения); регрессия: сценарии спеки SelectMultiple §16. Затем — проверка владельцем в Safari (переход в «до», Tab, ластики) и на iPad.
 
 ---
 

@@ -16,11 +16,12 @@
   кольца фокуса;
 - видимый фокус кнопок фильтров: кнопки календаря `SelectDateInterval`
   и кнопки списка `SelectSingle` и `SelectMultiple`;
-- `SelectDateInterval`: открытие календаря клавишами из поля даты.
+- `SelectDateInterval`: открытие календаря клавишами из поля даты;
+- поле в карточке `PageCard` на Playground — `FormInput` (§7).
 
 Вне рамок: меню (`DropdownButtonWithAction`, `HamburgerMenu`),
 `TextPopover`, крестик `NotificationMessage`, Tab внутри открытого
-календаря.
+календаря, фокус полей пакета (`FormInput`, поля фильтров).
 
 ## 2. Решения и их источники
 
@@ -34,6 +35,8 @@
 | Ластики — все ластики фильтров пакета: `Search`, `RussianMobileFilter`, `SelectSingle`, `SelectMultiple` (на кнопке и в поле поиска), `SelectDateInterval` | решение Claude, сказано владельцу |
 | Тот же видимый фокус у кнопки списка `SelectSingle` и `SelectMultiple` (`DropdownButton`): у неё тоже `focus:outline-hidden` без замены, фокус на ней так же «пропадает» | решение Claude, сказано владельцу |
 | Видимый фокус пакета — кольцо `focus-visible` 2px `indigo-500`, как у `TextPopover`, крестика `PageCard` и `NotificationMessage` | решение Claude по коду пакета |
+| Изучить: у поля в карточке `PageCard` на Playground фокус отличается от фокуса остальных компонентов пакета | владелец, 2026-10-19 |
+| Поле в карточке `PageCard` на Playground — `FormInput` пакета; фокус полей пакета не меняется | владелец, 2026-10-19 (из вариантов: `FormInput` в карточке, единый фиолетовый фокус полей, отложить) |
 
 ## 3. `SelectSingle`: Tab внутри открытого списка
 
@@ -96,3 +99,29 @@ Tab идёт по странице. Механизм тот же: `findTabStops`
   `SelectDateInterval` — порядок Tab, кольцо на кнопках «от» и «до»,
   стрелка вниз, Enter, пробел в поле открывают календарь; кольцо на
   кнопках списков. Safari владельца — фокус виден на каждом шаге Tab.
+
+## 7. Поле в карточке `PageCard` на Playground
+
+Что найдено (Chromium, оба окружения Playground, 2026-10-19):
+
+- Поле в карточке — разметка самого Playground (`.page-card-demo-input`
+  в `playground/shell.css`), не компонент пакета. Фокус — outline 2px
+  `indigo-500` с отступом 2px: фиолетовая рамка поодаль от поля.
+- Фокус полей пакета сейчас разный:
+  - `FormInput` — рамка `blue-300` и ореол 3px `blue-200/50`, голубой,
+    как в формах приложений;
+  - поле поиска `SelectMultiple` — рамка и кольцо 1px `indigo-500`;
+  - поля фильтров `Search`, `RussianMobileFilter`, поле даты `PickDay` —
+    без кольца, виден только курсор.
+- Кнопки — кольцо `indigo-500`: 2px у `TextPopover`, крестика `PageCard`,
+  `NotificationMessage`, ластиков (§4) и кнопок фильтров (§5), 1px
+  с рамкой у `DropdownButtonWithAction`, у кнопок `ConfirmationModal` —
+  цвет по типу окна.
+
+Решение владельца: в карточке — поле пакета `FormInput`, с подписью,
+вместо поля Playground. Фокус у него — как у `FormInput` в формах
+приложений. Стили поля Playground (`.page-card-demo-input`) убираются;
+отступ поля от заголовка остаётся (класс на корне `FormInput`).
+Компоненты пакета не меняются. Приёмка: в обоих окружениях Playground
+фокус поля в карточке выглядит так же, как у `FormInput` в разделе
+`FormInput` (снимки), заголовок и крестик карточки — как прежде.
