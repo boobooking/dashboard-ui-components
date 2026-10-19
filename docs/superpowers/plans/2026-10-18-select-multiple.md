@@ -522,26 +522,20 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 ---
 
-### Task 6e: Календарь `SelectDateInterval` с клавиатуры
+### Task 6e: Видимый фокус кнопок фильтров и календарь с клавиатуры
 
-Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §5 (кроме Safari).
+Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §5.
 
-**Files:** Modify `src/components/PickDay.vue`, `README.md`; Test `tests/PickDay.test.js` (или `tests/SelectDateInterval.test.js`, где лежат похожие).
+**Files:** Modify `src/components/PickDay.vue`, `src/components/DropdownButton.vue`, `README.md`; Test `tests/PickDay.test.js` (или `tests/SelectDateInterval.test.js`, где лежат похожие), `tests/SelectSingle.test.js` / `tests/SelectMultiple.test.js` (классы кольца кнопки списка).
 
-**Interfaces:** у кнопки календаря — кольцо `focus-visible` (как у ластиков), видимое поверх поля; поле даты — `@keydown`: `ArrowDown`, `Enter`, `' '` без Ctrl/Alt/Meta и без `isComposing` → `preventDefault()` и открыть календарь (`popupIsOpen = true`); остальные клавиши — ручной ввод, как сейчас.
+**Interfaces:** у кнопки календаря `PickDay` и у кнопки списка `DropdownButton` — кольцо `focus-visible` 2px `indigo-500` (`bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500`, при обрезке обёрткой — `bb:focus-visible:ring-inset`), `focus:outline-hidden` остаётся; поле даты — `@keydown`: `ArrowDown`, `Enter`, `' '` без Ctrl/Alt/Meta и без `isComposing` → `preventDefault()` и открыть календарь (`popupIsOpen = true`); остальные клавиши — ручной ввод, как сейчас.
 
-- [ ] **Step 1: Тесты**: фокус в поле, ArrowDown / Enter / пробел → календарь открыт, `defaultPrevented` `true`, значение поля не изменилось; с модификаторами — не открывается; буква — не открывает, вводится; у кнопки календаря классы кольца.
+- [ ] **Step 1: Тесты**: фокус в поле даты, ArrowDown / Enter / пробел → календарь открыт, `defaultPrevented` `true`, значение поля не изменилось; с модификаторами — не открывается; буква — не открывает; у кнопки календаря и у кнопки списка `SelectSingle` — классы кольца.
 - [ ] **Step 2: Тесты падают.**
 - [ ] **Step 3: Реализация.**
-- [ ] **Step 4: README**, раздел `SelectDateInterval`, «С клавиатуры»: в поле даты стрелка вниз, Enter и пробел открывают календарь.
+- [ ] **Step 4: README**, раздел `SelectDateInterval`, «С клавиатуры»: в поле даты стрелка вниз, Enter и пробел открывают календарь; кнопки календаря и списков в фокусе обведены кольцом.
 - [ ] **Step 5: Весь набор и сборка.**
-- [ ] **Step 6: Коммит** — `feat: открывать календарь SelectDateInterval клавишами из поля даты`.
-
----
-
-### Task 6f: Tab к полю «до» в Safari
-
-Спека: §5, последний пункт. Сначала причина: лог `focusin` из Safari владельца и опыт в WebKit; исправление — отдельный коммит `fix:` с тестом, если поведение можно закрепить в happy-dom; изменение порядка Tab или разметки — согласовать с Codex до правки.
+- [ ] **Step 6: Коммит** — `feat: показывать фокус кнопок фильтров и открывать календарь клавишами из поля даты`.
 
 ---
 
