@@ -77,6 +77,52 @@ describe('SelectSingle', () => {
         expect(errors).toEqual([])
     })
 
+    // У строки и объекта с length длина не нулевая: без проверки на массив
+    // список счёл бы их пунктами, и find с v-for уронили бы рендер.
+    it.each([
+        { name: 'объект', value: { a: 1 } },
+        { name: 'объект с length', value: { length: 1 } },
+        { name: 'строка', value: 'строка' },
+        { name: 'число', value: 5 },
+    ])('не падает, если вместо списка пришёл не массив: $name', ({ value }) => {
+        const errors = []
+        const warnings = []
+        const wrapper = mount(SelectSingle, {
+            props: { header: 'Вендор', items: value },
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
+
+        expect(errors).toEqual([])
+        expect(wrapper.find('[popovertarget]').exists()).toBe(false)
+        expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "items"')
+    })
+
+    it('пропускает элементы-необъекты, выбранный пункт остаётся выбранным', async () => {
+        const errors = []
+        const warnings = []
+        const wrapper = mount(SelectSingle, {
+            props: { header: 'Вендор', items: items.slice(0, 2), modelValue: 'b' },
+            attachTo: document.body,
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
+
+        await wrapper.setProps({ items: [null, items[0], undefined, 'мусор', items[1]] })
+        await open(wrapper)
+        const buttons = panelOf(wrapper).findAll('button')
+
+        expect(buttons.map((button) => button.text())).toEqual(['Первый', 'Второй'])
+        expect(buttons.map((button) => button.get('svg').element.style.display)).toEqual(['none', ''])
+        expect(wrapper.get('[popovertarget]').text()).toBe('Второй')
+
+        await buttons[0].trigger('click')
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([['a']])
+        expect(wrapper.emitted('changed')).toEqual([[]])
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('в открытом списке стрелка вниз ведёт на первый пункт и не прокручивает страницу', async () => {
         const wrapper = mountSelect()
         await open(wrapper)

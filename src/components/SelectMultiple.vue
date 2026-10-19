@@ -149,10 +149,10 @@ export default {
     },
 
     computed: {
-        // null, undefined и не массив — как пустой список: компонент
-        // не должен падать.
+        // null, undefined и не массив — как пустой список, элементы-необъекты
+        // пропускаются: компонент не должен падать.
         itemList() {
-            return Array.isArray(this.items) ? this.items : [];
+            return Array.isArray(this.items) ? this.items.filter((item) => typeof item === "object" && item !== null) : [];
         },
 
         // null и не массив — как пустое значение: компонент не должен падать.

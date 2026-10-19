@@ -598,6 +598,33 @@ describe('SelectMultiple: поиск', () => {
         expect(itemNames(wrapper)).toEqual(['Первый', 'Второй', 'Третий'])
     })
 
+    // Выбор закрывает список и сбрасывает запрос, поэтому клик — после
+    // повторного открытия.
+    it('пропускает элементы-необъекты: надпись, поиск и выбор', async () => {
+        const wrapper = mountSelect({ items: [null, items[0], undefined, 'мусор', items[1]], modelValue: ['a', 'b'], withSearch: true })
+
+        expect(wrapper.get('[popovertarget]').text()).toBe('Выбрано: 2')
+
+        await open(wrapper)
+
+        expect(itemNames(wrapper)).toEqual(['Первый', 'Второй'])
+
+        await fieldOf(wrapper).setValue('вто')
+
+        expect(itemNames(wrapper)).toEqual(['Второй'])
+
+        press('Escape')
+        await settle()
+        await open(wrapper)
+
+        expect(itemNames(wrapper)).toEqual(['Первый', 'Второй'])
+
+        await itemButtons(wrapper)[0].trigger('click')
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([[['b']]])
+        expect(wrapper.emitted('changed')).toEqual([[]])
+    })
+
     it.each([
         { name: 'по-русски', props: {}, expected: 'Ничего не найдено' },
         { name: 'lang en', props: { lang: 'en' }, expected: 'Nothing found' },
