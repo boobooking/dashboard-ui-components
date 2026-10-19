@@ -278,11 +278,15 @@ export default {
                     if (isPopoverOpen(panel)) {
                         fitPopover(button, panel, options);
 
+                        // Размер — из getBoundingClientRect: offsetWidth
+                        // и offsetHeight округляют дробные px, и с ними
+                        // панель могла бы стать на долю пикселя меньше.
                         if (this.keepSize) {
-                            panel.style.minWidth = `${panel.offsetWidth}px`;
+                            const rect = panel.getBoundingClientRect();
+                            panel.style.minWidth = `${rect.width}px`;
 
                             if (panel.style.top === "auto") {
-                                panel.style.minHeight = `${panel.offsetHeight}px`;
+                                panel.style.minHeight = `${rect.height}px`;
                             }
                         }
                     }

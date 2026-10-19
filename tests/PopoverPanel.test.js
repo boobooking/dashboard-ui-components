@@ -261,9 +261,10 @@ describe('PopoverPanel: keep-size', () => {
         Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: height })
     }
 
+    // Удерживаемый размер панель берёт из getBoundingClientRect: дробные
+    // px в нём не округлены.
     function size(panel, width, height) {
-        Object.defineProperty(panel, 'offsetWidth', { configurable: true, value: width })
-        Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: height })
+        panel.getBoundingClientRect = () => ({ width, height })
     }
 
     function frame() {
@@ -286,6 +287,17 @@ describe('PopoverPanel: keep-size', () => {
 
         expect(panelOf(wrapper).element.style.minWidth).toBe('240px')
         expect(panelOf(wrapper).element.style.minHeight).toBe('')
+    })
+
+    it('дробная ширина не округляется', async () => {
+        viewport(1000, 800)
+        const wrapper = mountPanel({ props: { keepSize: true } })
+        buttonOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 140, left: 50, right: 290 })
+        size(panelOf(wrapper).element, 240.3, 300)
+
+        await openPanel(wrapper)
+
+        expect(panelOf(wrapper).element.style.minWidth).toBe('240.3px')
     })
 
     it('открытая вверх держит и высоту', async () => {
