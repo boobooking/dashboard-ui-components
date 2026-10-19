@@ -18,7 +18,7 @@
 - Сравнение `id` — строгое (`===`); клик добавляет `id` в конец или убирает все его вхождения; массив из пропа не меняется; `id` вне пунктов сохраняются (спека §4.2).
 - Надпись (спека §4.3): ни одного выбранного среди `items` — пусто; один — его `name`; больше — `` `${texts.selected}: ${n}` ``.
 - Тексты (спека §9) — ключи `selected` («Выбрано» / «Selected»), `search` («Поиск» / «Search»), `nothingFound` («Ничего не найдено» / «Nothing found») в `src/i18n.js`, оба словаря.
-- `SelectSingle`, меню (`PopoverMenu`) и календари (`PickDay`) ведут себя по-прежнему: их тесты не меняются и остаются зелёными.
+- `SelectSingle`, меню (`PopoverMenu`) и календари (`PickDay`) ведут себя по-прежнему: их тесты не меняются и остаются зелёными. Исключение — проверки классов фокуса, которые меняет единый фокус (Tasks 6j–6l, спека followups §8); проверки поведения не меняются.
 - Каждая утилита — `bb:`, без порогов ширины; содержимое кнопок — `bb:pointer-events-none bb:cursor-default` (у `ListElement` и `CrossButton` уже есть).
 - Стиль: в `.vue` — двойные кавычки и точки с запятой в `<script>`, Options API; в `.js` тестов — одинарные кавычки без точек с запятой; отступ 4 пробела; комментарии по-русски, описывают код как он есть. Существующие комментарии сохраняются.
 - Тесты — `npm test -- --dir tests`. База на `d81579c`: `Test Files 44 passed (44)`, `Tests 836 passed (836)`.
@@ -573,6 +573,97 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 ### Task 6g: Повтор приёмки
 
 Playground заново; Chrome оба окружения и Playwright WebKit и Chromium: Tab по всем фильтрам Playground — каждый ластик достижим, кольцо видно, крестик по центру (снимки); `SelectSingle` — круг Tab; Enter и пробел на внешних ластиках очищают значение фильтра; `SelectDateInterval` — порядок Tab при пустых и при заполненных датах (у заполненных добавляются ластики), кольцо на кнопке календаря, стрелка вниз / Enter / пробел в поле открывают календарь полным нажатием (с отпусканием пробела), фокус на кнопке календаря, Escape возвращает фокус на кнопку, форма вокруг не отправляется; открытие клавишей сразу после ручного набора даты — дата принята (`blur`/`change` Pikaday), календарь открыт на ней; `PageCard` — крестик без второй рамки; поле в карточке `PageCard` — фокус как у `FormInput` в его разделе, заголовок и крестик карточки как прежде (снимки, оба окружения); регрессия: сценарии спеки SelectMultiple §16. После Task 6i — повтор затронутых пунктов: настоящие Enter и пробел на каждом внешнем ластике → фокус на своём поле или кнопке фильтра; клик мышью по ластику (Chrome) и касание (Chromium с `hasTouch`, `tap`) → фокус на управление не переносится, экранная клавиатура не вызывается фокусом поля; ожидания скрипта `step6b` обновлены (кольцо ластика на обёртке иконки, Tab после выбора встаёт на ластик значения) — прогон без fail; временный стенд с настоящей формой (кнопка submit, счётчик событий `submit`) вокруг `SelectDateInterval`: полные ArrowDown, Enter, пробел в поле даты открывают календарь, отправок — 0 (PLAN-013). Затем — проверка владельцем в Safari (переход в «до», Tab, ластики) и на iPad.
+
+---
+
+### Task 6j: Утилита единого фокуса и перевод колец пакета
+
+Спека: `docs/superpowers/specs/2026-10-19-keyboard-followups-design.md` §8 (решение владельца 2026-10-19).
+
+**Files:** Modify `src/styles/index.css`, `src/components/FormInput.vue`, `PickDay.vue` (кнопка календаря), `DropdownButton.vue`, `SelectMultiple.vue` (поле поиска), `CrossButton.vue`, `TextPopover.vue` (кнопка и `panel-class`), `NotificationMessage.vue`, `ConfirmationModal.vue`, `DropdownButtonWithAction.vue`, `README.md`; Create `tests/focusRing.test.js`; Modify `tests/utilityPrefix.test.js` и тесты, закрепляющие прежние классы фокуса: `CrossButton`, `DropdownButtonWithAction`, `PageCard`, `PickDay`, `SelectSingle`, `SelectMultiple` (и другие, что найдёт `grep -rn "ring-\|focus:border\|outline-" tests`).
+
+**Interfaces:**
+
+- В `src/styles/index.css` — утилита с комментарием (вид как у `FormInput`: линия по краю — `outline` со смещением внутрь, ложится на рамку; ореол — кольцо; `outline` остаётся в режиме принудительных цветов):
+
+```css
+@utility focus-ring {
+    @apply bb:outline-1 bb:outline-solid bb:outline-blue-300 bb:-outline-offset-1 bb:ring-3 bb:ring-blue-200/50;
+}
+```
+
+- В разметке — только момент: `bb:focus:focus-ring`, `bb:focus-visible:focus-ring`, `bb:group-focus-visible:focus-ring`. У носителя утилиты нет `bb:focus:outline-hidden` и классов кольца, рамки, обводки под вариантами фокуса; `bb:focus:z-10` у `DropdownButtonWithAction` остаётся; у кнопки `CrossButton` (утилита на обёртке иконки) `bb:focus:outline-hidden` остаётся.
+- Переводы (было → стало):
+  - `FormInput`, поле: `bb:focus:border-blue-300 bb:focus:ring-3 bb:focus:ring-blue-200/50 bb:focus:outline-hidden` → `bb:focus:focus-ring`;
+  - `PickDay`, кнопка календаря, и `DropdownButton`, кнопка списка: `bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500` → `bb:focus-visible:focus-ring`;
+  - `SelectMultiple`, поле поиска: `bb:focus:border-indigo-500 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500` → `bb:focus:focus-ring`;
+  - `CrossButton`, обёртка иконки: `bb:group-focus-visible:ring-2 bb:group-focus-visible:ring-indigo-500` → `bb:group-focus-visible:focus-ring`;
+  - `TextPopover`, кнопка и `panel-class`: `bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500` → `bb:focus-visible:focus-ring`;
+  - `NotificationMessage`, крестик: `bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2 bb:focus:ring-indigo-500` → `bb:focus:focus-ring`;
+  - `ConfirmationModal`: кнопка действия — `bb:focus:outline-hidden bb:focus:ring-2 bb:focus:ring-offset-2` и цвета `bb:focus:ring-red-500` / `bb:focus:ring-yellow-300` в `:class` → `bb:focus:focus-ring` (в `:class` остаются только фон и hover); «Отмена» — `… bb:focus:ring-indigo-500` → `bb:focus:focus-ring`;
+  - `DropdownButtonWithAction`, три места: `bb:focus:border-indigo-500 bb:focus:outline-hidden bb:focus:ring-1 bb:focus:ring-indigo-500 bb:focus:z-10` → `bb:focus:focus-ring bb:focus:z-10`;
+  - календарь в `index.css`: в `.pika-prev:focus, .pika-next:focus` и `.pika-label:has(.pika-select:focus-visible)` вместо `outline: 2px solid #ff8000` — `@apply bb:focus-ring;` (`opacity: 1` и `border-radius: 3px` остаются); `.pika-button:focus` (оранжевый фон дня) не меняется; комментарий над правилами — по новому виду.
+- Сторож в `tests/utilityPrefix.test.js`, в существующем обходе классов (включая `panel-class`): ни один класс компонента не задаёт вид фокуса — под вариантом `focus:`, `focus-visible:`, `group-focus-visible:` или `focus-within:` нет утилит `ring*`, `inset-ring*`, `ring-offset*`, `border*`, `outline*`; исключения — `outline-hidden` и `border*` в `NavigationMenuElement.vue` (полоска, не кольцо).
+
+- [ ] **Step 1: Тесты.**
+  - `tests/focusRing.test.js` (`// @vitest-environment node`): `compile` из `@tailwindcss/node` над настоящим `src/styles/index.css` (`base` — `src/styles`), `build(['bb:focus:focus-ring', 'bb:focus-visible:focus-ring', 'bb:group-focus-visible:focus-ring'])`; правила `.bb\:focus\:focus-ring:focus`, `.bb\:focus-visible\:focus-ring:focus-visible`, `.bb\:group-focus-visible\:focus-ring:is(:where(.bb\:group):focus-visible *)` содержат `outline-width: 1px`, `outline-style: solid`, `outline-color: var(--bb-color-blue-300)`, `outline-offset: calc(1px * -1)`, ширину кольца `3px` и `var(--bb-color-blue-200) 50%`; утилиты без префикса (`focus-ring`) нет; правила `.pika-prev:focus`/`.pika-next:focus` и `.pika-label:has(...)` содержат те же объявления линии и кольца и не содержат `#ff8000`; `.pika-button:focus` — `background: #ff8000`.
+  - Сторож — по Interfaces; отдельная проверка, что сторож ловит нарушение (строка разметки с `bb:focus:ring-2` даёт ошибку), как другие проверки этого файла.
+  - Каждый носитель из списка переводов несёт свою утилиту с вариантом и не несёт `bb:focus:outline-hidden` (у `CrossButton` — на обёртке иконки, а `bb:focus:outline-hidden` на кнопке есть); у кнопки действия `ConfirmationModal` для всех типов окна — одна `bb:focus:focus-ring`, без `ring-red`/`ring-yellow`.
+  - Прежние проверки классов фокуса в перечисленных тестах переписываются на новые классы; проверки поведения не трогать.
+- [ ] **Step 2: Тесты падают.**
+- [ ] **Step 3: Реализация** по Interfaces.
+- [ ] **Step 4: README** — «Клавиатурная навигация»: абзац о едином фокусе (вид как у `FormInput`, задан одной утилитой `focus-ring` в `src/styles/index.css`; когда виден — по таблице спеки §8: поля, крестик `NotificationMessage`, кнопки `ConfirmationModal` и `DropdownButtonWithAction` — при любом фокусе, в том числе после клика мышью; остальные кнопки и ссылки — с клавиатуры); строки о прежнем виде колец (ластики, календарь — «обводка», крестик `PageCard`) — по новому виду.
+- [ ] **Step 5: Весь набор и сборка** — как в Task 3 Step 4; плюс в собранном CSS есть правила утилиты: `grep -c 'focus-ring' dist/style.css` больше `0`.
+- [ ] **Step 6: Коммит** — `feat: задать единый фокус пакета одной утилитой по образцу FormInput`.
+
+---
+
+### Task 6k: Единый фокус у элементов без своего фокуса
+
+Спека: followups §8 (строки `ActionPill`, `PageTabs`, `Pagination`, `Search`, `RussianMobileFilter`, поле даты `PickDay`).
+
+**Files:** Modify `src/components/ActionPill.vue`, `PageTabs.vue`, `Pagination.vue`, `Search.vue`, `RussianMobileFilter.vue`, `PickDay.vue` (поле даты), `README.md` при необходимости; Test `tests/ActionPill.test.js`, `tests/PageTabs.test.js`, `tests/Pagination.test.js`, `tests/Search.test.js`, `tests/RussianMobileFilter.test.js`, `tests/PickDay.test.js`.
+
+**Interfaces:** `ActionPill` (кнопка), ссылки `PageTabs`, обе ссылки `Pagination` — `bb:focus-visible:focus-ring` (фокус-фон из `colors.js` и фон открытого таба остаются); поля `Search`, `RussianMobileFilter` и поле даты `PickDay` — `bb:focus:outline-hidden` → `bb:focus:focus-ring`, кольцо по самому полю внутри рамки фильтра. Своего вида фокуса исполнитель не добавляет; обрезку ореола обёрткой проверяет приёмка 6m, и её исправление — отличие, которое основная сессия согласует с Codex.
+
+- [ ] **Step 1: Тесты** — у каждого элемента утилита со своим вариантом; у полей нет `bb:focus:outline-hidden`.
+- [ ] **Step 2: Тесты падают.**
+- [ ] **Step 3: Реализация.**
+- [ ] **Step 4: Весь набор и сборка.**
+- [ ] **Step 5: Коммит** — `feat: показывать единый фокус у пилюль, табов, пагинации и полей фильтров`.
+
+---
+
+### Task 6l: Иконка `TextPopover` по центру кольца
+
+Спека: followups §9.
+
+**Files:** Modify `src/components/TextPopover.vue`; Test `tests/TextPopover.test.js`.
+
+**Interfaces:** кнопка — `bb:inline-flex bb:items-center bb:justify-center bb:self-center` (иконка не на базовой линии, кнопка не растягивается рядом и равна иконке 20×20), `bb:rounded-md` и `bb:focus-visible:focus-ring` остаются; подпись `sr-only` и `bb:pointer-events-none bb:cursor-default` у содержимого — как сейчас. Если приёмка 6m покажет несовпадение центров, вариант с обёрткой иконки (`group-focus-visible`) — отличие, которое основная сессия согласует с Codex.
+
+- [ ] **Step 1: Тест** — классы центровки на кнопке.
+- [ ] **Step 2: Тест падает.**
+- [ ] **Step 3: Реализация.**
+- [ ] **Step 4: Весь набор и сборка.**
+- [ ] **Step 5: Коммит** — `fix: поставить иконку TextPopover по центру кольца фокуса`.
+
+---
+
+### Task 6m: Приёмка единого фокуса
+
+Playground заново (и выкладка в certificates, проверка `200`). Playwright Chromium и WebKit, оба окружения (`index.html`, `host.html`):
+
+- Tab по всей странице: у каждого носителя из таблицы спеки §8 вычисленный стиль — `outline` 1px `solid` цвета `blue-300` со смещением `-1px` и кольцо 3px `blue-200/50`; снимки каждого вида элемента; фиолетовых, красных, жёлтых, оранжевых колец и кольца браузера у элементов пакета нет;
+- `FormInput` в фокусе — снимок совпадает со снимком до изменений, допускается разница сглаживания углов; «до» — Playground, который основная сессия собирает из `782d3a3` в `$S/playground-before` перед Task 6j;
+- календарь: стрелки месяцев и подписи месяца и года с клавиатуры — единый вид; день под фокусом — оранжевый фон, как прежде;
+- клик мышью — по варианту из таблицы: `focus-visible` — кольца нет, `focus` — есть;
+- кольца не обрезаются (фильтры, ячейки таблицы, ряд `DropdownButtonWithAction`, шапка календаря) — снимки;
+- Chromium с `forcedColors: 'active'` — у кнопки списка, поля `FormInput`, ластика фокус виден (`outline-style: solid`, снимок);
+- `TextPopover` в разделе, в таблице и в `lang="en"`: центры `svg` и кольца совпадают (±0.5px), высота строки таблицы прежняя; ластики, крестики, кнопка меню `DropdownButtonWithAction` — центры совпадают;
+- регрессия: `step6a` и `step6b2` без fail (ожидания классов кольца — по новому виду), консоль чистая.
+
+Отчёт — `$W/acceptance.md`, раздел «Task 6m». Затем — граница этапа с Codex и проверка владельцем в Safari: единый вид фокуса на всех шагах Tab (и всё прежнее из 6g).
 
 ---
 
