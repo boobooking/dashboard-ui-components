@@ -494,7 +494,7 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 **Files:** Modify `src/components/SelectSingle.vue`, `README.md`; Test `tests/SelectSingle.test.js`.
 
-**Interfaces:** `SelectSingle` передаёт `dropdown-button` `:find-tab-stops="itemStops"`; `itemStops()` — кнопки пунктов из `$refs.list` (`:scope > button`).
+**Interfaces:** `SelectSingle` передаёт `dropdown-button` `:find-tab-stops="itemStops"`; `itemStops()` — кнопки пунктов из `$refs.list` (`:scope > button`), без `$refs.list` — `[]`.
 
 - [ ] **Step 1: Тесты** (`tests/SelectSingle.test.js`, новый `describe('SelectSingle: Tab внутри списка')`): открыть, фокус на «Первый», Tab → «Второй», с «Третий» Tab → «Первый», с «Первый» Shift+Tab → «Третий», `defaultPrevented` `true`; фокус на кнопке фильтра при открытом списке — Tab → «Первый», Shift+Tab → «Третий»; Ctrl/Alt/Meta+Tab — `defaultPrevented` `false`; после закрытия (Escape) Tab не перехватывается; при пропаже пунктов слушатель снят (как в SelectMultiple: шпионы `add/removeEventListener`). Остальные тесты файла не меняются.
 - [ ] **Step 2: Тесты падают.**
@@ -511,7 +511,7 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 **Files:** Modify `src/components/CrossButton.vue` и родители ластиков — `DropdownButton.vue`, `Search.vue`, `RussianMobileFilter.vue`, `PickDay.vue`, `SelectMultiple.vue`; `README.md`; Test `tests/CrossButton.test.js`, `tests/keyboardNavigation.test.js` и тесты затронутых компонентов, где закреплены классы места ластика.
 
-**Interfaces:** у `CrossButton` нет `tabindex="-1"`; кольцо фокуса — `focus-visible` 2px `indigo-500` со скруглением — рисуется так, что иконка по центру кольца, при прежней зоне нажатия (решение — у исполнителя; например, кольцо на обёртке иконки через `group-focus-visible`). `PageCard` (у него уже `tabindex="0"` и своё кольцо) выглядит как прежде. Ластик поиска `SelectMultiple` перестаёт задавать `tabindex` и кольцо сам — берёт их у `CrossButton`; в круге Tab списка остаётся, в стрелках — нет.
+**Interfaces:** у `CrossButton` нет `tabindex="-1"`; кольцо фокуса — `focus-visible` 2px `indigo-500` со скруглением — рисуется так, что иконка по центру кольца, при прежней зоне нажатия (решение — у исполнителя; например, кольцо на обёртке иконки через `group-focus-visible`); у обёртки иконки остаются `bb:pointer-events-none bb:cursor-default` (Vimlike, README «Клавиатурная навигация»). `PageCard` (у него уже `tabindex="0"` и своё кольцо) выглядит как прежде — без второй рамки от общего стиля `CrossButton` (снимок в 6g). Ластик поиска `SelectMultiple` перестаёт задавать `tabindex` и кольцо сам — берёт их у `CrossButton`; в круге Tab списка остаётся, в стрелках — нет.
 
 - [ ] **Step 1: Тесты**: у ластика каждого фильтра (`Search`, `RussianMobileFilter`, `SelectSingle`, `SelectMultiple` — на кнопке и в поле поиска, `SelectDateInterval`) нет `tabindex="-1"` и есть классы кольца; Enter/пробел нажимают ластик (через `click`, как сейчас в `press.test.js`); `PageCard` — классы и `tabindex` как прежде; таблица места ластиков в `CrossButton.test.js` — по новым классам.
 - [ ] **Step 2: Тесты падают.**
@@ -528,9 +528,9 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 **Files:** Modify `src/components/PickDay.vue`, `src/components/DropdownButton.vue`, `README.md`; Test `tests/PickDay.test.js` (или `tests/SelectDateInterval.test.js`, где лежат похожие), `tests/SelectSingle.test.js` / `tests/SelectMultiple.test.js` (классы кольца кнопки списка).
 
-**Interfaces:** у кнопки календаря `PickDay` и у кнопки списка `DropdownButton` — кольцо `focus-visible` 2px `indigo-500` (`bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500`, при обрезке обёрткой — `bb:focus-visible:ring-inset`), `focus:outline-hidden` остаётся; поле даты — `@keydown`: `ArrowDown`, `Enter`, `' '` без Ctrl/Alt/Meta и без `isComposing` → `preventDefault()` и открыть календарь (`popupIsOpen = true`); остальные клавиши — ручной ввод, как сейчас.
+**Interfaces:** у кнопки календаря `PickDay` и у кнопки списка `DropdownButton` — кольцо `focus-visible` 2px `indigo-500` (`bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500`, при обрезке обёрткой — `bb:focus-visible:ring-inset`), `focus:outline-hidden` остаётся; поле даты — `@keydown`: `ArrowDown`, `Enter`, `' '` без Ctrl/Alt/Meta и без `isComposing` → `preventDefault()`, затем `this.$refs.trigger.focus({ preventScroll: true })`, затем открыть календарь (`popupIsOpen = true`) — именно в этом порядке: открытый календарь отключает поле (`:disabled="popupIsOpen"`), фокус с отключённого поля в браузере теряется, а `PopoverPanel` возвращает фокус на кнопку, только если он был внутри панели (PLAN-012); с кнопки следующая стрелка ведёт на день. `PopoverPanel` не меняется. Остальные клавиши — ручной ввод, как сейчас.
 
-- [ ] **Step 1: Тесты**: фокус в поле даты, ArrowDown / Enter / пробел → календарь открыт, `defaultPrevented` `true`, значение поля не изменилось; с модификаторами — не открывается; буква — не открывает; у кнопки календаря и у кнопки списка `SelectSingle` — классы кольца.
+- [ ] **Step 1: Тесты**: фокус в поле даты, ArrowDown / Enter / пробел → календарь открыт, `defaultPrevented` `true`, значение поля не изменилось, фокус на кнопке календаря; для каждой из трёх клавиш: открыть → Escape → календарь закрыт, фокус на кнопке; открыть → стрелка на день → выбор → календарь закрыт, фокус на кнопке; с Ctrl/Alt/Meta и с `isComposing` — не открывается; буква — не открывает; у кнопки календаря и у кнопки списка `SelectSingle` — классы кольца.
 - [ ] **Step 2: Тесты падают.**
 - [ ] **Step 3: Реализация.**
 - [ ] **Step 4: README**, раздел `SelectDateInterval`, «С клавиатуры»: в поле даты стрелка вниз, Enter и пробел открывают календарь; кнопки календаря и списков в фокусе обведены кольцом.
@@ -555,7 +555,7 @@ bash ~/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/su
 
 ### Task 6g: Повтор приёмки
 
-Playground заново; Chrome оба окружения и Playwright WebKit и Chromium: Tab по всем фильтрам Playground — каждый ластик достижим, кольцо видно, крестик по центру (снимки); `SelectSingle` — круг Tab; `SelectDateInterval` — порядок Tab, кольцо на кнопке календаря, стрелка вниз / Enter / пробел в поле открывают календарь; поле в карточке `PageCard` — фокус как у `FormInput` в его разделе, заголовок и крестик карточки как прежде (снимки, оба окружения); регрессия: сценарии спеки SelectMultiple §16. Затем — проверка владельцем в Safari (переход в «до», Tab, ластики) и на iPad.
+Playground заново; Chrome оба окружения и Playwright WebKit и Chromium: Tab по всем фильтрам Playground — каждый ластик достижим, кольцо видно, крестик по центру (снимки); `SelectSingle` — круг Tab; Enter и пробел на внешних ластиках очищают значение фильтра; `SelectDateInterval` — порядок Tab при пустых и при заполненных датах (у заполненных добавляются ластики), кольцо на кнопке календаря, стрелка вниз / Enter / пробел в поле открывают календарь полным нажатием (с отпусканием пробела), фокус на кнопке календаря, Escape возвращает фокус на кнопку, форма вокруг не отправляется; открытие клавишей сразу после ручного набора даты — дата принята (`blur`/`change` Pikaday), календарь открыт на ней; `PageCard` — крестик без второй рамки; поле в карточке `PageCard` — фокус как у `FormInput` в его разделе, заголовок и крестик карточки как прежде (снимки, оба окружения); регрессия: сценарии спеки SelectMultiple §16. Затем — проверка владельцем в Safari (переход в «до», Tab, ластики) и на iPad.
 
 ---
 
