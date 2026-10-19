@@ -7,7 +7,7 @@
                 v-model:is-open="isOpen"
                 v-if="hasItems"
                 :has-value="selectedItems.length > 0"
-                :find-selected="firstSelectedElement"
+                :find-selected="arrowsOrigin"
                 :find-stops="withSearch ? searchStops : null"
                 :keep-size="withSearch"
                 with-stable-height
@@ -226,6 +226,14 @@ export default {
             const index = this.visibleItems.findIndex((item) => this.selectedIds.includes(item.id));
 
             return index === -1 ? null : this.$refs.list.querySelectorAll("button")[index];
+        },
+
+        // От чего считают стрелки, пока фокус вне их остановок (на кнопке
+        // фильтра, на body): от первого выбранного пункта. Без выбранных —
+        // от поля, если оно есть: поле — первая остановка круга, поэтому
+        // вниз встаёт первый пункт, вверх — последний, как без поиска.
+        arrowsOrigin() {
+            return this.firstSelectedElement() ?? this.$refs.search ?? null;
         },
 
         // Список открылся — фокус в поле, набор сразу идёт в поиск. Страница

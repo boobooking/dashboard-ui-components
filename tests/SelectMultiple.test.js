@@ -716,6 +716,31 @@ describe('SelectMultiple: поиск', () => {
         expect(document.activeElement).toBe(stopOf(wrapper, to))
     })
 
+    it('фокус снаружи без выбранных: вниз — первый пункт, вверх — последний', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowUp')
+
+        expect(document.activeElement.textContent).toBe('Третий')
+    })
+
+    it('фокус снаружи с выбранным: отсчёт от него', async () => {
+        const wrapper = mountSelect({ withSearch: true, modelValue: ['b'] })
+        await open(wrapper)
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Третий')
+    })
+
     it('ластик поля вне стрелок и мыши', async () => {
         const wrapper = mountSelect({ withSearch: true })
         await open(wrapper)
