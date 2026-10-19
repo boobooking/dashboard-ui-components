@@ -206,9 +206,7 @@ export default {
         // клику кнопке фокус не даёт и оставляет его на body, а набор после
         // клика должен идти в поиск, и Escape — вернуть фокус на кнопку фильтра.
         itemClicked(item) {
-            this.$refs.list
-                .querySelectorAll("button")
-                [this.visibleItems.indexOf(item)].focus({ preventScroll: true });
+            this.itemElements()[this.visibleItems.indexOf(item)].focus({ preventScroll: true });
             this.$emit(
                 "update:modelValue",
                 this.selectedIds.includes(item.id)
@@ -223,12 +221,18 @@ export default {
             this.$emit("changed");
         },
 
+        // Кнопки пунктов в порядке visibleItems: корень ListElement — кнопка,
+        // и прямые потомки списка — только они. Без совпадений списка нет.
+        itemElements() {
+            return this.$refs.list ? [...this.$refs.list.querySelectorAll(":scope > button")] : [];
+        },
+
         // Кнопка первого выбранного пункта: пункты стоят в списке в порядке
         // visibleItems.
         firstSelectedElement() {
             const index = this.visibleItems.findIndex((item) => this.selectedIds.includes(item.id));
 
-            return index === -1 ? null : this.$refs.list.querySelectorAll("button")[index];
+            return index === -1 ? null : this.itemElements()[index];
         },
 
         // От чего считают стрелки, пока фокус вне их остановок (на кнопке
@@ -258,9 +262,8 @@ export default {
         // при открытии, а поиск могут включить и выключить при открытом списке.
         searchStops() {
             const field = this.$refs.search ? [this.$refs.search] : [];
-            const items = this.$refs.list ? [...this.$refs.list.querySelectorAll("button")] : [];
 
-            return [...field, ...items];
+            return [...field, ...this.itemElements()];
         },
 
         // Набор на пункте уходит в поле: мышь ставит фокус на пункт под
