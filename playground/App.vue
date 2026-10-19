@@ -316,7 +316,7 @@
                  «Последний переход». -->
             <page-card class="page-card-demo" fallback-url="#page-card">
                 <h3 class="page-card-demo-heading">Длинный заголовок карточки: на узком экране он переносится и не заходит под крестик</h3>
-                <input class="page-card-demo-input" type="text" value="Поле формы">
+                <form-input v-model="pageCardTitle" label="Название" class="page-card-demo-field"/>
             </page-card>
         </section>
 
@@ -395,6 +395,7 @@ export default {
             adminEmail: '',
             adminPassword: '',
             documentNumber: '',
+            pageCardTitle: 'Поле формы',
             markAdminName: false,
             markAdminEmail: false,
             markAdminPassword: false,
