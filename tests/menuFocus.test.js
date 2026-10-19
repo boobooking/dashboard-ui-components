@@ -259,6 +259,17 @@ describe('holdTabFocus', () => {
         expect(pressTab().defaultPrevented).toBe(false)
     })
 
+    it.each(['ctrlKey', 'altKey', 'metaKey'])('Tab с модификатором не перехватывается: %s', (modifier) => {
+        stop = holdTabFocus(() => items)
+        items[0].focus()
+
+        const event = new KeyboardEvent('keydown', { key: 'Tab', [modifier]: true, bubbles: true, cancelable: true })
+        items[0].dispatchEvent(event)
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(focused()).toBe('A')
+    })
+
     it('после снятия Tab не перехватывается', () => {
         holdTabFocus(() => items)()
         items[0].focus()

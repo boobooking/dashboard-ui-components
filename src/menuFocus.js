@@ -73,11 +73,12 @@ export function moveMenuFocus(menu, findSelected = () => null, findStops = null)
 // из них. Слушатель на document в фазе захвата — как у moveMenuFocus. Каждый
 // Tab ведёт модуль, а не браузер: Safari по умолчанию пропускает кнопки и
 // увёл бы фокус из списка. Фокус вне остановок — Tab ставит его на первую,
-// Shift+Tab — на последнюю. Без остановок Tab остаётся браузеру.
+// Shift+Tab — на последнюю. Без остановок и с Ctrl, Alt, Cmd Tab остаётся
+// браузеру.
 // Возвращает функцию, снимающую слушатель.
 export function holdTabFocus(findStops) {
     const onKeydown = (event) => {
-        if (event.key !== 'Tab') {
+        if (event.key !== 'Tab' || event.ctrlKey || event.altKey || event.metaKey) {
             return
         }
 
