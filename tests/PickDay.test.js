@@ -377,4 +377,103 @@ describe('PickDay: календарь на Popover API', () => {
             expect(document.activeElement).toBe(wrapper.get('.pika-select-month').element)
         })
     })
+
+    describe('календарь клавишами из поля даты', () => {
+        function fieldKeydown(wrapper, key, init = {}) {
+            const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init })
+            wrapper.get('input').element.dispatchEvent(event)
+            return event
+        }
+
+        function keydown(key) {
+            const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+            ;(document.activeElement ?? document).dispatchEvent(event)
+            return event
+        }
+
+        async function mountWithFocusedField() {
+            const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
+            await pikadayLoaded()
+            wrapper.get('input').element.focus()
+            return wrapper
+        }
+
+        it('у кнопки календаря кольцо видимого фокуса', () => {
+            const wrapper = mount(PickDay, { attachTo: document.body })
+
+            expect(triggerOf(wrapper).classes()).toEqual(
+                expect.arrayContaining(['bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500', 'bb:focus:outline-hidden']),
+            )
+        })
+
+        describe.each([
+            ['ArrowDown', 'ArrowDown'],
+            ['Enter', 'Enter'],
+            ['пробел', ' '],
+        ])('%s', (_name, key) => {
+            it('открывает календарь, не меняет поле и ставит фокус на кнопку', async () => {
+                const wrapper = await mountWithFocusedField()
+
+                const event = fieldKeydown(wrapper, key)
+                await settle()
+
+                expect(event.defaultPrevented).toBe(true)
+                expect(isOpen(wrapper)).toBe(true)
+                expect(wrapper.get('input').element.value).toBe('15.03.2026')
+                expect(document.activeElement).toBe(triggerOf(wrapper).element)
+            })
+
+            it('Escape закрывает календарь, фокус на кнопке', async () => {
+                const wrapper = await mountWithFocusedField()
+                fieldKeydown(wrapper, key)
+                await settle()
+
+                keydown('Escape')
+                await settle()
+
+                expect(isOpen(wrapper)).toBe(false)
+                expect(document.activeElement).toBe(triggerOf(wrapper).element)
+            })
+
+            it('стрелка ведёт на день, выбор закрывает календарь, фокус на кнопке', async () => {
+                const wrapper = await mountWithFocusedField()
+                fieldKeydown(wrapper, key)
+                await settle()
+
+                keydown('ArrowDown')
+                keydown('ArrowRight')
+                document.activeElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }))
+                await settle()
+
+                expect(isOpen(wrapper)).toBe(false)
+                expect(wrapper.emitted('update:modelValue')).toEqual([['16.03.2026']])
+                expect(document.activeElement).toBe(triggerOf(wrapper).element)
+            })
+
+            it.each([
+                ['Ctrl', { ctrlKey: true }],
+                ['Alt', { altKey: true }],
+                ['Meta', { metaKey: true }],
+                ['набор через IME', { isComposing: true }],
+            ])('с %s календарь не открывается', async (_modifier, init) => {
+                const wrapper = await mountWithFocusedField()
+
+                const event = fieldKeydown(wrapper, key, init)
+                await settle()
+
+                expect(event.defaultPrevented).toBe(false)
+                expect(isOpen(wrapper)).toBe(false)
+            })
+        })
+
+        it('буква не открывает календарь', async () => {
+            const wrapper = await mountWithFocusedField()
+
+            const event = fieldKeydown(wrapper, '1')
+            await settle()
+
+            expect(event.defaultPrevented).toBe(false)
+            expect(isOpen(wrapper)).toBe(false)
+        })
+    })
 })

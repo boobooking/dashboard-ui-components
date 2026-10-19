@@ -24,7 +24,7 @@
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
-                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus:outline-hidden"
+                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus:outline-hidden bb:focus-visible:ring-2 bb:focus-visible:ring-indigo-500"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                              см. README, «Клавиатурная навигация». -->
@@ -45,6 +45,7 @@
                         <input
                             :disabled="popupIsOpen"
                             ref="field"
+                            @keydown="openOnKey"
                             type="text"
                             :value="dayValue"
                             :placeholder="placeholderText"
@@ -175,6 +176,24 @@ export default {
     },
 
     methods: {
+        // Стрелка вниз, Enter и пробел в поле открывают календарь. Порядок
+        // обязателен: открытый календарь отключает поле, а фокус с отключённого
+        // поля в браузере теряется; PopoverPanel же возвращает фокус на кнопку,
+        // только если он был внутри панели. Поэтому фокус — на кнопку до открытия.
+        openOnKey(event) {
+            if (event.ctrlKey || event.altKey || event.metaKey || event.isComposing) {
+                return;
+            }
+
+            if (!["ArrowDown", "Enter", " "].includes(event.key)) {
+                return;
+            }
+
+            event.preventDefault();
+            this.$refs.trigger.focus({ preventScroll: true });
+            this.popupIsOpen = true;
+        },
+
         // Стрелки ведут фокус по дням, пока календарь открыт и создан.
         syncDayFocus() {
             this.stopDayFocus?.();

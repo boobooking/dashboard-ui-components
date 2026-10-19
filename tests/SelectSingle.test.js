@@ -324,6 +324,14 @@ describe('SelectSingle: список на Popover API', () => {
         expect(panelOf(wrapper).classes()).toContain('bb:overscroll-contain')
     })
 
+    it('у кнопки списка кольцо видимого фокуса', () => {
+        const wrapper = mountSelect()
+
+        expect(triggerOf(wrapper).classes()).toEqual(
+            expect.arrayContaining(['bb:focus-visible:ring-2', 'bb:focus-visible:ring-indigo-500', 'bb:focus:outline-hidden']),
+        )
+    })
+
     // Так делает Safari: по клику фокус на кнопку не ставится, и при
     // закрытии popover браузер возвращает его туда, где он был до
     // открытия, — на body, раньше, чем придёт toggle.
