@@ -90,7 +90,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        // Язык подписи ластика; без него — язык страницы (CrossButton).
+        // Язык подписи ластика; без него — язык плагина (CrossButton).
         lang: {
             type: String,
             default: null,

@@ -46,8 +46,8 @@ import { moveMenuFocus } from "../menuFocus.js";
 // Выпадающая панель у кнопки на Popover API: открытие и закрытие, место у
 // кнопки, закрытие прокруткой и изменением размера окна, стрелки. Кнопку и
 // содержимое рисует вызывающий компонент.
-// Внутренний компонент пакета: на нём стоят меню PopoverMenu, список
-// SelectSingle (DropdownButton) и календарь PickDay.
+// Внутренний компонент пакета: на нём стоят меню PopoverMenu, списки
+// SelectSingle и SelectMultiple (DropdownButton) и календарь PickDay.
 export default {
     emits: ["update:modelValue", "toggle"],
 
