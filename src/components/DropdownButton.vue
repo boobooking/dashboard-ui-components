@@ -31,8 +31,7 @@
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
                         :aria-labelledby="labelledBy ? labelledBy + ' ' + trigger.id : null"
-                        class="bb:flex bb:w-full bb:h-full bb:items-center bb:focus-visible:focus-ring bb:cursor-pointer"
-                        :class="look === 'form' ? 'bb:rounded-md' : ''"
+                        class="bb:flex bb:w-full bb:h-full bb:items-center bb:focus-visible:focus-ring bb:cursor-pointer bb:rounded-[var(--bb-field-radius,0)]"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                              см. README, «Клавиатурная навигация». -->
@@ -104,12 +103,6 @@ export default {
         labelledBy: {
             type: String,
             default: null,
-        },
-        // Вид поля: form — кольцо фокуса кнопки скруглено под рамку поля формы.
-        look: {
-            type: String,
-            default: "filter",
-            validator: (value) => ["filter", "form"].includes(value),
         },
     },
 

@@ -82,13 +82,9 @@ async function choose(wrapper, name) {
     await settle()
 }
 
-describe('SelectSingle: look', () => {
-    it.each([['ядра', SelectSingle], ['DropdownButton', DropdownButton]])('валидатор look %s', (name, component) => {
-        const { validator } = component.props.look
-
-        expect(validator('x')).toBe(false)
-        expect(validator('filter')).toBe(true)
-        expect(validator('form')).toBe(true)
+describe('SelectSingle: без вида', () => {
+    it.each([['ядро', SelectSingle], ['DropdownButton', DropdownButton]])('у %s нет пропа look', (name, component) => {
+        expect(component.props.look).toBeUndefined()
     })
 })
 
@@ -166,10 +162,12 @@ describe('SelectSingleFilter', () => {
         expect(warnings).toEqual([])
     })
 
-    it('кольцо фокуса кнопки без скругления', () => {
+    it('радиус кнопки берётся из переменной, переменную фильтр не задаёт', () => {
         const { wrapper, errors, warnings } = mountFilter()
+        const boxes = [wrapper.element, ...wrapper.element.querySelectorAll('div')]
 
-        expect(triggerOf(wrapper).classes()).not.toContain('bb:rounded-md')
+        expect(triggerOf(wrapper).classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
+        expect(boxes.flatMap((box) => [...box.classList]).filter((name) => name.includes('--bb-field-radius'))).toEqual([])
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
@@ -244,10 +242,11 @@ describe('SelectSingleForm', () => {
         expect(warnings).toEqual([])
     })
 
-    it('кольцо фокуса кнопки скруглено под рамку', () => {
+    it('рамка задаёт радиус поля, кнопка берёт его из переменной', () => {
         const { wrapper, errors, warnings } = mountForm()
 
-        expect(triggerOf(wrapper).classes()).toContain('bb:rounded-md')
+        expect([...frameOf(wrapper).classList]).toContain('bb:[--bb-field-radius:0.375rem]')
+        expect(triggerOf(wrapper).classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
