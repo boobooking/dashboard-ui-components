@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import Dot from '../src/components/Dot.vue'
+import DropdownButton from '../src/components/DropdownButton.vue'
 import ElementHeader from '../src/components/ElementHeader.vue'
 import SelectSingle from '../src/components/SelectSingle.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
@@ -81,13 +82,25 @@ async function choose(wrapper, name) {
     await settle()
 }
 
+describe('SelectSingle: look', () => {
+    it.each([['ядра', SelectSingle], ['DropdownButton', DropdownButton]])('валидатор look %s', (name, component) => {
+        const { validator } = component.props.look
+
+        expect(validator('x')).toBe(false)
+        expect(validator('filter')).toBe(true)
+        expect(validator('form')).toBe(true)
+    })
+})
+
 describe('SelectSingleFilter', () => {
     const mountFilter = (props = {}, attrs = {}) => mountWrapper(SelectSingleFilter, { header: 'Вендор', items, ...props }, attrs)
 
     it('корень по ширине содержимого', () => {
-        const { wrapper } = mountFilter()
+        const { wrapper, errors, warnings } = mountFilter()
 
         expect(wrapper.classes()).toContain('bb:w-fit')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('высота и рамка на корне', () => {
@@ -153,10 +166,20 @@ describe('SelectSingleFilter', () => {
         expect(warnings).toEqual([])
     })
 
+    it('кольцо фокуса кнопки без скругления', () => {
+        const { wrapper, errors, warnings } = mountFilter()
+
+        expect(triggerOf(wrapper).classes()).not.toContain('bb:rounded-md')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('кнопка без aria-labelledby', () => {
-        const { wrapper } = mountFilter({ modelValue: 'a' })
+        const { wrapper, errors, warnings } = mountFilter({ modelValue: 'a' })
 
         expect(triggerOf(wrapper).attributes('aria-labelledby')).toBeUndefined()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('null в подписи', () => {
@@ -205,9 +228,11 @@ describe('SelectSingleForm', () => {
     })
 
     it('рамка поля', () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
 
         expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:rounded-md', 'bb:border-gray-300']))
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('без пунктов рамка остаётся', () => {
@@ -219,8 +244,16 @@ describe('SelectSingleForm', () => {
         expect(warnings).toEqual([])
     })
 
+    it('кольцо фокуса кнопки скруглено под рамку', () => {
+        const { wrapper, errors, warnings } = mountForm()
+
+        expect(triggerOf(wrapper).classes()).toContain('bb:rounded-md')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('доступное имя', async () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
         const labelId = labelOf(wrapper).attributes('id')
 
         expect(labelId).toBeTruthy()
@@ -230,6 +263,8 @@ describe('SelectSingleForm', () => {
 
         expect(triggerOf(wrapper).text()).toBe('Первый')
         expect(triggerOf(wrapper).attributes('aria-labelledby')).toBe(`${labelId} ${triggerOf(wrapper).attributes('id')}`)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('две формы на странице', () => {
@@ -251,7 +286,7 @@ describe('SelectSingleForm', () => {
     // Заглушка Popover открывает панель только по click: открытие Enter
     // и пробелом проверяется в браузере.
     it('клавиатура в поле формы', async () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
 
         await open(wrapper)
 
@@ -262,6 +297,8 @@ describe('SelectSingleForm', () => {
 
         expect(isOpen(wrapper)).toBe(false)
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('v-model насквозь', async () => {

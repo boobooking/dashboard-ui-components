@@ -11,6 +11,7 @@
                 :with-search="withSearch"
                 :lang="lang"
                 :labelled-by="labelId"
+                look="form"
                 @update:model-value="$emit('update:modelValue', $event)"
                 @changed="$emit('changed')"
             />

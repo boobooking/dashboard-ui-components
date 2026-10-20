@@ -309,8 +309,9 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 подписью, а каждое поле, как в фильтре, называется своей подсказкой «от» или
 «до» с датой. Клик по подписи ничего не делает.
 
-`isRequired` только показывает точку, как у `FormInput`. `class` и `style`
-ложатся на корень компонента.
+`isRequired` только показывает точку, как у `FormInput`. `class`, `style`,
+все остальные атрибуты и слушатели ложатся на корень компонента (у `FormInput`
+остальные атрибуты уходят на поле ввода).
 
 ### SelectSingleFilter
 
@@ -393,8 +394,9 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 и выбранным пунктом, у пустого поля — подписью. Клик по подписи ничего
 не делает.
 
-`isRequired` только показывает точку, как у `FormInput`. `class` и `style`
-ложатся на корень компонента.
+`isRequired` только показывает точку, как у `FormInput`. `class`, `style`,
+все остальные атрибуты и слушатели ложатся на корень компонента (у `FormInput`
+остальные атрибуты уходят на поле ввода).
 
 ### SelectMultipleFilter
 
@@ -503,8 +505,9 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 и надписью на кнопке, у пустого поля — подписью. Клик по подписи ничего
 не делает.
 
-`isRequired` только показывает точку, как у `FormInput`. `class` и `style`
-ложатся на корень компонента.
+`isRequired` только показывает точку, как у `FormInput`. `class`, `style`,
+все остальные атрибуты и слушатели ложатся на корень компонента (у `FormInput`
+остальные атрибуты уходят на поле ввода).
 
 ### InfoPill
 
@@ -1297,6 +1300,7 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 | `<select-single class="h-18 border border-gray-200" header="…">` | `<select-single-filter header="…">` — высота и рамка встроены |
 | `<select-multiple class="h-18 border border-gray-200" header="…">` | `<select-multiple-filter header="…">` |
 | `<select-date-interval class="h-18 border border-gray-200" header="…">` | `<select-date-interval-filter header="…">` |
+| `"select-source": SelectSingle` (проект регистрирует компонент под своим именем тега) | `"select-source": SelectSingleFilter`; так же для `SelectMultiple` и `SelectDateInterval` |
 | `SelectSingle` в форме рядом с `FormInput` | `<select-single-form label="…">` |
 | `SelectMultiple` в форме | `<select-multiple-form label="…">` |
 | `SelectDateInterval` в форме | `<select-date-interval-form label="…">` |
@@ -1304,6 +1308,10 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 `import { SelectSingle }` больше не работает: имена `SelectSingle`,
 `SelectMultiple` и `SelectDateInterval` из пакета убраны. Остальные классы
 на фильтрах (`ml-2` и т. п.) переносятся как есть.
+
+В формах меняются и пропы: `header` становится `label`, `class="border
+border-gray-200"` убирается (на корне формы он обвёл бы подпись вместе с полем),
+а `isLoading` у форм нет.
 
 `0.20.0` не подтянется по `^0.19.x`: для версий `0.x` знак `^` пропускает
 только патчи. Обновление — `npm install @boobooking/dashboard-ui-components@^0.20.0`.

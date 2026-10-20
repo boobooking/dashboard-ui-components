@@ -6,6 +6,7 @@
             v-if="hasItems"
             :has-value="selectedItems.length > 0"
             :labelled-by="labelledBy"
+            :look="look"
             :find-selected="arrowsOrigin"
             :find-stops="searchStops"
             :find-tab-stops="tabStops"
@@ -115,6 +116,14 @@ export default {
         labelledBy: {
             type: String,
             default: null,
+        },
+        // Вид поля: form — кольцо фокуса кнопки скруглено под рамку поля
+        // формы (DropdownButton). Задаёт обёртка SelectSingleForm /
+        // SelectMultipleForm.
+        look: {
+            type: String,
+            default: "filter",
+            validator: (value) => ["filter", "form"].includes(value),
         },
     },
 

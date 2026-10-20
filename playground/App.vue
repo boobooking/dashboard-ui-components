@@ -49,6 +49,17 @@
         </section>
 
         <section>
+            <h2>Панель фильтров</h2>
+            <!-- Три фильтра и фильтр без пунктов в одном ряду: высота и рамки одинаковые. -->
+            <div class="demo-row">
+                <select-single-filter header="Вендор" :items="vendorItems" v-model="vendor"/>
+                <select-multiple-filter header="Бренд" :items="brandItems" v-model="brands"/>
+                <select-date-interval-filter header="Интервал" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
+                <select-single-filter header="Без пунктов" :items="[]"/>
+            </div>
+        </section>
+
+        <section>
             <h2>SelectDateIntervalFilter</h2>
             <select-date-interval-filter
                 header="Интервал"

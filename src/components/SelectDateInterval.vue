@@ -21,6 +21,10 @@
 import PickDay from "./PickDay.vue";
 import { withLang } from "../lang.js";
 
+// Ядро выбора интервала дат: два поля даты. Заголовок, подпись и рамку
+// рисуют обёртки SelectDateIntervalFilter и SelectDateIntervalForm; пакет
+// ядро не экспортирует. Корень занимает всю высоту и ширину, которые дала
+// обёртка.
 export default {
     components: {
         PickDay,

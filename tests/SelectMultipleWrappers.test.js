@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import Dot from '../src/components/Dot.vue'
+import DropdownButton from '../src/components/DropdownButton.vue'
 import ElementHeader from '../src/components/ElementHeader.vue'
 import SelectMultiple from '../src/components/SelectMultiple.vue'
 import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
@@ -81,13 +82,25 @@ async function choose(wrapper, name) {
     await settle()
 }
 
+describe('SelectMultiple: look', () => {
+    it.each([['ядра', SelectMultiple], ['DropdownButton', DropdownButton]])('валидатор look %s', (name, component) => {
+        const { validator } = component.props.look
+
+        expect(validator('x')).toBe(false)
+        expect(validator('filter')).toBe(true)
+        expect(validator('form')).toBe(true)
+    })
+})
+
 describe('SelectMultipleFilter', () => {
     const mountFilter = (props = {}, attrs = {}) => mountWrapper(SelectMultipleFilter, { header: 'Вендор', items, ...props }, attrs)
 
     it('корень по ширине содержимого', () => {
-        const { wrapper } = mountFilter()
+        const { wrapper, errors, warnings } = mountFilter()
 
         expect(wrapper.classes()).toContain('bb:w-fit')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('высота и рамка на корне', () => {
@@ -153,10 +166,20 @@ describe('SelectMultipleFilter', () => {
         expect(warnings).toEqual([])
     })
 
+    it('кольцо фокуса кнопки без скругления', () => {
+        const { wrapper, errors, warnings } = mountFilter()
+
+        expect(triggerOf(wrapper).classes()).not.toContain('bb:rounded-md')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('кнопка без aria-labelledby', () => {
-        const { wrapper } = mountFilter({ modelValue: ['a'] })
+        const { wrapper, errors, warnings } = mountFilter({ modelValue: ['a'] })
 
         expect(triggerOf(wrapper).attributes('aria-labelledby')).toBeUndefined()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('надпись «Выбрано» через lang', () => {
@@ -213,9 +236,11 @@ describe('SelectMultipleForm', () => {
     })
 
     it('рамка поля', () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
 
         expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:rounded-md', 'bb:border-gray-300']))
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('без пунктов рамка остаётся', () => {
@@ -227,8 +252,16 @@ describe('SelectMultipleForm', () => {
         expect(warnings).toEqual([])
     })
 
+    it('кольцо фокуса кнопки скруглено под рамку', () => {
+        const { wrapper, errors, warnings } = mountForm()
+
+        expect(triggerOf(wrapper).classes()).toContain('bb:rounded-md')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('доступное имя', async () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
         const labelId = labelOf(wrapper).attributes('id')
 
         expect(labelId).toBeTruthy()
@@ -238,6 +271,8 @@ describe('SelectMultipleForm', () => {
 
         expect(triggerOf(wrapper).text()).toBe('Первый')
         expect(triggerOf(wrapper).attributes('aria-labelledby')).toBe(`${labelId} ${triggerOf(wrapper).attributes('id')}`)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('две формы на странице', () => {
@@ -259,7 +294,7 @@ describe('SelectMultipleForm', () => {
     // Заглушка Popover открывает панель только по click: открытие Enter
     // и пробелом проверяется в браузере.
     it('клавиатура в поле формы', async () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
 
         await open(wrapper)
 
@@ -270,6 +305,8 @@ describe('SelectMultipleForm', () => {
 
         expect(isOpen(wrapper)).toBe(false)
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('v-model насквозь', async () => {

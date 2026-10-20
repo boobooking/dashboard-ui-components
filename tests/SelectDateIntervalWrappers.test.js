@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { h } from 'vue'
 import Dot from '../src/components/Dot.vue'
 import ElementHeader from '../src/components/ElementHeader.vue'
 import PickDay from '../src/components/PickDay.vue'
@@ -63,13 +64,15 @@ describe('SelectDateIntervalFilter', () => {
     const mountFilter = (props = {}, attrs = {}) => mountWrapper(SelectDateIntervalFilter, { header: 'Интервал', ...props }, attrs)
 
     it('корень по ширине содержимого', () => {
-        const { wrapper } = mountFilter()
+        const { wrapper, errors, warnings } = mountFilter()
 
         expect(wrapper.classes()).toContain('bb:w-fit')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('поля фильтра без скругления у кнопки и поля', () => {
-        const { wrapper } = mountFilter()
+        const { wrapper, errors, warnings } = mountFilter()
 
         for (const field of wrapper.findAllComponents(PickDay)) {
             expect(field.classes()).toContain('bb:pl-3')
@@ -77,6 +80,8 @@ describe('SelectDateIntervalFilter', () => {
             expect(field.get('input').classes()).not.toContain('bb:rounded-md')
             expect(field.get('input').classes()).not.toContain('bb:pl-3')
         }
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('высота и рамка на корне', () => {
@@ -142,6 +147,14 @@ describe('SelectDateIntervalFilter', () => {
         expect(warnings).toEqual([])
     })
 
+    it('класс потребителя', () => {
+        const { wrapper, errors, warnings } = mountFilter({}, { class: 'ml-2 h-18 border border-gray-200' })
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb-dashboard-ui', 'ml-2', 'h-18', 'border', 'border-gray-200']))
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('null в подписи', () => {
         const errors = []
         const wrapper = mount(SelectDateIntervalFilter, {
@@ -183,27 +196,31 @@ describe('SelectDateIntervalForm', () => {
     })
 
     it('кольцо фокуса скруглено под рамку', () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
 
         for (const field of wrapper.findAllComponents(PickDay)) {
             expect(field.classes()).not.toContain('bb:pl-3')
             expect(field.get('button[popovertarget]').classes()).toContain('bb:rounded-md')
             expect(field.get('input').classes()).toEqual(expect.arrayContaining(['bb:rounded-md', 'bb:pl-3']))
         }
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('группа названа подписью', () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
         const group = wrapper.get('[role="group"]')
         const labelId = labelOf(wrapper).attributes('id')
 
         expect(labelId).toBeTruthy()
         expect(group.attributes('aria-labelledby')).toBe(labelId)
         expect(group.findAllComponents(PickDay)).toHaveLength(2)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('от и до одинаковой ширины', () => {
-        const { wrapper } = mountForm()
+        const { wrapper, errors, warnings } = mountForm()
         const [from, to] = wrapper.findAllComponents(PickDay)
         const fromClasses = [...from.element.classList].sort()
         const toClasses = [...to.element.classList].sort()
@@ -211,6 +228,8 @@ describe('SelectDateIntervalForm', () => {
         expect(fromClasses).toEqual(toClasses)
         expect(fromClasses).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:border-gray-300']))
         expect(wrapper.getComponent(SelectDateInterval).classes()).toContain('bb:grid-cols-2')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('без значков и новых текстов', async () => {
@@ -248,6 +267,31 @@ describe('SelectDateIntervalForm', () => {
         const { wrapper, errors, warnings } = mountForm({}, { class: 'ml-2' })
 
         expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb-dashboard-ui', 'ml-2']))
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('две формы на странице', () => {
+        const page = mount({
+            render: () => h('div', [
+                h(SelectDateIntervalForm, { label: 'Период' }),
+                h(SelectDateIntervalForm, { label: 'Срок' }),
+            ]),
+        })
+        const [first, second] = page.findAllComponents(SelectDateIntervalForm)
+        const firstLabelId = labelOf(first).attributes('id')
+        const secondLabelId = labelOf(second).attributes('id')
+
+        expect(firstLabelId).not.toBe(secondLabelId)
+        expect(first.get('[role="group"]').attributes('aria-labelledby')).toBe(firstLabelId)
+        expect(second.get('[role="group"]').attributes('aria-labelledby')).toBe(secondLabelId)
+    })
+
+    it('lang насквозь', async () => {
+        const { wrapper, errors, warnings } = mountForm({ lang: 'en' })
+        await pikadayLoaded()
+
+        expect(wrapper.findAll('input').map((input) => input.attributes('placeholder'))).toEqual(['from', 'to'])
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
