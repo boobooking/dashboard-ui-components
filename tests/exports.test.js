@@ -7,8 +7,10 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty('Modal')
     })
 
-    // Части SelectSingle, SelectDateInterval, PageCard и фильтров: проекты
-    // их не используют.
+    // Внутренние части: Popup и CrossButton используют другие компоненты,
+    // PickDay компонента в пакете нет. Ядра SelectSingle, SelectMultiple,
+    // SelectDate и SelectDateInterval тоже не экспортируются: проекты
+    // используют только обёртки Filter и Form.
     it.each(['Popup', 'PickDay', 'CrossButton'])('%s — внутренний, не экспортируется', (name) => {
         expect(pkg).not.toHaveProperty(name)
     })

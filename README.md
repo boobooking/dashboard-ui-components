@@ -91,8 +91,9 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует двадцать два компонента: `Dot`, `RussianMobileFilter`,
-`Search`, `SelectDateIntervalFilter`, `SelectDateIntervalForm`,
+Пакет экспортирует двадцать четыре компонента: `Dot`, `RussianMobileFilter`,
+`Search`, `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`,
+`SelectDateIntervalForm`,
 `SelectSingleFilter`, `SelectSingleForm`, `SelectMultipleFilter`,
 `SelectMultipleForm`, `InfoPill`, `ErrorMessages`, `FormInput`, `ActionPill`,
 `ConfirmationModal`, `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
@@ -227,6 +228,59 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 `isRequired` только показывает точку: атрибут `required` и `aria-*` полю
 он не ставит.
 
+### SelectDateFilter
+
+Одно поле даты под заголовком. Дата выбирается в календаре Pikaday,
+у поля — ластик очистки. Подсказки у поля нет. Pikaday загружается
+в браузере при монтировании компонента, а не при загрузке пакета, поэтому
+календарь появляется, когда загрузка закончится.
+
+Высота 4.5rem и серая рамка встроены в фильтр, ширина поля 9rem: класс
+`h-18 border border-gray-200` ему не нужен. `class` и остальные атрибуты
+ложатся на корень фильтра.
+
+    <select-date-filter header="Дата" v-model="day" @changed="reload"/>
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `modelValue` | `String` | `""` | Выбранная дата |
+| `header` | `String` | обязателен | Подпись поля |
+| `isRequired` | `Boolean` | `false` | Пометка обязательности в заголовке |
+| `isLoading` | `Boolean` | `false` | Индикатор загрузки в заголовке |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует и на поле, и на календарь |
+
+События: `update:modelValue` — на каждый выбор даты и на очистку ластиком
+(пустой строкой); `changed` — когда новое значение отличается от
+переданного пропса.
+
+Календарь, ластик и клавиатура — как у каждого из двух полей
+`SelectDateIntervalFilter` (см. «SelectDateIntervalFilter»).
+
+### SelectDateForm
+
+Одно поле даты в форме, в виде `FormInput`: подпись над полем, рамка поля
+на всю ширину формы, высотой 38px, как у `FormInput`. Рамка скругляет и поле,
+и кольцо фокуса в нём. Подсказки у поля нет.
+
+    <select-date-form label="Дата" v-model="day" :is-required="markDayRequired"/>
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `modelValue` | `String` | `""` | Выбранная дата |
+| `label` | `String` | обязателен | Подпись над полем |
+| `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует и на поле, и на календарь |
+
+События: `update:modelValue` и `changed`. Календарь, ластик и клавиатура —
+как у `SelectDateFilter` (см. «SelectDateFilter»).
+
+Подпись связана с полем для скринридера: кнопка календаря называется
+подписью и датой, поле ввода — подписью. Клик по подписи ничего не делает.
+
+`isRequired` только показывает точку, как у `FormInput`. `class`, `style`,
+все остальные атрибуты и слушатели ложатся на корень компонента (у `FormInput`
+остальные атрибуты уходят на поле ввода).
+
 ### SelectDateIntervalFilter
 
 Два поля даты под одним заголовком — интервал дат «от» и «до». Дата
@@ -235,7 +289,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 пакета, поэтому календари появляются, когда загрузка закончится.
 
 Высота 4.5rem и серая рамка встроены в фильтр: класс
-`h-18 border border-gray-200` ему не нужен. `class` и остальные атрибуты
+`h-18 border border-gray-200` ему не нужен. Ширина фильтра 18rem, «от» и «до»
+по половине, между ними вертикальная линия. `class` и остальные атрибуты
 ложатся на корень фильтра.
 
     <select-date-interval-filter
@@ -284,7 +339,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 Интервал дат в форме, в виде `FormInput`: подпись над полями, под ней «от»
 и «до» одинаковой ширины на всю ширину формы. У каждого поля своя рамка, как
-у `FormInput`, высотой 38px.
+у `FormInput`, высотой 38px; рамка скругляет и поле, и кольцо фокуса в нём.
 
     <select-date-interval-form
         label="Период"
@@ -1148,7 +1203,7 @@ Vimium, Vimari, Vimlike — по их подсказкам, как мышью; �
 выбирают только момент. Поля, крестик `NotificationMessage`, кнопки
 `ConfirmationModal` и `DropdownButtonWithAction` показывают фокус при любом
 его появлении, в том числе после клика мышью; остальные кнопки и ссылки —
-только с клавиатуры. Стрелки месяцев и подпись месяца в календаре `PickDay`
+только с клавиатуры. Стрелки месяцев и подпись месяца в календаре поля даты
 берут тот же вид, когда фокус в них с клавиатуры.
 
 Vimlike (Safari на iPhone, iPad и Mac) считает кнопкой любой элемент
@@ -1158,14 +1213,15 @@ Vimlike (Safari на iPhone, iPad и Mac) считает кнопкой любо
 бы тексту, иконке, у которой нет `click()`, и скрытой подписи, которую Vimlike
 считает невидимой. Поэтому содержимое кнопок и ссылок пакета — текст, иконки,
 скрытые подписи — с курсором `default` и не ловит указатель: мышь над ним
-видит руку самой кнопки. По той же причине поле даты `SelectDateIntervalFilter`
-и `SelectDateIntervalForm` лежит не внутри кнопки календаря, а под ней: поле
+видит руку самой кнопки. По той же причине поле даты `SelectDateFilter`, `SelectDateForm`,
+`SelectDateIntervalFilter` и `SelectDateIntervalForm` лежит не внутри кнопки календаря, а под ней: поле
 внутри кнопки Vimlike считал бы кнопкой вместо неё. В поле по-прежнему можно
 перейти Tab и набрать дату.
 
 Подсказки Vimlike в открытых меню, списках `SelectSingleFilter`,
 `SelectSingleForm`, `SelectMultipleFilter` и `SelectMultipleForm` и календарях
-`SelectDateIntervalFilter` и `SelectDateIntervalForm` не видны: Vimlike рисует
+`SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`
+и `SelectDateIntervalForm` не видны: Vimlike рисует
 их под верхним слоем браузера, в котором открываются эти панели. Vimium
 выводит свои подсказки в верхний слой, и у него такой проблемы нет. В Vimlike
 панель открывают подсказкой её кнопки, а дальше выбирают стрелками и Enter:
@@ -1277,7 +1333,7 @@ Inertia SSR), а серверная разметка гидратируется 
 
     npm run playground
 
-Поднимает демо-страницы со всеми двадцатью двумя компонентами в двух окружениях:
+Поднимает демо-страницы со всеми двадцатью четырьмя компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не
@@ -1312,6 +1368,9 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 В формах меняются и пропы: `header` становится `label`, `class="border
 border-gray-200"` убирается (на корне формы он обвёл бы подпись вместе с полем),
 а `isLoading` у форм нет.
+
+`SelectDateFilter` и `SelectDateForm` — новые компоненты одной даты, у них
+нет предшественника: в таблице их нет.
 
 `0.20.0` не подтянется по `^0.19.x`: для версий `0.x` знак `^` пропускает
 только патчи. Обновление — `npm install @boobooking/dashboard-ui-components@^0.20.0`.
