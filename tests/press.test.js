@@ -5,7 +5,7 @@ import CrossButton from '../src/components/CrossButton.vue'
 import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
-import SelectMultiple from '../src/components/SelectMultiple.vue'
+import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { installPopoverStub } from './popoverStub.js'
 
@@ -127,7 +127,7 @@ describe('ластики фильтров: очистка после нажат�
         },
         {
             name: 'SelectMultiple',
-            mount: () => mount(SelectMultiple, { props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: ['a'] }, attachTo: document.body }),
+            mount: () => mount(SelectMultipleFilter, { props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: ['a'] }, attachTo: document.body }),
             expected: [],
         },
         {
@@ -164,7 +164,7 @@ describe('ластики фильтров: очистка после нажат�
     // Запрос поиска — внутреннее состояние SelectMultiple, не значение:
     // событий у компонента нет, очистку видно по полю.
     it('SelectMultiple — ластик поиска', async () => {
-        const wrapper = mount(SelectMultiple, { props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: [], withSearch: true }, attachTo: document.body })
+        const wrapper = mount(SelectMultipleFilter, { props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: [], withSearch: true }, attachTo: document.body })
         const field = wrapper.get('input')
         await field.setValue('а')
         const eraser = crossButton(wrapper)

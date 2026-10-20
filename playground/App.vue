@@ -39,6 +39,9 @@
                 <select-single-form label="Вендор" :items="vendorItems" v-model="formVendor"/>
                 <select-single-form label="Сертификат" :items="longItems" v-model="formCertificate" is-required/>
                 <select-single-form label="Без пунктов" :items="[]"/>
+                <!-- SelectMultipleForm: список с поиском и обязательное поле. -->
+                <select-multiple-form label="Бренд" :items="brandItems" v-model="formBrands"/>
+                <select-multiple-form label="Мероприятие" :items="eventItems" v-model="formEvents" with-search is-required/>
             </div>
         </section>
 
@@ -80,8 +83,8 @@
         </section>
 
         <section>
-            <h2>SelectMultiple</h2>
-            <select-multiple
+            <h2>SelectMultipleFilter</h2>
+            <select-multiple-filter
                 header="Бренд"
                 :items="brandItems"
                 v-model="brands"
@@ -90,7 +93,7 @@
             <p>Выбрано: {{ brands.length === 0 ? '(ничего)' : brands.join(', ') }}, запросов: {{ brandCommits }}</p>
 
             <h3>Длинный список с поиском: поле не двигается при наборе, у нижнего края окна — вверх</h3>
-            <select-multiple header="Мероприятие" :items="eventItems" v-model="events" with-search/>
+            <select-multiple-filter header="Мероприятие" :items="eventItems" v-model="events" with-search/>
         </section>
 
         <section>
@@ -351,7 +354,8 @@ import {
     SelectDateInterval,
     SelectSingleFilter,
     SelectSingleForm,
-    SelectMultiple,
+    SelectMultipleFilter,
+    SelectMultipleForm,
     InfoPill,
     ErrorMessages,
     FormInput,
@@ -377,7 +381,8 @@ export default {
         SelectDateInterval,
         SelectSingleFilter,
         SelectSingleForm,
-        SelectMultiple,
+        SelectMultipleFilter,
+        SelectMultipleForm,
         InfoPill,
         ErrorMessages,
         FormInput,
@@ -446,6 +451,8 @@ export default {
             longItem: null,
             formVendor: null,
             formCertificate: null,
+            formBrands: [],
+            formEvents: [],
             brandItems: [
                 { id: 'rc', name: 'Royal Canin' },
                 { id: 'eukanuba', name: 'Eukanuba' },

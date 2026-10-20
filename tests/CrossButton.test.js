@@ -7,7 +7,7 @@ import PageCard from '../src/components/PageCard.vue'
 import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
-import SelectMultiple from '../src/components/SelectMultiple.vue'
+import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { installPopoverStub } from './popoverStub.js'
 
@@ -139,7 +139,7 @@ describe('CrossButton у тех, кто его использует', () => {
         },
         {
             name: 'SelectMultiple — ластик',
-            mount: () => mount(SelectMultiple, {
+            mount: () => mount(SelectMultipleFilter, {
                 props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: ['a'] },
                 attachTo: document.body,
             }),
@@ -149,7 +149,7 @@ describe('CrossButton у тех, кто его использует', () => {
         {
             name: 'SelectMultiple — ластик поиска',
             mount: () => {
-                const wrapper = mount(SelectMultiple, {
+                const wrapper = mount(SelectMultipleFilter, {
                     props: { header: 'Бренд', items: [{ id: 'a', name: 'Сбер' }], modelValue: [], withSearch: true },
                     attachTo: document.body,
                 })

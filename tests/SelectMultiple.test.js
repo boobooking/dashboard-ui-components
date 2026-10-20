@@ -4,6 +4,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue'
 import PopoverPanel from '../src/components/PopoverPanel.vue'
 import SelectMultiple from '../src/components/SelectMultiple.vue'
+import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
@@ -49,7 +50,7 @@ function mountSelect(props = {}) {
 }
 
 function mountWith(options) {
-    return mount(SelectMultiple, {
+    return mount(SelectMultipleFilter, {
         attachTo: document.body,
         ...options,
         global: vueHandlers(),
@@ -93,8 +94,11 @@ describe('SelectMultiple', () => {
     it('не падает, если вместо списка пришёл null', () => {
         mountWith({ props: { header: 'Вендор', items: null } })
 
-        expect(warnings).toHaveLength(1)
-        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "items"')
+        // Предупреждают обёртка и ядро: проп items есть у обоих.
+        expect(warnings).toHaveLength(2)
+        for (const warning of warnings) {
+            expect(warning).toContain('Invalid prop: type check failed for prop "items"')
+        }
         warnings = []
     })
 
@@ -106,8 +110,11 @@ describe('SelectMultiple', () => {
         mountWith({ props: { header: 'Вендор', items: value } })
 
         expect(errors).toEqual([])
-        expect(warnings).toHaveLength(1)
-        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "items"')
+        // Предупреждают обёртка и ядро: проп items есть у обоих.
+        expect(warnings).toHaveLength(2)
+        for (const warning of warnings) {
+            expect(warning).toContain('Invalid prop: type check failed for prop "items"')
+        }
         warnings = []
     })
 
@@ -202,7 +209,7 @@ describe('SelectMultiple: список на Popover API', () => {
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)
-        expect(wrapper.vm.isOpen).toBe(false)
+        expect(wrapper.findComponent(SelectMultiple).vm.isOpen).toBe(false)
     })
 
     it('прокрутка страницы закрывает список, прокрутка внутри списка — нет', async () => {
@@ -285,8 +292,8 @@ describe('SelectMultiple: список на Popover API', () => {
     it('открытие второго списка закрывает первый, id у панелей свои', async () => {
         const Page = {
             render: () => h('div', [
-                h(SelectMultiple, { header: 'Вендор', items }),
-                h(SelectMultiple, { header: 'Сертификат', items }),
+                h(SelectMultipleFilter, { header: 'Вендор', items }),
+                h(SelectMultipleFilter, { header: 'Сертификат', items }),
             ]),
         }
         const page = mount(Page, { attachTo: document.body, global: vueHandlers() })
@@ -469,7 +476,7 @@ describe('SelectMultiple: выбор нескольких пунктов', () =>
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)
-        expect(wrapper.vm.isOpen).toBe(false)
+        expect(wrapper.findComponent(SelectMultiple).vm.isOpen).toBe(false)
         expect(wrapper.emitted('update:modelValue')).toEqual([[['a']]])
         expect(wrapper.emitted('changed')).toHaveLength(1)
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
@@ -510,8 +517,11 @@ describe('SelectMultiple: выбор нескольких пунктов', () =>
         const wrapper = mountSelect({ modelValue: 'a' })
 
         expect(labelOf(wrapper)).toBe('')
-        expect(warnings).toHaveLength(1)
-        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "modelValue"')
+        // Предупреждают обёртка и ядро: проп modelValue есть у обоих.
+        expect(warnings).toHaveLength(2)
+        for (const warning of warnings) {
+            expect(warning).toContain('Invalid prop: type check failed for prop "modelValue"')
+        }
         warnings = []
     })
 
@@ -941,7 +951,7 @@ describe('SelectMultiple: поиск', () => {
         await settle()
 
         expect(wrapper.find('[popover]').exists()).toBe(false)
-        expect(wrapper.vm.isOpen).toBe(false)
+        expect(wrapper.findComponent(SelectMultiple).vm.isOpen).toBe(false)
 
         await wrapper.setProps({ items })
         await settle()
@@ -956,8 +966,8 @@ describe('SelectMultiple: поиск', () => {
     it('две копии: открытие второй закрывает первую и сбрасывает её запрос', async () => {
         const Page = {
             render: () => h('div', [
-                h(SelectMultiple, { header: 'Вендор', items, withSearch: true }),
-                h(SelectMultiple, { header: 'Сертификат', items, withSearch: true }),
+                h(SelectMultipleFilter, { header: 'Вендор', items, withSearch: true }),
+                h(SelectMultipleFilter, { header: 'Сертификат', items, withSearch: true }),
             ]),
         }
         const page = mount(Page, { attachTo: document.body, global: vueHandlers() })

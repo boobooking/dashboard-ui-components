@@ -1,89 +1,89 @@
 <template>
-    <div class="bb-dashboard-ui bb:flex bb:flex-none">
-        <div class="bb:flex bb:w-full bb:flex-col bb:border bb:border-white bb:bg-white">
-            <element-header :text="header" :is-required="isRequired" :is-loading="isLoading"/>
-            <dropdown-button
-                :title="title"
-                v-model:is-open="isOpen"
-                v-if="hasItems"
-                :has-value="selectedItems.length > 0"
-                :find-selected="arrowsOrigin"
-                :find-stops="searchStops"
-                :find-tab-stops="tabStops"
-                :keep-size="withSearch"
-                :lang="lang"
-                @erased="clear"
-                @toggle="onToggle"
+    <div class="bb-dashboard-ui bb:flex bb:flex-col bb:grow">
+        <dropdown-button
+            :title="title"
+            v-model:is-open="isOpen"
+            v-if="hasItems"
+            :has-value="selectedItems.length > 0"
+            :labelled-by="labelledBy"
+            :find-selected="arrowsOrigin"
+            :find-stops="searchStops"
+            :find-tab-stops="tabStops"
+            :keep-size="withSearch"
+            :lang="lang"
+            @erased="clear"
+            @toggle="onToggle"
+        >
+            <!-- Поле поиска над пунктами: при прокрутке длинного списка
+                 оно остаётся на месте, прокручиваются пункты. -->
+            <div
+                v-if="withSearch"
+                class="bb:sticky bb:top-0 bb:min-w-56 bb:px-2 bb:py-2 bb:bg-white bb:border-b bb:border-gray-200"
             >
-                <!-- Поле поиска над пунктами: при прокрутке длинного списка
-                     оно остаётся на месте, прокручиваются пункты. -->
-                <div
-                    v-if="withSearch"
-                    class="bb:sticky bb:top-0 bb:min-w-56 bb:px-2 bb:py-2 bb:bg-white bb:border-b bb:border-gray-200"
-                >
-                    <div class="bb:relative">
-                        <!-- type="text", а не "search": у search Escape в Chrome
-                             сначала стирает запрос, а не закрывает список, и
-                             браузер рисует свой крестик рядом с ластиком.
-                             Enter гасится: фильтр может стоять внутри формы,
-                             и Enter в поле отправил бы её. -->
-                        <input
-                            ref="search"
-                            type="text"
-                            autocomplete="off"
-                            v-model="query"
-                            :placeholder="texts.search"
-                            :aria-label="texts.search"
-                            class="bb:w-full bb:pl-3 bb:pr-9 bb:py-2 bb:text-sm bb:bg-white bb:border bb:border-gray-300 bb:rounded-md bb:focus:focus-ring"
-                            @keydown.enter.prevent
-                        />
-                        <cross-button
-                            ref="searchEraser"
-                            v-show="query !== ''"
-                            size="small"
-                            :lang="lang"
-                            @clicked="clearQuery"
-                            class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
-                        />
-                    </div>
-                </div>
-                <!-- Рамку, фон, скругление и тень списка задаёт панель
-                     DropdownButton; здесь — раскладка пунктов и разделители. -->
-                <div
-                    v-if="visibleItems.length > 0"
-                    ref="list"
-                    class="bb:flex bb:flex-col bb:py-1 bb:divide-y bb:divide-gray-200 bb:divide-dashed"
-                    @keydown="onListKeydown"
-                >
-                    <list-element
-                        v-for="item in visibleItems"
-                        :name="itemName(item)"
-                        :key="item.id"
-                        :is-checked="selectedIds.includes(item.id)"
-                        :aria-pressed="selectedIds.includes(item.id)"
-                        @clicked="itemClicked(item)"
+                <div class="bb:relative">
+                    <!-- type="text", а не "search": у search Escape в Chrome
+                         сначала стирает запрос, а не закрывает список, и
+                         браузер рисует свой крестик рядом с ластиком.
+                         Enter гасится: фильтр может стоять внутри формы,
+                         и Enter в поле отправил бы её. -->
+                    <input
+                        ref="search"
+                        type="text"
+                        autocomplete="off"
+                        v-model="query"
+                        :placeholder="texts.search"
+                        :aria-label="texts.search"
+                        class="bb:w-full bb:pl-3 bb:pr-9 bb:py-2 bb:text-sm bb:bg-white bb:border bb:border-gray-300 bb:rounded-md bb:focus:focus-ring"
+                        @keydown.enter.prevent
+                    />
+                    <cross-button
+                        ref="searchEraser"
+                        v-show="query !== ''"
+                        size="small"
+                        :lang="lang"
+                        @clicked="clearQuery"
+                        class="bb:absolute bb:right-0 bb:top-0 bb:pr-2 bb:h-full"
                     />
                 </div>
-                <div
-                    v-else
-                    class="bb:px-3 bb:py-2 bb:text-sm bb:text-gray-500 bb:text-center"
-                    v-text="texts.nothingFound"
+            </div>
+            <!-- Рамку, фон, скругление и тень списка задаёт панель
+                 DropdownButton; здесь — раскладка пунктов и разделители. -->
+            <div
+                v-if="visibleItems.length > 0"
+                ref="list"
+                class="bb:flex bb:flex-col bb:py-1 bb:divide-y bb:divide-gray-200 bb:divide-dashed"
+                @keydown="onListKeydown"
+            >
+                <list-element
+                    v-for="item in visibleItems"
+                    :name="itemName(item)"
+                    :key="item.id"
+                    :is-checked="selectedIds.includes(item.id)"
+                    :aria-pressed="selectedIds.includes(item.id)"
+                    @clicked="itemClicked(item)"
                 />
-            </dropdown-button>
-        </div>
+            </div>
+            <div
+                v-else
+                class="bb:px-3 bb:py-2 bb:text-sm bb:text-gray-500 bb:text-center"
+                v-text="texts.nothingFound"
+            />
+        </dropdown-button>
     </div>
 </template>
 
 <script>
 import { withLang } from "../lang.js";
-import ElementHeader from "./ElementHeader.vue";
 import DropdownButton from "./DropdownButton.vue";
 import ListElement from "./ListElement.vue";
 import CrossButton from "./CrossButton.vue";
 
+// Ядро выбора нескольких пунктов: кнопка со списком и поиском. Заголовок,
+// подпись и рамку рисуют обёртки SelectMultipleFilter и SelectMultipleForm;
+// пакет ядро не экспортирует. Корень занимает всю высоту и ширину, которые
+// дала обёртка.
 export default {
     components: {
-        ElementHeader,
         DropdownButton,
         ListElement,
         CrossButton,
@@ -105,22 +105,16 @@ export default {
             type: Array,
             default: () => [],
         },
-        header: {
-            type: String,
-            required: true,
-        },
-        isRequired: {
-            type: Boolean,
-            default: false,
-        },
-        isLoading: {
-            type: Boolean,
-            default: false,
-        },
         // Поле поиска над пунктами списка.
         withSearch: {
             type: Boolean,
             default: false,
+        },
+        // id подписи поля формы: SelectMultipleForm связывает её с кнопкой
+        // (DropdownButton). У фильтра не задан.
+        labelledBy: {
+            type: String,
+            default: null,
         },
     },
 

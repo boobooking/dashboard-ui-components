@@ -38,9 +38,17 @@ export const ssrFixtures = {
     RussianMobileFilter: { props: { header: 'Телефон', modelValue: '79031234567' } },
     Search: { props: { header: 'Поиск', modelValue: 'запрос' } },
     SelectDateInterval: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
-    SelectMultiple: {
+    SelectMultipleFilter: {
         props: {
             header: 'Бренд',
+            items: [{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }],
+            modelValue: ['rc', 'eukanuba'],
+            withSearch: true,
+        },
+    },
+    SelectMultipleForm: {
+        props: {
+            label: 'Бренд',
             items: [{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }],
             modelValue: ['rc', 'eukanuba'],
             withSearch: true,

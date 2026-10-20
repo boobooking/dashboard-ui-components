@@ -14,11 +14,11 @@ describe('публичная поверхность пакета', () => {
     })
 
     // Ядра обёрток …Filter и …Form: проекты берут обёртки.
-    it.each(['SelectSingle'])('%s — ядро, не экспортируется', (name) => {
+    it.each(['SelectSingle', 'SelectMultiple'])('%s — ядро, не экспортируется', (name) => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно двадцать компонентов, плагин и downloadFile', () => {
+    it('ровно двадцать один компонент, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
             'ConfirmationModal',
@@ -36,7 +36,8 @@ describe('публичная поверхность пакета', () => {
             'RussianMobileFilter',
             'Search',
             'SelectDateInterval',
-            'SelectMultiple',
+            'SelectMultipleFilter',
+            'SelectMultipleForm',
             'SelectSingleFilter',
             'SelectSingleForm',
             'TextPopover',
