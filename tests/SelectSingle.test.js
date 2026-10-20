@@ -619,3 +619,30 @@ describe('SelectSingle: фокус после ластика', () => {
         expect(wrapper.emitted('changed')).toHaveLength(1)
     })
 })
+
+describe('SelectSingle: клик после замены items', () => {
+    it('пункт выбирается и список закрывается, хотя items заменили до обработчика клика', async () => {
+        const errors = []
+        const warnings = []
+        const Parent = {
+            components: { SelectSingleFilter },
+            data: () => ({ list: items.map((item) => ({ ...item })) }),
+            template: '<SelectSingleFilter header="Вендор" :items="list" @update:modelValue="$emit(\'picked\', $event)" />',
+        }
+        const wrapper = mount(Parent, {
+            attachTo: document.body,
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
+        await open(wrapper)
+        const button = wrapper.findAll('[popover] button').find((candidate) => candidate.text() === 'Второй')
+
+        wrapper.vm.list.splice(0, wrapper.vm.list.length, { id: 'x', name: 'Иной' }, { id: 'y', name: 'Другой' })
+        button.element.click()
+        await settle()
+
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+        expect(wrapper.emitted('picked')).toEqual([['b']])
+        expect(isOpen(wrapper)).toBe(false)
+    })
+})

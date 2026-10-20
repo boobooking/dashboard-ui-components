@@ -201,7 +201,7 @@ export default {
         // PopoverPanel возвращает фокус на кнопку фильтра, только если он
         // был в панели.
         itemClicked(item) {
-            this.itemElements()[this.visibleItems.indexOf(item)].focus({ preventScroll: true });
+            this.itemElements()[this.visibleItems.indexOf(item)]?.focus({ preventScroll: true });
             this.isOpen = false;
             this.$emit(
                 "update:modelValue",

@@ -1275,3 +1275,23 @@ describe('SelectMultiple: фокус после ластика', () => {
         expect(wrapper.emitted('changed')).toHaveLength(1)
     })
 })
+
+describe('SelectMultiple: клик после замены items', () => {
+    it('пункт выбирается и список закрывается, хотя items заменили до обработчика клика', async () => {
+        const Parent = {
+            components: { SelectMultipleFilter },
+            data: () => ({ list: items.map((item) => ({ ...item })) }),
+            template: '<SelectMultipleFilter header="Вендор" :items="list" @update:modelValue="$emit(\'picked\', $event)" />',
+        }
+        const wrapper = mount(Parent, { attachTo: document.body, global: vueHandlers() })
+        await open(wrapper)
+        const button = wrapper.findAll('[popover] button').find((candidate) => candidate.text() === 'Второй')
+
+        wrapper.vm.list.splice(0, wrapper.vm.list.length, { id: 'x', name: 'Иной' }, { id: 'y', name: 'Другой' })
+        button.element.click()
+        await settle()
+
+        expect(wrapper.emitted('picked')).toEqual([[['b']]])
+        expect(isOpen(wrapper)).toBe(false)
+    })
+})
