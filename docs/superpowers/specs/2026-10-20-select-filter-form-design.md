@@ -317,7 +317,9 @@ payments) фильтр без пунктов ниже соседнего, а р�
 ## 16. Файлы
 
 - Изменяются: `src/components/SelectSingle.vue`, `SelectMultiple.vue`,
-  `SelectDateInterval.vue` (становятся ядрами), `src/index.js`, `README.md`,
+  `SelectDateInterval.vue` (становятся ядрами), `src/components/DropdownButton.vue`
+  (`aria-labelledby` кнопки, пока задан `labelledBy`; без него атрибута нет,
+  фильтры не меняются), `src/index.js`, `README.md`,
   `package.json`, `playground/App.vue`, `tests/ssrFixtures.js`,
   `tests/exports.test.js` и тесты из раздела 10.
 - Создаются: `src/components/SelectSingleFilter.vue`, `SelectSingleForm.vue`,
