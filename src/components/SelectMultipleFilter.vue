@@ -1,5 +1,5 @@
 <template>
-    <div class="bb-dashboard-ui bb:flex bb:flex-none bb:h-18 bb:border bb:border-gray-200">
+    <div class="bb-dashboard-ui bb:flex bb:flex-none bb:w-fit bb:h-18 bb:border bb:border-gray-200">
         <div class="bb:flex bb:w-full bb:flex-col bb:border bb:border-white bb:bg-white">
             <element-header :text="header ?? ''" :is-required="isRequired" :is-loading="isLoading"/>
             <select-multiple

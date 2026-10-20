@@ -25,6 +25,7 @@
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
                         class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus-visible:focus-ring"
+                        :class="look === 'form' ? 'bb:rounded-md' : ''"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                              см. README, «Клавиатурная навигация». -->
@@ -50,6 +51,7 @@
                             :value="dayValue"
                             :placeholder="placeholderText"
                             class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:focus-ring"
+                            :class="look === 'form' ? 'bb:pl-3 bb:rounded-md' : ''"
                         />
                     </label>
                 </template>
@@ -96,6 +98,13 @@ export default {
         placeholderText: {
             type: String,
             default: "",
+        },
+        // Вид поля: form — кольцо фокуса кнопки и поля скруглено под рамку
+        // и начинается от её края, а отступ слева у самого поля.
+        look: {
+            type: String,
+            default: "filter",
+            validator: (value) => ["filter", "form"].includes(value),
         },
     },
 

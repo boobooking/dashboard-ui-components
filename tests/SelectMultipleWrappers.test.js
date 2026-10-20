@@ -84,6 +84,12 @@ async function choose(wrapper, name) {
 describe('SelectMultipleFilter', () => {
     const mountFilter = (props = {}, attrs = {}) => mountWrapper(SelectMultipleFilter, { header: 'Вендор', items, ...props }, attrs)
 
+    it('корень по ширине содержимого', () => {
+        const { wrapper } = mountFilter()
+
+        expect(wrapper.classes()).toContain('bb:w-fit')
+    })
+
     it('высота и рамка на корне', () => {
         const { wrapper, errors, warnings } = mountFilter()
 

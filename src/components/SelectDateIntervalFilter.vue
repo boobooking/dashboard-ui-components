@@ -1,5 +1,5 @@
 <template>
-    <div class="bb-dashboard-ui bb:flex bb:h-18 bb:border bb:border-gray-200">
+    <div class="bb-dashboard-ui bb:flex bb:w-fit bb:h-18 bb:border bb:border-gray-200">
         <div class="bb:flex bb:border bb:border-white">
             <div class="bb:flex bb:flex-col bb:min-w-72 bb:w-72 bb:bg-white bb:h-full">
                 <element-header :text="header ?? ''" :is-required="isRequired" :is-loading="isLoading"/>

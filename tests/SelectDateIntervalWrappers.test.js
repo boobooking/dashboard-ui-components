@@ -49,8 +49,35 @@ describe('SelectDateInterval: look ядра', () => {
     })
 })
 
+describe('PickDay: look', () => {
+    it('валидатор look', () => {
+        const { validator } = PickDay.props.look
+
+        expect(validator('x')).toBe(false)
+        expect(validator('filter')).toBe(true)
+        expect(validator('form')).toBe(true)
+    })
+})
+
 describe('SelectDateIntervalFilter', () => {
     const mountFilter = (props = {}, attrs = {}) => mountWrapper(SelectDateIntervalFilter, { header: 'Интервал', ...props }, attrs)
+
+    it('корень по ширине содержимого', () => {
+        const { wrapper } = mountFilter()
+
+        expect(wrapper.classes()).toContain('bb:w-fit')
+    })
+
+    it('поля фильтра без скругления у кнопки и поля', () => {
+        const { wrapper } = mountFilter()
+
+        for (const field of wrapper.findAllComponents(PickDay)) {
+            expect(field.classes()).toContain('bb:pl-3')
+            expect(field.get('button[popovertarget]').classes()).not.toContain('bb:rounded-md')
+            expect(field.get('input').classes()).not.toContain('bb:rounded-md')
+            expect(field.get('input').classes()).not.toContain('bb:pl-3')
+        }
+    })
 
     it('высота и рамка на корне', () => {
         const { wrapper, errors, warnings } = mountFilter()
@@ -153,6 +180,16 @@ describe('SelectDateIntervalForm', () => {
         expect(dot().element.style.display).toBe('')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
+    })
+
+    it('кольцо фокуса скруглено под рамку', () => {
+        const { wrapper } = mountForm()
+
+        for (const field of wrapper.findAllComponents(PickDay)) {
+            expect(field.classes()).not.toContain('bb:pl-3')
+            expect(field.get('button[popovertarget]').classes()).toContain('bb:rounded-md')
+            expect(field.get('input').classes()).toEqual(expect.arrayContaining(['bb:rounded-md', 'bb:pl-3']))
+        }
     })
 
     it('группа названа подписью', () => {
