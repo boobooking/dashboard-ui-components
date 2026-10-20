@@ -117,7 +117,9 @@ payments) фильтр без пунктов ниже соседнего, а р�
 
 Вид сегодняшних фильтров плюс встроенные высота и рамка. Корень обёртки:
 
-- `bb:h-18 bb:border bb:border-gray-200 bb:bg-white` и раскладка в столбец;
+- `bb:h-18 bb:border bb:border-gray-200`, внутри — прежняя рамка
+  `bb:border bb:border-white bb:bg-white`, перенесённая из ядра, и раскладка
+  в столбец;
 - первым — `ElementHeader` с `header`, `isRequired`, `isLoading`, как сейчас;
 - под ним — ядро, занимает оставшуюся высоту.
 

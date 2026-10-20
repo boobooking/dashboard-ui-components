@@ -7,7 +7,7 @@
     npm install @boobooking/dashboard-ui-components
 
 ```js
-import { RussianMobileFilter, SelectDateInterval } from '@boobooking/dashboard-ui-components'
+import { RussianMobileFilter, SelectDateIntervalFilter } from '@boobooking/dashboard-ui-components'
 import '@boobooking/dashboard-ui-components/style.css'
 ```
 
@@ -65,10 +65,11 @@ Vue не ниже 3.5, ESM, сборщик, умеющий импорт CSS из
 Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в CSS приложения
 пакету не нужны.
 
-Меню `DropdownButtonWithAction` и `HamburgerMenu`, списки `SelectSingle` и `SelectMultiple`,
-календари `SelectDateInterval` и подсказка `TextPopover` стоят на Popover API
-браузера: Safari 17+, Chrome 114+, Firefox 125+. В браузерах старше меню,
-списки, календари и подсказка видны в потоке всегда.
+Меню `DropdownButtonWithAction` и `HamburgerMenu`, списки `SelectSingleFilter`,
+`SelectSingleForm`, `SelectMultipleFilter` и `SelectMultipleForm`, календари
+`SelectDateIntervalFilter` и `SelectDateIntervalForm` и подсказка `TextPopover`
+стоят на Popover API браузера: Safari 17+, Chrome 114+, Firefox 125+. В браузерах
+старше меню, списки, календари и подсказка видны в потоке всегда.
 
 ## Цвета
 
@@ -90,10 +91,11 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует девятнадцать компонентов: `Dot`, `RussianMobileFilter`,
-`Search`, `SelectDateInterval`, `SelectSingle`, `SelectMultiple`, `InfoPill`,
-`ErrorMessages`, `FormInput`, `ActionPill`, `ConfirmationModal`,
-`DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
+Пакет экспортирует двадцать два компонента: `Dot`, `RussianMobileFilter`,
+`Search`, `SelectDateIntervalFilter`, `SelectDateIntervalForm`,
+`SelectSingleFilter`, `SelectSingleForm`, `SelectMultipleFilter`,
+`SelectMultipleForm`, `InfoPill`, `ErrorMessages`, `FormInput`, `ActionPill`,
+`ConfirmationModal`, `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
 `NavigationMenuElement`, `PageTabs`, `PageCard`, `NotificationMessage`,
 `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
 (`files: ["dist"]`) исходники не попадают, поэтому контракт каждого
@@ -225,14 +227,18 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 `isRequired` только показывает точку: атрибут `required` и `aria-*` полю
 он не ставит.
 
-### SelectDateInterval
+### SelectDateIntervalFilter
 
 Два поля даты под одним заголовком — интервал дат «от» и «до». Дата
 выбирается в календаре Pikaday, у каждого поля — ластик очистки. Pikaday
 загружается в браузере при монтировании компонента, а не при загрузке
 пакета, поэтому календари появляются, когда загрузка закончится.
 
-    <select-date-interval
+Высота 4.5rem и серая рамка встроены в фильтр: класс
+`h-18 border border-gray-200` ему не нужен. `class` и остальные атрибуты
+ложатся на корень фильтра.
+
+    <select-date-interval-filter
         header="Период"
         :date-from="dateFrom"
         :date-to="dateTo"
@@ -274,9 +280,41 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 же, как клик; Escape закрывает календарь. После закрытия фокус возвращается на
 поле. В поле можно перейти Tab и набрать дату.
 
-### SelectSingle
+### SelectDateIntervalForm
 
-    <select-single
+Интервал дат в форме, в виде `FormInput`: подпись над полями, под ней «от»
+и «до» одинаковой ширины на всю ширину формы. У каждого поля своя рамка, как
+у `FormInput`, высотой 38px.
+
+    <select-date-interval-form
+        label="Период"
+        v-model:date-from="dateFrom"
+        v-model:date-to="dateTo"
+        :is-required="markPeriodRequired"
+    />
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `dateFrom` | `String` | `""` | Начало интервала |
+| `dateTo` | `String` | `""` | Конец интервала |
+| `label` | `String` | обязателен | Подпись над полями |
+| `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует и на подсказки полей, и на оба календаря |
+
+События те же, что у `SelectDateIntervalFilter`: `update:dateFrom`,
+`update:dateTo` и `changed`. Календари, ластики, подсказки и клавиатура —
+тоже как у него (см. «SelectDateIntervalFilter»).
+
+Подпись связана с полями для скринридера: оба поля — группа, названная
+подписью, а каждое поле, как в фильтре, называется своей подсказкой «от» или
+«до» с датой. Клик по подписи ничего не делает.
+
+`isRequired` только показывает точку, как у `FormInput`. `class` и `style`
+ложатся на корень компонента.
+
+### SelectSingleFilter
+
+    <select-single-filter
         header="Вендор"
         :items="[{ id: 'a', name: 'Первый' }]"
         v-model="vendor"
@@ -297,6 +335,11 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 События: `update:modelValue` и `changed` — при выборе элемента (повторный
 клик по уже выбранному снимает выбор) и при очистке через ластик.
+
+Высота 4.5rem и серая рамка встроены в фильтр: класс
+`h-18 border border-gray-200` ему не нужен. `class` и остальные атрибуты
+ложатся на корень фильтра. Без пунктов кнопки нет, а заголовок, высота и рамка
+остаются.
 
 С клавиатуры: пока список открыт, стрелки вверх и вниз переводят фокус по
 пунктам и страницу не прокручивают. Отсчёт идёт от выбранного пункта: вниз —
@@ -322,18 +365,49 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 внутри списка — нет. Открытие другого списка, календаря или меню
 закрывает предыдущее.
 
-### SelectMultiple
+### SelectSingleForm
 
-    <select-multiple
+Выбор одного пункта в форме, в виде `FormInput`: подпись над полем, рамка
+поля на всю ширину формы, высотой 38px, как у `FormInput`. В рамке — кнопка
+со списком и ластиком, та же, что у `SelectSingleFilter`.
+
+    <select-single-form
+        label="Вендор"
+        :items="vendors"
+        v-model="vendor"
+        :is-required="markVendorRequired"
+    />
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `items` | `Array` | обязателен | Массив `{ id, name }` |
+| `modelValue` | `String \| Number` | `null` | `id` выбранного элемента или `null` |
+| `label` | `String` | обязателен | Подпись над полем |
+| `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+
+`items`, `v-model`, события, список и клавиатура — как у `SelectSingleFilter`
+(см. «SelectSingleFilter»). Без пунктов кнопки нет, под подписью остаётся
+пустая рамка.
+
+Подпись связана с кнопкой для скринридера: кнопка называется подписью
+и выбранным пунктом, у пустого поля — подписью. Клик по подписи ничего
+не делает.
+
+`isRequired` только показывает точку, как у `FormInput`. `class` и `style`
+ложатся на корень компонента.
+
+### SelectMultipleFilter
+
+    <select-multiple-filter
         header="Бренд"
         :items="[{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }]"
         v-model="brands"
         @changed="reload"
     />
 
-    <select-multiple header="Мероприятие" :items="events" v-model="eventIds" with-search @changed="reload"/>
+    <select-multiple-filter header="Мероприятие" :items="events" v-model="eventIds" with-search @changed="reload"/>
 
-Тот же фильтр, что `SelectSingle`, но выбрать можно несколько пунктов.
+Тот же фильтр, что `SelectSingleFilter`, но выбрать можно несколько пунктов.
 `items` — массив объектов `{ id, name }`. `v-model` держит массив `id`
 выбранных пунктов, пустой массив — ничего не выбрано. `id` — строка или число,
 сравнение строгое.
@@ -367,15 +441,15 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 на кнопку фильтра, а запрос поиска сбрасывается. `changed` уходит после
 каждого выбора, и страница сразу перезапрашивает выдачу.
 
-Список открывается так же, как у `SelectSingle`: в верхнем слое браузера, место,
+Список открывается так же, как у `SelectSingleFilter`: в верхнем слое браузера, место,
 высота, прокрутка и способы закрытия те же, фокус после закрытия возвращается
 на кнопку. Отличия: галочка стоит у каждого выбранного пункта; пункт
 сообщает скринридеру, выбран ли он (`aria-pressed`).
-Как и у `SelectSingle`, без пунктов кнопки нет, заголовок остаётся. Пункты
-пропали при открытом списке — список закрывается, запрос поиска сбрасывается,
-а вернувшиеся пункты появляются с закрытым списком.
+Как и у `SelectSingleFilter`, без пунктов кнопки нет, а заголовок, высота
+и рамка остаются. Пункты пропали при открытом списке — список закрывается,
+запрос поиска сбрасывается, а вернувшиеся пункты появляются с закрытым списком.
 
-С клавиатуры, пока список открыт, всё как у `SelectSingle`: стрелки вверх и вниз
+С клавиатуры, пока список открыт, всё как у `SelectSingleFilter`: стрелки вверх и вниз
 ведут фокус по пунктам по кругу, Enter или пробел переключают пункт и закрывают
 список, Escape закрывает его без выбора. Если выбрано несколько пунктов,
 отсчёт идёт от первого выбранного среди видимых. Мышь ведёт тот же фокус, что
@@ -401,6 +475,36 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 становится уже, чем при открытии, а поле не двигается, сколько бы пунктов ни
 убрал поиск: открытая вниз панель становится ниже вместе с найденным, открытая
 вверх не становится ниже, и пустое место остаётся под пунктами, у кнопки.
+
+### SelectMultipleForm
+
+Выбор нескольких пунктов в форме, в виде `FormInput`: подпись над полем, рамка
+поля на всю ширину формы, высотой 38px, как у `FormInput`. В рамке — кнопка
+со списком, поиском и ластиком, та же, что у `SelectMultipleFilter`.
+
+    <select-multiple-form label="Бренд" :items="brands" v-model="brandIds"/>
+
+    <select-multiple-form label="Мероприятие" :items="events" v-model="eventIds" with-search :is-required="markEventsRequired"/>
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `items` | `Array` | обязателен | Массив `{ id, name }` |
+| `modelValue` | `Array` | `[]` | `id` выбранных пунктов |
+| `label` | `String` | обязателен | Подпись над полем |
+| `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `withSearch` | `Boolean` | `false` | Поле поиска вверху списка |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"` — надпись, поле поиска, «Ничего не найдено», подписи обоих ластиков |
+
+`items`, `v-model`, события, надпись на кнопке, список, поиск и клавиатура —
+как у `SelectMultipleFilter` (см. «SelectMultipleFilter»). Без пунктов кнопки
+нет, под подписью остаётся пустая рамка.
+
+Подпись связана с кнопкой для скринридера: кнопка называется подписью
+и надписью на кнопке, у пустого поля — подписью. Клик по подписи ничего
+не делает.
+
+`isRequired` только показывает точку, как у `FormInput`. `class` и `style`
+ложатся на корень компонента.
 
 ### InfoPill
 
@@ -1008,12 +1112,12 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 | `ConfirmationModal` — кнопка отмены | Отмена | Cancel |
 | `DropdownButtonWithAction` — подпись стрелки для скринридера | Открыть меню | Open menu |
 | `HamburgerMenu` — подпись кнопки для скринридера | Открыть меню | Open menu |
-| `SelectDateInterval` — месяцы, дни недели, кнопки календарей | по-русски | in English |
-| `SelectDateInterval` — подсказки полей | от / до | from / to |
-| Ластик `Search`, `RussianMobileFilter`, `SelectSingle` (язык плагина), `SelectMultiple` (проп `lang`) и `SelectDateInterval` — подпись для скринридера | Очистить | Clear |
-| `SelectMultiple` — надпись при нескольких выбранных | Выбрано: N | Selected: N |
-| `SelectMultiple` — подсказка и имя поля поиска | Поиск | Search |
-| `SelectMultiple` — нет совпадений | Ничего не найдено | Nothing found |
+| `SelectDateIntervalFilter`, `SelectDateIntervalForm` — месяцы, дни недели, кнопки календарей | по-русски | in English |
+| `SelectDateIntervalFilter`, `SelectDateIntervalForm` — подсказки полей | от / до | from / to |
+| Ластик `Search`, `RussianMobileFilter`, `SelectSingleFilter` и `SelectSingleForm` (язык плагина), `SelectMultipleFilter` и `SelectMultipleForm` (проп `lang`), `SelectDateIntervalFilter` и `SelectDateIntervalForm` — подпись для скринридера | Очистить | Clear |
+| `SelectMultipleFilter`, `SelectMultipleForm` — надпись при нескольких выбранных | Выбрано: N | Selected: N |
+| `SelectMultipleFilter`, `SelectMultipleForm` — подсказка и имя поля поиска | Поиск | Search |
+| `SelectMultipleFilter`, `SelectMultipleForm` — нет совпадений | Ничего не найдено | Nothing found |
 | `DataTable` — пагинация | Предыдущая / Следующая / Показаны результаты X - Y из Z | Previous / Next / Showing X - Y of Z results |
 | `PageTabs` — имя навигации для скринридера | Закладки | Tabs |
 | `PageCard` — доступное имя крестика | Назад | Back |
@@ -1021,8 +1125,9 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 | `TextPopover` — подпись кнопки и имя области | Показать текст / Полный текст | Show text / Full text |
 
 Формат даты — `дд.мм.гггг` в обоих языках: это формат значения, а не текст.
-Неделя начинается с понедельника. Календари `SelectDateInterval` берут язык
-при монтировании: смена языка после монтирования в них не отражается.
+Неделя начинается с понедельника. Календари `SelectDateIntervalFilter`
+и `SelectDateIntervalForm` берут язык при монтировании: смена языка после
+монтирования в них не отражается.
 
 ## Клавиатурная навигация
 
@@ -1050,17 +1155,18 @@ Vimlike (Safari на iPhone, iPad и Mac) считает кнопкой любо
 бы тексту, иконке, у которой нет `click()`, и скрытой подписи, которую Vimlike
 считает невидимой. Поэтому содержимое кнопок и ссылок пакета — текст, иконки,
 скрытые подписи — с курсором `default` и не ловит указатель: мышь над ним
-видит руку самой кнопки. По той же причине поле даты `SelectDateInterval`
-лежит не внутри кнопки календаря, а под ней: поле внутри кнопки Vimlike
-считал бы кнопкой вместо неё. В поле по-прежнему можно перейти Tab и набрать
-дату.
+видит руку самой кнопки. По той же причине поле даты `SelectDateIntervalFilter`
+и `SelectDateIntervalForm` лежит не внутри кнопки календаря, а под ней: поле
+внутри кнопки Vimlike считал бы кнопкой вместо неё. В поле по-прежнему можно
+перейти Tab и набрать дату.
 
-Подсказки Vimlike в открытых меню, списках `SelectSingle` и `SelectMultiple` и календарях
-`SelectDateInterval` не видны: Vimlike рисует их под верхним слоем браузера,
-в котором открываются эти панели. Vimium выводит свои подсказки в верхний
-слой, и у него такой проблемы нет. В Vimlike панель открывают подсказкой её
-кнопки, а дальше выбирают стрелками и Enter: пункт списка или меню, день
-календаря.
+Подсказки Vimlike в открытых меню, списках `SelectSingleFilter`,
+`SelectSingleForm`, `SelectMultipleFilter` и `SelectMultipleForm` и календарях
+`SelectDateIntervalFilter` и `SelectDateIntervalForm` не видны: Vimlike рисует
+их под верхним слоем браузера, в котором открываются эти панели. Vimium
+выводит свои подсказки в верхний слой, и у него такой проблемы нет. В Vimlike
+панель открывают подсказкой её кнопки, а дальше выбирают стрелками и Enter:
+пункт списка или меню, день календаря.
 
 ## SSR
 
@@ -1071,8 +1177,9 @@ Inertia SSR), а серверная разметка гидратируется 
 - `PageCard` на сервере рисует крестик, только если задан `fallback-url`:
   адрес возврата известен только в браузере, и крестик, ведущий на него,
   появляется после монтирования;
-- `SelectDateInterval` загружает Pikaday в браузере при монтировании:
-  календари появляются, когда загрузка закончится;
+- `SelectDateIntervalFilter` и `SelectDateIntervalForm` загружают Pikaday
+  в браузере при монтировании: календари появляются, когда загрузка
+  закончится;
 - остальные компоненты рендерятся на сервере так же, как в браузере.
 
 ## Правила API пакета
@@ -1083,12 +1190,13 @@ Inertia SSR), а серверная разметка гидратируется 
 - Значение компонента передаётся через `v-model` (проп `modelValue` и
   событие `update:modelValue`) и не обязательно: компонент обязан
   отрисовываться без переданного значения. `required: true` оставляют
-  только там, без чего компонент бессмыслен, — например, у `items` в
-  `SelectSingle` или у `header` во всех фильтрах.
+  только там, без чего компонент бессмыслен, — например, у `items`
+  в `SelectSingleFilter` и `SelectSingleForm`, у `header` во всех фильтрах
+  или у `label` полей формы.
 - Именованные модели (`v-model:date-from`, `v-model:date-to`, как у
-  `SelectDateInterval`) — исключение для компонентов с несколькими
-  значениями. У компонента с одним значением именованная модель не нужна:
-  для него это и есть обычный `v-model`.
+  `SelectDateIntervalFilter` и `SelectDateIntervalForm`) — исключение для
+  компонентов с несколькими значениями. У компонента с одним значением
+  именованная модель не нужна: для него это и есть обычный `v-model`.
 - Булев проп называется `is*`, если описывает состояние компонента
   (`isRequired`, `isLoading`), и `with*`, если описывает необязательную
   возможность (`withPulse` у `Dot`).
@@ -1144,10 +1252,10 @@ Inertia SSR), а серверная разметка гидратируется 
 
 Правило пакета — значение через `v-model` — относится к состоянию, которое
 компонент меняет сам: меню `DropdownButtonWithAction` закрывается по клику
-вне, `SelectSingle` меняет выбор. `ConfirmationModal` свою видимость не меняет
-никогда. Обе кнопки и Escape только сообщают родителю решение пользователя,
-а закрыть модалку, оставить её открытой на время запроса или открыть
-следующую — решает родитель.
+вне, `SelectSingleFilter` меняет выбор. `ConfirmationModal` свою видимость
+не меняет никогда. Обе кнопки и Escape только сообщают родителю решение
+пользователя, а закрыть модалку, оставить её открытой на время запроса или
+открыть следующую — решает родитель.
 
 `v-model` обещал бы двустороннюю связь, которой нет, поэтому видимость
 передаётся пропом `isOpen`.
@@ -1166,7 +1274,7 @@ Inertia SSR), а серверная разметка гидратируется 
 
     npm run playground
 
-Поднимает демо-страницы со всеми девятнадцатью компонентами в двух окружениях:
+Поднимает демо-страницы со всеми двадцатью двумя компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не
@@ -1181,6 +1289,24 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 
 Правила номера телефона в `RussianMobileFilter` — российские; язык текстов
 задаётся, см. «Языки».
+
+## Обновление с 0.19
+
+| Было | Стало |
+| --- | --- |
+| `<select-single class="h-18 border border-gray-200" header="…">` | `<select-single-filter header="…">` — высота и рамка встроены |
+| `<select-multiple class="h-18 border border-gray-200" header="…">` | `<select-multiple-filter header="…">` |
+| `<select-date-interval class="h-18 border border-gray-200" header="…">` | `<select-date-interval-filter header="…">` |
+| `SelectSingle` в форме рядом с `FormInput` | `<select-single-form label="…">` |
+| `SelectMultiple` в форме | `<select-multiple-form label="…">` |
+| `SelectDateInterval` в форме | `<select-date-interval-form label="…">` |
+
+`import { SelectSingle }` больше не работает: имена `SelectSingle`,
+`SelectMultiple` и `SelectDateInterval` из пакета убраны. Остальные классы
+на фильтрах (`ml-2` и т. п.) переносятся как есть.
+
+`0.20.0` не подтянется по `^0.19.x`: для версий `0.x` знак `^` пропускает
+только патчи. Обновление — `npm install @boobooking/dashboard-ui-components@^0.20.0`.
 
 ## Обновление с 0.15
 
