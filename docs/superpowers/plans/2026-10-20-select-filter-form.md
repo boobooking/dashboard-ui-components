@@ -322,7 +322,9 @@ Tasks 1–4 выполнены по редакции 1 спеки (головн�
   - `npm run build` и `npx vite build --config vite.playground.config.js` — без предупреждений.
 - [ ] **Step 5: Commit** — `git commit -m "refactor: убрать переключатель вида из ядер списков"`.
 
-### Task 7: ядро `SelectDate`, `SelectDateFilter`, `SelectDateForm`
+### Task 7: ядро `SelectDate`, `SelectDateFilter`, `SelectDateForm` (часть 1 из 2)
+
+Task 7 и Task 8 — одна атомарная задача для одного исполнителя: смена контракта ядра даты ломает диапазон до его переделки в Task 8, поэтому зелёной точки и коммита между ними нет. Общий прогон и единственный коммит — в Task 8 Step 4–5.
 
 **Files:**
 - Rename: `src/components/PickDay.vue` → `src/components/SelectDate.vue` (`git mv`), `tests/PickDay.test.js` → `tests/SelectDate.test.js`
@@ -348,7 +350,7 @@ Tasks 1–4 выполнены по редакции 1 спеки (головн�
   - пропы `modelValue`, `label` (обязателен), `isRequired`, `lang`; события те же;
   - подсказка пустая.
 
-- [ ] **Step 1: Переименование** — `git mv` файла ядра и теста, импорты во всех местах; полный прогон зелёный, без изменений поведения (коммит не нужен до Step 6).
+- [ ] **Step 1: Переименование** — `git mv` файла ядра и теста, импорты во всех местах; полный прогон зелёный, без изменений поведения (коммита нет, он один — в конце Task 8).
 - [ ] **Step 2: Тесты ядра и обёрток (падают):**
   - в `SelectDate.test.js`:
     - отступ `bb:pl-3` на поле ввода;
@@ -367,11 +369,9 @@ Tasks 1–4 выполнены по редакции 1 спеки (головн�
   - в `exports.test.js`: «двадцать четыре», `SelectDate` в `it.each` ядер;
   - фикстуры: `SelectDateFilter` (`header: 'Дата', modelValue: '01.03.2026'`), `SelectDateForm` (`label: 'Дата'`, та же дата);
   - в Playground — фильтр в панели фильтров и поле в форме.
-- [ ] **Step 6: Прогон и Commit:**
-  - тесты зелёные, чистый вывод `0`, обе сборки без предупреждений;
-  - `git commit -m "feat: добавить поле одной даты SelectDateFilter и SelectDateForm"`.
+- [ ] **Step 6: Переход к Task 8** — без коммита: тесты диапазона (`SelectDateIntervalWrappers.test.js`, проверки `look` и прежних классов) падают до Task 8, это ожидаемо. Тесты `SelectDate.test.js` и `SelectDateWrappers.test.js` уже зелёные.
 
-### Task 8: ядро `SelectDateInterval` без разметки, обёртки рисуют поля
+### Task 8: ядро `SelectDateInterval` без разметки, обёртки рисуют поля (часть 2 из 2, тот же исполнитель)
 
 **Files:**
 - Modify: `src/components/SelectDateInterval.vue`, `SelectDateIntervalFilter.vue`, `SelectDateIntervalForm.vue`
@@ -382,7 +382,7 @@ Tasks 1–4 выполнены по редакции 1 спеки (головн�
   - `inheritAttrs: false`;
   - пропы `dateFrom`, `dateTo`, `lang`; события и наблюдатели прежние;
   - шаблон — только `<slot :from="from" :to="to"/>`;
-  - `from` / `to` — computed `{ value, update, placeholder }`, где `update(value)` пишет в локальную копию, а `placeholder` — `texts.dateFrom` / `texts.dateTo`;
+  - `from` / `to` — computed `{ value, update, placeholder }`, где `update(value)` — стрелочная функция, замыкающая экземпляр ядра (или связанный метод Options API), пишет в локальную копию, а `placeholder` — `texts.dateFrom` / `texts.dateTo`;
   - `look` и импорт `SelectDate` уходят из ядра.
 - **`SelectDateIntervalFilter`:**
   - рамка, заголовок и столбец `bb:w-72`, как сейчас;
@@ -390,7 +390,7 @@ Tasks 1–4 выполнены по редакции 1 спеки (головн�
   - каждому `select-date` передаются `:model-value="from.value"`, `@update:model-value="from.update"`, `:placeholder-text="from.placeholder"` и `:lang="lang"` (у второго — `to`).
 - **`SelectDateIntervalForm`:**
   - подпись, затем `<div class="bb:mt-1 bb:grid bb:grid-cols-2 bb:gap-3" role="group" :aria-labelledby="labelId">`, внутри ядро со слотом;
-  - в слоте две рамки классами рамки `SelectDateForm` (с переменной радиуса), в каждой `select-date` (`class="bb:flex-1"`) с полем `from` или `to`, как в фильтре.
+  - в слоте две рамки `bb:flex bb:h-9.5 bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm bb:[--bb-field-radius:0.375rem]` — классы рамки `SelectDateForm` без `bb:mt-1` (отступ от подписи уже у группы); в каждой `select-date` (`class="bb:flex-1"`) с полем `from` или `to`, как в фильтре.
 
 - [ ] **Step 1: Тесты (падают):**
   - ядро передаёт в слот `from` и `to` с `value`, `update`, `placeholder`; `update` меняет значение и даёт `update:dateFrom` и `changed`; эхо родителя не даёт `changed`; атрибуты на ядро не переносятся;
@@ -403,7 +403,7 @@ Tasks 1–4 выполнены по редакции 1 спеки (головн�
   - тесты зелёные, чистый вывод `0`;
   - `ssr` и `hydration` для двадцати четырёх компонентов;
   - обе сборки без предупреждений.
-- [ ] **Step 5: Commit** — `git commit -m "refactor: отдать разметку полей диапазона дат обёрткам"`.
+- [ ] **Step 5: Commit** — один коммит Tasks 7–8: `git commit -m "feat: добавить поле одной даты и отдать разметку полей диапазона обёрткам"`.
 
 ### Task 9: README, Playground, приёмка редакции 2
 
