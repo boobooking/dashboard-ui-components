@@ -116,21 +116,23 @@
         <section>
             <h2>Цвета</h2>
             <table class="demo-colors">
-                <tr>
-                    <th>имя</th><th>InfoPill</th><th>ActionPill</th><th>кнопка, стрелка и пункт меню</th><th>Dot</th>
-                </tr>
-                <tr>
-                    <td>без цвета</td><td>—</td><td>—</td>
-                    <td><dropdown-button-with-action :actions="[{ label: 'Посмотреть', href: '#view' }, { label: 'Пункт', onSelect: countSelection }]"/></td>
-                    <td>—</td>
-                </tr>
-                <tr v-for="color in colors" :key="color">
-                    <td>{{ color }}</td>
-                    <td><info-pill :text="color === 'indigo' ? 'Найдено: 40' : 'статус'" :color="color"/></td>
-                    <td><action-pill icon="download" title="скачать xlsx" :color="color" :is-loading="pillsLoading" loading-text="формируется отчёт"/></td>
-                    <td><dropdown-button-with-action :actions="[{ label: 'Действие', color, onSelect: countSelection }, { label: 'Пункт', color, onSelect: countSelection }]"/></td>
-                    <td><dot :color="color"/></td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <th>имя</th><th>InfoPill</th><th>ActionPill</th><th>кнопка, стрелка и пункт меню</th><th>Dot</th>
+                    </tr>
+                    <tr>
+                        <td>без цвета</td><td>—</td><td>—</td>
+                        <td><dropdown-button-with-action :actions="[{ label: 'Посмотреть', href: '#view' }, { label: 'Пункт', onSelect: countSelection }]"/></td>
+                        <td>—</td>
+                    </tr>
+                    <tr v-for="color in colors" :key="color">
+                        <td>{{ color }}</td>
+                        <td><info-pill :text="color === 'indigo' ? 'Найдено: 40' : 'статус'" :color="color"/></td>
+                        <td><action-pill icon="download" title="скачать xlsx" :color="color" :is-loading="pillsLoading" loading-text="формируется отчёт"/></td>
+                        <td><dropdown-button-with-action :actions="[{ label: 'Действие', color, onSelect: countSelection }, { label: 'Пункт', color, onSelect: countSelection }]"/></td>
+                        <td><dot :color="color"/></td>
+                    </tr>
+                </tbody>
             </table>
             <h3>Полоска строки</h3>
             <data-table
