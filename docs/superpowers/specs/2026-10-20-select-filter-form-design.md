@@ -117,7 +117,9 @@ certificates 24 раза, в cashback 12 (7 SelectSingle под собствен
   как кнопка `DropdownButton`.
 - `labelledBy` задан — кнопка-триггер получает
   `aria-labelledby="<id подписи> <id кнопки>"`: имя — подпись и то, что
-  кнопка называет сейчас (подсказка и дата). Не задан — атрибута нет.
+  кнопка называет сейчас (подсказка и дата). Поле ввода — отдельная
+  остановка Tab — получает `aria-labelledby="<id подписи>"`: его имя —
+  подпись, дата остаётся значением. Не задан — атрибутов нет.
 - Внутреннего пропа `look` нет.
 
 ### 3.3 `SelectDateInterval`
@@ -131,7 +133,9 @@ certificates 24 раза, в cashback 12 (7 SelectSingle под собствен
 `from` и `to`, у каждого — `value` (строка даты), `update(value)` (новая
 дата) и `placeholder` (`texts.dateFrom` или `texts.dateTo`: «от» и «до»).
 Обёртка ставит в свою раскладку два ядра `SelectDate`, привязанных к этим
-полям. Разделитель, рамки и ширину полей задаёт обёртка.
+полям, и передаёт `lang` и ядру диапазона, и каждому `SelectDate`.
+Разделитель, рамки и ширину полей задаёт обёртка. У ядра
+`inheritAttrs: false`: атрибуты потребителя остаются на публичной обёртке.
 
 ## 4. Обёртки `…Filter`
 
@@ -188,7 +192,8 @@ certificates 24 раза, в cashback 12 (7 SelectSingle под собствен
   полей на странице разные);
 - `SelectSingleForm`, `SelectMultipleForm`, `SelectDateForm`: обёртка
   передаёт этот `id` ядру пропом `labelledBy`; кнопка получает
-  `aria-labelledby="<id подписи> <id кнопки>"`;
+  `aria-labelledby="<id подписи> <id кнопки>"`, а поле ввода `SelectDateForm`
+  — `aria-labelledby="<id подписи>"`;
 - `SelectDateIntervalForm`: оба поля — группа (`role="group"`,
   `aria-labelledby` на подпись); поля дат называются подсказками «от» и «до»
   с датой;
@@ -262,7 +267,8 @@ certificates 24 раза, в cashback 12 (7 SelectSingle под собствен
     на корне, `v-model` и `changed` насквозь; у `SelectDateIntervalForm` два
     поля одинаковой ширины, каждое в своей рамке;
   - доступное имя: кнопка `SelectSingleForm`, `SelectMultipleForm`,
-    `SelectDateForm` ссылается на подпись и себя; группа
+    `SelectDateForm` ссылается на подпись и себя; поле ввода `SelectDateForm`
+    — на подпись (при пустой и выбранной дате); группа
     `SelectDateIntervalForm` — на подпись; у двух полей на странице разные
     `id`; при гидратации `id` совпадают;
   - во всех тестах обёрток ошибки и предупреждения Vue проверяются пустыми,
