@@ -182,12 +182,16 @@ describe('SelectSingleFilter', () => {
 
     it('null в подписи', () => {
         const errors = []
+        const warnings = []
         const wrapper = mount(SelectSingleFilter, {
             props: { header: null, items },
-            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: () => {} } },
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
 
         expect(errors).toEqual([])
+        expect(warnings).toEqual([
+            'Invalid prop: type check failed for prop "header". Expected String with value "null", got Null ',
+        ])
         expect(wrapper.getComponent(ElementHeader).text()).toBe('')
         expect(triggerOf(wrapper).exists()).toBe(true)
     })
@@ -228,7 +232,10 @@ describe('SelectSingleForm', () => {
     it('рамка поля', () => {
         const { wrapper, errors, warnings } = mountForm()
 
-        expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:rounded-md', 'bb:border-gray-300']))
+        expect([...frameOf(wrapper).classList].sort()).toEqual([
+            'bb:mt-1', 'bb:h-9.5', 'bb:w-full', 'bb:rounded-md', 'bb:border', 'bb:border-gray-300', 'bb:bg-white',
+            'bb:shadow-xs', 'bb:text-sm', 'bb:[--bb-field-radius:0.375rem]', 'bb:flex', 'bb:flex-col',
+        ].sort())
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
@@ -267,11 +274,15 @@ describe('SelectSingleForm', () => {
     })
 
     it('две формы на странице', () => {
+        const errors = []
+        const warnings = []
         const page = mount({
             render: () => h('div', [
                 h(SelectSingleForm, { label: 'Вендор', items }),
                 h(SelectSingleForm, { label: 'Сертификат', items }),
             ]),
+        }, {
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
         const [first, second] = page.findAllComponents(SelectSingleForm)
         const firstLabelId = labelOf(first).attributes('id')
@@ -280,6 +291,8 @@ describe('SelectSingleForm', () => {
         expect(firstLabelId).not.toBe(secondLabelId)
         expect(triggerOf(first).attributes('aria-labelledby')).toBe(`${firstLabelId} ${triggerOf(first).attributes('id')}`)
         expect(triggerOf(second).attributes('aria-labelledby')).toBe(`${secondLabelId} ${triggerOf(second).attributes('id')}`)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     // Заглушка Popover открывает панель только по click: открытие Enter
@@ -323,12 +336,16 @@ describe('SelectSingleForm', () => {
 
     it('null в подписи', () => {
         const errors = []
+        const warnings = []
         const wrapper = mount(SelectSingleForm, {
             props: { label: null, items },
-            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: () => {} } },
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
 
         expect(errors).toEqual([])
+        expect(warnings).toEqual([
+            'Invalid prop: type check failed for prop "label". Expected String with value "null", got Null ',
+        ])
         expect(labelOf(wrapper).text()).toBe('')
         expect(triggerOf(wrapper).exists()).toBe(true)
     })

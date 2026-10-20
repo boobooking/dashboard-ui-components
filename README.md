@@ -67,7 +67,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 Меню `DropdownButtonWithAction` и `HamburgerMenu`, списки `SelectSingleFilter`,
 `SelectSingleForm`, `SelectMultipleFilter` и `SelectMultipleForm`, календари
-`SelectDateIntervalFilter` и `SelectDateIntervalForm` и подсказка `TextPopover`
+`SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`,
+`SelectDateIntervalForm` и подсказка `TextPopover`
 стоят на Popover API браузера: Safari 17+, Chrome 114+, Firefox 125+. В браузерах
 старше меню, списки, календари и подсказка видны в потоке всегда.
 
@@ -247,11 +248,15 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `header` | `String` | обязателен | Подпись поля |
 | `isRequired` | `Boolean` | `false` | Пометка обязательности в заголовке |
 | `isLoading` | `Boolean` | `false` | Индикатор загрузки в заголовке |
-| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует и на поле, и на календарь |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует на календарь и на подпись ластика для скринридера (у самого поля текста нет) |
 
-События: `update:modelValue` — на каждый выбор даты и на очистку ластиком
-(пустой строкой); `changed` — когда новое значение отличается от
-переданного пропса.
+События: `update:modelValue` (дата или пустая строка после ластика)
+и `changed` приходят на каждый выбор пользователя: в том числе на повторный
+выбор уже показанной даты, на набранную в поле дату, которая разобралась,
+и на очистку ластиком. Когда значение меняет родитель, ни одно из событий
+не приходит. Поля диапазона `SelectDateIntervalFilter` и
+`SelectDateIntervalForm` устроены иначе: их `changed` приходит, только когда
+новое значение отличается от переданного пропса.
 
 Календарь, ластик и клавиатура — как у каждого из двух полей
 `SelectDateIntervalFilter` (см. «SelectDateIntervalFilter»).
@@ -269,10 +274,11 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `modelValue` | `String` | `""` | Выбранная дата |
 | `label` | `String` | обязателен | Подпись над полем |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
-| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует и на поле, и на календарь |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует на календарь и на подпись ластика для скринридера (у самого поля текста нет) |
 
-События: `update:modelValue` и `changed`. Календарь, ластик и клавиатура —
-как у `SelectDateFilter` (см. «SelectDateFilter»).
+События: `update:modelValue` и `changed` — когда значение выбрал пользователь,
+как у `SelectDateFilter` (см. «SelectDateFilter»); смена значения родителем
+их не вызывает. Календарь, ластик и клавиатура — тоже как у него.
 
 Подпись связана с полем для скринридера: кнопка календаря называется
 подписью и датой, поле ввода — подписью. Клик по подписи ничего не делает.
@@ -314,7 +320,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 События: `update:dateFrom`, `update:dateTo` — на каждый выбор даты
 в соответствующем поле и на его очистку ластиком (пустой строкой);
 `changed` — когда новое значение отличается от переданного пропса
-(отдельно для каждой из двух дат).
+(отдельно для каждой из двух дат). Повторный выбор уже показанной даты
+событий не вызывает.
 
 Клик по любому месту поля открывает его календарь. Календарь открывается
 в верхнем слое браузера (Popover API): его не обрезает обёртка
@@ -1170,9 +1177,9 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 | `ConfirmationModal` — кнопка отмены | Отмена | Cancel |
 | `DropdownButtonWithAction` — подпись стрелки для скринридера | Открыть меню | Open menu |
 | `HamburgerMenu` — подпись кнопки для скринридера | Открыть меню | Open menu |
-| `SelectDateIntervalFilter`, `SelectDateIntervalForm` — месяцы, дни недели, кнопки календарей | по-русски | in English |
+| `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`, `SelectDateIntervalForm` — месяцы, дни недели, кнопки календарей | по-русски | in English |
 | `SelectDateIntervalFilter`, `SelectDateIntervalForm` — подсказки полей | от / до | from / to |
-| Ластик `Search`, `RussianMobileFilter`, `SelectSingleFilter` и `SelectSingleForm` (язык плагина), `SelectMultipleFilter` и `SelectMultipleForm` (проп `lang`), `SelectDateIntervalFilter` и `SelectDateIntervalForm` — подпись для скринридера | Очистить | Clear |
+| Ластик `Search`, `RussianMobileFilter`, `SelectSingleFilter` и `SelectSingleForm` (язык плагина), `SelectMultipleFilter` и `SelectMultipleForm` (проп `lang`), `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter` и `SelectDateIntervalForm` — подпись для скринридера | Очистить | Clear |
 | `SelectMultipleFilter`, `SelectMultipleForm` — надпись при нескольких выбранных | Выбрано: N | Selected: N |
 | `SelectMultipleFilter`, `SelectMultipleForm` — подсказка и имя поля поиска | Поиск | Search |
 | `SelectMultipleFilter`, `SelectMultipleForm` — нет совпадений | Ничего не найдено | Nothing found |
@@ -1183,8 +1190,8 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 | `TextPopover` — подпись кнопки и имя области | Показать текст / Полный текст | Show text / Full text |
 
 Формат даты — `дд.мм.гггг` в обоих языках: это формат значения, а не текст.
-Неделя начинается с понедельника. Календари `SelectDateIntervalFilter`
-и `SelectDateIntervalForm` берут язык при монтировании: смена языка после
+Неделя начинается с понедельника. Календари `SelectDateFilter`, `SelectDateForm`,
+`SelectDateIntervalFilter` и `SelectDateIntervalForm` берут язык при монтировании: смена языка после
 монтирования в них не отражается.
 
 ## Клавиатурная навигация
@@ -1236,8 +1243,9 @@ Inertia SSR), а серверная разметка гидратируется 
 - `PageCard` на сервере рисует крестик, только если задан `fallback-url`:
   адрес возврата известен только в браузере, и крестик, ведущий на него,
   появляется после монтирования;
-- `SelectDateIntervalFilter` и `SelectDateIntervalForm` загружают Pikaday
-  в браузере при монтировании: календари появляются, когда загрузка
+- `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`
+  и `SelectDateIntervalForm` загружают Pikaday в браузере при монтировании:
+  календари появляются, когда загрузка
   закончится;
 - остальные компоненты рендерятся на сервере так же, как в браузере.
 

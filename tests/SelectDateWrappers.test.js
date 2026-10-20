@@ -162,12 +162,16 @@ describe('SelectDateFilter', () => {
 
     it('null в заголовке', () => {
         const errors = []
+        const warnings = []
         const wrapper = mount(SelectDateFilter, {
             props: { header: null },
-            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: () => {} } },
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
 
         expect(errors).toEqual([])
+        expect(warnings).toEqual([
+            'Invalid prop: type check failed for prop "header". Expected String with value "null", got Null ',
+        ])
         expect(wrapper.getComponent(ElementHeader).text()).toBe('')
         expect(wrapper.findComponent(SelectDate).exists()).toBe(true)
     })
@@ -243,11 +247,15 @@ describe('SelectDateForm', () => {
     })
 
     it('две формы на странице', () => {
+        const errors = []
+        const warnings = []
         const page = mount({
             render: () => h('div', [
                 h(SelectDateForm, { label: 'Дата' }),
                 h(SelectDateForm, { label: 'Срок' }),
             ]),
+        }, {
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
         const [first, second] = page.findAllComponents(SelectDateForm)
         const firstLabelId = labelOf(first).attributes('id')
@@ -258,6 +266,8 @@ describe('SelectDateForm', () => {
         expect(triggerOf(second).attributes('aria-labelledby')).toBe(`${secondLabelId} ${triggerOf(second).attributes('id')}`)
         expect(inputOf(first).attributes('aria-labelledby')).toBe(firstLabelId)
         expect(inputOf(second).attributes('aria-labelledby')).toBe(secondLabelId)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('смена даты: update:modelValue и changed насквозь', async () => {
@@ -291,12 +301,16 @@ describe('SelectDateForm', () => {
 
     it('null в подписи', () => {
         const errors = []
+        const warnings = []
         const wrapper = mount(SelectDateForm, {
             props: { label: null },
-            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: () => {} } },
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
 
         expect(errors).toEqual([])
+        expect(warnings).toEqual([
+            'Invalid prop: type check failed for prop "label". Expected String with value "null", got Null ',
+        ])
         expect(labelOf(wrapper).text()).toBe('')
         expect(wrapper.findComponent(SelectDate).exists()).toBe(true)
     })
