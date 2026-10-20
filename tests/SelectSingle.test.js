@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import SelectSingle from '../src/components/SelectSingle.vue'
+import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
@@ -31,7 +32,7 @@ const DISPLAY = /^bb:(block|inline-block|inline|flex|inline-flex|grid|inline-gri
 
 // attachTo нужен фокусу: элементу вне документа его не дать.
 function mountSelect(props = {}) {
-    return mount(SelectSingle, { props: { header: 'Вендор', items, ...props }, attachTo: document.body })
+    return mount(SelectSingleFilter, { props: { header: 'Вендор', items, ...props }, attachTo: document.body })
 }
 
 function triggerOf(wrapper) {
@@ -69,7 +70,7 @@ async function open(wrapper) {
 describe('SelectSingle', () => {
     it('не падает, если вместо списка пришёл null', () => {
         const errors = []
-        mount(SelectSingle, {
+        mount(SelectSingleFilter, {
             props: { header: 'Вендор', items: null },
             global: { config: { errorHandler: (error) => errors.push(error), warnHandler: () => {} } },
         })
@@ -87,21 +88,24 @@ describe('SelectSingle', () => {
     ])('не падает, если вместо списка пришёл не массив: $name', ({ value }) => {
         const errors = []
         const warnings = []
-        const wrapper = mount(SelectSingle, {
+        const wrapper = mount(SelectSingleFilter, {
             props: { header: 'Вендор', items: value },
             global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
         })
 
         expect(errors).toEqual([])
         expect(wrapper.find('[popovertarget]').exists()).toBe(false)
-        expect(warnings).toHaveLength(1)
-        expect(warnings[0]).toContain('Invalid prop: type check failed for prop "items"')
+        // Предупреждают обёртка и ядро: проп items есть у обоих.
+        expect(warnings).toHaveLength(2)
+        for (const warning of warnings) {
+            expect(warning).toContain('Invalid prop: type check failed for prop "items"')
+        }
     })
 
     it('пропускает элементы-необъекты, выбранный пункт остаётся выбранным', async () => {
         const errors = []
         const warnings = []
-        const wrapper = mount(SelectSingle, {
+        const wrapper = mount(SelectSingleFilter, {
             props: { header: 'Вендор', items: items.slice(0, 2), modelValue: 'b' },
             attachTo: document.body,
             global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
@@ -182,7 +186,7 @@ describe('SelectSingle: пункты пропали при открытом сп
     }
 
     it('стрелки снова прокручивают страницу, а вернувшиеся пункты открываются заново и ходят по новому списку', async () => {
-        const wrapper = mount(SelectSingle, { props: { header: 'Вендор', items }, attachTo: document.body })
+        const wrapper = mount(SelectSingleFilter, { props: { header: 'Вендор', items }, attachTo: document.body })
         wrapper.find('button').element.focus()
         await wrapper.find('button').trigger('click')
         await settle()
@@ -234,7 +238,7 @@ describe('SelectSingle: список на Popover API', () => {
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)
-        expect(wrapper.vm.isOpen).toBe(false)
+        expect(wrapper.findComponent(SelectSingle).vm.isOpen).toBe(false)
     })
 
     it('клик вне списка закрывает его', async () => {
@@ -245,7 +249,7 @@ describe('SelectSingle: список на Popover API', () => {
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)
-        expect(wrapper.vm.isOpen).toBe(false)
+        expect(wrapper.findComponent(SelectSingle).vm.isOpen).toBe(false)
     })
 
     it('прокрутка страницы закрывает список, прокрутка внутри списка — нет', async () => {
@@ -328,8 +332,8 @@ describe('SelectSingle: список на Popover API', () => {
     it('открытие второго списка закрывает первый, id у панелей свои', async () => {
         const Page = {
             render: () => h('div', [
-                h(SelectSingle, { header: 'Вендор', items }),
-                h(SelectSingle, { header: 'Сертификат', items }),
+                h(SelectSingleFilter, { header: 'Вендор', items }),
+                h(SelectSingleFilter, { header: 'Сертификат', items }),
             ]),
         }
         const page = mount(Page, { attachTo: document.body })

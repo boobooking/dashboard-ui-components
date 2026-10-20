@@ -1,5 +1,8 @@
 <template>
-    <div class="bb:flex bb:flex-col bb:grow bb:bg-white">
+    <div class="bb:flex bb:flex-col bb:grow">
+        <!-- Фона у корня нет: его дают рамка фильтра и рамка поля формы.
+             Белый прямоугольник здесь закрасил бы скруглённые углы рамки
+             поля формы. -->
         <div class="bb:relative bb:flex bb:w-full bb:h-full">
             <!-- Список — PopoverPanel под кнопкой: открывает и закрывает его
                  браузер по popovertarget кнопки. Обёртка кнопки занимает
@@ -27,6 +30,7 @@
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
+                        :aria-labelledby="labelledBy ? labelledBy + ' ' + trigger.id : null"
                         class="bb:flex bb:w-full bb:h-full bb:items-center bb:focus-visible:focus-ring bb:cursor-pointer"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
@@ -90,6 +94,13 @@ export default {
         },
         // Язык подписи ластика; без него — язык плагина (CrossButton).
         lang: {
+            type: String,
+            default: null,
+        },
+        // id подписи поля формы. Кнопка называется подписью и своим текстом:
+        // aria-labelledby ссылается на подпись и на саму кнопку. Без него
+        // атрибута нет.
+        labelledBy: {
             type: String,
             default: null,
         },

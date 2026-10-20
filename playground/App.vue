@@ -35,6 +35,10 @@
                 </div>
                 <p>Значения: «{{ adminName }}», «{{ adminEmail }}», «{{ adminPassword }}»</p>
                 <form-input v-model="documentNumber" label="Номер закрывающего документа" :is-required="documentNumber.trim() === ''"/>
+                <!-- SelectSingleForm под полями FormInput: подпись, рамка и высота те же. -->
+                <select-single-form label="Вендор" :items="vendorItems" v-model="formVendor"/>
+                <select-single-form label="Сертификат" :items="longItems" v-model="formCertificate" is-required/>
+                <select-single-form label="Без пунктов" :items="[]"/>
             </div>
         </section>
 
@@ -58,17 +62,21 @@
         </section>
 
         <section>
-            <h2>SelectSingle</h2>
-            <select-single
-                header="Вендор"
-                :items="vendorItems"
-                v-model="vendor"
-                @changed="vendorCommits++"
-            />
+            <h2>SelectSingleFilter</h2>
+            <!-- Фильтр без пунктов рядом с фильтром с пунктами: высота и рамка одинаковые. -->
+            <div class="demo-row">
+                <select-single-filter
+                    header="Вендор"
+                    :items="vendorItems"
+                    v-model="vendor"
+                    @changed="vendorCommits++"
+                />
+                <select-single-filter header="Без пунктов" :items="[]"/>
+            </div>
             <p>Выбрано: {{ vendor === null ? '(ничего)' : vendor }}, запросов: {{ vendorCommits }}</p>
 
             <h3>Длинный список: прокрутка внутри, у нижнего края окна — вверх</h3>
-            <select-single header="Сертификат" :items="longItems" v-model="longItem"/>
+            <select-single-filter header="Сертификат" :items="longItems" v-model="longItem"/>
         </section>
 
         <section>
@@ -341,7 +349,8 @@ import {
     RussianMobileFilter,
     Search,
     SelectDateInterval,
-    SelectSingle,
+    SelectSingleFilter,
+    SelectSingleForm,
     SelectMultiple,
     InfoPill,
     ErrorMessages,
@@ -366,7 +375,8 @@ export default {
         RussianMobileFilter,
         Search,
         SelectDateInterval,
-        SelectSingle,
+        SelectSingleFilter,
+        SelectSingleForm,
         SelectMultiple,
         InfoPill,
         ErrorMessages,
@@ -434,6 +444,8 @@ export default {
             vendor: null,
             vendorCommits: 0,
             longItem: null,
+            formVendor: null,
+            formCertificate: null,
             brandItems: [
                 { id: 'rc', name: 'Royal Canin' },
                 { id: 'eukanuba', name: 'Eukanuba' },

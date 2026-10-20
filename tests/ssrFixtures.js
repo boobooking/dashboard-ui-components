@@ -46,6 +46,7 @@ export const ssrFixtures = {
             withSearch: true,
         },
     },
-    SelectSingle: { props: { header: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
+    SelectSingleFilter: { props: { header: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
+    SelectSingleForm: { props: { label: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
     TextPopover: { props: { text: 'Полный текст сообщения', modelValue: true } },
 }

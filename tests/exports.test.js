@@ -13,7 +13,12 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно девятнадцать компонентов, плагин и downloadFile', () => {
+    // Ядра обёрток …Filter и …Form: проекты берут обёртки.
+    it.each(['SelectSingle'])('%s — ядро, не экспортируется', (name) => {
+        expect(pkg).not.toHaveProperty(name)
+    })
+
+    it('ровно двадцать компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
             'ConfirmationModal',
@@ -32,7 +37,8 @@ describe('публичная поверхность пакета', () => {
             'Search',
             'SelectDateInterval',
             'SelectMultiple',
-            'SelectSingle',
+            'SelectSingleFilter',
+            'SelectSingleForm',
             'TextPopover',
             'dashboardUi',
             'downloadFile',

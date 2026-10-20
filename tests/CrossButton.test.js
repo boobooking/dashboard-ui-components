@@ -8,7 +8,7 @@ import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
 import SelectMultiple from '../src/components/SelectMultiple.vue'
-import SelectSingle from '../src/components/SelectSingle.vue'
+import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
@@ -161,7 +161,7 @@ describe('CrossButton у тех, кто его использует', () => {
         },
         {
             name: 'SelectSingle — ластик',
-            mount: () => mount(SelectSingle, {
+            mount: () => mount(SelectSingleFilter, {
                 props: { header: 'Вендор', items: [{ id: 'a', name: 'Сбер' }], modelValue: 'a' },
                 attachTo: document.body,
             }),

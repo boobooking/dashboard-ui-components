@@ -1,43 +1,43 @@
 <template>
-    <div class="bb-dashboard-ui bb:flex bb:flex-none">
-        <div class="bb:flex bb:w-full bb:flex-col bb:border bb:border-white bb:bg-white">
-            <element-header :text="header" :is-required="isRequired" :is-loading="isLoading"/>
-            <dropdown-button
-                :title="activeItemName"
-                v-model:is-open="isOpen"
-                v-if="hasItems"
-                :has-value="hasValue"
-                :find-selected="activeItemElement"
-                :find-tab-stops="itemStops"
-                @erased="clear"
+    <div class="bb-dashboard-ui bb:flex bb:flex-col bb:grow">
+        <dropdown-button
+            :title="activeItemName"
+            v-model:is-open="isOpen"
+            v-if="hasItems"
+            :has-value="hasValue"
+            :labelled-by="labelledBy"
+            :find-selected="activeItemElement"
+            :find-tab-stops="itemStops"
+            @erased="clear"
+        >
+            <!-- Рамку, фон, скругление и тень списка задаёт панель
+                 DropdownButton; здесь — раскладка пунктов и разделители. -->
+            <div
+                ref="list"
+                class="bb:flex bb:flex-col bb:py-1 bb:divide-y bb:divide-gray-200 bb:divide-dashed"
             >
-                <!-- Рамку, фон, скругление и тень списка задаёт панель
-                     DropdownButton; здесь — раскладка пунктов и разделители. -->
-                <div
-                    ref="list"
-                    class="bb:flex bb:flex-col bb:py-1 bb:divide-y bb:divide-gray-200 bb:divide-dashed"
-                >
-                    <list-element
-                        v-for="item in itemList"
-                        :name="item.name"
-                        :key="item.id"
-                        :is-checked="item.id === modelValue"
-                        @clicked="itemClicked(item)"
-                    />
-                </div>
-            </dropdown-button>
-        </div>
+                <list-element
+                    v-for="item in itemList"
+                    :name="item.name"
+                    :key="item.id"
+                    :is-checked="item.id === modelValue"
+                    @clicked="itemClicked(item)"
+                />
+            </div>
+        </dropdown-button>
     </div>
 </template>
 
 <script>
-import ElementHeader from "./ElementHeader.vue";
 import DropdownButton from "./DropdownButton.vue";
 import ListElement from "./ListElement.vue";
 
+// Ядро выбора одного пункта: кнопка со списком. Заголовок, подпись и рамку
+// рисуют обёртки SelectSingleFilter и SelectSingleForm; пакет ядро
+// не экспортирует. Корень занимает всю высоту и ширину, которые дала
+// обёртка.
 export default {
     components: {
-        ElementHeader,
         DropdownButton,
         ListElement,
     },
@@ -57,17 +57,11 @@ export default {
             type: [String, Number],
             default: null,
         },
-        header: {
+        // id подписи поля формы: SelectSingleForm связывает её с кнопкой
+        // (DropdownButton). У фильтра не задан.
+        labelledBy: {
             type: String,
-            required: true,
-        },
-        isRequired: {
-            type: Boolean,
-            default: false,
-        },
-        isLoading: {
-            type: Boolean,
-            default: false,
+            default: null,
         },
     },
 
