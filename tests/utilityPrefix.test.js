@@ -254,7 +254,7 @@ describe('исключение для panelClass', () => {
     it('утилита без префикса в panel-class вызывающего компонента находится', () => {
         const caller = '<template><popover-panel panel-class="bb:border flex"></popover-panel></template>'
 
-        expect(classTokens(caller, 'PickDay.vue')).toEqual(['bb:border', 'flex'])
+        expect(classTokens(caller, 'SelectDate.vue')).toEqual(['bb:border', 'flex'])
     })
 })
 

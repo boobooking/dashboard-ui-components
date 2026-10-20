@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from 'vue'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import PickDay from '../src/components/PickDay.vue'
+import SelectDate from '../src/components/SelectDate.vue'
 import CrossButton from '../src/components/CrossButton.vue'
 import { formatDay } from '../src/date.js'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
@@ -18,10 +18,10 @@ async function pikadayLoaded() {
     await flushPromises()
 }
 
-describe('PickDay', () => {
+describe('SelectDate', () => {
     it('не падает, если родитель передал null', async () => {
         const errors = []
-        const wrapper = mount(PickDay, {
+        const wrapper = mount(SelectDate, {
             props: { modelValue: null },
             global: { config: { errorHandler: (error) => errors.push(error) } },
         })
@@ -35,7 +35,7 @@ describe('PickDay', () => {
 
     it('календарь создаётся после загрузки pikaday', async () => {
         const errors = []
-        const wrapper = mount(PickDay, {
+        const wrapper = mount(SelectDate, {
             props: { modelValue: '15.03.2026' },
             attachTo: document.body,
             global: { config: { errorHandler: (error) => errors.push(error) } },
@@ -54,7 +54,7 @@ describe('PickDay', () => {
 
     it('значение, пришедшее до загрузки pikaday, — в календаре после загрузки', async () => {
         const errors = []
-        const wrapper = mount(PickDay, {
+        const wrapper = mount(SelectDate, {
             props: { modelValue: '' },
             attachTo: document.body,
             global: { config: { errorHandler: (error) => errors.push(error) } },
@@ -76,7 +76,7 @@ describe('PickDay', () => {
         const errors = []
         const container = document.createElement('div')
         document.body.appendChild(container)
-        const app = createApp(PickDay)
+        const app = createApp(SelectDate)
         app.config.errorHandler = (error) => errors.push(error)
         const vm = app.mount(container)
 
@@ -89,7 +89,7 @@ describe('PickDay', () => {
     })
 })
 
-describe('PickDay: календарь на Popover API', () => {
+describe('SelectDate: календарь на Popover API', () => {
     // Панель — popover="auto" Popover API. Его заменяет tests/popoverStub.js.
     let uninstallPopover
 
@@ -123,7 +123,7 @@ describe('PickDay: календарь на Popover API', () => {
     }
 
     async function mountOpen(props = {}) {
-        const wrapper = mount(PickDay, { props, attachTo: document.body })
+        const wrapper = mount(SelectDate, { props, attachTo: document.body })
         await pikadayLoaded()
         await triggerOf(wrapper).trigger('click')
         await settle()
@@ -177,7 +177,7 @@ describe('PickDay: календарь на Popover API', () => {
     })
 
     it('пока календарь открыт, поле отключено, а ластика нет', async () => {
-        const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
+        const wrapper = mount(SelectDate, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
         await pikadayLoaded()
         expect(wrapper.findComponent(CrossButton).exists()).toBe(true)
         expect(wrapper.get('input').attributes('disabled')).toBeUndefined()
@@ -194,13 +194,13 @@ describe('PickDay: календарь на Popover API', () => {
     // клик, доставшийся им, до popovertarget кнопки не дошёл бы. Сам клик
     // проверяется в браузере, тест закрепляет класс.
     it('<label> с полем не принимает клики: они достаются кнопке', () => {
-        const wrapper = mount(PickDay, { attachTo: document.body })
+        const wrapper = mount(SelectDate, { attachTo: document.body })
 
         expect(wrapper.get('label').classes()).toContain('bb:pointer-events-none')
     })
 
     it('у панели нет утилит отображения', () => {
-        const wrapper = mount(PickDay, { attachTo: document.body })
+        const wrapper = mount(SelectDate, { attachTo: document.body })
 
         expect(panelOf(wrapper).classes().filter((name) => DISPLAY.test(name))).toEqual([])
     })
@@ -208,7 +208,7 @@ describe('PickDay: календарь на Popover API', () => {
     // Панель лежит в DOM внутри обёртки поля и наследует её line-height
     // и cursor: календарь стал бы ниже, а курсор над ним — рукой.
     it('календарь не наследует межстрочный интервал и курсор поля', () => {
-        const wrapper = mount(PickDay, { attachTo: document.body })
+        const wrapper = mount(SelectDate, { attachTo: document.body })
         const panel = panelOf(wrapper).element
 
         expect(panel.closest('.bb\\:leading-none')).toBeNull()
@@ -353,7 +353,7 @@ describe('PickDay: календарь на Popover API', () => {
         })
 
         it('у закрытого календаря стрелки не перехватываются', async () => {
-            const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
+            const wrapper = mount(SelectDate, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
             await pikadayLoaded()
             await triggerOf(wrapper).trigger('click')
             await settle()
@@ -392,14 +392,14 @@ describe('PickDay: календарь на Popover API', () => {
         }
 
         async function mountWithFocusedField() {
-            const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
+            const wrapper = mount(SelectDate, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
             await pikadayLoaded()
             wrapper.get('input').element.focus()
             return wrapper
         }
 
         it('у кнопки календаря кольцо видимого фокуса', () => {
-            const wrapper = mount(PickDay, { attachTo: document.body })
+            const wrapper = mount(SelectDate, { attachTo: document.body })
 
             expect(triggerOf(wrapper).classes()).toEqual(
                 expect.arrayContaining(['bb:focus-visible:focus-ring']),
@@ -507,12 +507,12 @@ describe('PickDay: календарь на Popover API', () => {
 })
 
 async function mountFilled() {
-    const wrapper = mount(PickDay, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
+    const wrapper = mount(SelectDate, { props: { modelValue: '15.03.2026' }, attachTo: document.body })
     await pikadayLoaded()
     return wrapper
 }
 
-describe('PickDay: фокус после ластика', () => {
+describe('SelectDate: фокус после ластика', () => {
     // Фокус на ластике — как после Tab; в happy-dom :focus-visible равен :focus.
     async function pressEraser(wrapper, { visible = true, moveFocusTo = null } = {}) {
         const eraser = wrapper.findComponent(CrossButton)
@@ -568,11 +568,72 @@ describe('PickDay: фокус после ластика', () => {
     })
 })
 
-describe('PickDay: единый фокус', () => {
+describe('SelectDate: единый фокус', () => {
     it('поле даты показывает фокус утилитой пакета без outline-hidden', () => {
-        const classes = mount(PickDay, { props: { modelValue: '' } }).get('input').classes()
+        const classes = mount(SelectDate, { props: { modelValue: '' } }).get('input').classes()
 
         expect(classes).toContain('bb:focus:focus-ring')
         expect(classes).not.toContain('bb:focus:outline-hidden')
+    })
+})
+
+describe('SelectDate: ядро без вида', () => {
+    function mountField(props = {}) {
+        const errors = []
+        const warnings = []
+        const wrapper = mount(SelectDate, {
+            props,
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
+
+        return { wrapper, errors, warnings }
+    }
+
+    it('у ядра нет пропа look', () => {
+        expect(SelectDate.props.look).toBeUndefined()
+    })
+
+    // Отступ на самом поле ввода: кнопка и поле покрывают всё поле, и кольцо
+    // фокуса обоих обводит его целиком.
+    it('отступ текста — на поле ввода', async () => {
+        const { wrapper, errors, warnings } = mountField()
+        await pikadayLoaded()
+
+        expect(wrapper.get('input').classes()).toContain('bb:pl-3')
+        expect(wrapper.classes()).not.toContain('bb:pl-3')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('радиус кнопки и поля берётся из переменной', async () => {
+        const { wrapper, errors, warnings } = mountField()
+        await pikadayLoaded()
+
+        expect(wrapper.get('button[popovertarget]').classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
+        expect(wrapper.get('input').classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('labelledBy: кнопка называется подписью и собой, поле — подписью', async () => {
+        const { wrapper, errors, warnings } = mountField({ labelledBy: 'date-label', modelValue: '15.03.2026' })
+        await pikadayLoaded()
+        const trigger = wrapper.get('button[popovertarget]')
+
+        expect(trigger.attributes('id')).toBeTruthy()
+        expect(trigger.attributes('aria-labelledby')).toBe(`date-label ${trigger.attributes('id')}`)
+        expect(wrapper.get('input').attributes('aria-labelledby')).toBe('date-label')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('без labelledBy атрибутов нет', async () => {
+        const { wrapper, errors, warnings } = mountField({ modelValue: '15.03.2026' })
+        await pikadayLoaded()
+
+        expect(wrapper.get('button[popovertarget]').attributes('aria-labelledby')).toBeUndefined()
+        expect(wrapper.get('input').attributes('aria-labelledby')).toBeUndefined()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 })

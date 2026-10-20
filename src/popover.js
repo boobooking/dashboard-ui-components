@@ -2,7 +2,7 @@
 // поверх страницы, и его не обрезает ни одна обёртка с прокруткой.
 // Внутренний модуль пакета: им ставит на место панель PopoverPanel — меню
 // DropdownButtonWithAction и HamburgerMenu, списки SelectSingle
-// и SelectMultiple и календарь PickDay.
+// и SelectMultiple и календарь SelectDate.
 
 // Зазор от кнопки и отступ от края окна, px.
 const GAP = 4

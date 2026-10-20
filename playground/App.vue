@@ -42,6 +42,8 @@
                 <!-- SelectMultipleForm: список с поиском и обязательное поле. -->
                 <select-multiple-form label="Бренд" :items="brandItems" v-model="formBrands"/>
                 <select-multiple-form label="Мероприятие" :items="eventItems" v-model="formEvents" with-search is-required/>
+                <!-- SelectDateForm: одно поле даты в рамке, без подсказки. -->
+                <select-date-form label="Дата" v-model="formDay"/>
                 <!-- SelectDateIntervalForm: два поля дат, у каждого своя рамка. -->
                 <select-date-interval-form label="Период" v-model:date-from="formDateFrom" v-model:date-to="formDateTo"/>
                 <select-date-interval-form label="Период оплаты" v-model:date-from="formDateFrom" v-model:date-to="formDateTo" is-required/>
@@ -50,10 +52,11 @@
 
         <section>
             <h2>Панель фильтров</h2>
-            <!-- Три фильтра и фильтр без пунктов в одном ряду: высота и рамки одинаковые. -->
+            <!-- Четыре фильтра и фильтр без пунктов в одном ряду: высота и рамки одинаковые. -->
             <div class="demo-row">
                 <select-single-filter header="Вендор" :items="vendorItems" v-model="vendor"/>
                 <select-multiple-filter header="Бренд" :items="brandItems" v-model="brands"/>
+                <select-date-filter header="Дата" v-model="day"/>
                 <select-date-interval-filter header="Интервал" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
                 <select-single-filter header="Без пунктов" :items="[]"/>
             </div>
@@ -365,6 +368,8 @@ import {
     Dot,
     RussianMobileFilter,
     Search,
+    SelectDateFilter,
+    SelectDateForm,
     SelectDateIntervalFilter,
     SelectDateIntervalForm,
     SelectSingleFilter,
@@ -393,6 +398,8 @@ export default {
         Dot,
         RussianMobileFilter,
         Search,
+        SelectDateFilter,
+        SelectDateForm,
         SelectDateIntervalFilter,
         SelectDateIntervalForm,
         SelectSingleFilter,
@@ -453,6 +460,7 @@ export default {
             phone: '',
             phoneCommits: 0,
             search: '',
+            day: '',
             dateFrom: '',
             dateTo: '',
             edgeDateFrom: '',
@@ -469,6 +477,7 @@ export default {
             formCertificate: null,
             formBrands: [],
             formEvents: [],
+            formDay: '',
             formDateFrom: '',
             formDateTo: '',
             brandItems: [

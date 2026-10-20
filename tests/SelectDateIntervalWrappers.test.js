@@ -4,7 +4,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import Dot from '../src/components/Dot.vue'
 import ElementHeader from '../src/components/ElementHeader.vue'
-import PickDay from '../src/components/PickDay.vue'
+import SelectDate from '../src/components/SelectDate.vue'
 import SelectDateInterval from '../src/components/SelectDateInterval.vue'
 import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import SelectDateIntervalForm from '../src/components/SelectDateIntervalForm.vue'
@@ -12,7 +12,7 @@ import SelectDateIntervalForm from '../src/components/SelectDateIntervalForm.vue
 enableAutoUnmount(afterEach)
 
 // Обёртки ядра SelectDateInterval: вид фильтра и вид поля формы. Календари
-// проверяют SelectDateInterval.test.js и PickDay.test.js; здесь — вид
+// проверяют SelectDateInterval.test.js и SelectDate.test.js; здесь — вид
 // обёрток и то, что значения и события проходят сквозь них.
 
 // pikaday загружается в mounted(): дожидаемся загрузки и создания календаря.
@@ -33,30 +33,122 @@ function mountWrapper(component, props, attrs = {}) {
     return { wrapper, errors, warnings }
 }
 
-describe('SelectDateInterval: look ядра', () => {
-    it('валидатор look', () => {
-        const { validator } = SelectDateInterval.props.look
+describe('SelectDateInterval: ядро без разметки', () => {
+    // Слот ядра рисует один узел; поля слота последнего рендера — в fields().
+    function mountCore(props = {}, attrs = {}) {
+        const errors = []
+        const warnings = []
+        let fields = null
+        const wrapper = mount({
+            render: () => h(SelectDateInterval, { ...props, ...attrs }, {
+                default: (slotProps) => {
+                    fields = slotProps
+                    return h('div', { class: 'slot-root' })
+                },
+            }),
+        }, {
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
 
-        expect(validator('x')).toBe(false)
-        expect(validator('filter')).toBe(true)
-        expect(validator('form')).toBe(true)
+        return { wrapper, core: wrapper.getComponent(SelectDateInterval), fields: () => fields, errors, warnings }
+    }
+
+    it('у ядра нет пропа look', () => {
+        expect(SelectDateInterval.props.look).toBeUndefined()
     })
 
-    it('без look раскладка filter', () => {
-        const wrapper = mount(SelectDateInterval)
+    it('передаёт в слот from и to: значение, update и подсказку', () => {
+        const { wrapper, fields, errors, warnings } = mountCore({ dateFrom: '01.03.2026', dateTo: '15.03.2026' })
+        const { from, to } = fields()
 
-        expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb:flex', 'bb:divide-x']))
-        expect(wrapper.classes()).not.toContain('bb:grid-cols-2')
+        expect(wrapper.findAll('.slot-root')).toHaveLength(1)
+        expect(from.value).toBe('01.03.2026')
+        expect(to.value).toBe('15.03.2026')
+        expect(from.placeholder).toBe('от')
+        expect(to.placeholder).toBe('до')
+        expect(typeof from.update).toBe('function')
+        expect(typeof to.update).toBe('function')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
-})
 
-describe('PickDay: look', () => {
-    it('валидатор look', () => {
-        const { validator } = PickDay.props.look
+    it('подсказки на языке ядра', () => {
+        const { fields, errors, warnings } = mountCore({ lang: 'en' })
 
-        expect(validator('x')).toBe(false)
-        expect(validator('filter')).toBe(true)
-        expect(validator('form')).toBe(true)
+        expect(fields().from.placeholder).toBe('from')
+        expect(fields().to.placeholder).toBe('to')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('update меняет значение и даёт update:date… и changed', async () => {
+        const { core, fields, errors, warnings } = mountCore({ dateFrom: '01.03.2026', dateTo: '15.03.2026' })
+
+        fields().from.update('02.03.2026')
+        await flushPromises()
+
+        expect(fields().from.value).toBe('02.03.2026')
+        expect(core.emitted('update:dateFrom')).toEqual([['02.03.2026']])
+        expect(core.emitted('update:dateTo')).toBeUndefined()
+        expect(core.emitted('changed')).toEqual([[]])
+
+        fields().to.update('')
+        await flushPromises()
+
+        expect(fields().to.value).toBe('')
+        expect(core.emitted('update:dateTo')).toEqual([['']])
+        expect(core.emitted('changed')).toEqual([[], []])
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('эхо родителя и новое значение от родителя не дают changed', async () => {
+        const errors = []
+        const warnings = []
+        let fields = null
+        const wrapper = mount({
+            data: () => ({ dateFrom: '01.03.2026' }),
+            render() {
+                return h(SelectDateInterval, {
+                    dateFrom: this.dateFrom,
+                    'onUpdate:dateFrom': (value) => {
+                        this.dateFrom = value
+                    },
+                }, {
+                    default: (slotProps) => {
+                        fields = slotProps
+                        return h('div')
+                    },
+                })
+            },
+        }, {
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
+        const core = wrapper.getComponent(SelectDateInterval)
+
+        fields.from.update('02.03.2026')
+        await flushPromises()
+
+        expect(wrapper.vm.dateFrom).toBe('02.03.2026')
+        expect(core.emitted('changed')).toEqual([[]])
+
+        wrapper.vm.dateFrom = '05.03.2026'
+        await flushPromises()
+
+        expect(fields.from.value).toBe('05.03.2026')
+        expect(core.emitted('changed')).toEqual([[]])
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('атрибуты на ядро не переносятся', () => {
+        const { wrapper, errors, warnings } = mountCore({}, { class: 'ml-2', 'data-test': 'core' })
+        const slotRoot = wrapper.get('.slot-root')
+
+        expect(slotRoot.classes()).toEqual(['slot-root'])
+        expect(slotRoot.attributes('data-test')).toBeUndefined()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 })
 
@@ -71,15 +163,34 @@ describe('SelectDateIntervalFilter', () => {
         expect(warnings).toEqual([])
     })
 
-    it('поля фильтра без скругления у кнопки и поля', () => {
+    // Ядро своей разметки не рисует: строка с линией лежит прямо в столбце
+    // обёртки шириной 18rem.
+    it('строка с линией — разметка обёртки, от и до по половине', () => {
         const { wrapper, errors, warnings } = mountFilter()
+        const [from, to] = wrapper.findAllComponents(SelectDate)
+        const row = from.element.parentElement
 
-        for (const field of wrapper.findAllComponents(PickDay)) {
-            expect(field.classes()).toContain('bb:pl-3')
-            expect(field.get('button[popovertarget]').classes()).not.toContain('bb:rounded-md')
-            expect(field.get('input').classes()).not.toContain('bb:rounded-md')
-            expect(field.get('input').classes()).not.toContain('bb:pl-3')
+        expect(to.element.parentElement).toBe(row)
+        expect([...row.classList]).toEqual(expect.arrayContaining(['bb:flex', 'bb:h-full', 'bb:divide-x', 'bb:divide-gray-200']))
+        expect([...row.parentElement.classList]).toContain('bb:w-72')
+        for (const field of [from, to]) {
+            expect(field.classes()).toEqual(expect.arrayContaining(['bb:flex-1', 'bb:min-w-36']))
+            expect(field.classes()).not.toContain('bb:pl-3')
+            expect(field.get('input').classes()).toContain('bb:pl-3')
         }
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('радиус кнопок и полей берётся из переменной, переменную фильтр не задаёт', () => {
+        const { wrapper, errors, warnings } = mountFilter()
+        const boxes = [wrapper.element, ...wrapper.element.querySelectorAll('div')]
+
+        for (const field of wrapper.findAllComponents(SelectDate)) {
+            expect(field.get('button[popovertarget]').classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
+            expect(field.get('input').classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
+        }
+        expect(boxes.flatMap((box) => [...box.classList]).filter((name) => name.includes('--bb-field-radius'))).toEqual([])
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
@@ -124,7 +235,7 @@ describe('SelectDateIntervalFilter', () => {
         const { wrapper, errors, warnings } = mountFilter({ dateFrom: '01.03.2026', dateTo: '15.03.2026' })
         await pikadayLoaded()
 
-        const [from, to] = wrapper.findAllComponents(PickDay)
+        const [from, to] = wrapper.findAllComponents(SelectDate)
         expect(from.props('modelValue')).toBe('01.03.2026')
         expect(to.props('modelValue')).toBe('15.03.2026')
 
@@ -138,11 +249,12 @@ describe('SelectDateIntervalFilter', () => {
         expect(warnings).toEqual([])
     })
 
-    it('lang насквозь', async () => {
+    it('lang у ядра и у обоих полей', async () => {
         const { wrapper, errors, warnings } = mountFilter({ lang: 'en' })
         await pikadayLoaded()
 
         expect(wrapper.findAll('input').map((input) => input.attributes('placeholder'))).toEqual(['from', 'to'])
+        expect(wrapper.findAllComponents(SelectDate).map((field) => field.props('lang'))).toEqual(['en', 'en'])
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
@@ -164,7 +276,7 @@ describe('SelectDateIntervalFilter', () => {
 
         expect(errors).toEqual([])
         expect(wrapper.getComponent(ElementHeader).text()).toBe('')
-        expect(wrapper.findAllComponents(PickDay)).toHaveLength(2)
+        expect(wrapper.findAllComponents(SelectDate)).toHaveLength(2)
     })
 })
 
@@ -195,13 +307,17 @@ describe('SelectDateIntervalForm', () => {
         expect(warnings).toEqual([])
     })
 
+    // Рамки задают радиус поля: кольцо фокуса кнопки и поля ввода скруглено
+    // под рамку.
     it('кольцо фокуса скруглено под рамку', () => {
         const { wrapper, errors, warnings } = mountForm()
 
-        for (const field of wrapper.findAllComponents(PickDay)) {
+        for (const field of wrapper.findAllComponents(SelectDate)) {
+            expect([...field.element.parentElement.classList]).toContain('bb:[--bb-field-radius:0.375rem]')
+            expect(field.classes()).toContain('bb:flex-1')
             expect(field.classes()).not.toContain('bb:pl-3')
-            expect(field.get('button[popovertarget]').classes()).toContain('bb:rounded-md')
-            expect(field.get('input').classes()).toEqual(expect.arrayContaining(['bb:rounded-md', 'bb:pl-3']))
+            expect(field.get('button[popovertarget]').classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
+            expect(field.get('input').classes()).toEqual(expect.arrayContaining(['bb:rounded-[var(--bb-field-radius,0)]', 'bb:pl-3']))
         }
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
@@ -214,20 +330,28 @@ describe('SelectDateIntervalForm', () => {
 
         expect(labelId).toBeTruthy()
         expect(group.attributes('aria-labelledby')).toBe(labelId)
-        expect(group.findAllComponents(PickDay)).toHaveLength(2)
+        expect(group.classes()).toEqual(expect.arrayContaining(['bb:mt-1', 'bb:grid', 'bb:grid-cols-2', 'bb:gap-3']))
+        expect(group.findAllComponents(SelectDate)).toHaveLength(2)
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
 
-    it('от и до одинаковой ширины', () => {
+    // Ядро своей разметки не рисует: обе рамки лежат прямо в сетке группы.
+    // Отступ от подписи — у группы, у рамок его нет.
+    it('от и до одинаковой ширины: две рамки с одинаковыми классами', () => {
         const { wrapper, errors, warnings } = mountForm()
-        const [from, to] = wrapper.findAllComponents(PickDay)
-        const fromClasses = [...from.element.classList].sort()
-        const toClasses = [...to.element.classList].sort()
+        const group = wrapper.get('[role="group"]').element
+        const frames = wrapper.findAllComponents(SelectDate).map((field) => field.element.parentElement)
+        const [fromClasses, toClasses] = frames.map((frame) => [...frame.classList].sort())
 
+        expect(frames.map((frame) => frame.parentElement)).toEqual([group, group])
+        expect(frames[0]).not.toBe(frames[1])
         expect(fromClasses).toEqual(toClasses)
-        expect(fromClasses).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:border-gray-300']))
-        expect(wrapper.getComponent(SelectDateInterval).classes()).toContain('bb:grid-cols-2')
+        expect(fromClasses).toEqual(expect.arrayContaining([
+            'bb:flex', 'bb:h-9.5', 'bb:w-full', 'bb:rounded-md', 'bb:border', 'bb:border-gray-300',
+            'bb:bg-white', 'bb:shadow-xs', 'bb:text-sm', 'bb:[--bb-field-radius:0.375rem]',
+        ]))
+        expect(fromClasses).not.toContain('bb:mt-1')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
@@ -237,13 +361,14 @@ describe('SelectDateIntervalForm', () => {
         const { wrapper, errors, warnings } = mountForm()
         await pikadayLoaded()
 
-        const [from, to] = wrapper.findAllComponents(PickDay)
+        const [from, to] = wrapper.findAllComponents(SelectDate)
         for (const field of [from, to]) {
             expect(field.findAll('input')).toHaveLength(1)
             expect(field.findAll('button[popovertarget]')).toHaveLength(1)
         }
-        // Значки заголовка и точки вне полей: сравниваются только ядра.
-        expect(wrapper.getComponent(SelectDateInterval).findAll('svg')).toHaveLength(filter.getComponent(SelectDateInterval).findAll('svg').length)
+        // Значки заголовка и точки вне полей: сравниваются только поля дат.
+        const icons = (component) => component.findAllComponents(SelectDate).flatMap((field) => field.findAll('svg'))
+        expect(icons(wrapper)).toHaveLength(icons(filter).length)
         expect(wrapper.findAll('input').map((input) => input.attributes('placeholder'))).toEqual(['от', 'до'])
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
@@ -253,7 +378,7 @@ describe('SelectDateIntervalForm', () => {
         const { wrapper, errors, warnings } = mountForm({ dateFrom: '01.03.2026', dateTo: '15.03.2026' })
         await pikadayLoaded()
 
-        const [, to] = wrapper.findAllComponents(PickDay)
+        const [, to] = wrapper.findAllComponents(SelectDate)
         to.vm.$emit('update:modelValue', '16.03.2026')
         await flushPromises()
 
@@ -287,11 +412,17 @@ describe('SelectDateIntervalForm', () => {
         expect(second.get('[role="group"]').attributes('aria-labelledby')).toBe(secondLabelId)
     })
 
-    it('lang насквозь', async () => {
+    it('lang у ядра и у обоих полей', async () => {
         const { wrapper, errors, warnings } = mountForm({ lang: 'en' })
         await pikadayLoaded()
 
         expect(wrapper.findAll('input').map((input) => input.attributes('placeholder'))).toEqual(['from', 'to'])
+        expect(wrapper.findAllComponents(SelectDate).map((field) => field.props('lang'))).toEqual(['en', 'en'])
+        const headers = wrapper.findAll('.pika-table thead').map((thead) => thead.text())
+        expect(headers).toHaveLength(2)
+        for (const header of headers) {
+            expect(header).toContain('Mon')
+        }
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
@@ -305,6 +436,6 @@ describe('SelectDateIntervalForm', () => {
 
         expect(errors).toEqual([])
         expect(labelOf(wrapper).text()).toBe('')
-        expect(wrapper.findAllComponents(PickDay)).toHaveLength(2)
+        expect(wrapper.findAllComponents(SelectDate)).toHaveLength(2)
     })
 })

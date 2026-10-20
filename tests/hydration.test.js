@@ -39,7 +39,7 @@ async function hydrate(render) {
     let consoleWarns
     try {
         client.mount(container)
-        // PickDay загружает pikaday в mounted(): загрузка заканчивается до
+        // SelectDate загружает pikaday в mounted(): загрузка заканчивается до
         // конца теста, а не после.
         await vi.dynamicImportSettled()
         await flushPromises()

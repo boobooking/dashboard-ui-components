@@ -24,8 +24,8 @@
                         type="button"
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
-                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus-visible:focus-ring"
-                        :class="look === 'form' ? 'bb:rounded-md' : ''"
+                        :aria-labelledby="labelledBy ? labelledBy + ' ' + trigger.id : null"
+                        class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus-visible:focus-ring bb:rounded-[var(--bb-field-radius,0)]"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                              см. README, «Клавиатурная навигация». -->
@@ -37,13 +37,14 @@
                     <label class="bb:flex bb:w-full bb:items-center bb:leading-none bb:min-w-24 bb:pointer-events-none">
                         <!-- Геометрия поля выписана явно: базовый слой пакета обнуляет
                              отступы и рамку, а раньше их неявно задавал @tailwindcss/forms
-                             приложения. py-2 pr-3 и рамка в 1 px — те же значения, что
-                             давал плагин. В виде фильтра левого отступа нет намеренно:
-                             отступ колонки задаёт родитель, а два сложившихся отступа
-                             уводили дату правее заголовка. В виде формы поле само
-                             несёт bb:pl-3. placeholder:text-sm держит подсказку на ступень
-                             крупнее заголовка фильтра; размер получает только подсказка,
-                             выбранная дата остаётся крупнее. -->
+                             приложения. py-2, pl-3, pr-3 и рамка в 1 px — те же значения,
+                             что давал плагин. Отступ слева стоит на самом поле всегда:
+                             родители отступ не задают, кнопка и поле покрывают всё поле,
+                             и кольцо фокуса обоих обводит его целиком. Углы кнопки и поля
+                             скругляет радиус из --bb-field-radius, который задаёт рамка
+                             обёртки; без него углы прямые. placeholder:text-sm держит
+                             подсказку на ступень крупнее заголовка фильтра; размер получает
+                             только подсказка, выбранная дата остаётся крупнее. -->
                         <input
                             :disabled="popupIsOpen"
                             ref="field"
@@ -51,8 +52,8 @@
                             type="text"
                             :value="dayValue"
                             :placeholder="placeholderText"
-                            class="bb:w-full bb:h-full bb:py-2 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:focus-ring"
-                            :class="look === 'form' ? 'bb:pl-3 bb:rounded-md' : ''"
+                            :aria-labelledby="labelledBy || null"
+                            class="bb:w-full bb:h-full bb:py-2 bb:pl-3 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:focus-ring bb:rounded-[var(--bb-field-radius,0)]"
                         />
                     </label>
                 </template>
@@ -77,6 +78,9 @@ import { formatDay, parseDay } from "../date.js";
 import { moveDayFocus, pickOnClick } from "../dayFocus.js";
 import { withLang } from "../lang.js";
 
+// Ядро поля одной даты: поле ввода с календарём, ластик и клавиатура.
+// Заголовок, подпись и рамку рисуют обёртки SelectDateFilter, SelectDateForm
+// и обёртки диапазона дат; пакет ядро не экспортирует.
 export default {
     components: {
         PopoverPanel,
@@ -100,12 +104,13 @@ export default {
             type: String,
             default: "",
         },
-        // Вид поля: form — кольцо фокуса кнопки и поля скруглено под рамку
-        // и начинается от её края, а отступ слева у самого поля.
-        look: {
+        // id подписи поля формы. Кнопка называется подписью и своим текстом
+        // (подсказка и дата): aria-labelledby ссылается на подпись и на саму
+        // кнопку. Поле ввода называется подписью, дата остаётся его значением.
+        // Без него атрибутов нет.
+        labelledBy: {
             type: String,
-            default: "filter",
-            validator: (value) => ["filter", "form"].includes(value),
+            default: null,
         },
     },
 

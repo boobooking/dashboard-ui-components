@@ -8,7 +8,7 @@ import ConfirmationModal from '../src/components/ConfirmationModal.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import PageCard from '../src/components/PageCard.vue'
 import Pagination from '../src/components/Pagination.vue'
-import PickDay from '../src/components/PickDay.vue'
+import SelectDate from '../src/components/SelectDate.vue'
 import Search from '../src/components/Search.vue'
 import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import TextPopover from '../src/components/TextPopover.vue'
@@ -17,7 +17,7 @@ enableAutoUnmount(afterEach)
 
 const inApp = (options) => ({ plugins: [[dashboardUi, options]] })
 
-// pikaday загружается в mounted() PickDay: календарь появляется после загрузки.
+// pikaday загружается в mounted() SelectDate: календарь появляется после загрузки.
 async function pikadayLoaded() {
     await vi.dynamicImportSettled()
     await flushPromises()
@@ -92,7 +92,7 @@ describe('SelectDateInterval: подсказки и оба календаря', 
 
             expect(wrapper.findAll('input').map((input) => input.attributes('placeholder'))).toEqual(testCase.placeholders)
 
-            // Оба вложенных PickDay: шапки их календарей — на языке интервала.
+            // Оба вложенных SelectDate: шапки их календарей — на языке интервала.
             const headers = wrapper.findAll('.pika-table thead').map((thead) => thead.text())
             expect(headers).toHaveLength(2)
             for (const header of headers) {
@@ -111,7 +111,7 @@ describe('недопустимый lang: язык плагина, а не пад
         { name: 'ConfirmationModal, lang en-US и плагин en — English', component: ConfirmationModal, props: { isOpen: true, actionButtonText: 'OK', lang: 'en-US' }, global: inApp({ lang: 'en' }), expected: 'Cancel' },
         { name: 'Pagination, lang de и плагин en — English', component: Pagination, props: { ...paginationProps, lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Showing' },
         { name: 'Pagination, lang пустой и без плагина — русский', component: Pagination, props: { ...paginationProps, lang: '' }, global: {}, expected: 'Показаны результаты' },
-        { name: 'PickDay, lang пустой и без плагина — русский', component: PickDay, props: { lang: '' }, global: {}, expected: 'Пн' },
+        { name: 'SelectDate, lang пустой и без плагина — русский', component: SelectDate, props: { lang: '' }, global: {}, expected: 'Пн' },
         { name: 'SelectDateInterval, lang de и плагин en — English', component: SelectDateIntervalFilter, props: { header: 'Интервал', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Mon' },
         { name: 'DropdownButtonWithAction, lang de и плагин en — English', component: DropdownButtonWithAction, props: { lang: 'de', actions: [{ label: 'Основное', href: '#main' }, { label: 'Действие', href: '#' }] }, global: inApp({ lang: 'en' }), expected: 'Open menu' },
         { name: 'TextPopover, lang de и плагин en — English', component: TextPopover, props: { text: 'Text', lang: 'de' }, global: inApp({ lang: 'en' }), expected: 'Show text' },
@@ -165,7 +165,7 @@ describe('недопустимый lang: крестик PageCard', () => {
     })
 })
 
-describe('PickDay: месяц в шапке календаря', () => {
+describe('SelectDate: месяц в шапке календаря', () => {
     const cases = [
         { name: 'без плагина — русский месяц', global: {}, expected: messages.ru.months, absent: messages.en.months },
         { name: 'плагин en — английский месяц', global: inApp({ lang: 'en' }), expected: messages.en.months, absent: messages.ru.months },
@@ -173,7 +173,7 @@ describe('PickDay: месяц в шапке календаря', () => {
 
     for (const testCase of cases) {
         it(testCase.name, async () => {
-            const wrapper = mount(PickDay, { global: testCase.global })
+            const wrapper = mount(SelectDate, { global: testCase.global })
             await pikadayLoaded()
             // Дата не фиксирована, поэтому ищем месяц среди двенадцати.
             const label = wrapper.get('.pika-label').text()
@@ -184,7 +184,7 @@ describe('PickDay: месяц в шапке календаря', () => {
     }
 })
 
-describe('PickDay: календарь', () => {
+describe('SelectDate: календарь', () => {
     const cases = [
         { name: 'без плагина — ru', global: {}, expected: 'Пн', absent: 'Mon' },
         { name: 'плагин en', global: inApp({ lang: 'en' }), expected: 'Mon', absent: 'Пн' },
@@ -192,7 +192,7 @@ describe('PickDay: календарь', () => {
 
     for (const testCase of cases) {
         it(testCase.name, async () => {
-            const wrapper = mount(PickDay, { global: testCase.global })
+            const wrapper = mount(SelectDate, { global: testCase.global })
             await pikadayLoaded()
             // Pikaday рисует календарь в контейнер, как только создан (bound: false);
             // шапка таблицы — краткие дни недели.

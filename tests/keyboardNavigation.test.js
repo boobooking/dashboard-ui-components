@@ -197,7 +197,7 @@ describe('содержимое кнопок и ссылок', () => {
     for (const testCase of cases) {
         it(testCase.name, async () => {
             const wrapper = testCase.mount()
-            // pikaday загружается в mounted() PickDay.
+            // pikaday загружается в mounted() SelectDate.
             await vi.dynamicImportSettled()
             await flushPromises()
 

@@ -47,7 +47,7 @@ import { holdTabFocus, moveMenuFocus } from "../menuFocus.js";
 // кнопки, закрытие прокруткой и изменением размера окна, стрелки. Кнопку и
 // содержимое рисует вызывающий компонент.
 // Внутренний компонент пакета: на нём стоят меню PopoverMenu, списки
-// SelectSingle и SelectMultiple (DropdownButton) и календарь PickDay.
+// SelectSingle и SelectMultiple (DropdownButton) и календарь SelectDate.
 export default {
     emits: ["update:modelValue", "toggle"],
 

@@ -1,34 +1,18 @@
 <template>
-    <div :class="look === 'form' ? 'bb-dashboard-ui bb:grid bb:grid-cols-2 bb:gap-3' : 'bb-dashboard-ui bb:flex bb:h-full bb:divide-x bb:divide-gray-200'">
-        <pick-day
-            v-model="userDateFrom"
-            :class="look === 'form' ? 'bb:h-9.5 bb:min-w-0 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm' : 'bb:flex-1 bb:min-w-36 bb:pl-3'"
-            :look="look"
-            :placeholder-text="texts.dateFrom"
-            :lang="resolvedLang"
-        />
-        <pick-day
-            v-model="userDateTo"
-            :class="look === 'form' ? 'bb:h-9.5 bb:min-w-0 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm' : 'bb:flex-1 bb:min-w-36 bb:pl-3'"
-            :look="look"
-            :placeholder-text="texts.dateTo"
-            :lang="resolvedLang"
-        />
-    </div>
+    <slot :from="from" :to="to"/>
 </template>
 
 <script>
-import PickDay from "./PickDay.vue";
 import { withLang } from "../lang.js";
 
-// Ядро выбора интервала дат: два поля даты. Заголовок, подпись и рамку
-// рисуют обёртки SelectDateIntervalFilter и SelectDateIntervalForm; пакет
-// ядро не экспортирует. Корень занимает всю высоту и ширину, которые дала
-// обёртка.
+// Ядро выбора интервала дат без своей разметки: значения двух дат и правила
+// событий. В слот по умолчанию ядро отдаёт поля from и to: значение, update
+// с новой датой и подсказку «от» или «до». Поля дат, разделитель, рамки,
+// заголовок и подпись рисуют обёртки SelectDateIntervalFilter
+// и SelectDateIntervalForm; пакет ядро не экспортирует.
 export default {
-    components: {
-        PickDay,
-    },
+    // Своего узла у ядра нет: атрибуты потребителя остаются на обёртке.
+    inheritAttrs: false,
 
     mixins: [withLang],
 
@@ -43,13 +27,6 @@ export default {
             type: String,
             default: "",
         },
-        // Вид ядра: filter — два поля в ряд под заголовком обёртки фильтра,
-        // form — два поля, каждое в своей рамке.
-        look: {
-            type: String,
-            default: "filter",
-            validator: (value) => ["filter", "form"].includes(value),
-        },
     },
 
     data() {
@@ -57,6 +34,29 @@ export default {
             userDateFrom: this.dateFrom,
             userDateTo: this.dateTo,
         };
+    },
+
+    computed: {
+        // Поля слота. update пишет новую дату в локальную копию, события
+        // шлют наблюдатели ниже.
+        from() {
+            return {
+                value: this.userDateFrom,
+                update: (value) => {
+                    this.userDateFrom = value;
+                },
+                placeholder: this.texts.dateFrom,
+            };
+        },
+        to() {
+            return {
+                value: this.userDateTo,
+                update: (value) => {
+                    this.userDateTo = value;
+                },
+                placeholder: this.texts.dateTo,
+            };
+        },
     },
 
     watch: {

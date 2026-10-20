@@ -123,8 +123,8 @@ describe('носители focus-ring', () => {
         }
     })
 
-    it('PickDay: кнопка календаря — focus-visible, поле даты — focus, без focus:outline-hidden', () => {
-        const strings = focusRingStrings('PickDay.vue')
+    it('SelectDate: кнопка календаря — focus-visible, поле даты — focus, без focus:outline-hidden', () => {
+        const strings = focusRingStrings('SelectDate.vue')
         const utilities = strings.map((value) => value.split(/\s+/).filter((token) => token.endsWith('focus-ring')))
 
         expect(utilities).toEqual([['bb:focus-visible:focus-ring'], ['bb:focus:focus-ring']])

@@ -37,6 +37,8 @@ export const ssrFixtures = {
     },
     RussianMobileFilter: { props: { header: 'Телефон', modelValue: '79031234567' } },
     Search: { props: { header: 'Поиск', modelValue: 'запрос' } },
+    SelectDateFilter: { props: { header: 'Дата', modelValue: '01.03.2026' } },
+    SelectDateForm: { props: { label: 'Дата', modelValue: '01.03.2026' } },
     SelectDateIntervalFilter: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
     SelectDateIntervalForm: { props: { label: 'Период', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
     SelectMultipleFilter: {
