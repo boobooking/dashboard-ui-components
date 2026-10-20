@@ -64,7 +64,9 @@
 
 - **Фильтр без пунктов, которые приходят позже.** Пустой `items`, затем `setProps` с пунктами: корень сохраняет `bb:h-18`, кнопка появляется. Тест — Task 1, «пункты пришли позже».
 - **Два поля формы на одной странице.** У подписей разные `id`, каждая кнопка ссылается на свою подпись. Тест — Task 1 и Task 2, «две формы на странице».
-- **Клавиатура в поле формы.** Enter открывает список внутри скруглённой рамки, Escape закрывает его, и фокус возвращается на кнопку. Тест — Task 1, «клавиатура в поле формы».
+- **Клавиатура в поле формы.** Список открывается внутри скруглённой рамки, Escape закрывает его, и фокус возвращается на кнопку.
+  - Unit-тест — Task 1, «клавиатура в поле формы»: открытие кликом. Заглушка Popover в happy-dom открывает панель только по `click`, а не по Enter.
+  - Нативное открытие Enter и пробелом — в приёмке Task 4, в обоих окружениях.
 - **`null` в `label` и `header`.** Компонент рисуется, подпись пустая, ошибок нет. Тест — Task 1, Task 2, Task 3, «null в подписи».
 - **Старый класс на новом фильтре.** Проект ещё передаёт `class="h-18 border border-gray-200 ml-2"`: классы ложатся на корень, вид не меняется. Тест — Task 1, «класс потребителя».
 
@@ -112,7 +114,7 @@
     - `без пунктов рамка остаётся` — рамка есть, кнопки нет;
     - `доступное имя` — без выбора у кнопки `aria-labelledby` равно `${labelId} ${button.id}`, где `labelId` — `id` подписи. С `modelValue: 'a'` значение то же;
     - `две формы на странице` — две копии в одном `mount` обёртки-родителя: `id` подписей разные, у каждой кнопки свой;
-    - `клавиатура в поле формы` — фокус на кнопке, Enter, список открыт; Escape — список закрыт, `document.activeElement` — кнопка. Помощники `settle` и `press` — как в `SelectSingle.test.js`, `installPopoverStub`;
+    - `клавиатура в поле формы` — фокус на кнопке, клик по ней, список открыт; Escape (`press('Escape')`) — список закрыт, `document.activeElement` — кнопка. Помощники `settle`, `press`, `open` и `installPopoverStub` — как в `SelectSingle.test.js`. Заглушка открывает панель только по `click`; открытие Enter и пробелом проверяет Task 4 в браузере. Обработчики компонентов ради теста не меняются;
     - `v-model насквозь`, `класс на корне`, `null в подписи` — как у фильтра.
 - [ ] **Step 3: Запуск** — `npm test -- --dir tests tests/SelectSingleWrappers.test.js`. Ожидается FAIL: файлов обёрток нет.
 - [ ] **Step 4: `DropdownButton`, ядро, две обёртки** — как в Interfaces. Комментарии ядра и `DropdownButton` поправить там, где они говорят о заголовке или фоне.
@@ -131,7 +133,9 @@
   - `SelectSingleFilter` — два фильтра рядом, с пунктами и с `items: []`;
   - `SelectSingleForm` — под `FormInput` секции FormInput: поле с пунктами, обязательное поле, поле без пунктов.
 
-  Импорт из `../dist/index.js` и `components` — по новым именам. Затем `npm run build`: без предупреждений.
+  Импорт из `../dist/index.js` и `components` — по новым именам. Затем две сборки, обе без ошибок и предупреждений:
+  - `npm run build` — сборка библиотеки;
+  - `npx vite build --config vite.playground.config.js` — сборка Playground, обе страницы.
 - [ ] **Step 8: Полный прогон** — тесты и проверка чистого вывода (Global Constraints). Ожидается: все зелёные, `0`, число тестов больше 1103.
 - [ ] **Step 9: Commit** — `git add -A src tests playground/App.vue && git commit -m "feat: разделить SelectSingle на ядро и обёртки фильтра и формы"`.
 
@@ -153,7 +157,7 @@
   - поиск, его ластик и кольцо фокуса поля (`bb:focus:focus-ring`) остаются в ядре: `focusRing.test.js` по-прежнему ждёт один узел в `SelectMultiple.vue`.
 - **`SelectMultipleFilter` / `SelectMultipleForm`** — как обёртки Task 1 плюс пропы `withSearch` и `lang`, переданные ядру.
 
-- [ ] **Step 1: Тесты обёрток (падают)** — `tests/SelectMultipleWrappers.test.js`, те же группы, что в Task 1, плюс:
+- [ ] **Step 1: Тесты обёрток (падают)** — `tests/SelectMultipleWrappers.test.js`, те же группы, что в Task 1 (в «клавиатуре в поле формы» тоже открытие кликом), плюс:
   - `надпись «Выбрано» через lang` — `lang: 'en'`, `modelValue: ['a', 'b']`: надпись кнопки `Selected: 2`;
   - `поиск у формы` — `withSearch`: при открытии фокус в поле поиска;
   - `две формы на странице`;
@@ -165,7 +169,7 @@
   - список в `exports.test.js` обновлён (`двадцать один`), `SelectMultiple` в `it.each` ядер;
   - фикстуры `SelectMultipleFilter` (`header: 'Бренд'`) и `SelectMultipleForm` (`label: 'Бренд'`) с пунктами, `modelValue` и `withSearch: true` прежней фикстуры.
 - [ ] **Step 5: Перенос тестов поведения** — как Step 6 Task 1. Чтение `wrapper.vm.isOpen` и `wrapper.vm.query` (в том числе `SelectMultiple.test.js:944`) идёт у ядра через `findComponent(SelectMultiple)`.
-- [ ] **Step 6: Playground** — секции `SelectMultipleFilter` (рядом с фильтрами Task 1, с поиском) и `SelectMultipleForm` (в форме Task 1). `npm run build` без предупреждений.
+- [ ] **Step 6: Playground** — секции `SelectMultipleFilter` (рядом с фильтрами Task 1, с поиском) и `SelectMultipleForm` (в форме Task 1). Затем `npm run build` и `npx vite build --config vite.playground.config.js`, обе без ошибок и предупреждений.
 - [ ] **Step 7: Полный прогон** — тесты зелёные, чистый вывод `0`.
 - [ ] **Step 8: Commit** — `git commit -m "feat: разделить SelectMultiple на ядро и обёртки фильтра и формы"`.
 
@@ -215,7 +219,7 @@
   - список в `exports.test.js` (`двадцать два`) и `it.each` ядер;
   - фикстуры `SelectDateIntervalFilter` (`header: 'Интервал'`) и `SelectDateIntervalForm` (`label: 'Период'`) с прежними датами `01.03.2026` / `15.03.2026`.
 - [ ] **Step 5: Перенос тестов поведения** — как Step 6 Task 1, монтируется `SelectDateIntervalFilter`. `PickDay.test.js` не меняется.
-- [ ] **Step 6: Playground** — секции `SelectDateIntervalFilter` (в панели фильтров) и `SelectDateIntervalForm` (в форме). `npm run build` без предупреждений.
+- [ ] **Step 6: Playground** — секции `SelectDateIntervalFilter` (в панели фильтров) и `SelectDateIntervalForm` (в форме). Затем `npm run build` и `npx vite build --config vite.playground.config.js`, обе без ошибок и предупреждений.
 - [ ] **Step 7: Полный прогон** — зелёный, чистый вывод `0`. `tests/ssr.test.js` и `tests/hydration.test.js` проходят для всех двадцати двух компонентов.
 - [ ] **Step 8: Commit** — `git commit -m "feat: разделить SelectDateInterval на ядро и обёртки фильтра и формы"`.
 
@@ -236,7 +240,9 @@
 
   Упоминания старых имён в остальном README (`Клавиатурная навигация`, `Языки`, `SSR`) заменяются новыми.
 - [ ] **Step 2: Версия** — `npm version 0.20.0 --no-git-tag-version`. В `package.json` и `package-lock.json` стоит `0.20.0`.
-- [ ] **Step 3: Проверки** — `npm test -- --dir tests` (зелёный, чистый вывод `0`) и `npm run build` (без предупреждений).
+- [ ] **Step 3: Проверки:**
+  - `npm test -- --dir tests` — зелёный, чистый вывод `0`;
+  - `npm run build` и `npx vite build --config vite.playground.config.js` — без предупреждений.
 - [ ] **Step 4: Приёмка в Playground** — `npm run playground`, открыть оба окружения через chrome-devtools (порт — из вывода vite; страницы `index.html` и `host.html`). В каждом окружении:
   - три фильтра одной высоты с серой рамкой, в том числе фильтр без пунктов;
   - три поля формы под `FormInput` одной с ним высоты и рамки:
@@ -244,7 +250,7 @@
     - углы рамки целые;
     - кольцо фокуса видно целиком;
   - «от» и «до» в форме одинаковой ширины;
-  - клавиатура и мышь: открытие, стрелки, выбор, Escape, ластик, поиск, календари — как в 0.19.1;
+  - клавиатура и мышь: открытие, стрелки, выбор, Escape, ластик, поиск, календари — как в 0.19.1. Отдельно — нативное открытие Enter и пробелом у всех трёх полей формы и фильтров (в unit-тестах его не проверить);
   - голое окружение и окружение приложения выглядят одинаково.
 
   Записать результат по каждому пункту в отчёт.
