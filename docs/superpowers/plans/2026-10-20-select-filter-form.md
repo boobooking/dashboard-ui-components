@@ -269,7 +269,7 @@
 ### Task 5: Выпуск `0.20.0` (только с согласия владельца)
 
 - [ ] **Step 1: Согласие.** Основная сессия спрашивает владельца. Без «да» на этом шаге ничего не публикуется.
-- [ ] **Step 2: Слияние.** `git checkout main && git merge --ff-only feature/select-filter-form`, затем `npm test -- --dir tests` и `npm run build` на `main`.
+- [ ] **Step 2: Слияние.** `git checkout main && git merge --ff-only feature/select-filter-form`, затем `npm test -- --dir tests` и `npm run build` на `main`. На macOS после ff-слияния в `main` выполнить `npm run test:browser`; до тега и пуша — успешный прогон Chromium и WebKit.
 - [ ] **Step 3: Тег и пуш.** `git tag v0.20.0 && git push origin main && git push origin v0.20.0`. Публикацию в npm делает GitHub Actions по тегу. Проверка: `npm view @boobooking/dashboard-ui-components dist-tags` показывает `latest: '0.20.0'` (после завершения workflow).
 - [ ] **Step 4: Уборка.** `git branch -d feature/select-filter-form`.
 
