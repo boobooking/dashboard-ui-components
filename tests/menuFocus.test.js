@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { holdTabFocus, moveMenuFocus } from '../src/menuFocus.js'
 
 // Меню из трёх пунктов и кнопка вне меню, с которой фокус уходит в меню.

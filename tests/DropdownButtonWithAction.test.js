@@ -273,14 +273,17 @@ describe('DropdownButtonWithAction без привязки', () => {
                 actions: [
                     main,
                     { label: 'Поменять пароль', href: '#password' },
+                    { label: 'Зафиксировать', onSelect: () => {} },
                     { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
                     { label: 'Удалить', color: 'red', onSelect: () => {} },
                 ],
             },
         })
 
-        const [plain, yellow, red] = menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.classes())
-        expect(plain).toEqual(expect.arrayContaining(['bb:text-gray-700', 'bb:focus:bg-gray-100']))
+        const [plain, plainButton, yellow, red] = menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.classes())
+        const plainClasses = ['bb:text-gray-700', 'bb:hover:bg-gray-100', 'bb:hover:text-gray-900', 'bb:focus:bg-gray-100']
+        expect(plain).toEqual(expect.arrayContaining(plainClasses))
+        expect(plainButton).toEqual(expect.arrayContaining(plainClasses))
         expect(yellow).toEqual(expect.arrayContaining(['bb:bg-yellow-100', 'bb:text-yellow-800', 'bb:hover:bg-yellow-200', 'bb:focus:bg-yellow-200']))
         expect(red).toEqual(expect.arrayContaining(['bb:bg-red-100', 'bb:text-red-800', 'bb:hover:bg-red-200', 'bb:focus:bg-red-200']))
         expect(red).not.toContain('bb:bg-red-400')
