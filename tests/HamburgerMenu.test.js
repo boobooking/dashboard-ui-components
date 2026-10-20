@@ -1,12 +1,14 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import HamburgerMenu from '../src/components/HamburgerMenu.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import { COLOR_NAMES, colorClass } from '../src/colors.js'
 import { dashboardUi } from '../src/plugin.js'
+import ConfirmationModal from '../src/components/ConfirmationModal.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
+import { installSafariFocus } from './safariFocus.js'
 
 enableAutoUnmount(afterEach)
 
@@ -367,5 +369,137 @@ describe('HamburgerMenu: на странице', () => {
 
         expect(document.body.querySelector('[role="menu"]')).toBeNull()
         expect(press('ArrowDown').defaultPrevented).toBe(false)
+    })
+})
+
+// Safari: клик фокус на кнопку и пункт не ставит, а при скрытии панели фокус
+// с пункта уходит на body. Chrome возвращает фокус на кнопку сам.
+describe('HamburgerMenu: фокус после закрытия в Safari', () => {
+    const navigation = []
+    const errors = []
+    const warnings = []
+    const global = {
+        plugins: [[dashboardUi, { navigate: (href) => navigation.push(href) }]],
+        config: { errorHandler: (error) => errors.push(String(error)), warnHandler: (message) => warnings.push(message) },
+    }
+    const link = { label: 'Поменять пароль', href: '#password' }
+    let uninstallSafari
+    let frames
+
+    beforeEach(() => {
+        navigation.length = 0
+        errors.length = 0
+        warnings.length = 0
+        frames = []
+        uninstallSafari = installSafariFocus()
+        vi.stubGlobal('requestAnimationFrame', (callback) => frames.push(callback))
+        vi.stubGlobal('cancelAnimationFrame', () => {})
+        document.body.focus()
+    })
+
+    afterEach(() => {
+        uninstallSafari()
+        vi.unstubAllGlobals()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    function runFrames() {
+        frames.splice(0).forEach((callback) => callback(0))
+    }
+
+    function mountMenu(actions) {
+        return mount(HamburgerMenu, { attachTo: document.body, props: { actions }, global })
+    }
+
+    it.each([
+        { name: 'Escape после стрелок', close: () => press('Escape') },
+        { name: 'Enter на пункте', close: () => document.activeElement.click() },
+    ])('$name — фокус на кнопке меню', async ({ close }) => {
+        const wrapper = mountMenu([link, { label: 'Выйти', onSelect: () => {} }])
+        await openMenu(wrapper)
+        press('ArrowDown')
+        expect(document.activeElement.textContent).toBe('Поменять пароль')
+
+        close()
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(document.activeElement).toBe(buttonOf(wrapper).element)
+    })
+
+    it('клик по пункту-кнопке без предварительного фокуса — фокус на кнопке меню, onSelect один раз', async () => {
+        const onSelect = vi.fn()
+        const wrapper = mountMenu([link, { label: 'Выйти', onSelect }])
+        await openMenu(wrapper)
+        expect(document.activeElement).toBe(document.body)
+
+        await itemsOf(wrapper)[1].trigger('click')
+        await settle()
+
+        expect(onSelect).toHaveBeenCalledTimes(1)
+        expect(document.activeElement).toBe(buttonOf(wrapper).element)
+    })
+
+    it('клик по пункту-ссылке без предварительного фокуса — фокус на кнопке меню, navigate вызван', async () => {
+        const wrapper = mountMenu([link, { label: 'Выйти', onSelect: () => {} }])
+        await openMenu(wrapper)
+
+        await itemsOf(wrapper)[0].trigger('click')
+        await settle()
+
+        expect(navigation).toEqual(['#password'])
+        expect(document.activeElement).toBe(buttonOf(wrapper).element)
+    })
+
+    it('onSelect переводит фокус на другой элемент страницы — фокус там и остаётся', async () => {
+        const field = document.createElement('input')
+        document.body.appendChild(field)
+        onTestFinished(() => field.remove())
+        const wrapper = mountMenu([link, { label: 'Выйти', onSelect: () => field.focus() }])
+        await openMenu(wrapper)
+
+        await itemsOf(wrapper)[1].trigger('click')
+        await settle()
+
+        expect(document.activeElement).toBe(field)
+    })
+
+    // Пункт открывает ConfirmationModal: порядок кадра модалки и toggle
+    // закрытия меню в браузерах разный.
+    it.each(['toggle-first', 'frame-first'])('пункт открывает модалку, порядок %s — фокус на «Отмена», после закрытия на кнопке меню', async (order) => {
+        const Page = {
+            data: () => ({ open: false }),
+            render() {
+                return h('div', [
+                    h(HamburgerMenu, { actions: [link, { label: 'Удалить', onSelect: () => { this.open = true } }] }),
+                    h(ConfirmationModal, {
+                        confirmationHeading: 'Удаление',
+                        confirmationText: 'Удалить?',
+                        actionButtonText: 'Удалить',
+                        isOpen: this.open,
+                        onActionCanceled: () => { this.open = false },
+                    }),
+                ])
+            },
+        }
+        const wrapper = mount(Page, { attachTo: document.body, global })
+        await openMenu(wrapper)
+        runFrames()
+
+        await itemsOf(wrapper)[1].trigger('click')
+        if (order === 'toggle-first') {
+            await flushToggles()
+        }
+        runFrames()
+        const cancel = wrapper.findAll('[role="dialog"] button').find((button) => button.text() === 'Отмена').element
+        expect(document.activeElement).toBe(cancel)
+
+        await flushToggles()
+        expect(document.activeElement).toBe(cancel)
+
+        wrapper.vm.open = false
+        await settle()
+        expect(document.activeElement).toBe(buttonOf(wrapper).element)
     })
 })

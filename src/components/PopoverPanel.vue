@@ -264,6 +264,11 @@ export default {
         onClick() {
             if (this.closeOnClick) {
                 this.close();
+                // Фокус возвращается сразу, не дожидаясь toggle: модалка,
+                // которую открыл пункт, запоминает фокус в своём кадре, а он
+                // может прийти раньше toggle. Флаг возврата сбрасывается,
+                // поздний toggle ничего не делает.
+                this.restoreFocus(this.$refs.panel);
             }
         },
 

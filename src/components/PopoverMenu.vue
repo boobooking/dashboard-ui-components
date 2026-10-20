@@ -10,6 +10,7 @@
         :max-width="224"
         arrows
         close-on-click
+        return-focus
         panel-class="bb:w-56 bb:rounded-md bb:shadow-lg bb:bg-white bb:ring-1 bb:ring-black/5"
         panel-role="menu"
         @update:model-value="$emit('update:modelValue', $event)"
@@ -30,7 +31,7 @@
                     role="menuitem"
                     class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
                     :class="color(item) === null ? 'bb:text-gray-700 bb:hover:bg-gray-100 bb:hover:text-gray-900 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
-                    @click="followLink($event, item.href)"
+                    @click="linkClicked($event, item.href)"
                     v-text="item.label"
                 ></a>
                 <button
@@ -39,7 +40,7 @@
                     role="menuitem"
                     class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
                     :class="color(item) === null ? 'bb:text-gray-700 bb:hover:bg-gray-100 bb:hover:text-gray-900 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
-                    @click="select(item)"
+                    @click="select(item, $event)"
                     v-text="item.label"
                 ></button>
             </template>
@@ -101,11 +102,19 @@ export default {
             return isLinkItem(item);
         },
 
+        // Safari по клику фокус на пункт не ставит: фокус на пункте до закрытия
+        // меню — условие возврата его на кнопку меню (returnFocus панели).
+        linkClicked(event, href) {
+            event.currentTarget.focus({ preventScroll: true });
+            this.followLink(event, href);
+        },
+
         // Кнопка без функции onSelect по клику только закрывает меню.
         // Результат onSelect возвращается обработчику клика: отклонённый
         // Promise асинхронного onSelect Vue передаёт в свой обработчик ошибок,
         // а без return отказ ушёл бы в unhandledrejection.
-        select(item) {
+        select(item, event) {
+            event.currentTarget.focus({ preventScroll: true });
             if (typeof item.onSelect === "function") {
                 return item.onSelect();
             }
