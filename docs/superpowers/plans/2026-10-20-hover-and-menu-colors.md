@@ -66,6 +66,7 @@
     - новый тест: список открыт, фокус в поле поиска, `mousemove` по пункту — фокус в поле.
   - `SelectSingleFilter` и `SelectSingleForm`: список открыт, `document.body.focus()`, клик по пункту — выбор `b`, `document.activeElement` — кнопка списка;
   - стрелка после `mousemove` над другим пунктом — фокус на соседе пункта в фокусе, а не пункта под мышью;
+  - Tab после `mousemove` над другим пунктом — следующая остановка после пункта в фокусе, а не после пункта под мышью;
   - классы `hover` у `ListElement` и у пункта меню без цвета.
 
   Ошибки и предупреждения Vue пустые.
@@ -87,7 +88,8 @@
   - `colors.test.js` — новая строка схемы `menuItem`;
   - `DropdownButtonWithAction.test.js` и `HamburgerMenu.test.js`:
     - цветной пункт имеет `bb:bg-red-100`, `bb:text-red-800`, `bb:hover:bg-red-200`, `bb:focus:bg-red-200` и не имеет `bb:bg-red-400`;
-    - `it.each` по цветам — через `colorClass(color, 'menuItem')`.
+    - `it.each` по цветам — через `colorClass(color, 'menuItem')`;
+    - прежние ожидания `bb:focus:bg-yellow-100` и `bb:focus:bg-red-100` заменяются новыми классами.
 - [ ] **Step 2: Запуск** — FAIL.
 - [ ] **Step 3: Код** — `src/colors.js`.
 - [ ] **Step 4: Прогон** — тесты зелёные, чистый вывод `0`, обе сборки.
