@@ -21,15 +21,15 @@
             <!-- Вид пунктов задаёт только компонент: страница передаёт
                  данные, а не разметку. Цвет текста у каждого пункта
                  свой: у popover в верхнем слое color браузера, а не
-                 страницы. Подсветка — фокус, его ставят и
-                 стрелки, и мышь (moveMenuFocus), поэтому hover-стилей нет. -->
+                 страницы. Пункт подсвечивают наведение (hover)
+                 и фокус; фокус ставят стрелки (moveMenuFocus) и клик. -->
             <template v-for="(item, index) in actionItems" :key="index">
                 <a
                     v-if="isLink(item)"
                     :href="item.href"
                     role="menuitem"
                     class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
-                    :class="color(item) === null ? 'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
+                    :class="color(item) === null ? 'bb:text-gray-700 bb:hover:bg-gray-100 bb:hover:text-gray-900 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
                     @click="followLink($event, item.href)"
                     v-text="item.label"
                 ></a>
@@ -38,7 +38,7 @@
                     type="button"
                     role="menuitem"
                     class="bb:block bb:w-full bb:px-4 bb:py-2 bb:text-sm bb:text-left bb:cursor-pointer bb:focus:outline-hidden"
-                    :class="color(item) === null ? 'bb:text-gray-700 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
+                    :class="color(item) === null ? 'bb:text-gray-700 bb:hover:bg-gray-100 bb:hover:text-gray-900 bb:focus:bg-gray-100 bb:focus:text-gray-900' : colorClass(color(item), 'menuItem')"
                     @click="select(item)"
                     v-text="item.label"
                 ></button>

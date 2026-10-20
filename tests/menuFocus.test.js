@@ -95,25 +95,13 @@ describe('moveMenuFocus', () => {
         }
     })
 
-    it('движение мыши по пункту ставит на него фокус', () => {
+    it('движение мыши по пункту фокус не ставит', () => {
         stop = moveMenuFocus(menu)
         items[0].focus()
 
         items[1].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
 
-        expect(focused()).toBe('B')
-    })
-
-    // Пункт под курсором уже виден: прокрутка к частично видному пункту у края
-    // окна сдвигала бы страницу под мышью, и следующий пункт снова уезжал бы.
-    it('движение мыши ставит фокус без прокрутки к пункту', () => {
-        stop = moveMenuFocus(menu)
-        const focus = vi.spyOn(items[1], 'focus')
-
-        items[1].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
-
-        expect(focus).toHaveBeenCalledWith({ preventScroll: true })
-        expect(focused()).toBe('B')
+        expect(focused()).toBe('A')
     })
 
     it('движение мыши по меню вне пунктов фокус не трогает', () => {
@@ -132,6 +120,16 @@ describe('moveMenuFocus', () => {
         items[1].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
 
         expect(focused()).toBe('')
+    })
+
+    it('стрелка после движения мыши идёт от пункта в фокусе', () => {
+        stop = moveMenuFocus(menu)
+        items[0].focus()
+
+        items[2].dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
+        press('ArrowDown')
+
+        expect(focused()).toBe('B')
     })
 
     it('после снятия стрелки снова прокручивают страницу', () => {

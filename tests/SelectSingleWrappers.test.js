@@ -82,6 +82,26 @@ async function choose(wrapper, name) {
     await settle()
 }
 
+// Клик по пункту без фокуса на нём (фокус на body) возвращает фокус на кнопку.
+describe.each([
+    ['SelectSingleFilter', SelectSingleFilter, { header: 'Вендор' }],
+    ['SelectSingleForm', SelectSingleForm, { label: 'Вендор' }],
+])('%s: клик без фокуса на пункте', (name, component, labelProps) => {
+    it('выбирает пункт и возвращает фокус на кнопку', async () => {
+        const { wrapper, errors, warnings } = mountWrapper(component, { ...labelProps, items })
+        await open(wrapper)
+        document.body.focus()
+
+        await panelOf(wrapper).findAll('button').find((button) => button.text() === 'Второй').trigger('click')
+        await settle()
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([['b']])
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+})
+
 describe('SelectSingle: без вида', () => {
     it.each([['ядро', SelectSingle], ['DropdownButton', DropdownButton]])('у %s нет пропа look', (name, component) => {
         expect(component.props.look).toBeUndefined()

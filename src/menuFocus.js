@@ -1,6 +1,6 @@
-// Фокус по пунктам открытого меню ведут стрелки вверх и вниз и мышь.
-// Подсветка пункта — это фокус, поэтому подсвечен всегда один пункт: тот,
-// на который последней указали клавиатура или мышь.
+// Фокус по пунктам открытого меню ведут стрелки вверх и вниз. Мышь фокус
+// не двигает: наведение только подсвечивает пункт (hover-стили пунктов),
+// а фокус меняют клавиатура и клик.
 // Внутренний модуль пакета: им ходят по спискам SelectSingle и
 // SelectMultiple и меню PopoverMenu — меню DropdownButtonWithAction
 // и HamburgerMenu.
@@ -17,11 +17,10 @@ const ITEMS = 'a[href], button'
 // не прокручивают. Пока фокус вне меню, отсчёт идёт от выбранного пункта,
 // если он есть: вниз — следующий за ним, вверх — предыдущий; без выбранного
 // вниз — первый пункт, вверх — последний. С краёв фокус уходит по кругу.
-// Движение мыши по пункту ставит фокус на него: стрелки продолжают от пункта
-// под курсором. Если задан findStops, стрелки ходят по его результату в его
-// порядке, а мышь ставит фокус только на элементы из него: так в круг войдёт
-// поле поиска над пунктами, а ластик поля, тоже кнопка, останется вне его.
-// Возвращает функцию, снимающую оба слушателя.
+// Если задан findStops, стрелки ходят по его результату в его порядке: так
+// в круг войдёт поле поиска над пунктами, а ластик поля, тоже кнопка,
+// останется вне его.
+// Возвращает функцию, снимающую слушатель.
 export function moveMenuFocus(menu, findSelected = () => null, findStops = null) {
     const onKeydown = (event) => {
         if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
@@ -48,24 +47,10 @@ export function moveMenuFocus(menu, findSelected = () => null, findStops = null)
         items[next].focus()
     }
 
-    // mousemove, а не mouseover: после стрелки курсор стоит на прежнем пункте,
-    // и сдвиг мыши в его пределах должен вернуть фокус под курсор. Без
-    // прокрутки: пункт под курсором уже виден, а прокрутка к частично видному
-    // пункту у края окна сдвигала бы страницу под мышью.
-    const onMousemove = (event) => {
-        const item = event.target.closest(ITEMS)
-
-        if (item !== null && (findStops === null || findStops().includes(item))) {
-            item.focus({ preventScroll: true })
-        }
-    }
-
     document.addEventListener('keydown', onKeydown, true)
-    menu.addEventListener('mousemove', onMousemove)
 
     return () => {
         document.removeEventListener('keydown', onKeydown, true)
-        menu.removeEventListener('mousemove', onMousemove)
     }
 }
 

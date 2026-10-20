@@ -2,7 +2,7 @@
     <button
         type="button"
         @click.prevent="toggle"
-        class="bb:flex bb:w-full bb:bg-white bb:cursor-pointer bb:focus:outline-hidden bb:focus:bg-indigo-100"
+        class="bb:flex bb:w-full bb:bg-white bb:cursor-pointer bb:focus:outline-hidden bb:hover:bg-indigo-100 bb:focus:bg-indigo-100"
     >
         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
              см. README, «Клавиатурная навигация». -->

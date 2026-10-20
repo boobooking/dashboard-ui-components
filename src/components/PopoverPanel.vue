@@ -73,7 +73,7 @@ export default {
             type: Number,
             default: null,
         },
-        // Стрелки и мышь ведут фокус по кнопкам и ссылкам панели.
+        // Стрелки ведут фокус по кнопкам и ссылкам панели.
         arrows: {
             type: Boolean,
             default: false,

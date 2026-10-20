@@ -849,7 +849,7 @@ describe('SelectMultiple: поиск', () => {
         expect(document.activeElement).toBe(fieldOf(wrapper).element)
     })
 
-    it('ластик поля вне стрелок и мыши', async () => {
+    it('ластик поля вне стрелок', async () => {
         const wrapper = mountSelect({ withSearch: true })
         await open(wrapper)
         await fieldOf(wrapper).setValue('й')
@@ -859,9 +859,19 @@ describe('SelectMultiple: поиск', () => {
 
         expect(document.activeElement.textContent).toBe('Первый')
 
-        await searchEraserOf(wrapper).trigger('mousemove')
+        press('ArrowUp')
 
-        expect(document.activeElement.textContent).toBe('Первый')
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
+    it('мышь над пунктом фокус из поля поиска не уводит', async () => {
+        const wrapper = mountSelect({ withSearch: true })
+        await open(wrapper)
+        fieldOf(wrapper).element.focus()
+
+        stopOf(wrapper, 'Третий').dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
     })
 
     it('набор символа на пункте уходит в поле', async () => {

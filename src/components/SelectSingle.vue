@@ -108,7 +108,11 @@ export default {
 
     methods: {
         // Повторный клик по выбранному снимает выбор — так же, как ластик.
+        // Фокус ставится на пункт до закрытия: Safari по клику кнопке фокус не
+        // даёт и оставляет его на body, а PopoverPanel возвращает фокус на
+        // кнопку списка, только если он был в панели.
         itemClicked(item) {
+            this.$refs.list.querySelectorAll("button")[this.itemList.indexOf(item)].focus({ preventScroll: true });
             this.isOpen = false;
             this.$emit("update:modelValue", item.id === this.modelValue ? null : item.id);
             this.$emit("changed");

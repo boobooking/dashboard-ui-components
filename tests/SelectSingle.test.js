@@ -440,6 +440,17 @@ describe('SelectSingle: список на Popover API', () => {
     })
 })
 
+describe('SelectSingle: подсветка пункта', () => {
+    it('пункт подсвечивается и наведением, и фокусом', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+
+        const classes = panelOf(wrapper).findAll('button')[0].classes()
+
+        expect(classes).toEqual(expect.arrayContaining(['bb:hover:bg-indigo-100', 'bb:focus:bg-indigo-100']))
+    })
+})
+
 describe('SelectSingle: Tab внутри списка', () => {
     function pressTab(init = {}) {
         const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true, ...init })
@@ -466,6 +477,28 @@ describe('SelectSingle: Tab внутри списка', () => {
 
         expect(pressTab({ shiftKey: true }).defaultPrevented).toBe(true)
         expect(document.activeElement.textContent).toBe('Третий')
+    })
+
+    it('Tab после движения мыши идёт от пункта в фокусе', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        itemButton(wrapper, 'Первый').element.focus()
+
+        await itemButton(wrapper, 'Третий').trigger('mousemove')
+        pressTab()
+
+        expect(document.activeElement.textContent).toBe('Второй')
+    })
+
+    it('стрелка после движения мыши идёт от пункта в фокусе', async () => {
+        const wrapper = mountSelect()
+        await open(wrapper)
+        itemButton(wrapper, 'Первый').element.focus()
+
+        await itemButton(wrapper, 'Третий').trigger('mousemove')
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Второй')
     })
 
     it('с кнопки фильтра Tab ведёт на первый пункт, Shift+Tab на последний', async () => {
