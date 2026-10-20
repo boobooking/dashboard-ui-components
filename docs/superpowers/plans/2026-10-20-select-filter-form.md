@@ -187,7 +187,12 @@
   - пропы `dateFrom`, `dateTo`, `lang` и `look: { type: String, default: "filter", validator: (value) => ["filter", "form"].includes(value) }`;
   - события и наблюдатели прежние;
   - корень `:class="look === 'form' ? 'bb-dashboard-ui bb:grid bb:grid-cols-2 bb:gap-3' : 'bb-dashboard-ui bb:flex bb:h-full bb:divide-x bb:divide-gray-200'"`;
-  - у каждого `pick-day` `:class="look === 'form' ? 'bb:h-9.5 bb:min-w-0 bb:pl-3 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm' : 'bb:flex-1 bb:min-w-36 bb:pl-3'"`;
+  - у каждого `pick-day` `:class="look === 'form' ? 'bb:h-9.5 bb:min-w-0 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm' : 'bb:flex-1 bb:min-w-36 bb:pl-3'"` и `:look="look"`;
+  - **`PickDay`** (отклонение по приёмке, согласовано с Codex): внутренний проп `look: { type: String, default: "filter", validator }`. Вид `filter` не меняется. В `form`:
+    - кнопка-триггер получает `bb:rounded-md`;
+    - поле ввода получает `bb:pl-3 bb:rounded-md` (литеральные тернарные выражения).
+
+    Так оба носителя кольца фокуса (кнопка и поле ввода — отдельная остановка Tab) обводят всё скруглённое поле, а текст не прилипает к рамке;
   - `ElementHeader` и внешние `div` уходят в обёртку фильтра.
 - **`SelectDateIntervalFilter`:**
   - корень `bb-dashboard-ui bb:flex bb:h-18 bb:border bb:border-gray-200`;
