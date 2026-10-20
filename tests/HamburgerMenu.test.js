@@ -278,9 +278,9 @@ describe('HamburgerMenu: цвета пунктов', () => {
 
         const [plain, yellow, red] = itemsOf(wrapper).map((item) => item.classes())
         expect(plain).toEqual(expect.arrayContaining(['bb:text-gray-700', 'bb:focus:bg-gray-100', 'bb:focus:text-gray-900', 'bb:hover:bg-gray-100', 'bb:hover:text-gray-900']))
-        expect(yellow).toEqual(expect.arrayContaining(['bb:text-yellow-800', 'bb:focus:bg-yellow-100']))
+        expect(yellow).toEqual(expect.arrayContaining(['bb:bg-yellow-100', 'bb:text-yellow-800', 'bb:hover:bg-yellow-200', 'bb:focus:bg-yellow-200']))
         expect(yellow).not.toContain('bb:text-gray-700')
-        expect(red).toEqual(expect.arrayContaining(['bb:text-red-800', 'bb:focus:bg-red-100']))
+        expect(red).toEqual(expect.arrayContaining(['bb:bg-red-100', 'bb:text-red-800', 'bb:hover:bg-red-200', 'bb:focus:bg-red-200']))
         expect(red).not.toContain('bb:bg-red-400')
     })
 

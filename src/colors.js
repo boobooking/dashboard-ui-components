@@ -7,7 +7,8 @@
 //
 // pill — InfoPill и ActionPill; pillHover — ActionPill, пока не идёт
 // работа; button — основная кнопка и стрелка DropdownButtonWithAction;
-// menuItem — пункт PopoverMenu; mark — Dot и полоска строки DataTable.
+// menuItem — пункт PopoverMenu: фон цвета всегда, темнее при наведении
+// и фокусе; mark — Dot и полоска строки DataTable.
 // mark — цвет текста, а не фона: точка красится fill-current, полоска —
 // bb:bg-current, и набор у них один.
 //
@@ -18,42 +19,42 @@ export const COLORS = {
         pill: 'bb:bg-gray-100 bb:text-gray-800',
         pillHover: 'bb:hover:text-gray-600',
         button: 'bb:bg-gray-100 bb:border-gray-300 bb:text-gray-800 bb:hover:bg-gray-200',
-        menuItem: 'bb:text-gray-800 bb:focus:bg-gray-100',
+        menuItem: 'bb:bg-gray-100 bb:text-gray-800 bb:hover:bg-gray-200 bb:focus:bg-gray-200',
         mark: 'bb:text-gray-500',
     },
     green: {
         pill: 'bb:bg-green-100 bb:text-green-800',
         pillHover: 'bb:hover:text-green-600',
         button: 'bb:bg-green-100 bb:border-green-300 bb:text-green-800 bb:hover:bg-green-200',
-        menuItem: 'bb:text-green-800 bb:focus:bg-green-100',
+        menuItem: 'bb:bg-green-100 bb:text-green-800 bb:hover:bg-green-200 bb:focus:bg-green-200',
         mark: 'bb:text-green-500',
     },
     yellow: {
         pill: 'bb:bg-yellow-100 bb:text-yellow-800',
         pillHover: 'bb:hover:text-yellow-600',
         button: 'bb:bg-yellow-100 bb:border-yellow-300 bb:text-yellow-800 bb:hover:bg-yellow-200',
-        menuItem: 'bb:text-yellow-800 bb:focus:bg-yellow-100',
+        menuItem: 'bb:bg-yellow-100 bb:text-yellow-800 bb:hover:bg-yellow-200 bb:focus:bg-yellow-200',
         mark: 'bb:text-yellow-500',
     },
     red: {
         pill: 'bb:bg-red-100 bb:text-red-800',
         pillHover: 'bb:hover:text-red-600',
         button: 'bb:bg-red-100 bb:border-red-300 bb:text-red-800 bb:hover:bg-red-200',
-        menuItem: 'bb:text-red-800 bb:focus:bg-red-100',
+        menuItem: 'bb:bg-red-100 bb:text-red-800 bb:hover:bg-red-200 bb:focus:bg-red-200',
         mark: 'bb:text-red-500',
     },
     indigo: {
         pill: 'bb:bg-indigo-100 bb:text-indigo-800',
         pillHover: 'bb:hover:text-indigo-600',
         button: 'bb:bg-indigo-100 bb:border-indigo-300 bb:text-indigo-800 bb:hover:bg-indigo-200',
-        menuItem: 'bb:text-indigo-800 bb:focus:bg-indigo-100',
+        menuItem: 'bb:bg-indigo-100 bb:text-indigo-800 bb:hover:bg-indigo-200 bb:focus:bg-indigo-200',
         mark: 'bb:text-indigo-500',
     },
     purple: {
         pill: 'bb:bg-purple-100 bb:text-purple-800',
         pillHover: 'bb:hover:text-purple-600',
         button: 'bb:bg-purple-100 bb:border-purple-300 bb:text-purple-800 bb:hover:bg-purple-200',
-        menuItem: 'bb:text-purple-800 bb:focus:bg-purple-100',
+        menuItem: 'bb:bg-purple-100 bb:text-purple-800 bb:hover:bg-purple-200 bb:focus:bg-purple-200',
         mark: 'bb:text-purple-500',
     },
 }

@@ -25,7 +25,7 @@ describe('список цветов', () => {
             pill: `bb:bg-${name}-100 bb:text-${name}-800`,
             pillHover: `bb:hover:text-${name}-600`,
             button: `bb:bg-${name}-100 bb:border-${name}-300 bb:text-${name}-800 bb:hover:bg-${name}-200`,
-            menuItem: `bb:text-${name}-800 bb:focus:bg-${name}-100`,
+            menuItem: `bb:bg-${name}-100 bb:text-${name}-800 bb:hover:bg-${name}-200 bb:focus:bg-${name}-200`,
             mark: `bb:text-${name}-500`,
         })
     })
