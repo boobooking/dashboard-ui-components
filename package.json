@@ -27,6 +27,7 @@
     "scripts": {
         "build": "vite build",
         "test": "vitest run --passWithNoTests",
+        "test:browser": "npm run build && playwright test",
         "playground": "npm run build && vite --config vite.playground.config.js"
     },
     "peerDependencies": {
@@ -38,6 +39,7 @@
     },
     "devDependencies": {
         "@inertiajs/vue3": "3.6.1",
+        "@playwright/test": "1.63.0",
         "@tailwindcss/forms": "^0.5.10",
         "@tailwindcss/vite": "^4.3.3",
         "@vitejs/plugin-vue": "^6.0.8",
