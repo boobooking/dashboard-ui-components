@@ -154,6 +154,13 @@ for (const file of pages) {
                 await plain.hover()
                 await expectColor(plain, 'background-color', 'gray-100')
             })
+
+            test('жёлтый в фокусе темнее', async ({ page }) => {
+                await openMenuByClick(page, hamburgerButton(page))
+                await away(page)
+                await arrowTo(page, 'Выйти на всех устройствах')
+                await expectColor(menuItem(page, 'Выйти на всех устройствах'), 'background-color', 'yellow-200')
+            })
         })
 
         test.describe('меню строки таблицы', () => {

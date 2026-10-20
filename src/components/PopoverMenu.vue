@@ -113,6 +113,7 @@ export default {
         // Результат onSelect возвращается обработчику клика: отклонённый
         // Promise асинхронного onSelect Vue передаёт в свой обработчик ошибок,
         // а без return отказ ушёл бы в unhandledrejection.
+        // Фокус на пункт — по той же причине, что у ссылки (linkClicked).
         select(item, event) {
             event.currentTarget.focus({ preventScroll: true });
             if (typeof item.onSelect === "function") {

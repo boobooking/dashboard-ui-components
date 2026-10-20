@@ -6,11 +6,12 @@ export const pages = ['index.html', 'host.html']
 // тест с ними падает.
 export const test = base.extend({
     consoleProblems: [async ({ page }, use) => {
-        // Состояние последнего toggle панели: openMenu по нему узнаёт, что
-        // слушатели меню уже стоят (см. openMenu).
+        // Состояние toggle каждой панели по её id: waitForMenuReady по нему
+        // узнаёт, что слушатели меню уже стоят (см. waitForMenuReady).
         await page.addInitScript(() => {
+            window.panelStates = {}
             document.addEventListener('toggle', (event) => {
-                window.lastPanelState = event.newState
+                window.panelStates[event.target.id] = event.newState
             }, true)
         })
         const problems = []
@@ -47,11 +48,13 @@ export const menuItem = (page, text) =>
 // Меню открыто и готово к клавишам. Слушатель стрелок панель ставит по
 // событию toggle, которое браузер присылает позже открытия; стрелка до него
 // прокручивает страницу, и панель закрывается по прокрутке. Состояние toggle
-// запоминает init-скрипт фикстуры: в одной задаче с ним панель ставит свои
-// слушатели, поэтому после ответа evaluate клавиши уже доходят.
+// запоминает по id панели init-скрипт фикстуры: в одной задаче с ним панель
+// ставит свои слушатели, поэтому после ответа evaluate клавиши уже доходят.
+// Ждём состояние той панели, что открыта сейчас, а не последнюю в странице.
 export async function waitForMenuReady(page) {
     await expect(openPanel(page)).toBeVisible()
-    await expect.poll(() => page.evaluate(() => window.lastPanelState)).toBe('open')
+    const id = await openPanel(page).getAttribute('id')
+    await expect.poll(() => page.evaluate((panelId) => window.panelStates[panelId], id)).toBe('open')
 }
 
 // Кнопка меню в зоне видимости, и события прокрутки уже доставлены: событие
@@ -70,8 +73,8 @@ export async function openMenuByClick(page, trigger) {
     await waitForMenuReady(page)
 }
 
-// Стрелки вниз до пункта: с фокусом на кнопке меню первая стрелка ставит его
-// на первый пункт.
+// Стрелки вниз до пункта: пока фокус вне панели, первая стрелка ставит его
+// на первый пункт (в WebKit открытое мышью меню оставляет фокус на body).
 export async function arrowTo(page, text) {
     const labels = await openPanel(page).locator('a, button').allTextContents()
     const index = labels.findIndex((label) => label.includes(text))
@@ -99,5 +102,9 @@ export async function expectColor(locator, property, name) {
     const expected = name === 'white'
         ? 'rgb(255, 255, 255)'
         : await tokenColor(locator, name, property)
+    // Отсутствующий токен `--bb-color-*` даёт пустое значение или прозрачный
+    // цвет: такой тест должен падать, а не проходить.
+    expect(expected, `токен --bb-color-${name}`).not.toBe('')
+    expect(expected, `токен --bb-color-${name}`).not.toBe('rgba(0, 0, 0, 0)')
     await expect(locator).toHaveCSS(property, expected)
 }

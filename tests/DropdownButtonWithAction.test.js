@@ -1059,21 +1059,29 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         config: { errorHandler: (error) => errors.push(String(error)), warnHandler: (message) => warnings.push(message) },
     }
     const link = { label: 'Поменять пароль', href: '#password' }
+    const withoutNavigate = {
+        plugins: [dashboardUi],
+        config: global.config,
+    }
     let uninstallSafari
     let frames
+    let wrappers
 
     beforeEach(() => {
         navigation.length = 0
         errors.length = 0
         warnings.length = 0
         frames = []
+        wrappers = []
         uninstallSafari = installSafariFocus()
         vi.stubGlobal('requestAnimationFrame', (callback) => frames.push(callback))
         vi.stubGlobal('cancelAnimationFrame', () => {})
         document.body.focus()
     })
 
+    // Предупреждения Vue при размонтировании тоже попадают в проверку.
     afterEach(() => {
+        wrappers.forEach((wrapper) => wrapper.unmount())
         uninstallSafari()
         vi.unstubAllGlobals()
         expect(errors).toEqual([])
@@ -1100,8 +1108,10 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         frames.splice(0).forEach((callback) => callback(0))
     }
 
-    function mountMenu(actions) {
-        return mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, ...actions] }, global })
+    function mountMenu(actions, mountGlobal = global) {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main, ...actions] }, global: mountGlobal })
+        wrappers.push(wrapper)
+        return wrapper
     }
 
     it.each([
@@ -1144,6 +1154,34 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         expect(document.activeElement).toBe(arrowOf(wrapper).element)
     })
 
+    it('Enter на пункте-кнопке — фокус на кнопке меню, onSelect один раз', async () => {
+        const onSelect = vi.fn()
+        const wrapper = mountMenu([link, { label: 'Выйти', onSelect }])
+        await openFromBody(wrapper)
+        press('ArrowDown')
+        press('ArrowDown')
+        expect(document.activeElement.textContent).toBe('Выйти')
+
+        document.activeElement.click()
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(onSelect).toHaveBeenCalledTimes(1)
+        expect(document.activeElement).toBe(arrowOf(wrapper).element)
+    })
+
+    it('клик по пункту-ссылке без navigate — фокус на кнопке меню, ошибок нет', async () => {
+        const wrapper = mountMenu([link, { label: 'Выйти', onSelect: () => {} }], withoutNavigate)
+        await openFromBody(wrapper)
+
+        await menuItems(wrapper)[0].trigger('click')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(navigation).toEqual([])
+        expect(document.activeElement).toBe(arrowOf(wrapper).element)
+    })
+
     it('onSelect переводит фокус на другой элемент страницы — фокус там и остаётся', async () => {
         const field = document.createElement('input')
         document.body.appendChild(field)
@@ -1176,6 +1214,7 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
             },
         }
         const wrapper = mount(Page, { attachTo: document.body, global })
+        wrappers.push(wrapper)
         await openFromBody(wrapper)
         runFrames()
 
@@ -1190,8 +1229,9 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         await flushToggles()
         expect(document.activeElement).toBe(cancel)
 
-        wrapper.vm.open = false
+        await wrapper.findAll('[role="dialog"] button').find((button) => button.text() === 'Отмена').trigger('click')
         await settle()
+        expect(wrapper.vm.open).toBe(false)
         expect(document.activeElement).toBe(arrowOf(wrapper).element)
     })
 })

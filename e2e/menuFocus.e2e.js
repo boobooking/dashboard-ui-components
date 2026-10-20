@@ -10,6 +10,7 @@ const menus = [
     {
         name: 'DropdownButtonWithAction',
         trigger: (page) => buttonAfterHeading(page, 'h3', 'Несколько действий'),
+        counter: (page) => page.locator('p', { hasText: /^Выбрано действий: \d+, последний переход/ }),
         keyboardItem: 'Отправить письмо',
         buttonItem: 'Отправить письмо',
         linkItem: 'Поменять пароль',
@@ -18,12 +19,20 @@ const menus = [
     {
         name: 'HamburgerMenu',
         trigger: hamburgerButton,
+        counter: (page) => page.locator('p', { hasText: /^Выбрано действий: \d+$/ }),
         keyboardItem: 'Выйти на всех',
         buttonItem: 'Выйти на всех',
         linkItem: 'Поменять пароль',
         href: '#password',
     },
 ]
+
+// Счётчик выбранных действий Playground у проверяемого меню: по нему видно,
+// что пункт действительно выбран.
+const selectedCount = async (page, menu) => {
+    const text = await menu.counter(page).textContent()
+    return Number(/Выбрано действий: (\d+)/.exec(text)[1])
+}
 
 const modalMenuTrigger = (page) => buttonAfterHeading(page, 'h2', 'ConfirmationModal', 3)
 
@@ -47,7 +56,9 @@ for (const file of pages) {
                 test('выбор пункта-кнопки мышью: фокус на кнопке меню', async ({ page }) => {
                     const trigger = menu.trigger(page)
                     await openMenuByClick(page, trigger)
+                    const before = await selectedCount(page, menu)
                     await menuItem(page, menu.buttonItem).click()
+                    await expect.poll(() => selectedCount(page, menu)).toBe(before + 1)
                     await expect(openPanel(page)).toHaveCount(0)
                     await expect(trigger).toBeFocused()
                 })
@@ -67,13 +78,18 @@ for (const file of pages) {
                     const trigger = menu.trigger(page)
                     await openMenuByClick(page, trigger)
                     await arrowTo(page, menu.keyboardItem)
+                    const before = await selectedCount(page, menu)
                     await page.keyboard.press('Enter')
+                    await expect.poll(() => selectedCount(page, menu)).toBe(before + 1)
                     await expect(openPanel(page)).toHaveCount(0)
                     await expect(trigger).toBeFocused()
                 })
             })
         }
 
+        // Порядок «кадр модалки раньше toggle» (restoreFocus сразу после
+        // close() в PopoverPanel.onClick) охраняют модульные тесты обоих
+        // порядков: настоящий браузер выставить этот порядок не может.
         test.describe('пункт меню открывает ConfirmationModal', () => {
             const cancel = (page) => page.getByRole('button', { name: 'Отмена' })
 
@@ -98,6 +114,8 @@ for (const file of pages) {
                 await expect(trigger).toBeFocused()
             })
 
+            // Проходит и на старом коде: кнопка меню в фокусе уже до открытия,
+            // и браузер возвращает фокус сам.
             test('всё клавиатурой: фокус на «Отмена», после Escape модалки на кнопке меню', async ({ page }) => {
                 const trigger = modalMenuTrigger(page)
                 await scrollToTrigger(page, trigger)
