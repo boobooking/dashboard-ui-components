@@ -97,6 +97,11 @@
   - рамка (классы из Global Constraints, плюс `bb:flex bb:flex-col`), в ней ядро с `:labelled-by="labelId"`.
 - **Обе обёртки** передают значение и события как `:model-value="modelValue"` и `@update:model-value="$emit('update:modelValue', $event)"`, плюс `@changed="$emit('changed')"`. `emits: ["update:modelValue", "changed"]`. `class` и прочие атрибуты ложатся на корень — `inheritAttrs` по умолчанию.
 - **Produces для Task 2:** `DropdownButton.labelledBy` и раскладка обёрток — образец для `SelectMultiple`.
+- **Уточнение по итоговому ревью** (согласовано с Codex, PLAN-004):
+  - внутренний проп `look: { type: String, default: "filter", validator }` у ядер `SelectSingle` и `SelectMultiple` и у `DropdownButton`; ядра передают его как `:look="look"`;
+  - обёртки `…Form` передают `look="form"`;
+  - в `form` кнопка `DropdownButton` получает `bb:rounded-md` (литеральное тернарное выражение);
+  - в `filter` классы прежние.
 
 - [ ] **Step 1: База** — `W=…; mkdir -p "$W"; git rev-parse HEAD > "$W/base-sha"; npm test -- --dir tests 2>&1 | grep -E 'Test Files|Tests '`. Ожидается `46 passed`, `1103 passed`.
 - [ ] **Step 2: Тесты обёрток (падают)** — `tests/SelectSingleWrappers.test.js`, `describe('SelectSingleFilter')` и `describe('SelectSingleForm')`. Пункты `[{ id: 'a', name: 'Первый' }, { id: 'b', name: 'Второй' }]`.
