@@ -272,3 +272,158 @@
 - [ ] **Step 2: Слияние.** `git checkout main && git merge --ff-only feature/select-filter-form`, затем `npm test -- --dir tests` и `npm run build` на `main`.
 - [ ] **Step 3: Тег и пуш.** `git tag v0.20.0 && git push origin main && git push origin v0.20.0`. Публикацию в npm делает GitHub Actions по тегу. Проверка: `npm view @boobooking/dashboard-ui-components dist-tags` показывает `latest: '0.20.0'` (после завершения workflow).
 - [ ] **Step 4: Уборка.** `git branch -d feature/select-filter-form`.
+
+---
+
+## Редакция 2 (после показа Тиму, 2026-10-20)
+
+Tasks 1–4 выполнены по редакции 1 спеки (головной коммит `be62f51`). Тим изменил разделение: ядро — только поведение, обёртка — весь вид; у ядер нет переключателей вида; разделитель и рамки полей диапазона — часть обёртки; добавляются `SelectDateFilter` и `SelectDateForm`. Спека — редакция 2. Tasks 6–9 переделывают код на той же ветке; Task 5 (выпуск) выполняется после Task 9.
+
+**Global Constraints редакции 2** (дополняют и заменяют противоречащие строки выше):
+
+- **Переключателей вида нет.** У ядер `SelectSingle`, `SelectMultiple`, `SelectDate`, `SelectDateInterval` и у `DropdownButton` пропа `look` нет. Классы, отличающие фильтр от формы, живут только в обёртках.
+- **Скругление.**
+  - Обёртка `…Form` задаёт на рамке поля `bb:[--bb-field-radius:0.375rem]`; обёртки `…Filter` переменную не задают.
+  - Кнопка `DropdownButton`, а также кнопка-триггер и поле ввода `SelectDate` всегда несут `bb:rounded-[var(--bb-field-radius,0)]`.
+- **Отступ текста поля даты** — `bb:pl-3` на поле ввода `SelectDate`; родители отступ не задают.
+- **Экспорт:** двадцать четыре компонента. `SelectSingle`, `SelectMultiple`, `SelectDate`, `SelectDateInterval` и `PickDay` не экспортируются.
+- **`SelectDateInterval`** — ядро без разметки:
+  - `inheritAttrs: false`;
+  - слот по умолчанию со свойствами `from` и `to`, у каждого `{ value, update, placeholder }`;
+  - обёртки передают `lang` и ядру, и каждому `SelectDate`;
+  - `v-bind` без аргумента запрещён `tests/utilityPrefix.test.js`, поэтому поля слота привязываются явно.
+- **Доступность `SelectDate` с `labelledBy`:**
+  - кнопка-триггер — `aria-labelledby="<id подписи> <id кнопки>"`;
+  - поле ввода — `aria-labelledby="<id подписи>"`;
+  - без `labelledBy` атрибутов нет.
+
+### Task 6: `SelectSingle`, `SelectMultiple` — без `look`, радиус из переменной
+
+**Files:**
+- Modify: `src/components/DropdownButton.vue`, `SelectSingle.vue`, `SelectMultiple.vue`, `SelectSingleForm.vue`, `SelectMultipleForm.vue`
+- Test: `tests/SelectSingleWrappers.test.js`, `tests/SelectMultipleWrappers.test.js` и тесты, проверявшие `look` у этих ядер и `DropdownButton`.
+
+**Interfaces:**
+- `DropdownButton`: проп `look` удалён; у кнопки-триггера литеральный класс `bb:rounded-[var(--bb-field-radius,0)]` без условия. `labelledBy` и прежнее поведение — как есть.
+- Ядра: проп `look` удалён, `:look` больше не передаётся.
+- `SelectSingleForm`, `SelectMultipleForm`: `look="form"` убран; на рамке поля добавлен `bb:[--bb-field-radius:0.375rem]`.
+
+- [ ] **Step 1: Тесты (падают):**
+  - у рамки формы класс `bb:[--bb-field-radius:0.375rem]`;
+  - у кнопки-триггера и в фильтре, и в форме класс `bb:rounded-[var(--bb-field-radius,0)]`;
+  - у корня и рамок фильтра нет класса с `--bb-field-radius`;
+  - у ядер и `DropdownButton` нет пропа `look`: `expect(SelectSingle.props.look).toBeUndefined()`, то же для `SelectMultiple` и `DropdownButton`.
+
+  Тесты валидатора `look` удаляются, сценарии поведения остаются. Ошибки и предупреждения Vue проверяются пустыми.
+- [ ] **Step 2: Запуск** — FAIL.
+- [ ] **Step 3: Код** — как в Interfaces.
+- [ ] **Step 4: Прогон:**
+  - тесты зелёные, чистый вывод `0`, `focusRing.test.js` без изменений числа носителей;
+  - `npm run build` и `npx vite build --config vite.playground.config.js` — без предупреждений.
+- [ ] **Step 5: Commit** — `git commit -m "refactor: убрать переключатель вида из ядер списков"`.
+
+### Task 7: ядро `SelectDate`, `SelectDateFilter`, `SelectDateForm`
+
+**Files:**
+- Rename: `src/components/PickDay.vue` → `src/components/SelectDate.vue` (`git mv`), `tests/PickDay.test.js` → `tests/SelectDate.test.js`
+- Create: `src/components/SelectDateFilter.vue`, `src/components/SelectDateForm.vue`, `tests/SelectDateWrappers.test.js`
+- Modify:
+  - `src/components/SelectDateInterval.vue` (импорт `SelectDate`), `src/index.js`, `playground/App.vue`;
+  - тесты, импортирующие `PickDay`: `keyboardNavigation`, `i18n`, `hydration`, `utilityPrefix`, `focusRing` (имя файла в списке носителей), `exports`;
+  - `tests/ssrFixtures.js`.
+
+**Interfaces:**
+- **Ядро `SelectDate`:**
+  - пропы как у `PickDay` минус `look` плюс `labelledBy: { type: String, default: null }`; события как у `PickDay`;
+  - поле ввода всегда несёт `bb:pl-3` и `bb:rounded-[var(--bb-field-radius,0)]`; кнопка-триггер — `bb:rounded-[var(--bb-field-radius,0)]`;
+  - кнопка-триггер: `:aria-labelledby="labelledBy ? labelledBy + ' ' + trigger.id : null"`; поле ввода: `:aria-labelledby="labelledBy || null"`;
+  - комментарий об отступе поля ввода переписывается: отступ стоит на поле ввода всегда.
+- **`SelectDateFilter`:**
+  - корень `bb-dashboard-ui bb:flex bb:w-fit bb:h-18 bb:border bb:border-gray-200`;
+  - внутри `bb:flex bb:border bb:border-white`, затем столбец `bb:flex bb:flex-col bb:w-36 bb:bg-white bb:h-full`: `element-header` и `select-date` (`class="bb:flex-1"`);
+  - пропы `modelValue` (String, `""`), `header` (обязателен), `isRequired`, `isLoading`, `lang`; события `update:modelValue`, `changed`.
+- **`SelectDateForm`:**
+  - подпись с `useId()` и `Dot`, как в Task 1;
+  - рамка `bb:mt-1 bb:flex bb:h-9.5 bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm bb:[--bb-field-radius:0.375rem]`, в ней `select-date` (`class="bb:flex-1"`, `:labelled-by="labelId"`);
+  - пропы `modelValue`, `label` (обязателен), `isRequired`, `lang`; события те же;
+  - подсказка пустая.
+
+- [ ] **Step 1: Переименование** — `git mv` файла ядра и теста, импорты во всех местах; полный прогон зелёный, без изменений поведения (коммит не нужен до Step 6).
+- [ ] **Step 2: Тесты ядра и обёрток (падают):**
+  - в `SelectDate.test.js`:
+    - отступ `bb:pl-3` на поле ввода;
+    - класс радиуса на кнопке и поле;
+    - нет пропа `look`;
+    - `labelledBy`: у кнопки `"<id> <id кнопки>"`, у поля `"<id>"`; без него атрибутов нет.
+  - в `tests/SelectDateWrappers.test.js`:
+    - **фильтр:** корень `bb:h-18 bb:border bb:border-gray-200 bb:w-fit`; столбец `bb:w-36`; заголовок и точки; смена даты — `update:modelValue` и `changed`; `class` на корне; `null` в заголовке; переменная радиуса не задана;
+    - **форма:** подпись и точка; рамка поля и переменная; доступное имя кнопки и поля при пустой и выбранной дате; две формы — разные `id`; `class` на корне; `null` в подписи.
+
+  Во всех тестах ошибки и предупреждения Vue пустые.
+- [ ] **Step 3: Запуск** — FAIL.
+- [ ] **Step 4: Код** — ядро и две обёртки, как в Interfaces.
+- [ ] **Step 5: Экспорт, SSR, Playground:**
+  - `SelectDateFilter` и `SelectDateForm` в `src/index.js`;
+  - в `exports.test.js`: «двадцать четыре», `SelectDate` в `it.each` ядер;
+  - фикстуры: `SelectDateFilter` (`header: 'Дата', modelValue: '01.03.2026'`), `SelectDateForm` (`label: 'Дата'`, та же дата);
+  - в Playground — фильтр в панели фильтров и поле в форме.
+- [ ] **Step 6: Прогон и Commit:**
+  - тесты зелёные, чистый вывод `0`, обе сборки без предупреждений;
+  - `git commit -m "feat: добавить поле одной даты SelectDateFilter и SelectDateForm"`.
+
+### Task 8: ядро `SelectDateInterval` без разметки, обёртки рисуют поля
+
+**Files:**
+- Modify: `src/components/SelectDateInterval.vue`, `SelectDateIntervalFilter.vue`, `SelectDateIntervalForm.vue`
+- Test: `tests/SelectDateIntervalWrappers.test.js`, `tests/SelectDateInterval.test.js`
+
+**Interfaces:**
+- **Ядро:**
+  - `inheritAttrs: false`;
+  - пропы `dateFrom`, `dateTo`, `lang`; события и наблюдатели прежние;
+  - шаблон — только `<slot :from="from" :to="to"/>`;
+  - `from` / `to` — computed `{ value, update, placeholder }`, где `update(value)` пишет в локальную копию, а `placeholder` — `texts.dateFrom` / `texts.dateTo`;
+  - `look` и импорт `SelectDate` уходят из ядра.
+- **`SelectDateIntervalFilter`:**
+  - рамка, заголовок и столбец `bb:w-72`, как сейчас;
+  - внутри ядро со слотом `v-slot="{ from, to }"`: строка `bb:flex bb:h-full bb:divide-x bb:divide-gray-200` с двумя `select-date` (`class="bb:flex-1 bb:min-w-36"`);
+  - каждому `select-date` передаются `:model-value="from.value"`, `@update:model-value="from.update"`, `:placeholder-text="from.placeholder"` и `:lang="lang"` (у второго — `to`).
+- **`SelectDateIntervalForm`:**
+  - подпись, затем `<div class="bb:mt-1 bb:grid bb:grid-cols-2 bb:gap-3" role="group" :aria-labelledby="labelId">`, внутри ядро со слотом;
+  - в слоте две рамки классами рамки `SelectDateForm` (с переменной радиуса), в каждой `select-date` (`class="bb:flex-1"`) с полем `from` или `to`, как в фильтре.
+
+- [ ] **Step 1: Тесты (падают):**
+  - ядро передаёт в слот `from` и `to` с `value`, `update`, `placeholder`; `update` меняет значение и даёт `update:dateFrom` и `changed`; эхо родителя не даёт `changed`; атрибуты на ядро не переносятся;
+  - фильтр: строка с линией (`bb:divide-x`) — разметка обёртки, у обоих полей `bb:flex-1 bb:min-w-36`, переменная радиуса не задана;
+  - форма: две рамки с одинаковыми классами и переменной, группа с подписью, `lang` у обоих полей;
+  - тесты `look` удаляются, сценарии поведения в `SelectDateInterval.test.js` (через `SelectDateIntervalFilter`) остаются, в том числе «открытие "до" закрывает "от"».
+- [ ] **Step 2: Запуск** — FAIL.
+- [ ] **Step 3: Код** — как в Interfaces.
+- [ ] **Step 4: Прогон:**
+  - тесты зелёные, чистый вывод `0`;
+  - `ssr` и `hydration` для двадцати четырёх компонентов;
+  - обе сборки без предупреждений.
+- [ ] **Step 5: Commit** — `git commit -m "refactor: отдать разметку полей диапазона дат обёрткам"`.
+
+### Task 9: README, Playground, приёмка редакции 2
+
+**Files:**
+- Modify: `README.md`, `playground/App.vue`, при необходимости `docs/superpowers/specs/2026-10-20-select-filter-form-design.md`
+
+- [ ] **Step 1: README:**
+  - разделы `SelectDateFilter` и `SelectDateForm`;
+  - список компонентов и «Playground» — двадцать четыре;
+  - в «Клавиатурной навигации» поле даты названо без внутреннего имени `PickDay`;
+  - в «Обновление с 0.19» — строка о новых компонентах одной даты (без предшественника);
+  - описания вида фильтров и форм — по спеке редакции 2.
+- [ ] **Step 2: Playground:**
+  - панель фильтров — четыре `…Filter` и пустой `SelectSingleFilter` в одной строке;
+  - форма — `FormInput` и четыре `…Form`.
+- [ ] **Step 3: Проверки:**
+  - `npm test -- --dir tests` — зелёный, чистый вывод `0`;
+  - `npm run build` и `npx vite build --config vite.playground.config.js` — без предупреждений;
+  - `npm version` не меняется, версия остаётся `0.20.0`.
+- [ ] **Step 4: Commit** — `git commit -m "docs: описать поля одной даты и обновить Playground"`.
+- [ ] **Step 5: Приёмка в браузере** — выполняет основная сессия: статическая сборка Playground в `~/Code/mars/certificates/src/public/build/ui-playground`, страницы `index.html` и `host.html`, контейнер headless Chrome. Проверяется спека §14 по каждому пункту в обоих окружениях.
+
+После Task 9 и итогового ревью ветки — Task 5 (выпуск) с согласия владельца.
