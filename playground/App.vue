@@ -42,12 +42,15 @@
                 <!-- SelectMultipleForm: список с поиском и обязательное поле. -->
                 <select-multiple-form label="Бренд" :items="brandItems" v-model="formBrands"/>
                 <select-multiple-form label="Мероприятие" :items="eventItems" v-model="formEvents" with-search is-required/>
+                <!-- SelectDateIntervalForm: два поля дат, у каждого своя рамка. -->
+                <select-date-interval-form label="Период" v-model:date-from="formDateFrom" v-model:date-to="formDateTo"/>
+                <select-date-interval-form label="Период оплаты" v-model:date-from="formDateFrom" v-model:date-to="formDateTo" is-required/>
             </div>
         </section>
 
         <section>
-            <h2>SelectDateInterval</h2>
-            <select-date-interval
+            <h2>SelectDateIntervalFilter</h2>
+            <select-date-interval-filter
                 header="Интервал"
                 v-model:date-from="dateFrom"
                 v-model:date-to="dateTo"
@@ -56,7 +59,7 @@
 
             <h3>У правого края: календарь прижимается правым краем к полю</h3>
             <div class="demo-end">
-                <select-date-interval
+                <select-date-interval-filter
                     header="Интервал у края"
                     v-model:date-from="edgeDateFrom"
                     v-model:date-to="edgeDateTo"
@@ -302,7 +305,7 @@
 
         <section>
             <h2>lang="en"</h2>
-            <select-date-interval header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
+            <select-date-interval-filter header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
             <text-popover lang="en" text="Full text in English"/>
             <dropdown-button-with-action lang="en" :actions="[{ label: 'Action', onSelect: countSelection }, { label: 'Another action', onSelect: countSelection }]"/>
             <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
@@ -351,7 +354,8 @@ import {
     Dot,
     RussianMobileFilter,
     Search,
-    SelectDateInterval,
+    SelectDateIntervalFilter,
+    SelectDateIntervalForm,
     SelectSingleFilter,
     SelectSingleForm,
     SelectMultipleFilter,
@@ -378,7 +382,8 @@ export default {
         Dot,
         RussianMobileFilter,
         Search,
-        SelectDateInterval,
+        SelectDateIntervalFilter,
+        SelectDateIntervalForm,
         SelectSingleFilter,
         SelectSingleForm,
         SelectMultipleFilter,
@@ -453,6 +458,8 @@ export default {
             formCertificate: null,
             formBrands: [],
             formEvents: [],
+            formDateFrom: '',
+            formDateTo: '',
             brandItems: [
                 { id: 'rc', name: 'Royal Canin' },
                 { id: 'eukanuba', name: 'Eukanuba' },

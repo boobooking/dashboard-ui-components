@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import SelectDateInterval from '../src/components/SelectDateInterval.vue'
+import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
@@ -9,7 +9,7 @@ enableAutoUnmount(afterEach)
 describe('SelectDateInterval', () => {
     it('не падает на null и не шлёт changed на значения от родителя', async () => {
         const errors = []
-        const wrapper = mount(SelectDateInterval, {
+        const wrapper = mount(SelectDateIntervalFilter, {
             props: { header: 'Период', dateFrom: null, dateTo: null },
             global: { config: { errorHandler: (error) => errors.push(error) } },
         })
@@ -39,7 +39,7 @@ describe('SelectDateInterval: календари на Popover API', () => {
     }
 
     it('открытие календаря «до» закрывает календарь «от»', async () => {
-        const wrapper = mount(SelectDateInterval, { props: { header: 'Период' }, attachTo: document.body })
+        const wrapper = mount(SelectDateIntervalFilter, { props: { header: 'Период' }, attachTo: document.body })
         const [from, to] = wrapper.findAll('button[popovertarget]')
         const [fromPanel, toPanel] = wrapper.findAll('[popover]')
 

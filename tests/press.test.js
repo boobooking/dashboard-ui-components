@@ -4,7 +4,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import CrossButton from '../src/components/CrossButton.vue'
 import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
-import SelectDateInterval from '../src/components/SelectDateInterval.vue'
+import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { installPopoverStub } from './popoverStub.js'
@@ -137,7 +137,7 @@ describe('ластики фильтров: очистка после нажат�
         },
         {
             name: 'SelectDateInterval',
-            mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', dateFrom: '01.10.2026' }, attachTo: document.body }),
+            mount: () => mount(SelectDateIntervalFilter, { props: { header: 'Интервал', dateFrom: '01.10.2026' }, attachTo: document.body }),
             event: 'update:dateFrom',
             expected: '',
         },

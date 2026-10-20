@@ -1,25 +1,26 @@
 <template>
-    <div class="bb-dashboard-ui bb:flex">
-        <div class="bb:flex bb:border bb:border-white">
-            <div class="bb:flex bb:flex-col bb:min-w-72 bb:w-72 bb:bg-white bb:h-full">
-                <element-header :text="header" :is-required="isRequired" :is-loading="isLoading"/>
-                <div class="bb:flex bb:h-full bb:divide-x bb:divide-gray-200">
-                    <pick-day v-model="userDateFrom" class="bb:flex-1 bb:min-w-36 bb:pl-3" :placeholder-text="texts.dateFrom" :lang="resolvedLang"/>
-                    <pick-day v-model="userDateTo" class="bb:flex-1 bb:min-w-36 bb:pl-3" :placeholder-text="texts.dateTo" :lang="resolvedLang"/>
-                </div>
-            </div>
-        </div>
+    <div :class="look === 'form' ? 'bb-dashboard-ui bb:grid bb:grid-cols-2 bb:gap-3' : 'bb-dashboard-ui bb:flex bb:h-full bb:divide-x bb:divide-gray-200'">
+        <pick-day
+            v-model="userDateFrom"
+            :class="look === 'form' ? 'bb:h-9.5 bb:min-w-0 bb:pl-3 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm' : 'bb:flex-1 bb:min-w-36 bb:pl-3'"
+            :placeholder-text="texts.dateFrom"
+            :lang="resolvedLang"
+        />
+        <pick-day
+            v-model="userDateTo"
+            :class="look === 'form' ? 'bb:h-9.5 bb:min-w-0 bb:pl-3 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm' : 'bb:flex-1 bb:min-w-36 bb:pl-3'"
+            :placeholder-text="texts.dateTo"
+            :lang="resolvedLang"
+        />
     </div>
 </template>
 
 <script>
-import ElementHeader from "./ElementHeader.vue";
 import PickDay from "./PickDay.vue";
 import { withLang } from "../lang.js";
 
 export default {
     components: {
-        ElementHeader,
         PickDay,
     },
 
@@ -36,17 +37,12 @@ export default {
             type: String,
             default: "",
         },
-        header: {
+        // Вид ядра: filter — два поля в ряд под заголовком обёртки фильтра,
+        // form — два поля, каждое в своей рамке.
+        look: {
             type: String,
-            required: true,
-        },
-        isRequired: {
-            type: Boolean,
-            default: false,
-        },
-        isLoading: {
-            type: Boolean,
-            default: false,
+            default: "filter",
+            validator: (value) => ["filter", "form"].includes(value),
         },
     },
 

@@ -6,7 +6,7 @@ import CrossButton from '../src/components/CrossButton.vue'
 import PageCard from '../src/components/PageCard.vue'
 import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
-import SelectDateInterval from '../src/components/SelectDateInterval.vue'
+import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { installPopoverStub } from './popoverStub.js'
@@ -170,7 +170,7 @@ describe('CrossButton у тех, кто его использует', () => {
         },
         {
             name: 'SelectDateInterval — ластик даты',
-            mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', dateFrom: '01.10.2026' } }),
+            mount: () => mount(SelectDateIntervalFilter, { props: { header: 'Интервал', dateFrom: '01.10.2026' } }),
             icon: ['bb:w-6', 'bb:h-6'],
             place: ['bb:absolute', 'bb:top-0', 'bb:right-0', 'bb:h-full', 'bb:pr-2', 'bb:z-10'],
         },

@@ -10,7 +10,7 @@ import PageCard from '../src/components/PageCard.vue'
 import Pagination from '../src/components/Pagination.vue'
 import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
-import SelectDateInterval from '../src/components/SelectDateInterval.vue'
+import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import TextPopover from '../src/components/TextPopover.vue'
@@ -124,13 +124,13 @@ const cases = [
     },
     {
         name: 'SelectDateInterval — ластик даты',
-        mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', dateFrom: '01.10.2026' } }),
+        mount: () => mount(SelectDateIntervalFilter, { props: { header: 'Интервал', dateFrom: '01.10.2026' } }),
         button: crossButton,
         label: 'Очистить',
     },
     {
         name: 'SelectDateInterval — кнопка поля даты',
-        mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', dateFrom: '01.10.2026' } }),
+        mount: () => mount(SelectDateIntervalFilter, { props: { header: 'Интервал', dateFrom: '01.10.2026' } }),
         button: (wrapper) => wrapper.find('button[popovertarget]'),
         label: 'от 01.10.2026',
     },
@@ -228,7 +228,7 @@ describe('содержимое кнопок и ссылок', () => {
 // достаётся кнопке. Поле остаётся обычным: в него можно перейти Tab и набрать
 // дату.
 describe('поле даты', () => {
-    const dateField = (props = {}, global = {}) => mount(SelectDateInterval, { props: { header: 'Интервал', ...props }, global })
+    const dateField = (props = {}, global = {}) => mount(SelectDateIntervalFilter, { props: { header: 'Интервал', ...props }, global })
 
     it('кнопка календаря не содержит поля и лежит поверх него', async () => {
         const wrapper = dateField({ dateFrom: '01.10.2026' })
@@ -284,7 +284,7 @@ describe('имя поля', () => {
     const fields = [
         { name: 'Search', mount: () => mount(Search, { props: { header: 'Поиск', modelValue: 'abc' } }) },
         { name: 'RussianMobileFilter', mount: () => mount(RussianMobileFilter, { props: { header: 'Телефон', modelValue: '+79991234567' }, attachTo: document.body }) },
-        { name: 'SelectDateInterval', mount: () => mount(SelectDateInterval, { props: { header: 'Интервал', dateFrom: '01.10.2026', dateTo: '15.10.2026' } }) },
+        { name: 'SelectDateInterval', mount: () => mount(SelectDateIntervalFilter, { props: { header: 'Интервал', dateFrom: '01.10.2026', dateTo: '15.10.2026' } }) },
     ]
 
     for (const testCase of fields) {
