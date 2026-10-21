@@ -143,9 +143,11 @@ describe('вид', () => {
     })
 
     it('переключатель снимает картинку @tailwindcss/forms приложения', () => {
-        const { wrapper } = mountCards()
+        const { wrapper, errors, warnings } = mountCards()
 
         expect(wrapper.get('input').classes()).toContain('bb:bg-none')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('без значения ни одна карточка не выбрана', () => {
