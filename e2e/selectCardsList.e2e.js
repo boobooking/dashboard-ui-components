@@ -31,15 +31,18 @@ async function expectFocusRing(locator) {
 
 // Кольца не видно: обводки нет или она прозрачная (@tailwindcss/forms ставит
 // галочке в фокусе `outline: 2px solid transparent`), ореола нет. Значения
-// перечитываются, пока не сойдутся. Прозрачность: нулевая альфа в записи
-// через запятую и через косую черту, либо ключевое слово.
-const transparentColor = /^(transparent|[a-z-]+\(.*(,|\/)\s*0(\.0+)?%?\s*\))$/
+// перечитываются, пока не сойдутся. Прозрачность: ключевое слово, rgba() из
+// четырёх компонентов через запятую с нулевой альфой или запись с `/ 0`.
+const transparentColor = /^(transparent|rgba\(\s*[^,]+,[^,]+,[^,]+,\s*0(\.0+)?%?\s*\)|[a-z-]+\([^/]*\/\s*0(\.0+)?%?\s*\))$/
 async function expectNoFocusRing(locator) {
     await expect.poll(async () => {
         const style = await computed(locator, ['outline-style', 'outline-color', 'box-shadow'])
         const noOutline = style['outline-style'] === 'none' || transparentColor.test(style['outline-color'])
-        return noOutline && style['box-shadow'] === 'none'
-    }).toBe(true)
+        return {
+            outline: noOutline ? 'none' : `${style['outline-style']} ${style['outline-color']}`,
+            boxShadow: style['box-shadow'],
+        }
+    }).toEqual({ outline: 'none', boxShadow: 'none' })
 }
 
 for (const file of pages) {
@@ -135,7 +138,9 @@ for (const file of pages) {
             }
             const [first, second, third, fourth] = boxes
             // Дробная ширина колонок: равенство в пределах полупикселя.
-            expect(new Set([first.x, second.x, third.x, fourth.x].map(Math.round)).size).toBe(3)
+            const columns = [first.x, third.x, fourth.x].sort((a, b) => a - b)
+            expect(columns[1] - columns[0]).toBeGreaterThan(1)
+            expect(columns[2] - columns[1]).toBeGreaterThan(1)
             expect(second.x).toBeCloseTo(first.x, 0)
             expect(second.y).toBeGreaterThan(first.y)
             expect(third.y).toBeCloseTo(first.y, 0)
