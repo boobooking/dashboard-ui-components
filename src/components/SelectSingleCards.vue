@@ -110,6 +110,9 @@ export default {
         // смене пропа. Если родитель значение не принял, проп не изменился
         // и рендера нет: без сверки отмеченной осталась бы карточка, которую
         // modelValue не выбирает.
+        // Сверка парует input с itemList по индексу: каждый input в корне —
+        // переключатель карточки, в порядке itemList (порядок DOM = порядок
+        // массива); другой input внутри компонента сломал бы пары.
         syncChecked() {
             this.$el.querySelectorAll("input").forEach((input, index) => {
                 input.checked = this.isSelected(this.itemList[index]);
