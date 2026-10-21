@@ -78,15 +78,19 @@ describe('группа', () => {
     })
 
     it('у двух компонентов в одном приложении разные id подписей и name переключателей', () => {
+        const errors = []
+        const warnings = []
         const wrapper = mount(
             { render: () => h('div', [h(SelectSingleCards, { label: 'Первый', items }), h(SelectSingleCards, { label: 'Второй', items })]) },
-            { attachTo: document.body }
+            { attachTo: document.body, global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } } }
         )
         const labelIds = wrapper.findAll('span[id]').map((label) => label.attributes('id'))
         const groupNames = wrapper.findAll('input').map((input) => input.attributes('name'))
 
         expect(new Set(labelIds).size).toBe(2)
         expect(new Set(groupNames).size).toBe(2)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
     })
 
     it('внутри компонента name у всех переключателей один', () => {

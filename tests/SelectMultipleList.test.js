@@ -93,7 +93,7 @@ describe('группа', () => {
     it('у двух компонентов в одном приложении разные id подписей', () => {
         const wrapper = mount(
             { render: () => h('div', [h(SelectMultipleList, { label: 'Первый', items }), h(SelectMultipleList, { label: 'Второй', items })]) },
-            { attachTo: document.body }
+            { attachTo: document.body, global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } } }
         )
         const labelIds = wrapper.findAll('span[id]').map((label) => label.attributes('id'))
 
