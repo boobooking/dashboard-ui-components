@@ -58,6 +58,7 @@ export const ssrFixtures = {
         },
     },
     SelectSingleFilter: { props: { header: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
+    SelectSingleCards: { props: { label: 'Бренд', items: [{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }], modelValue: 'eukanuba', isRequired: true } },
     SelectSingleForm: { props: { label: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
     TextPopover: { props: { text: 'Полный текст сообщения', modelValue: true } },
 }

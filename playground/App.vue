@@ -50,6 +50,17 @@
             </div>
         </section>
 
+        <!-- Копия формы мероприятия russia: «Название» стоит первым, чтобы Tab входил в карточки из поля. -->
+        <section>
+            <h2>SelectSingleCards и SelectMultipleList</h2>
+            <div class="demo-form">
+                <form-input label="Название" v-model="eventName"/>
+                <select-single-cards label="Бренд" :items="eventBrandItems" v-model="eventBrand" :is-required="eventBrand === null"/>
+                <select-single-cards label="Способ валидации участника" :items="eventValidationItems" v-model="eventValidation"/>
+                <p>Выбрано: {{ JSON.stringify({ brand: eventBrand, validation: eventValidation }) }}</p>
+            </div>
+        </section>
+
         <section>
             <h2>Панель фильтров</h2>
             <!-- Четыре фильтра и фильтр без пунктов в одном ряду: высота и рамки одинаковые. -->
@@ -376,6 +387,7 @@ import {
     SelectDateIntervalForm,
     SelectSingleFilter,
     SelectSingleForm,
+    SelectSingleCards,
     SelectMultipleFilter,
     SelectMultipleForm,
     InfoPill,
@@ -406,6 +418,7 @@ export default {
         SelectDateIntervalForm,
         SelectSingleFilter,
         SelectSingleForm,
+        SelectSingleCards,
         SelectMultipleFilter,
         SelectMultipleForm,
         InfoPill,
@@ -435,6 +448,17 @@ export default {
             adminEmail: '',
             adminPassword: '',
             documentNumber: '',
+            eventName: '',
+            eventBrandItems: [
+                { id: 'rc', name: 'Royal Canin' },
+                { id: 'eukanuba', name: 'Eukanuba' },
+            ],
+            eventBrand: null,
+            eventValidationItems: [
+                { id: true, name: 'Самостоятельно через ввод кода СМС' },
+                { id: false, name: 'При помощи промо-персонала' },
+            ],
+            eventValidation: true,
             pageCardTitle: 'Поле формы',
             markAdminName: false,
             markAdminEmail: false,

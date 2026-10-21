@@ -16,6 +16,7 @@ export { default as SelectMultipleFilter } from './components/SelectMultipleFilt
 export { default as SelectMultipleForm } from './components/SelectMultipleForm.vue'
 export { default as SelectSingleFilter } from './components/SelectSingleFilter.vue'
 export { default as SelectSingleForm } from './components/SelectSingleForm.vue'
+export { default as SelectSingleCards } from './components/SelectSingleCards.vue'
 export { default as InfoPill } from './components/InfoPill.vue'
 export { default as ErrorMessages } from './components/ErrorMessages.vue'
 export { default as FormInput } from './components/FormInput.vue'

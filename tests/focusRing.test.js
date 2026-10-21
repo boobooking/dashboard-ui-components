@@ -12,6 +12,7 @@ const componentsDir = fileURLToPath(new URL('../src/components', import.meta.url
 
 const FOCUS = '.bb\\:focus\\:focus-ring:focus'
 const FOCUS_VISIBLE = '.bb\\:focus-visible\\:focus-ring:focus-visible'
+const HAS_FOCUS_VISIBLE = '.bb\\:has-focus-visible\\:focus-ring:has(:focus-visible)'
 const GROUP_FOCUS_VISIBLE = '.bb\\:group-focus-visible\\:focus-ring:is(:where(.bb\\:group):focus-visible *)'
 
 const LINE_AND_HALO = [
@@ -28,7 +29,7 @@ async function buildCss() {
     const source = fs.readFileSync(`${stylesDir}/index.css`, 'utf8')
     const compiler = await compile(source, { base: stylesDir, onDependency() {} })
 
-    return compiler.build(['bb:focus:focus-ring', 'bb:focus-visible:focus-ring', 'bb:group-focus-visible:focus-ring', 'focus-ring'])
+    return compiler.build(['bb:focus:focus-ring', 'bb:focus-visible:focus-ring', 'bb:group-focus-visible:focus-ring', 'bb:has-focus-visible:focus-ring', 'focus-ring'])
 }
 
 // Тело правила с точным селектором; вложенный @supports входит в тело.
@@ -51,6 +52,7 @@ describe('утилита focus-ring', () => {
         ['focus', FOCUS],
         ['focus-visible', FOCUS_VISIBLE],
         ['group-focus-visible', GROUP_FOCUS_VISIBLE],
+        ['has-focus-visible', HAS_FOCUS_VISIBLE],
     ])('вариант %s рисует линию 1px и ореол 3px', async (_name, selector) => {
         const rule = ruleBody(await buildCss(), selector)
 
@@ -110,6 +112,7 @@ describe('носители focus-ring', () => {
         ['NotificationMessage.vue', 'bb:focus:focus-ring', 1],
         ['ConfirmationModal.vue', 'bb:focus:focus-ring', 2],
         ['DropdownButtonWithAction.vue', 'bb:focus:focus-ring', 3],
+        ['SelectSingleCards.vue', 'bb:has-focus-visible:focus-ring', 1],
     ]
 
     it.each(carriers)('%s: утилита %s на %i узлах, без focus:outline-hidden', (fileName, utility, count) => {
