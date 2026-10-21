@@ -3,6 +3,9 @@ import { test, expect, pages, openPlayground, expectColor } from './helpers.js'
 const sectionOf = (page) => page.locator('section').filter({
     has: page.locator('h2', { hasText: 'SelectSingleCards и SelectMultipleList' }),
 })
+const formInputSectionOf = (page) => page.locator('section').filter({
+    has: page.locator('h2', { hasText: /^FormInput$/ }),
+})
 
 const field = (section) => section.getByLabel('Название', { exact: true })
 const values = (section) => section.getByText(/^Выбрано:/)
@@ -45,11 +48,30 @@ async function expectNoFocusRing(locator) {
     }).toEqual({ outline: 'none', boxShadow: 'none' })
 }
 
-// Линия фокуса видна: обводка есть и не прозрачная.
-async function expectFocusLine(locator) {
-    const style = await computed(locator, ['outline-style', 'outline-color'])
-    expect(style['outline-style']).not.toBe('none')
-    expect(style['outline-color']).not.toMatch(transparentColor)
+// Рамка шириной 4px вокруг элемента — четыре полосы: сверху, снизу, слева,
+// справа. Пиксели, которые элемент закрывает хотя бы частично, в полосы не
+// входят: внутри элемента линия на рамке меняет лишь сглаживание углов и
+// оттенок рамки, и снимки различались бы при невидимом фокусе.
+function frameClips(box) {
+    const left = Math.floor(box.x)
+    const top = Math.floor(box.y)
+    const right = Math.ceil(box.x + box.width)
+    const bottom = Math.ceil(box.y + box.height)
+
+    return [
+        { x: left - 4, y: top - 4, width: right - left + 8, height: 4 },
+        { x: left - 4, y: bottom, width: right - left + 8, height: 4 },
+        { x: left - 4, y: top, width: 4, height: bottom - top },
+        { x: right, y: top, width: 4, height: bottom - top },
+    ]
+}
+
+async function frameShots(page, clips) {
+    const shots = []
+    for (const clip of clips) {
+        shots.push(await page.screenshot({ clip }))
+    }
+    return shots
 }
 
 // Системный цвет (CanvasText, Highlight…) в computed-виде.
@@ -248,17 +270,50 @@ for (const file of pages) {
                 await expect(values(section)).toContainText('"participants":["club","future_owner"]')
             })
 
-            test('линия фокуса видна после Tab у карточки и у галочки', async ({ page }) => {
-                await field(section).focus()
-                await page.keyboard.press('Tab')
-                await expect(radio(section, 'Бренд', 'Royal Canin')).toBeFocused()
-                await expectFocusLine(card(section, 'Бренд', 'Royal Canin'))
-                await page.keyboard.press('Tab')
-                await page.keyboard.press('Tab')
-                const first = checkbox(section, 'Участники', 'Будущие владельцы')
-                await expect(first).toBeFocused()
-                await expectFocusLine(first)
-            })
+            // Имя носителя, его локатор и путь фокуса к нему с клавиатуры. Поле
+            // FormInput берёт кольцо по focus:, кнопка SelectSingleForm — по
+            // focus-visible:, карточка — по has-focus-visible:.
+            const focusCarriers = [
+                ['карточка «Royal Canin»', (page) => card(sectionOf(page), 'Бренд', 'Royal Canin'), async (page) => {
+                    await field(sectionOf(page)).focus()
+                    await page.keyboard.press('Tab')
+                    await expect(radio(sectionOf(page), 'Бренд', 'Royal Canin')).toBeFocused()
+                }],
+                ['галочка «Будущие владельцы»', (page) => checkbox(sectionOf(page), 'Участники', 'Будущие владельцы'), async (page) => {
+                    await radio(sectionOf(page), 'Способ валидации участника', 'Самостоятельно через ввод кода СМС').focus()
+                    await page.keyboard.press('Tab')
+                    await expect(checkbox(sectionOf(page), 'Участники', 'Будущие владельцы')).toBeFocused()
+                }],
+                ['поле «Название»', (page) => field(sectionOf(page)), async (page) => {
+                    await radio(sectionOf(page), 'Бренд', 'Royal Canin').focus()
+                    await page.keyboard.press('Shift+Tab')
+                    await expect(field(sectionOf(page))).toBeFocused()
+                }],
+                ['кнопка SelectSingleForm «Вендор»', (page) => formInputSectionOf(page).getByRole('button', { name: /^Вендор/ }), async (page) => {
+                    await formInputSectionOf(page).getByLabel('Номер закрывающего документа', { exact: true }).focus()
+                    await page.keyboard.press('Tab')
+                    await expect(formInputSectionOf(page).getByRole('button', { name: /^Вендор/ })).toBeFocused()
+                }],
+            ]
+
+            // Линия фокуса отходит от края элемента наружу и видна в рамке вокруг
+            // него с каждой стороны. Снимки с фокусом и без снимаются с одних
+            // и тех же мест: элемент между ними не сдвигается. Носитель стоит
+            // посреди окна: элемент, с которого к нему идёт фокус, тоже виден,
+            // и фокус страницу не прокручивает.
+            for (const [name, carrier, focusByKeyboard] of focusCarriers) {
+                test(`фокус с клавиатуры различим: ${name}`, async ({ page }) => {
+                    await carrier(page).evaluate((element) => element.scrollIntoView({ block: 'center' }))
+                    const box = await carrier(page).boundingBox()
+                    const clips = frameClips(box)
+                    const unfocused = await frameShots(page, clips)
+                    await focusByKeyboard(page)
+                    expect(await carrier(page).boundingBox()).toEqual(box)
+                    const focused = await frameShots(page, clips)
+                    const changed = focused.map((shot, index) => !shot.equals(unfocused[index]))
+                    expect(changed, 'полосы рамки сверху, снизу, слева, справа').toEqual([true, true, true, true])
+                })
+            }
         })
     })
 }
