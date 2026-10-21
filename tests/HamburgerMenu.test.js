@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import HamburgerMenu from '../src/components/HamburgerMenu.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
@@ -422,9 +422,13 @@ describe('HamburgerMenu: фокус после закрытия в Safari', () =
         return wrapper
     }
 
+    // Клик по пункту — trigger(), а не нативный click(): клик в ту же
+    // миллисекунду, в которую повешен обработчик панели, Vue пропустил бы
+    // (e._vts <= attached), и меню осталось бы открытым. trigger() Vue Test
+    // Utils ставит событию метку на миллисекунду позже.
     it.each([
         { name: 'Escape после стрелок', close: () => press('Escape') },
-        { name: 'Enter на пункте', close: () => document.activeElement.click() },
+        { name: 'Enter на пункте', close: () => new DOMWrapper(document.activeElement).trigger('click') },
     ])('$name — фокус на кнопке меню', async ({ close }) => {
         const wrapper = mountMenu([link, { label: 'Выйти', onSelect: () => {} }])
         await openMenu(wrapper)
@@ -470,7 +474,7 @@ describe('HamburgerMenu: фокус после закрытия в Safari', () =
         press('ArrowDown')
         expect(document.activeElement.textContent).toBe('Выйти')
 
-        document.activeElement.click()
+        new DOMWrapper(document.activeElement).trigger('click')
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)

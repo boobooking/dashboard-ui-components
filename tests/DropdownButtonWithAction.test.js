@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import { COLOR_NAMES, colorClass } from '../src/colors.js'
@@ -740,15 +740,24 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
 
     // Vue передаёт в errorHandler отклонённый Promise, только если обработчик
     // клика его вернул; иначе отказ уходит в unhandledrejection.
+    //
+    // Часы стоят с монтирования: клик по пункту приходит в ту же миллисекунду,
+    // в которую повешен обработчик панели. Vue пропускает обработчик предка,
+    // если событие не позже его подключения (e._vts <= attached), и нативный
+    // click() оставил бы меню открытым; trigger() Vue Test Utils ставит
+    // событию метку на миллисекунду позже.
     it('асинхронный onSelect с отказом отдаёт ошибку Vue, а меню закрывается сразу', async () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(Date.now())
+        onTestFinished(() => now.mockRestore())
         const failure = new Error('сбой асинхронного обработчика')
         const { wrapper, errors } = mountChecked([main, { label: 'Удалить', onSelect: async () => { throw failure } }])
         await arrowOf(wrapper).trigger('click')
         await settle()
 
-        menuOf(wrapper).get('[role="menuitem"]').element.click()
+        const click = menuOf(wrapper).get('[role="menuitem"]').trigger('click')
         expect(isOpen(wrapper)).toBe(false)
 
+        await click
         await settle()
         expect(errors).toEqual([failure])
     })
@@ -1114,9 +1123,13 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         return wrapper
     }
 
+    // Клик по пункту — trigger(), а не нативный click(): клик в ту же
+    // миллисекунду, в которую повешен обработчик панели, Vue пропустил бы
+    // (e._vts <= attached), и меню осталось бы открытым. trigger() Vue Test
+    // Utils ставит событию метку на миллисекунду позже.
     it.each([
         { name: 'Escape после стрелок', close: () => press('Escape') },
-        { name: 'Enter на пункте', close: () => document.activeElement.click() },
+        { name: 'Enter на пункте', close: () => new DOMWrapper(document.activeElement).trigger('click') },
     ])('$name — фокус на кнопке меню', async ({ close }) => {
         const wrapper = mountMenu([link, { label: 'Выйти', onSelect: () => {} }])
         await openFromBody(wrapper)
@@ -1162,7 +1175,7 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         press('ArrowDown')
         expect(document.activeElement.textContent).toBe('Выйти')
 
-        document.activeElement.click()
+        new DOMWrapper(document.activeElement).trigger('click')
         await settle()
 
         expect(isOpen(wrapper)).toBe(false)
