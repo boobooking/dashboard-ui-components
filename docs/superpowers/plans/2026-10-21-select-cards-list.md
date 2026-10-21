@@ -387,3 +387,18 @@ it('gridTemplate', () => {
 - [ ] **Step 2:** Только после согласия: `git switch main && git merge --ff-only feature/select-cards-list && git tag v0.21.0 && git push origin main v0.21.0`.
 - [ ] **Step 3:** GitHub Actions `Publish` по тегу зелёный (`gh run list --workflow publish.yml --limit 1`). `npm view @boobooking/dashboard-ui-components version` — `0.21.0`. Первый `E404` или старая версия — не провал: registry догоняет, повторять до совпадения.
 - [ ] **Step 4:** Ветку `feature/select-cards-list` удалить локально (`git branch -d`).
+
+---
+
+### Исправления по итоговому ревью (перед Task 7)
+
+Согласовано с Codex (DEV-A принят, DEV-B и DEV-C одобрены как технические исправления; спека — редакция 2, §5.1, §8, §8.1, §10, §12). Одна волна исправлений, каждое — с тестом, который сначала падает.
+
+**Files:** `src/components/SelectSingleCards.vue`, `src/components/SelectMultipleList.vue`, `src/styles/index.css` (комментарий), `tests/SelectSingleCards.test.js`, `tests/SelectMultipleList.test.js` (при необходимости), `e2e/selectCardsList.e2e.js`, `README.md`.
+
+- [ ] **F1. Сторож предупреждений Vue в `tests/SelectSingleCards.test.js`.** Модульные `errors` / `warnings`, сброс в `beforeEach`, проверка пустоты в `afterEach` — как в `tests/SelectMultipleList.test.js`. Тесты с ожидаемым предупреждением (`label: null`, `items: null`, `items: 'x'`, неверные `columns`) проверяют ровно одно предупреждение с именем пропа и затем очищают массив. Тест «… без ошибок» у `label: null` переименовать по сути.
+- [ ] **F2 (DEV-B). Анимация карточки** — `bb:transition` → `bb:transition-[background-color,border-color]` (спека §5.1). Браузерный тест: после Tab на карточку у неё нет анимации `outline-color` и `box-shadow` (`getAnimations()` пуст по этим свойствам или `transition-property` не содержит их) — в Chromium и WebKit, на обеих страницах; тест должен падать с прежним `bb:transition` (проверить временной заменой, в коммит не идёт). Unit-тест на классы карточки обновить.
+- [ ] **F3 (DEV-C). Режим высокой контрастности** (спека §8.1): у точки выбранной карточки `bb:forced-colors:bg-[CanvasText]`, у кружка выбранной `bb:forced-colors:border-[Highlight]`; у галочки `bb:forced-colors:appearance-auto` на `input`, `bb:forced-colors:hidden` на `svg`. Unit-тесты на классы. Браузерный тест с `page.emulateMedia({ forcedColors: 'active' })`: выбранная карточка отличается от невыбранной (цвет точки и рамки кружка), отмеченная галочка — `checked` и в родном виде (`appearance` не `none`), клик и пробел меняют выбор, линия фокуса после Tab видна (`outline-style` не `none`, цвет не прозрачный). Сначала проверить, воспроизводит ли WebKit Playwright 1.63 `forced-colors` (медиазапрос `matchMedia('(forced-colors: active)')` и фактический вид); если нет — тест только в Chromium, причина — в комментарии теста и в отчёте. Снимки экрана обеих страниц в этом режиме — в отчёт.
+- [ ] **F4. Комментарий над `@utility focus-ring`** в `src/styles/index.css`: среди моментов — `bb:has-focus-visible:focus-ring` (фокус на элементе внутри носителя).
+- [ ] **F5. README:** общий абзац «Клавиатурная навигация» о фокусе (поля показывают фокус при любом его появлении) уточнить: `SelectSingleCards` и `SelectMultipleList` показывают фокус только с клавиатуры. В разделах обоих компонентов — одна-две фразы о режиме высокой контрастности (спека §8.1).
+- [ ] **Проверка:** `npm test -- --dir tests` с проверкой чистого вывода; `npm run test:browser` целиком; `npm run build`. Коммиты — `fix:` / `test:` / `docs:` по смыслу.
