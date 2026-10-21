@@ -25,7 +25,7 @@
 - **Нет `lang` и новых текстов:** `src/i18n.js` не меняется.
 - **Цвета выбора** — классы самого компонента (`indigo`), в `src/colors.js` не идут (спека §5.1).
 - **Утилиты:** каждая — с префиксом `bb:`; в `:class` — только литералы. Это проверяет `tests/utilityPrefix.test.js`. Геометрия сетки — через `:style`, не классами.
-- **Фокус:** только утилита `focus-ring`, только с клавиатуры. У карточки — `bb:has-focus-visible:focus-ring` на `label`, у галочки — `bb:focus-visible:focus-ring` на `input`. `bb:focus:outline-hidden` не ставится.
+- **Фокус:** только утилита `focus-ring`, только с клавиатуры. У карточки — `bb:has-focus-visible:focus-ring` на `label`, у галочки — `bb:focus-visible:focus-ring` на `input`. `bb:focus:outline-hidden` не ставится. Утилита `focus-ring` получает `bb:ring-offset-0` (Task 3): `@tailwindcss/forms` приложения ставит галочке в фокусе `--tw-ring-offset-width: 2px`, и без сброса ореол стал бы 5px с белым отступом.
 - **Стиль кода:**
   - в `.vue` — двойные кавычки и точки с запятой в `<script>`, Options API, отступ 4 пробела;
   - в `.js` тестов — одинарные кавычки без точек с запятой;
@@ -45,6 +45,27 @@
 3. **`@tailwindcss/forms` приложения** в `host.html`: у отмеченной галочки `background-image: none`, у карточек нет родного кружка. Тест — Task 4.
 4. **Пункты сменились при выбранном значении** (`setProps({ items })` с другим числом пунктов): раскладка пересчитывается, ошибок нет. Тест — Task 2.
 5. **Два компонента на странице:** разные `id` подписей и разные `name` групп карточек, стрелки не уходят в чужую группу. Тесты — Task 2 (unit) и Task 4 (e2e).
+
+## Прогон расширений клавиатурной навигации
+
+Нужен в Task 2 (карточки, ранняя проверка) и Task 5 (всё). Скрипты и стенды — в scratchpad сессии, в репозиторий не попадают.
+
+- **Страница.** Собранный Playground: `npm run build && npx vite build --config vite.playground.config.js --outDir <scratchpad>/pg --emptyOutDir --base ./`. Отдавать `python3 -m http.server` из `<scratchpad>/pg`, не vite dev: ошибка init Vimlike на странице роняет vite. Обе страницы: `index.html` и `host.html`. Каждую — ещё раз с добавленным стилем `button:not(:disabled) { cursor: pointer }` (правило certificates и cashback).
+- **Vimlike** (Playwright WebKit из `node_modules` пакета):
+  - `page.addScriptTag({ content: <файл> })`, файл — `/Applications/Vimlike.app/Contents/PlugIns/Vimlike Extension.appex/Contents/Resources/vimlike.min.js`;
+  - кандидаты — `new GBLinkManager().x()`;
+  - ошибка `Can't find variable: browser` на странице — init Vimlike без API расширения, не пакет.
+- **Vimari** (WebKit), файлы из `/Applications/Vimari.app/Contents/PlugIns/Vimari Extension.appex/Contents/Resources/`:
+  - `addStyleTag` с `injected.css`;
+  - `addScriptTag` с `var settings = { linkHintCharacters: "sadfjklewcmpgh", detectByCursorStyle: false }; var currentZoomLevel = 100;`, затем с `link-hints.js`;
+  - кандидаты — `getVisibleClickableElements()`.
+- **Vimium 2.4.2** (Chromium, только Task 5): клон `philc/vimium` в scratchpad, `--load-extension`, режим подсказок `f`. Если с первого прогона подсказки не появились — повторить.
+- **Видимость меток.** У меток расширений `pointer-events: none`, и `elementFromPoint` их пропускает. Перед сверкой ставить меткам и контейнеру `pointer-events: auto !important` и сверять по снимку экрана.
+- **Ожидается:**
+  - у каждой карточки ровно один кандидат, его прямоугольник — вся карточка (Vimari — `input` на всю карточку, Vimlike — карточка);
+  - у каждой галочки ровно один кандидат;
+  - нажатие кандидата (`click()`, как у расширения) выбирает карточку или отмечает пункт — видно в строке «Выбрано».
+- **Провал** (расширение не находит карточку с прозрачным `input` на всю карточку или находит два кандидата) — отклонение: стоп, доклад с данными прогона.
 
 ---
 
@@ -101,14 +122,16 @@ it('gridTemplate', () => {
 
 **Files:**
 - Create: `src/components/SelectSingleCards.vue`, `tests/SelectSingleCards.test.js`
-- Modify: `src/index.js` (экспорт после `SelectSingleForm`), `tests/exports.test.js` (двадцать пять компонентов, `SelectSingleCards` в списке), `tests/ssrFixtures.js`, `tests/focusRing.test.js`
+- Modify: `src/index.js` (экспорт после `SelectSingleForm`), `tests/exports.test.js` (двадцать пять компонентов, `SelectSingleCards` в списке), `tests/ssrFixtures.js`, `tests/focusRing.test.js`, `playground/App.vue`
 
 **Interfaces:**
 - Consumes: `src/columns.js` из Task 1; `Dot` (`src/components/Dot.vue`).
-- Produces: компонент `SelectSingleCards` с API из Global Constraints. Разметка, на которую опираются Task 4 и Task 5:
-  - корень `div.bb-dashboard-ui`;
-  - сетка `div[role="radiogroup"][aria-labelledby]`;
-  - карточка — `label`, внутри `input[type="radio"]` на всю карточку и надпись пункта.
+- Produces:
+  - компонент `SelectSingleCards` с API из Global Constraints. Разметка, на которую опираются Task 4 и Task 5:
+    - корень `div.bb-dashboard-ui`;
+    - сетка `div[role="radiogroup"][aria-labelledby]`;
+    - карточка — `label`, внутри `input[type="radio"]` на всю карточку и надпись пункта;
+  - раздел Playground `<section><h2>SelectSingleCards и SelectMultipleList</h2><div class="demo-form">…</div></section>` (Step 6); Task 3 дополняет его списками.
 
 - [ ] **Step 1: Write the failing tests** `tests/SelectSingleCards.test.js` (`// @vitest-environment happy-dom`, `attachTo: document.body`, `enableAutoUnmount(afterEach)`). Пункты `items = [{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }]`. Тесты:
   - **подпись и точка:** текст подписи `Бренд`; `Dot` с `color: 'red'` скрыт (`style.display === 'none'`), с `isRequired: true` виден; `label: null` — пустая подпись без ошибок;
@@ -187,7 +210,15 @@ it('gridTemplate', () => {
     - в `buildCss()` — класс `bb:has-focus-visible:focus-ring`;
     - новый тест: правило `.bb\\:has-focus-visible\\:focus-ring:has(:focus-visible)` (так его компилирует Tailwind 4.3.3) содержит все `LINE_AND_HALO`.
 - [ ] **Step 5:** `npm test -- --dir tests` — PASS: всё, включая `ssr.test.js`, `hydration.test.js`, `utilityPrefix.test.js`, `focusRing.test.js`. Чистый вывод — `grep` из Global Constraints даёт `0`.
-- [ ] **Step 6: Commit** — `git add -A src tests && git commit -m "feat: добавить SelectSingleCards"`.
+- [ ] **Step 6: Раздел Playground.** Сразу после раздела `FormInput` в `playground/App.vue` — `<section><h2>SelectSingleCards и SelectMultipleList</h2><div class="demo-form">…</div></section>`. Внутри по порядку:
+  1. `form-input label="Название" v-model="eventName"`;
+  2. `select-single-cards label="Бренд" :items="eventBrandItems" v-model="eventBrand" :is-required="eventBrand === null"`. Пункты `[{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }]`, значение `null`;
+  3. `select-single-cards label="Способ валидации участника" :items="eventValidationItems" v-model="eventValidation"`. Пункты `[{ id: true, name: 'Самостоятельно через ввод кода СМС' }, { id: false, name: 'При помощи промо-персонала' }]`, значение `true`;
+  4. `<p>Выбрано: {{ JSON.stringify({ brand: eventBrand, validation: eventValidation }) }}</p>` — последним в разделе.
+
+  Компонент регистрируется в `App.vue` так же, как остальные. Комментарий над разделом: копия формы мероприятия russia, «Название» стоит первым, чтобы Tab входил в карточки из поля.
+- [ ] **Step 7: Ранняя проверка расширений** — Vimlike и Vimari по разделу «Прогон расширений клавиатурной навигации», только карточки «Бренд» и «Способ валидации участника». Ожидается: по одному кандидату на карточку, на всю карточку; нажатие выбирает её. Провал — стоп и доклад, коммит не делается.
+- [ ] **Step 8: Commit** — `git add -A src tests playground && git commit -m "feat: добавить SelectSingleCards"`.
 
 ---
 
@@ -195,10 +226,10 @@ it('gridTemplate', () => {
 
 **Files:**
 - Create: `src/components/SelectMultipleList.vue`, `tests/SelectMultipleList.test.js`
-- Modify: `src/index.js` (экспорт после `SelectMultipleForm`), `tests/exports.test.js` (двадцать шесть), `tests/ssrFixtures.js`, `tests/focusRing.test.js`, `src/styles/index.css` (комментарий у `appearance: none`)
+- Modify: `src/index.js` (экспорт после `SelectMultipleForm`), `tests/exports.test.js` (двадцать шесть), `tests/ssrFixtures.js`, `tests/focusRing.test.js`, `src/styles/index.css` (утилита `focus-ring`, комментарий у `appearance: none`), `playground/App.vue`
 
 **Interfaces:**
-- Consumes: `src/columns.js` (Task 1); строку подписи, `itemList`, `itemName`, `gridStyle`, `itemStyles`, `syncChecked` — так же, как в `SelectSingleCards` (Task 2).
+- Consumes: `src/columns.js` (Task 1); строку подписи, `itemList`, `itemName`, `gridStyle`, `itemStyles`, `syncChecked` — так же, как в `SelectSingleCards` (Task 2); раздел Playground из Task 2.
 - Produces: компонент `SelectMultipleList`. Разметка для Task 4 и 5:
   - корень `div.bb-dashboard-ui`;
   - сетка `div[role="group"][aria-labelledby]`;
@@ -249,50 +280,50 @@ it('gridTemplate', () => {
   - `tests/exports.test.js` — «ровно двадцать шесть компонентов…», `SelectMultipleList` в списке.
   - `tests/ssrFixtures.js` — `SelectMultipleList: { props: { label: 'Участники', items: [{ id: 'owner', name: 'Владельцы' }, { id: 'doctor', name: 'Ветеринарные врачи' }, { id: 'club', name: 'Клубы' }], modelValue: ['doctor'], columns: 2 } }`.
   - `tests/focusRing.test.js` — в `carriers` `['SelectMultipleList.vue', 'bb:focus-visible:focus-ring', 1]`.
+  - Ореол без отступа — сначала тест: в `LINE_AND_HALO` добавить `'--tw-ring-offset-width: 0px'`, `npm test -- tests/focusRing.test.js` — FAIL. Затем в `@utility focus-ring` (`src/styles/index.css`) в конец `@apply` добавить `bb:ring-offset-0` и дописать в комментарий над утилитой: `@tailwindcss/forms` приложения ставит галочке в фокусе `--tw-ring-offset-width: 2px`, без сброса ореол стал бы шире и с белым отступом. Тест — PASS.
   - `src/styles/index.css` — комментарий над `.bb-dashboard-ui input { appearance: none; }` говорит, что родной вид не нужен и галочкам с переключателями: их кружок, квадрат и галочку рисуют `SelectSingleCards` и `SelectMultipleList`. Правило не меняется.
 - [ ] **Step 5:** `npm test -- --dir tests` — PASS, чистый вывод (`0`).
-- [ ] **Step 6: Commit** — `git add -A src tests && git commit -m "feat: добавить SelectMultipleList"`.
+- [ ] **Step 6: Раздел Playground** (из Task 2) дополняется. Перед строкой «Выбрано» по порядку:
+  1. `select-multiple-list label="Участники" :items="participantItems" v-model="eventParticipants" :is-required="eventParticipants.length === 0"`. Пункты — 14 участников russia в порядке `Create.vue` (`future_owner` … `referee`, подписи оттуда же), значение `[]`;
+  2. `select-multiple-list label="Участники в три колонки" :items="participantItems" v-model="participantsThree" :columns="3"`;
+  3. `select-multiple-list label="Четыре пункта в три колонки" :items="participantItems.slice(0, 4)" v-model="participantsFour" :columns="3"`.
+
+  Строка «Выбрано» показывает и участников: `JSON.stringify({ brand: eventBrand, validation: eventValidation, participants: eventParticipants })`.
+- [ ] **Step 7: Commit** — `git add -A src tests playground && git commit -m "feat: добавить SelectMultipleList"`.
 
 ---
 
-### Task 4: Playground и браузерные тесты
+### Task 4: Браузерные тесты
 
 **Files:**
-- Modify: `playground/App.vue`
 - Create: `e2e/selectCardsList.e2e.js`
 
 **Interfaces:**
-- Consumes: оба компонента (Task 2, 3), их разметку из блоков Produces; `test`, `expect`, `pages`, `openPlayground`, `expectColor` из `e2e/helpers.js`.
+- Consumes: раздел Playground из Task 2 и 3, разметку компонентов из блоков Produces; `test`, `expect`, `pages`, `openPlayground`, `expectColor` из `e2e/helpers.js`.
 
-- [ ] **Step 1: Раздел Playground.** Сразу после раздела `FormInput` — `<section><h2>SelectSingleCards и SelectMultipleList</h2><div class="demo-form">…</div></section>`. Внутри по порядку:
-  1. `form-input label="Название" v-model="eventName"`;
-  2. `select-single-cards label="Бренд" :items="eventBrandItems" v-model="eventBrand" :is-required="eventBrand === null"`. Пункты `[{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }]`, значение `null`;
-  3. `select-single-cards label="Способ валидации участника" :items="eventValidationItems" v-model="eventValidation"`. Пункты `[{ id: true, name: 'Самостоятельно через ввод кода СМС' }, { id: false, name: 'При помощи промо-персонала' }]`, значение `true`;
-  4. `select-multiple-list label="Участники" :items="participantItems" v-model="eventParticipants" :is-required="eventParticipants.length === 0"`. Пункты — 14 участников russia в порядке `Create.vue` (`future_owner` … `referee`, подписи оттуда же), значение `[]`;
-  5. `select-multiple-list label="Участники в три колонки" :items="participantItems" v-model="participantsThree" :columns="3"`;
-  6. `select-multiple-list label="Четыре пункта в три колонки" :items="participantItems.slice(0, 4)" v-model="participantsFour" :columns="3"`;
-  7. `<p>Выбрано: {{ JSON.stringify({ brand: eventBrand, validation: eventValidation, participants: eventParticipants }) }}</p>`.
-
-  Компоненты регистрируются в `App.vue` так же, как остальные. Комментарий над разделом: копия формы мероприятия russia, «Название» стоит первым, чтобы Tab входил в карточки из поля.
-- [ ] **Step 2: Write the browser tests** `e2e/selectCardsList.e2e.js` — цикл по `pages`, `openPlayground` в `beforeEach`.
-  - Локаторы:
-    - группа — `page.getByRole('radiogroup', { name: 'Бренд' })`, `getByRole('group', { name: 'Участники', exact: true })`;
-    - пункт — `getByRole('radio' | 'checkbox', { name })`;
-    - карточка — `page.locator('label', { has: <radio> })`;
-    - строка значений — `page.getByText(/^Выбрано:/)`.
+- [ ] **Step 1: Write the browser tests** `e2e/selectCardsList.e2e.js` — цикл по `pages`, `openPlayground` в `beforeEach`.
+  - **Все локаторы — внутри раздела:** `const section = page.locator('section').filter({ has: page.locator('h2', { hasText: 'SelectSingleCards и SelectMultipleList' }) })`. «Название» и «Выбрано» встречаются и в других разделах Playground.
+    - группа — `section.getByRole('radiogroup', { name: 'Бренд' })`, `section.getByRole('group', { name: 'Участники', exact: true })`;
+    - пункт — `section.getByRole('radio' | 'checkbox', { name })`;
+    - карточка — `section.locator('label', { has: <radio> })`;
+    - поле — `section.getByLabel('Название', { exact: true })`;
+    - строка значений — `section.getByText(/^Выбрано:/)`.
+  - **Помощники в файле:**
+    - `expectFocusRing(locator)` — видимое кольцо пакета: `expectColor(locator, 'outline-color', 'blue-300')`, `outline-width: 1px`, `box-shadow` не `none`;
+    - `expectNoFocusRing(locator)` — кольца не видно: `outline-style` равен `none` или цвет обводки прозрачный (альфа 0), и `box-shadow` равен `none`. Прозрачная обводка допустима: `@tailwindcss/forms` ставит галочке в фокусе `outline: 2px solid transparent`.
   - Тесты:
-    1. Фокус в поле «Название» (`getByLabel('Название', { exact: true }).focus()`). Tab → фокус на «Royal Canin» (выбора нет — первая). Tab → на «Самостоятельно через ввод кода СМС» (выбранная). Tab → на «Будущие владельцы».
+    1. Фокус в поле «Название». Tab → фокус на «Royal Canin» (выбора нет — первая). Tab → на «Самостоятельно через ввод кода СМС» (выбранная). Tab → на «Будущие владельцы».
     2. Фокус на «Самостоятельно…», `ArrowDown` → «При помощи промо-персонала» отмечен и в фокусе; строка содержит `"validation":false`. Группа «Бренд» не изменилась (`"brand":null`).
     3. Tab из «Название» на «Royal Canin», `Space` → строка содержит `"brand":"rc"`, у карточки `expectColor(card, 'background-color', 'indigo-50')` и `expectColor(card, 'border-top-color', 'indigo-500')`.
     4. Фокус на «Будущие владельцы», `Space` → отмечен. Tab → фокус на «Ветеринарные врачи» (порядок массива), `Space`. Строка содержит `"participants":["future_owner","doctor"]`. `Space` ещё раз → `["future_owner"]`.
-    5. Кольцо с клавиатуры: после Tab на «Royal Canin» у карточки `outline-style: solid`. После Tab на «Будущие владельцы» у `input` `outline-style: solid`.
-    6. Мышь без кольца: после клика по надписи «Eukanuba» у этой карточки `outline-style: none`. После клика по надписи «Клубы» у её `input` `outline-style: none`, и он отмечен.
-    7. Чужие стили не проступают: у отмеченного `input` «Клубы» `background-image: none` и `background-color` — `indigo-600` (`expectColor`). Тест идёт и в `host.html`, где подключён `@tailwindcss/forms`.
+    5. Кольцо с клавиатуры. Tab из «Название» на «Royal Canin» → `expectFocusRing(<карточка>)`, её `box-shadow` запомнить. Tab, Tab → на «Будущие владельцы» → `expectFocusRing(<input>)`, и его `box-shadow` равен запомненному у карточки. В `host.html` равенство ловит отступ ореола от `@tailwindcss/forms`.
+    6. Мышь без кольца: клик по надписи «Eukanuba» → `expectNoFocusRing(<карточка Eukanuba>)`; клик по надписи «Клубы» → `expectNoFocusRing(<input Клубы>)`, и он отмечен.
+    7. Чужие стили не проступают: у отмеченного `input` «Клубы» `background-image: none` и `expectColor(input, 'background-color', 'indigo-600')`. Тест идёт и в `host.html`, где подключён `@tailwindcss/forms`.
     8. Раскладка: у пунктов «Четыре пункта в три колонки» `boundingBox().x` трёх колонок различны. Второй пункт стоит под первым: `x` тот же, `y` больше. Третий и четвёртый стоят в строке первого: `y` тот же.
   - На то, что в Chromium и WebKit ведёт себя по-разному, тесты не опираются (спека §10): переход стрелкой с последней карточки, Shift+Tab в группу, фокус после клика.
-- [ ] **Step 3:** `npm run test:browser` — новые тесты PASS в Chromium и WebKit на обеих страницах, прежние тоже. Консоль чистая: фикстура `consoleProblems`.
-- [ ] **Step 4:** `npm test -- --dir tests` — PASS, чистый вывод.
-- [ ] **Step 5: Commit** — `git add playground/App.vue e2e/selectCardsList.e2e.js && git commit -m "test: показать карточки и список галочек в Playground"`.
+- [ ] **Step 2:** `npm run test:browser` — новые тесты PASS в Chromium и WebKit на обеих страницах, прежние тоже. Консоль чистая: фикстура `consoleProblems`.
+- [ ] **Step 3: Проверка, что тесты кольца ловят ошибку.** Временно убрать `bb:ring-offset-0` из утилиты `focus-ring` и пересобрать (`npm run test:browser` собирает сам). Тест 5 должен упасть в `host.html`. Вернуть правку, тест снова PASS. В коммит временная правка не идёт.
+- [ ] **Step 4: Commit** — `git add e2e/selectCardsList.e2e.js && git commit -m "test: проверить карточки и список галочек в браузерах"`.
 
 ---
 
@@ -311,22 +342,7 @@ it('gridTemplate', () => {
     - `getComputedStyle`: `border-color`, `background-color`, `color`, `font-size`, `line-height`, `padding`, `gap`;
     - снимки одного размера — посмотреть глазами.
   - Допустимы только сглаживание и кольцо фокуса. Затем снимок компонентов без `@tailwindcss/forms` и preflight должен совпасть со снимком с ними. Стенд удалить.
-- [ ] **Step 2: Расширения** на собранном Playground (`npm run build && npx vite build --config vite.playground.config.js --outDir <scratchpad>/pg --emptyOutDir --base ./`, отдавать `python3 -m http.server`, не vite dev). Обе страницы, и ещё раз с добавленным стилем `button:not(:disabled) { cursor: pointer }`.
-  - **Vimlike** (Playwright WebKit):
-    - `page.addScriptTag({ content: <файл> })` с `/Applications/Vimlike.app/Contents/PlugIns/Vimlike Extension.appex/Contents/Resources/vimlike.min.js`;
-    - кандидаты — `new GBLinkManager().x()`;
-    - ошибка `Can't find variable: browser` на странице — это init Vimlike без API расширения, не пакет.
-  - **Vimari** (WebKit):
-    - `addStyleTag` с `injected.css`;
-    - `addScriptTag` с `var settings = { linkHintCharacters: "sadfjklewcmpgh", detectByCursorStyle: false }; var currentZoomLevel = 100;` и `link-hints.js` из `/Applications/Vimari.app/Contents/PlugIns/Vimari Extension.appex/Contents/Resources/`;
-    - кандидаты — `getVisibleClickableElements()`.
-  - **Vimium 2.4.2** (Chromium): клон `philc/vimium` в scratchpad, `--load-extension`, режим подсказок `f`. Если с первого прогона подсказки не появились — повторить.
-  - Ожидается:
-    - у каждой карточки ровно один кандидат, его прямоугольник — вся карточка (Vimari — `input` на всю карточку, Vimlike — карточка);
-    - у каждой галочки ровно один кандидат;
-    - нажатие кандидата (`click()`, как у расширения) выбирает карточку или отмечает пункт — видно в строке «Выбрано».
-  - Перед сверкой видимости меток ставить меткам и контейнеру `pointer-events: auto !important` и сверять по снимку экрана: у меток расширений `pointer-events: none`.
-  - Если Vimari или Vimlike не находят карточку с прозрачным `input` на всю карточку — это отклонение: стоп, доклад с данными прогона.
+- [ ] **Step 2: Расширения** — Vimlike, Vimari и Vimium по разделу «Прогон расширений клавиатурной навигации», все карточки и все галочки раздела, обе страницы, с правилом `button:not(:disabled) { cursor: pointer }` и без него.
 - [ ] **Step 3: Playground в certificates.**
   - Выкладка: `npm run build && npx vite build --config vite.playground.config.js --outDir ~/Code/mars/certificates/src/public/build/ui-playground --emptyOutDir --base ./`.
   - `curl -sk -o /dev/null -w "%{http_code}"` по `https://certificates.test/build/ui-playground/index.html` и `host.html` — `200`.
