@@ -25,8 +25,10 @@
  * Единый вид фокуса пакета, как у FormInput: линия 1px blue-300 по краю
  * элемента и ореол 3px blue-200 с прозрачностью 50%. Линия — outline со
  * смещением внутрь: она ложится на рамку элемента, а в режиме принудительных
- * цветов outline остаётся, в отличие от box-shadow. Ореол — кольцо. Компоненты
- * выбирают только момент: bb:focus:focus-ring, bb:focus-visible:focus-ring,
+ * цветов outline остаётся, в отличие от box-shadow. В этом режиме линия на
+ * рамке слилась бы с ней того же системного цвета, поэтому она отходит от края
+ * наружу на 2px. Ореол — кольцо. Компоненты выбирают только момент:
+ * bb:focus:focus-ring, bb:focus-visible:focus-ring,
  * bb:group-focus-visible:focus-ring, bb:has-focus-visible:focus-ring (фокус
  * на элементе внутри носителя). Носитель утилиты не снимает обводку
  * через focus:outline-hidden: это правило встало бы после утилиты и стёрло бы
@@ -35,7 +37,7 @@
  * белым отступом.
  */
 @utility focus-ring {
-    @apply bb:outline-1 bb:outline-solid bb:outline-blue-300 bb:-outline-offset-1 bb:ring-3 bb:ring-blue-200/50 bb:ring-offset-0;
+    @apply bb:outline-1 bb:outline-solid bb:outline-blue-300 bb:-outline-offset-1 bb:ring-3 bb:ring-blue-200/50 bb:ring-offset-0 bb:forced-colors:outline-offset-2;
 }
 
 /*

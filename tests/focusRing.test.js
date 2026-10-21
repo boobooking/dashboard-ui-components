@@ -27,6 +27,9 @@ const LINE_AND_HALO = [
     '--tw-ring-offset-width: 0px',
 ]
 
+// Так Tailwind 4.3.3 записывает bb:forced-colors:outline-offset-2 внутри правила утилиты.
+const FORCED_COLORS_OFFSET = /@media \(forced-colors: active\) \{\s*outline-offset: 2px;\s*\}/
+
 async function buildCss() {
     const source = fs.readFileSync(`${stylesDir}/index.css`, 'utf8')
     const compiler = await compile(source, { base: stylesDir, onDependency() {} })
@@ -62,6 +65,20 @@ describe('утилита focus-ring', () => {
         for (const declaration of LINE_AND_HALO) {
             expect(rule).toContain(declaration)
         }
+    })
+
+    // В режиме высокой контрастности линия на рамке слилась бы с ней того же
+    // системного цвета, поэтому отходит от края наружу; обычное смещение прежнее.
+    it.each([
+        ['focus', FOCUS],
+        ['focus-visible', FOCUS_VISIBLE],
+        ['group-focus-visible', GROUP_FOCUS_VISIBLE],
+        ['has-focus-visible', HAS_FOCUS_VISIBLE],
+    ])('вариант %s в режиме высокой контрастности отодвигает линию на 2px наружу', async (_name, selector) => {
+        const rule = ruleBody(await buildCss(), selector)
+
+        expect(rule).toMatch(FORCED_COLORS_OFFSET)
+        expect(rule.replace(FORCED_COLORS_OFFSET, '').match(/outline-offset: [^;]+/g)).toEqual(['outline-offset: calc(1px * -1)'])
     })
 
     it('без префикса bb правила нет', async () => {
