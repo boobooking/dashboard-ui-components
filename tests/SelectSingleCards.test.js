@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import SelectSingleCards from '../src/components/SelectSingleCards.vue'
@@ -18,10 +18,23 @@ const fourItems = [
     { id: 'd', name: 'Четвёртый' },
 ]
 
+// Ошибки и предупреждения Vue всех монтирований теста; после каждого теста они
+// должны быть пусты, а тесты, которые их ждут, проверяют и забирают их сами.
+const errors = []
+const warnings = []
+
+beforeEach(() => {
+    errors.length = 0
+    warnings.length = 0
+})
+
+afterEach(() => {
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+})
+
 // Компонент монтируется в документ, как в приложении: так работает группа переключателей.
 function mountCards(props, attrs = {}) {
-    const errors = []
-    const warnings = []
     const wrapper = mount(SelectSingleCards, {
         props: { label: 'Бренд', items, ...props },
         attrs,
@@ -60,11 +73,14 @@ describe('подпись и точка', () => {
         expect(visible.wrapper.getComponent({ name: 'Dot' }).element.style.display).not.toBe('none')
     })
 
-    it('label null — пустая подпись без ошибок', () => {
+    it('label null — пустая подпись и одно предупреждение Vue об обязательном пропе', () => {
         const { wrapper, errors } = mountCards({ label: null })
 
         expect(wrapper.get('span[id]').text()).toBe('')
         expect(errors).toEqual([])
+        expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('label')
+        warnings.length = 0
     })
 })
 
@@ -78,8 +94,6 @@ describe('группа', () => {
     })
 
     it('у двух компонентов в одном приложении разные id подписей и name переключателей', () => {
-        const errors = []
-        const warnings = []
         const wrapper = mount(
             { render: () => h('div', [h(SelectSingleCards, { label: 'Первый', items }), h(SelectSingleCards, { label: 'Второй', items })]) },
             { attachTo: document.body, global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } } }
@@ -299,6 +313,8 @@ describe('неверное columns', () => {
 
         expect(wrapper.get('[role="radiogroup"]').element.style.gridTemplateColumns).toBe('repeat(2, minmax(0, 1fr))')
         expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('columns')
+        warnings.length = 0
     })
 
     it('null — две колонки без предупреждений', () => {
@@ -310,11 +326,14 @@ describe('неверное columns', () => {
 })
 
 describe('пустые items', () => {
-    it.each([[[]], [null], ['x']])('%j — только подпись, без сетки', (value) => {
+    it.each([[[], 0], [null, 1], ['x', 1]])('%j — только подпись, без сетки, предупреждений Vue: %i', (value, warningCount) => {
         const { wrapper } = mountCards({ items: value })
 
         expect(wrapper.find('[role="radiogroup"]').exists()).toBe(false)
         expect(wrapper.get('span[id]').text()).toBe('Бренд')
+        expect(warnings).toHaveLength(warningCount)
+        for (const warning of warnings) expect(warning).toContain('items')
+        warnings.length = 0
     })
 
     it('необъекты пропускаются', () => {
