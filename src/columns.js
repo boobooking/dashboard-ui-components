@@ -13,14 +13,16 @@ export function columnCount(value) {
     return isColumnCount(value) ? value : DEFAULT_COLUMNS
 }
 
-// Стиль сетки: колонки одинаковой ширины, не шире своего содержимого.
+// Стиль сетки: колонки одинаковой ширины; содержимое их не распирает.
 export function gridTemplate(columns) {
     return { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }
 }
 
 // Место пункта по индексу: колонки заполняются по очереди, сверху вниз.
 // Первые count % columns колонок получают на одну строку больше остальных.
-// Нумерация колонок и строк с 1.
+// Нумерация колонок и строк с 1. Параметр columns не проверяется: он уже должен
+// быть валидным числом колонок (см. columnCount); при 0 или дробном значении
+// результат пустой или неверный.
 export function gridPlacement(count, columns) {
     const base = Math.floor(count / columns)
     const extra = count % columns

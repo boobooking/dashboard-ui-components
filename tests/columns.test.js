@@ -43,7 +43,7 @@ describe('columnCount', () => {
 })
 
 describe('gridTemplate', () => {
-    it('повторяет колонки одинаковой минимальной шириной', () => {
+    it('колонки одинаковой ширины, содержимое их не распирает', () => {
         expect(gridTemplate(3)).toEqual({ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' })
     })
 })
