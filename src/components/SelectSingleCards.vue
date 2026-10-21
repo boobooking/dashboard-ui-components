@@ -12,7 +12,9 @@
                  bb:bg-none снимает точку @tailwindcss/forms приложения у :checked: input прозрачный,
                  но с картинкой внутри карточки Vimlike ставит метку не в угол, а в её центр.
                  Анимируются только фон и рамка: кольцо фокуса появляется сразу, как у остальных
-                 носителей focus-ring, а не за 150 мс из почти чёрной линии. -->
+                 носителей focus-ring, а не за 150 мс из почти чёрной линии.
+                 В режиме высокой контрастности браузер красит точку цветом фона, а рамки всех кружков
+                 одинаково: у выбранной точка — системным цветом текста, кружок — цветом выделения. -->
             <label
                 v-for="(item, index) in itemList"
                 :key="index"
@@ -21,8 +23,8 @@
                 :class="isSelected(item) ? 'bb:border-indigo-500 bb:bg-indigo-50' : 'bb:border-gray-300 bb:bg-white bb:hover:bg-gray-50'"
             >
                 <input type="radio" :name="groupName" :checked="isSelected(item)" class="bb:absolute bb:inset-0 bb:size-full bb:cursor-pointer bb:bg-none bb:opacity-0" @change="select(item)"/>
-                <span class="bb:pointer-events-none bb:cursor-default bb:shrink-0 bb:mt-0.5 bb:size-4 bb:rounded-full bb:border-2 bb:flex bb:items-center bb:justify-center" :class="isSelected(item) ? 'bb:border-indigo-600' : 'bb:border-gray-400'">
-                    <span v-if="isSelected(item)" class="bb:size-2 bb:rounded-full bb:bg-indigo-600"/>
+                <span class="bb:pointer-events-none bb:cursor-default bb:shrink-0 bb:mt-0.5 bb:size-4 bb:rounded-full bb:border-2 bb:flex bb:items-center bb:justify-center" :class="isSelected(item) ? 'bb:border-indigo-600 bb:forced-colors:border-[Highlight]' : 'bb:border-gray-400'">
+                    <span v-if="isSelected(item)" class="bb:size-2 bb:rounded-full bb:bg-indigo-600 bb:forced-colors:bg-[CanvasText]"/>
                 </span>
                 <span class="bb:pointer-events-none bb:cursor-default bb:ml-3 bb:text-sm bb:font-medium bb:text-gray-700" v-text="itemName(item)"/>
             </label>

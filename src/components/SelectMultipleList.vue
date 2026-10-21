@@ -7,17 +7,19 @@
         <div v-if="itemList.length > 0" role="group" :aria-labelledby="labelId" class="bb:mt-1 bb:grid bb:gap-x-4 bb:gap-y-2" :style="gridStyle">
             <!-- :key="index": id бывают булевыми и повторяться, а checked всё равно задаёт проп.
                  bb:bg-none снимает галочку @tailwindcss/forms приложения у :checked: ресет пакета
-                 background-image не трогает. Белая галочка svg лежит поверх input; путь тот же, что у плагина. -->
+                 background-image не трогает. Белая галочка svg лежит поверх input; путь тот же, что у плагина.
+                 В режиме высокой контрастности браузер красит отмеченный квадрат цветом фона, и белой
+                 галочки svg на нём не видно: там галочка — родная (appearance: auto), svg скрыт. -->
             <label v-for="(item, index) in itemList" :key="index" :style="itemStyles[index]" class="bb:flex bb:items-center">
                 <span class="bb:relative bb:flex bb:shrink-0">
                     <input
                         type="checkbox"
                         :checked="isChecked(item)"
-                        class="bb:size-4 bb:rounded bb:border bb:bg-none bb:focus-visible:focus-ring"
+                        class="bb:size-4 bb:rounded bb:border bb:bg-none bb:focus-visible:focus-ring bb:forced-colors:appearance-auto"
                         :class="isChecked(item) ? 'bb:border-indigo-600 bb:bg-indigo-600' : 'bb:border-gray-300 bb:bg-white'"
                         @change="toggle(item)"
                     />
-                    <svg v-if="isChecked(item)" class="bb:pointer-events-none bb:absolute bb:inset-0 bb:size-4 bb:fill-white" viewBox="0 0 16 16" aria-hidden="true">
+                    <svg v-if="isChecked(item)" class="bb:pointer-events-none bb:absolute bb:inset-0 bb:size-4 bb:fill-white bb:forced-colors:hidden" viewBox="0 0 16 16" aria-hidden="true">
                         <path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z"/>
                     </svg>
                 </span>

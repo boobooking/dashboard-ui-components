@@ -135,6 +135,17 @@ describe('вид', () => {
         }
     })
 
+    it('в режиме высокой контрастности галочка родная, своя белая скрыта', () => {
+        const { wrapper } = mountList({ modelValue: ['doctor'] })
+        const inputs = wrapper.findAll('input')
+
+        expect(inputs).toHaveLength(4)
+        for (const input of inputs) {
+            expect(input.classes()).toContain('bb:forced-colors:appearance-auto')
+        }
+        expect(rowOf(wrapper, 'Ветеринарные врачи').get('svg').classes()).toContain('bb:forced-colors:hidden')
+    })
+
     it('надпись', () => {
         const { wrapper } = mountList()
 

@@ -138,6 +138,16 @@ describe('вид', () => {
         expect(circle.find('span').exists()).toBe(false)
     })
 
+    it('в режиме высокой контрастности у выбранной точка цветом текста и кружок цветом выделения', () => {
+        const { wrapper } = mountCards({ modelValue: 'eukanuba' })
+        const selectedCircle = cardOf(wrapper, 'Eukanuba').get('span')
+        const otherCircle = cardOf(wrapper, 'Royal Canin').get('span')
+
+        expect(selectedCircle.classes()).toContain('bb:forced-colors:border-[Highlight]')
+        expect(selectedCircle.get('span').classes()).toContain('bb:forced-colors:bg-[CanvasText]')
+        expect(otherCircle.classes()).not.toContain('bb:forced-colors:border-[Highlight]')
+    })
+
     it('у каждой карточки общие классы: анимируются только фон и рамка, кольцо с клавиатуры', () => {
         const { wrapper } = mountCards({ modelValue: 'eukanuba' })
 

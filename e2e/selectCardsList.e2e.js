@@ -45,6 +45,23 @@ async function expectNoFocusRing(locator) {
     }).toEqual({ outline: 'none', boxShadow: 'none' })
 }
 
+// Линия фокуса видна: обводка есть и не прозрачная.
+async function expectFocusLine(locator) {
+    const style = await computed(locator, ['outline-style', 'outline-color'])
+    expect(style['outline-style']).not.toBe('none')
+    expect(style['outline-color']).not.toMatch(transparentColor)
+}
+
+// Системный цвет (CanvasText, Highlight…) в computed-виде.
+const systemColor = (page, name) => page.evaluate((colorName) => {
+    const probe = document.createElement('span')
+    probe.style.backgroundColor = colorName
+    document.body.appendChild(probe)
+    const value = getComputedStyle(probe).backgroundColor
+    probe.remove()
+    return value
+}, name)
+
 for (const file of pages) {
     test.describe(`SelectSingleCards и SelectMultipleList, ${file}`, () => {
         let section
@@ -171,6 +188,77 @@ for (const file of pages) {
             expect(second.y).toBeGreaterThan(first.y)
             expect(third.y).toBeCloseTo(first.y, 0)
             expect(fourth.y).toBeCloseTo(first.y, 0)
+        })
+
+        // Режим проверяется только в Chromium. WebKit Playwright включает
+        // медиазапрос (forced-colors: active), но цвета системными не заменяет:
+        // элемент с красным фоном остаётся красным, а forced-color-adjust WebKit
+        // не знает. Там тест проверял бы классы, а не режим.
+        test.describe('режим высокой контрастности', () => {
+            test.skip(({ browserName }) => browserName !== 'chromium', 'WebKit не заменяет цвета в режиме forced-colors')
+
+            test.beforeEach(async ({ page }) => {
+                await page.emulateMedia({ forcedColors: 'active' })
+            })
+
+            test('выбранная карточка: точка цветом текста, кружок цветом выделения', async ({ page }) => {
+                const group = 'Способ валидации участника'
+                const selected = card(section, group, 'Самостоятельно через ввод кода СМС')
+                const selectedCircle = selected.locator('span').first()
+                const otherCircle = card(section, group, 'При помощи промо-персонала').locator('span').first()
+                const canvasText = await systemColor(page, 'CanvasText')
+                const highlight = await systemColor(page, 'Highlight')
+                // Фон карточки браузер заменил системным: режим включён.
+                await expect(selected).toHaveCSS('background-color', await systemColor(page, 'Canvas'))
+                expect(canvasText).not.toBe(await systemColor(page, 'Canvas'))
+                await expect(selectedCircle.locator('span')).toHaveCSS('background-color', canvasText)
+                await expect(selectedCircle).toHaveCSS('border-top-color', highlight)
+                await expect(otherCircle).not.toHaveCSS('border-top-color', highlight)
+            })
+
+            test('отмеченная галочка — родная и видна', async ({ page }) => {
+                const participants = section.getByRole('group', { name: 'Участники', exact: true })
+                const club = checkbox(section, 'Участники', 'Клубы')
+                const before = await club.screenshot()
+                await participants.getByText('Клубы', { exact: true }).click()
+                await expect(club).toBeChecked()
+                await expect(club).not.toHaveCSS('appearance', 'none')
+                await expect(participants.locator('label', { has: page.getByRole('checkbox', { name: 'Клубы', exact: true }) }).locator('svg'))
+                    .toHaveCSS('display', 'none')
+                // Без фокуса и наведения снимки различаются только отметкой.
+                await club.blur()
+                await page.mouse.move(0, 0)
+                expect(await club.screenshot()).not.toEqual(before)
+            })
+
+            test('клик и пробел меняют выбор', async ({ page }) => {
+                await field(section).focus()
+                await page.keyboard.press('Tab')
+                await page.keyboard.press('Space')
+                await expect(radio(section, 'Бренд', 'Royal Canin')).toBeChecked()
+                await expect(values(section)).toContainText('"brand":"rc"')
+                await card(section, 'Бренд', 'Eukanuba').click()
+                await expect(radio(section, 'Бренд', 'Eukanuba')).toBeChecked()
+                await expect(values(section)).toContainText('"brand":"eukanuba"')
+                await section.getByRole('group', { name: 'Участники', exact: true }).getByText('Клубы', { exact: true }).click()
+                await expect(checkbox(section, 'Участники', 'Клубы')).toBeChecked()
+                await checkbox(section, 'Участники', 'Будущие владельцы').focus()
+                await page.keyboard.press('Space')
+                await expect(checkbox(section, 'Участники', 'Будущие владельцы')).toBeChecked()
+                await expect(values(section)).toContainText('"participants":["club","future_owner"]')
+            })
+
+            test('линия фокуса видна после Tab у карточки и у галочки', async ({ page }) => {
+                await field(section).focus()
+                await page.keyboard.press('Tab')
+                await expect(radio(section, 'Бренд', 'Royal Canin')).toBeFocused()
+                await expectFocusLine(card(section, 'Бренд', 'Royal Canin'))
+                await page.keyboard.press('Tab')
+                await page.keyboard.press('Tab')
+                const first = checkbox(section, 'Участники', 'Будущие владельцы')
+                await expect(first).toBeFocused()
+                await expectFocusLine(first)
+            })
         })
     })
 }
