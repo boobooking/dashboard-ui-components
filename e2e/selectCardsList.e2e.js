@@ -30,13 +30,16 @@ async function expectFocusRing(locator) {
 }
 
 // Кольца не видно: обводки нет или она прозрачная (@tailwindcss/forms ставит
-// галочке в фокусе `outline: 2px solid transparent`), ореола нет.
+// галочке в фокусе `outline: 2px solid transparent`), ореола нет. Значения
+// перечитываются, пока не сойдутся. Прозрачность: нулевая альфа в записи
+// через запятую и через косую черту, либо ключевое слово.
+const transparentColor = /^(transparent|[a-z-]+\(.*(,|\/)\s*0(\.0+)?%?\s*\))$/
 async function expectNoFocusRing(locator) {
-    const { 'outline-style': style, 'outline-color': color, 'box-shadow': shadow } =
-        await computed(locator, ['outline-style', 'outline-color', 'box-shadow'])
-    const transparent = /^rgba\(.*, 0\)$/.test(color) || color === 'transparent'
-    expect(style === 'none' || transparent, `обводка: ${style} ${color}`).toBe(true)
-    expect(shadow).toBe('none')
+    await expect.poll(async () => {
+        const style = await computed(locator, ['outline-style', 'outline-color', 'box-shadow'])
+        const noOutline = style['outline-style'] === 'none' || transparentColor.test(style['outline-color'])
+        return noOutline && style['box-shadow'] === 'none'
+    }).toBe(true)
 }
 
 for (const file of pages) {
@@ -108,6 +111,7 @@ for (const file of pages) {
 
         test('клик мышью не рисует кольцо', async () => {
             await card(section, 'Бренд', 'Eukanuba').click()
+            await expect(radio(section, 'Бренд', 'Eukanuba')).toBeChecked()
             await expectNoFocusRing(card(section, 'Бренд', 'Eukanuba'))
             await section.getByRole('group', { name: 'Участники', exact: true }).getByText('Клубы', { exact: true }).click()
             const club = checkbox(section, 'Участники', 'Клубы')
@@ -130,11 +134,12 @@ for (const file of pages) {
                 boxes.push(await checkbox(section, group, name).boundingBox())
             }
             const [first, second, third, fourth] = boxes
-            expect(new Set([first.x, second.x, third.x, fourth.x]).size).toBe(3)
-            expect(second.x).toBe(first.x)
+            // Дробная ширина колонок: равенство в пределах полупикселя.
+            expect(new Set([first.x, second.x, third.x, fourth.x].map(Math.round)).size).toBe(3)
+            expect(second.x).toBeCloseTo(first.x, 0)
             expect(second.y).toBeGreaterThan(first.y)
-            expect(third.y).toBe(first.y)
-            expect(fourth.y).toBe(first.y)
+            expect(third.y).toBeCloseTo(first.y, 0)
+            expect(fourth.y).toBeCloseTo(first.y, 0)
         })
     })
 }
