@@ -142,6 +142,12 @@ describe('вид', () => {
         )
     })
 
+    it('переключатель снимает картинку @tailwindcss/forms приложения', () => {
+        const { wrapper } = mountCards()
+
+        expect(wrapper.get('input').classes()).toContain('bb:bg-none')
+    })
+
     it('без значения ни одна карточка не выбрана', () => {
         const { wrapper } = mountCards()
 

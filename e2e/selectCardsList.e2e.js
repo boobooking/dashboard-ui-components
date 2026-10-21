@@ -130,6 +130,14 @@ for (const file of pages) {
             await expectColor(club, 'background-color', 'indigo-600')
         })
 
+        // Переключатель прозрачный, но картинку :checked видит Vimlike: с ней
+        // метка выбранной карточки встаёт в центр, а не в угол, как у остальных.
+        test('выбранная карточка: у переключателя нет картинки плагина форм', async () => {
+            const selected = radio(section, 'Способ валидации участника', 'Самостоятельно через ввод кода СМС')
+            await expect(selected).toBeChecked()
+            await expect(selected).toHaveCSS('background-image', 'none')
+        })
+
         test('три колонки: второй пункт под первым, третий и четвёртый в строке первого', async () => {
             const group = 'Четыре пункта в три колонки'
             const boxes = []
