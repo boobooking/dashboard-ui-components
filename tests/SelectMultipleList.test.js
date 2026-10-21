@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import SelectMultipleList from '../src/components/SelectMultipleList.vue'
@@ -13,9 +13,22 @@ const items = [
     { id: 'volunteer', name: 'Волонтёры' },
 ]
 
+// Ошибки и предупреждения Vue всех монтирований теста; после каждого теста они
+// должны быть пусты, а тесты, которые их ждут, проверяют и забирают их сами.
+const errors = []
+const warnings = []
+
+beforeEach(() => {
+    errors.length = 0
+    warnings.length = 0
+})
+
+afterEach(() => {
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+})
+
 function mountList(props, attrs = {}) {
-    const errors = []
-    const warnings = []
     const wrapper = mount(SelectMultipleList, {
         props: { label: 'Участники', items, ...props },
         attrs,
@@ -50,11 +63,13 @@ describe('подпись и точка', () => {
         expect(visible.wrapper.getComponent({ name: 'Dot' }).element.style.display).not.toBe('none')
     })
 
-    it('label null — пустая подпись без ошибок', () => {
-        const { wrapper, errors } = mountList({ label: null })
+    it('label null — пустая подпись и одно предупреждение Vue об обязательном пропе', () => {
+        const { wrapper } = mountList({ label: null })
 
         expect(wrapper.get('span[id]').text()).toBe('')
-        expect(errors).toEqual([])
+        expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('label')
+        warnings.length = 0
     })
 
     it('class и data-атрибуты ложатся на корень', () => {
@@ -148,6 +163,7 @@ describe('отметка', () => {
         expect(wrapper.emitted('changed')).toEqual([[]])
     })
 
+    // Клик по надписи внутри label отмечает галочку через активацию label в happy-dom.
     it('клик по надписи отмечает так же', async () => {
         const { wrapper } = mountList({ modelValue: ['doctor'] })
 
@@ -228,14 +244,16 @@ describe('раскладка', () => {
 
 describe('неверное columns', () => {
     it.each([0, -1, 1.5, '3'])('%s — две колонки и одно предупреждение Vue', (columns) => {
-        const { wrapper, warnings } = mountList({ columns })
+        const { wrapper } = mountList({ columns })
 
         expect(wrapper.get('[role="group"]').element.style.gridTemplateColumns).toBe('repeat(2, minmax(0, 1fr))')
         expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('columns')
+        warnings.length = 0
     })
 
     it('null — две колонки без предупреждений', () => {
-        const { wrapper, warnings } = mountList({ columns: null })
+        const { wrapper } = mountList({ columns: null })
 
         expect(wrapper.get('[role="group"]').element.style.gridTemplateColumns).toBe('repeat(2, minmax(0, 1fr))')
         expect(warnings).toEqual([])
@@ -243,17 +261,19 @@ describe('неверное columns', () => {
 })
 
 describe('пустые items', () => {
-    it.each([[[]], [null], ['x']])('%j — только подпись, без сетки', (value) => {
+    it.each([[[], 0], [null, 1], ['x', 1]])('%j — только подпись, без сетки, предупреждений Vue: %i', (value, warningCount) => {
         const { wrapper } = mountList({ items: value })
 
         expect(wrapper.find('[role="group"]').exists()).toBe(false)
         expect(wrapper.get('span[id]').text()).toBe('Участники')
+        expect(warnings).toHaveLength(warningCount)
+        for (const warning of warnings) expect(warning).toContain('items')
+        warnings.length = 0
     })
 
     it('необъекты пропускаются', () => {
-        const { wrapper, errors } = mountList({ items: [null, 5, { id: 'owner', name: 'Владельцы' }] })
+        const { wrapper } = mountList({ items: [null, 5, { id: 'owner', name: 'Владельцы' }] })
 
         expect(rows(wrapper)).toHaveLength(1)
-        expect(errors).toEqual([])
     })
 })
