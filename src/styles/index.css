@@ -27,7 +27,8 @@
  * смещением внутрь: она ложится на рамку элемента, а в режиме принудительных
  * цветов outline остаётся, в отличие от box-shadow. Ореол — кольцо. Компоненты
  * выбирают только момент: bb:focus:focus-ring, bb:focus-visible:focus-ring,
- * bb:group-focus-visible:focus-ring. Носитель утилиты не снимает обводку
+ * bb:group-focus-visible:focus-ring, bb:has-focus-visible:focus-ring (фокус
+ * на элементе внутри носителя). Носитель утилиты не снимает обводку
  * через focus:outline-hidden: это правило встало бы после утилиты и стёрло бы
  * линию. Отступ кольца обнулён: @tailwindcss/forms приложения ставит галочке
  * в фокусе --tw-ring-offset-width: 2px, без сброса ореол стал бы шире и с
