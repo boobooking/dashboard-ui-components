@@ -1337,8 +1337,10 @@ Vimium, Vimari, Vimlike — по их подсказкам, как мышью; �
 
 Фокус у всех компонентов пакета выглядит одинаково, как у `FormInput`: линия
 1px `blue-300` по краю элемента и ореол 3px `blue-200` с прозрачностью 50%.
-Вид задан одной утилитой `focus-ring` в `src/styles/index.css`, компоненты
-выбирают только момент. Поля, кроме `SelectSingleCards` и
+В режиме высокой контрастности (`forced-colors: active`) ореола нет, а линия
+отстоит от края элемента на 2px: на рамке того же системного цвета она бы
+слилась с ней. Вид задан одной утилитой `focus-ring` в `src/styles/index.css`,
+компоненты выбирают только момент. Поля, кроме `SelectSingleCards` и
 `SelectMultipleList`, крестик `NotificationMessage`, кнопки
 `ConfirmationModal` и `DropdownButtonWithAction` показывают фокус при любом
 его появлении, в том числе после клика мышью. Карточки `SelectSingleCards`,
