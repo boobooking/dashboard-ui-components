@@ -20,7 +20,7 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно двадцать пять компонентов, плагин и downloadFile', () => {
+    it('ровно двадцать шесть компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
             'ConfirmationModal',
@@ -43,6 +43,7 @@ describe('публичная поверхность пакета', () => {
             'SelectDateIntervalForm',
             'SelectMultipleFilter',
             'SelectMultipleForm',
+            'SelectMultipleList',
             'SelectSingleCards',
             'SelectSingleFilter',
             'SelectSingleForm',

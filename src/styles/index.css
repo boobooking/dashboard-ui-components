@@ -29,10 +29,12 @@
  * выбирают только момент: bb:focus:focus-ring, bb:focus-visible:focus-ring,
  * bb:group-focus-visible:focus-ring. Носитель утилиты не снимает обводку
  * через focus:outline-hidden: это правило встало бы после утилиты и стёрло бы
- * линию.
+ * линию. Отступ кольца обнулён: @tailwindcss/forms приложения ставит галочке
+ * в фокусе --tw-ring-offset-width: 2px, без сброса ореол стал бы шире и с
+ * белым отступом.
  */
 @utility focus-ring {
-    @apply bb:outline-1 bb:outline-solid bb:outline-blue-300 bb:-outline-offset-1 bb:ring-3 bb:ring-blue-200/50;
+    @apply bb:outline-1 bb:outline-solid bb:outline-blue-300 bb:-outline-offset-1 bb:ring-3 bb:ring-blue-200/50 bb:ring-offset-0;
 }
 
 /*
@@ -94,8 +96,9 @@
         text-decoration: inherit;
     }
 
-    /* Как у @tailwindcss/forms, а не как у preflight: у нас только текстовые
-       поля, и родной вид им не нужен. */
+    /* Как у @tailwindcss/forms, а не как у preflight: текстовым полям родной
+       вид не нужен, и галочкам с переключателями тоже: их кружок, квадрат и
+       галочку рисуют SelectSingleCards и SelectMultipleList. */
     .bb-dashboard-ui input {
         appearance: none;
     }

@@ -23,6 +23,8 @@ const LINE_AND_HALO = [
     'calc(3px + var(--tw-ring-offset-width))',
     // цвет кольца лежит во вложенном @supports, поэтому проверяем его часть
     'var(--bb-color-blue-200) 50%',
+    // отступ кольца обнулён: @tailwindcss/forms приложения ставит галочке в фокусе 2px
+    '--tw-ring-offset-width: 0px',
 ]
 
 async function buildCss() {
@@ -113,6 +115,7 @@ describe('носители focus-ring', () => {
         ['ConfirmationModal.vue', 'bb:focus:focus-ring', 2],
         ['DropdownButtonWithAction.vue', 'bb:focus:focus-ring', 3],
         ['SelectSingleCards.vue', 'bb:has-focus-visible:focus-ring', 1],
+        ['SelectMultipleList.vue', 'bb:focus-visible:focus-ring', 1],
     ]
 
     it.each(carriers)('%s: утилита %s на %i узлах, без focus:outline-hidden', (fileName, utility, count) => {

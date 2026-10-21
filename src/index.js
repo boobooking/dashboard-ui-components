@@ -14,6 +14,7 @@ export { default as SelectDateIntervalFilter } from './components/SelectDateInte
 export { default as SelectDateIntervalForm } from './components/SelectDateIntervalForm.vue'
 export { default as SelectMultipleFilter } from './components/SelectMultipleFilter.vue'
 export { default as SelectMultipleForm } from './components/SelectMultipleForm.vue'
+export { default as SelectMultipleList } from './components/SelectMultipleList.vue'
 export { default as SelectSingleFilter } from './components/SelectSingleFilter.vue'
 export { default as SelectSingleForm } from './components/SelectSingleForm.vue'
 export { default as SelectSingleCards } from './components/SelectSingleCards.vue'

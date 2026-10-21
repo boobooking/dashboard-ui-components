@@ -57,7 +57,10 @@
                 <form-input label="Название" v-model="eventName"/>
                 <select-single-cards label="Бренд" :items="eventBrandItems" v-model="eventBrand" :is-required="eventBrand === null"/>
                 <select-single-cards label="Способ валидации участника" :items="eventValidationItems" v-model="eventValidation"/>
-                <p>Выбрано: {{ JSON.stringify({ brand: eventBrand, validation: eventValidation }) }}</p>
+                <select-multiple-list label="Участники" :items="participantItems" v-model="eventParticipants" :is-required="eventParticipants.length === 0"/>
+                <select-multiple-list label="Участники в три колонки" :items="participantItems" v-model="participantsThree" :columns="3"/>
+                <select-multiple-list label="Четыре пункта в три колонки" :items="participantItems.slice(0, 4)" v-model="participantsFour" :columns="3"/>
+                <p>Выбрано: {{ JSON.stringify({ brand: eventBrand, validation: eventValidation, participants: eventParticipants }) }}</p>
             </div>
         </section>
 
@@ -390,6 +393,7 @@ import {
     SelectSingleCards,
     SelectMultipleFilter,
     SelectMultipleForm,
+    SelectMultipleList,
     InfoPill,
     ErrorMessages,
     FormInput,
@@ -421,6 +425,7 @@ export default {
         SelectSingleCards,
         SelectMultipleFilter,
         SelectMultipleForm,
+        SelectMultipleList,
         InfoPill,
         ErrorMessages,
         FormInput,
@@ -459,6 +464,25 @@ export default {
                 { id: false, name: 'При помощи промо-персонала' },
             ],
             eventValidation: true,
+            participantItems: [
+                { id: 'future_owner', name: 'Будущие владельцы' },
+                { id: 'doctor', name: 'Ветеринарные врачи' },
+                { id: 'owner', name: 'Владельцы' },
+                { id: 'volunteer', name: 'Волонтёры' },
+                { id: 'groomer', name: 'Грумеры' },
+                { id: 'dog_trainer', name: 'Догтренеры' },
+                { id: 'breeder', name: 'Заводчики' },
+                { id: 'club', name: 'Клубы' },
+                { id: 'seller', name: 'Продавцы' },
+                { id: 'shelter_employee', name: 'Сотрудники приюта' },
+                { id: 'sportsman', name: 'Спортсмены' },
+                { id: 'student', name: 'Студенты' },
+                { id: 'handler', name: 'Хендлеры' },
+                { id: 'referee', name: 'Эксперты судьи' },
+            ],
+            eventParticipants: [],
+            participantsThree: [],
+            participantsFour: [],
             pageCardTitle: 'Поле формы',
             markAdminName: false,
             markAdminEmail: false,
