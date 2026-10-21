@@ -10,12 +10,14 @@
                  а подсказка Vimlike и Vimari одна и стоит на всей карточке.
                  Кружок и надпись — cursor-default и pointer-events-none, как содержимое кнопок пакета.
                  bb:bg-none снимает точку @tailwindcss/forms приложения у :checked: input прозрачный,
-                 но с картинкой внутри карточки Vimlike ставит метку не в угол, а в её центр. -->
+                 но с картинкой внутри карточки Vimlike ставит метку не в угол, а в её центр.
+                 Анимируются только фон и рамка: кольцо фокуса появляется сразу, как у остальных
+                 носителей focus-ring, а не за 150 мс из почти чёрной линии. -->
             <label
                 v-for="(item, index) in itemList"
                 :key="index"
                 :style="itemStyles[index]"
-                class="bb:relative bb:flex bb:items-start bb:p-3 bb:border bb:rounded-md bb:cursor-pointer bb:select-none bb:transition bb:has-focus-visible:focus-ring"
+                class="bb:relative bb:flex bb:items-start bb:p-3 bb:border bb:rounded-md bb:cursor-pointer bb:select-none bb:transition-[background-color,border-color] bb:has-focus-visible:focus-ring"
                 :class="isSelected(item) ? 'bb:border-indigo-500 bb:bg-indigo-50' : 'bb:border-gray-300 bb:bg-white bb:hover:bg-gray-50'"
             >
                 <input type="radio" :name="groupName" :checked="isSelected(item)" class="bb:absolute bb:inset-0 bb:size-full bb:cursor-pointer bb:bg-none bb:opacity-0" @change="select(item)"/>

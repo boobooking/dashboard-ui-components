@@ -112,6 +112,24 @@ for (const file of pages) {
             await expect(first).toHaveCSS('box-shadow', cardShadow)
         })
 
+        // У остальных носителей focus-ring кольцо появляется сразу. Анимация
+        // outline-color и box-shadow вела бы линию за 150 мс из почти чёрной.
+        test('кольцо карточки появляется сразу: линия и ореол не анимируются', async ({ page }) => {
+            await field(section).focus()
+            await page.keyboard.press('Tab')
+            const royal = card(section, 'Бренд', 'Royal Canin')
+            const { transitioned, animated } = await royal.evaluate((element) => ({
+                transitioned: getComputedStyle(element).transitionProperty.split(',').map((name) => name.trim()),
+                animated: element.getAnimations().map((animation) => animation.transitionProperty),
+            }))
+            await expect(radio(section, 'Бренд', 'Royal Canin')).toBeFocused()
+            const ringProperties = ['all', 'outline', 'outline-color', 'box-shadow']
+            expect({
+                transitioned: transitioned.filter((name) => ringProperties.includes(name)),
+                animated: animated.filter((name) => ringProperties.includes(name)),
+            }).toEqual({ transitioned: [], animated: [] })
+        })
+
         test('клик мышью не рисует кольцо', async () => {
             await card(section, 'Бренд', 'Eukanuba').click()
             await expect(radio(section, 'Бренд', 'Eukanuba')).toBeChecked()

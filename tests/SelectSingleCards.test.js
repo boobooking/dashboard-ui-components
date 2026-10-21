@@ -138,6 +138,29 @@ describe('вид', () => {
         expect(circle.find('span').exists()).toBe(false)
     })
 
+    it('у каждой карточки общие классы: анимируются только фон и рамка, кольцо с клавиатуры', () => {
+        const { wrapper } = mountCards({ modelValue: 'eukanuba' })
+
+        expect(cards(wrapper)).toHaveLength(2)
+        for (const card of cards(wrapper)) {
+            expect(card.classes()).toEqual(
+                expect.arrayContaining([
+                    'bb:relative',
+                    'bb:flex',
+                    'bb:items-start',
+                    'bb:p-3',
+                    'bb:border',
+                    'bb:rounded-md',
+                    'bb:cursor-pointer',
+                    'bb:select-none',
+                    'bb:transition-[background-color,border-color]',
+                    'bb:has-focus-visible:focus-ring',
+                ])
+            )
+            expect(card.classes()).not.toContain('bb:transition')
+        }
+    })
+
     it('кружок и надпись не принимают курсор и клик', () => {
         const { wrapper } = mountCards()
         const spans = cards(wrapper)[0].findAll(':scope > span')
