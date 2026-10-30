@@ -858,6 +858,95 @@ describe('AmountInput: вставка', () => {
     })
 })
 
+describe('AmountInput: вставка в копейки', () => {
+    it.each([
+        ['сумма с разрядами', '1 234,56'],
+        ['запятая', '12,50'],
+        ['запятая и одна цифра', '1,5'],
+        ['буквы', 'ab12'],
+        ['пустой буфер', ''],
+    ])('отказ не меняет ничего, включая выделение: %s', async (_name, text) => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+        const fraction = fractionOf(wrapper)
+
+        await focus(fraction)
+        fraction.element.setSelectionRange(0, 1)
+        const event = paste(fraction, text)
+        await nextTick()
+
+        expect(parts(wrapper)).toEqual(['1 234', '56'])
+        expect(selection(fraction)).toEqual([0, 1])
+        expectNoEvents(wrapper)
+        expect(event.defaultPrevented).toBe(true)
+    })
+
+    it.each([
+        ['цифра сверх digits', '7', 2, 2],
+        ['замена выделения длиннее digits', '123', 0, 1],
+    ])('итог длиннее digits — отказ: %s', async (_name, text, start, end) => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+        const fraction = fractionOf(wrapper)
+
+        await focus(fraction)
+        fraction.element.setSelectionRange(start, end)
+        paste(fraction, text)
+        await nextTick()
+
+        expect(parts(wrapper)).toEqual(['1 234', '56'])
+        expect(selection(fraction)).toEqual([start, end])
+        expectNoEvents(wrapper)
+    })
+
+    it.each([
+        ['первая цифра', 0, 1, '76', 123476, 1],
+        ['последняя цифра', 1, 2, '57', 123457, 2],
+    ])('7 заменяет выделенную цифру, курсор после неё: %s', async (_name, start, end, shown, amount, caret) => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+        const fraction = fractionOf(wrapper)
+
+        await focus(fraction)
+        fraction.element.setSelectionRange(start, end)
+        const event = paste(fraction, '7')
+        await nextTick()
+
+        expect(parts(wrapper)).toEqual(['1 234', shown])
+        expect(selection(fraction)).toEqual([caret, caret])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[amount]])
+        expect(event.defaultPrevented).toBe(true)
+    })
+
+    it('вставка в середину: текст встаёт на место курсора, курсор после него', async () => {
+        const wrapper = mountAmount({ digits: 3 })
+        const fraction = fractionOf(wrapper)
+
+        await focus(fraction)
+        await fraction.setValue('19')
+        fraction.element.setSelectionRange(1, 1)
+        paste(fraction, '2')
+        await nextTick()
+
+        expect(fraction.element.value).toBe('129')
+        expect(selection(fraction)).toEqual([2, 2])
+    })
+
+    it('неполные копейки дополняются нулями только на выходе, changed один', async () => {
+        const { wrapper, value, changes } = mountBound({}, null)
+        const fraction = fractionOf(wrapper)
+
+        await focus(fraction)
+        paste(fraction, '5')
+        await nextTick()
+
+        expect(parts(wrapper)).toEqual(['', '5'])
+        expect(value.value).toBe(50)
+
+        await blur(fraction)
+
+        expect(parts(wrapper)).toEqual(['0', '50'])
+        expect(changes).toEqual([50])
+    })
+})
+
 describe('AmountInput: перетаскивание', () => {
     it.each([
         ['основная часть', wholeOf],

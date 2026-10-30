@@ -24,7 +24,7 @@
             @keydown.enter="commit"
             @keyup="holdCaret"
             @select="holdCaret"
-            @paste.prevent="onPaste"
+            @paste.prevent="onWholePaste"
             @drop.prevent
         />
         <template v-if="digits > 0">
@@ -46,6 +46,7 @@
                 @blur="completeParts"
                 @keydown.enter="commit"
                 @keydown.backspace="onFractionBackspace"
+                @paste.prevent="onFractionPaste"
                 @drop.prevent
             />
         </template>
@@ -302,13 +303,33 @@ export default {
 
         // Отклонённая вставка не меняет поле: сумма не должна молча стать другой.
         // Фокус при вставке в основной части, поэтому копейки дополняются сразу.
-        onPaste(event) {
+        onWholePaste(event) {
             const text = event.clipboardData?.getData("text") ?? "";
             const parsed = parsePastedAmount(text, this.resolvedLang, this.digits);
 
             if (parsed !== null) {
                 this.applyParts(parsed.whole, this.padFraction(parsed.fraction));
             }
+        },
+
+        // Текст буфера проверяется целиком, до maxlength: обрезанная браузером
+        // вставка молча дала бы другую сумму. Отказ не трогает и выделение.
+        // Значение пишется сразу, иначе курсор некуда поставить: Vue обновит поле позже.
+        onFractionPaste(event) {
+            const input = event.target;
+            const text = event.clipboardData?.getData("text") ?? "";
+            const { selectionStart, selectionEnd } = input;
+            const fraction = this.fraction.slice(0, selectionStart) + text + this.fraction.slice(selectionEnd);
+
+            if (!/^\d+$/.test(text) || fraction.length > this.digits) {
+                return;
+            }
+
+            const caret = selectionStart + text.length;
+
+            this.applyParts(this.whole, fraction);
+            input.value = fraction;
+            input.setSelectionRange(caret, caret);
         },
 
         // Действие браузера отменено, иначе он снял бы фокус с поля и нажатие
