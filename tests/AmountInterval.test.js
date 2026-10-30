@@ -219,6 +219,14 @@ describe.each(COMPONENTS)('%s', (name, component, base) => {
             expect(changes).toHaveLength(1)
         })
 
+        it('нулевая граница «от» считается заданной — выбор валюты даёт changed', async () => {
+            const { wrapper, changes } = mountBound(component, base, { currencies: ['USD', 'JPY'] }, { amountFrom: 0, currency: 'USD' })
+
+            await choose(wrapper, 'JPY ¥')
+
+            expect(changes).toEqual([{ amountFrom: 0, amountTo: null, currency: 'JPY' }])
+        })
+
         it('крестик в «от» — update:amountFrom null и changed', async () => {
             const { wrapper, from, changes } = mountBound(component, base, { currencies: ['USD'] }, { amountFrom: 100, amountTo: 500, currency: 'USD' })
 
@@ -421,10 +429,15 @@ describe('AmountIntervalFilter', () => {
         expect([...row.classList]).toEqual(expect.arrayContaining(['bb:divide-x', 'bb:divide-gray-200']))
     })
 
-    it('рамок формы с --bb-field-radius у фильтра нет', () => {
+    it('у блоков фильтра нет рамок формы', () => {
         const wrapper = mountInterval(AmountIntervalFilter, filterBase, { currency: 'USD', currencies: ['USD'] })
+        const frames = [fieldsOf(wrapper)[0], fieldsOf(wrapper)[1], blockOf(wrapper)].map((part) => part.element.parentElement)
+        const formClasses = ['bb:[--bb-field-radius:0.375rem]', 'bb:border', 'bb:border-gray-300', 'bb:rounded-md', 'bb:shadow-xs', 'bb:bg-white']
 
-        expect(wrapper.html()).not.toContain('bb:[--bb-field-radius')
+        expect(frames).toHaveLength(3)
+        for (const frame of frames) {
+            expect(formClasses.filter((name) => frame.classList.contains(name))).toEqual([])
+        }
     })
 
     it('заголовок и isLoading доходят до ElementHeader', () => {
