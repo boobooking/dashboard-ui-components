@@ -237,6 +237,15 @@ describe('AmountForm: блок валюты', () => {
         expect(changes).toEqual([])
     })
 
+    it('сумма 0 считается суммой: выбор другой валюты даёт changed', async () => {
+        const { wrapper, updates, changes } = mountBound({ currencies: ['USD', 'JPY'] }, { amount: 0, currency: 'USD' })
+
+        await choose(wrapper, 'JPY ¥')
+
+        expect(updates).toEqual([{ amount: 0, currency: 'JPY' }])
+        expect(changes).toEqual([{ amount: 0, currency: 'JPY' }])
+    })
+
     it('выбор той же валюты — событий нет', async () => {
         const wrapper = mountForm({ modelValue: { amount: 123456, currency: 'USD' }, currencies: ['USD', 'JPY'] })
 
@@ -291,7 +300,7 @@ describe('AmountForm: блокировка', () => {
 })
 
 describe('AmountForm: форма', () => {
-    it('подпись связана с основной частью: клик по ней отдаёт фокус полю', () => {
+    it('подпись связана с основной частью', () => {
         const wrapper = mountForm({ modelValue: { amount: 123456, currency: 'USD' }, currencies: ['USD'] })
         const label = wrapper.get('label')
 
@@ -317,6 +326,21 @@ describe('AmountForm: форма', () => {
         expect(second.get('label').attributes('for')).toBe(wholeOf(second).attributes('id'))
     })
 
+    it('у двух копий с двумя валютами разные id подписи кнопки', () => {
+        const wrapper = mount({
+            render: () => [
+                h(AmountForm, { label: 'Первая', currencies: ['USD', 'EUR'] }),
+                h(AmountForm, { label: 'Вторая', currencies: ['USD', 'EUR'] }),
+            ],
+        }, mountOptions())
+        const [first, second] = wrapper.findAllComponents(AmountForm)
+        const hintIdOf = (form) => triggerOf(form).attributes('aria-labelledby').split(' ')[0]
+
+        expect(hintIdOf(first)).not.toBe(hintIdOf(second))
+        expect(blockOf(first).element.contains(document.getElementById(hintIdOf(first)))).toBe(true)
+        expect(blockOf(second).element.contains(document.getElementById(hintIdOf(second)))).toBe(true)
+    })
+
     it('isRequired показывает точку', async () => {
         const wrapper = mountForm()
         const dot = () => wrapper.getComponent(Dot)
@@ -332,6 +356,12 @@ describe('AmountForm: форма', () => {
         const wrapper = mountForm({}, { class: 'ml-2' })
 
         expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb-dashboard-ui', 'ml-2']))
+    })
+
+    it('data-атрибут ложится на корень', () => {
+        const wrapper = mountForm({}, { 'data-test': 'amount' })
+
+        expect(wrapper.attributes('data-test')).toBe('amount')
     })
 
     it('строка из рамки суммы и рамки блока', () => {
@@ -422,6 +452,25 @@ describe('AmountForm: форма', () => {
             { amount: 1234500, currency: 'USD' },
         ])
         expect(wrapper.emitted('changed')).toEqual([[]])
+    })
+
+    it('родитель только слушает: выбор валюты шлёт amount: null и не шлёт changed', async () => {
+        // Значение задаёт родитель, поэтому событие выбора несёт переданную им сумму, а не введённую.
+        const wrapper = mountForm({ currencies: ['USD', 'JPY'] })
+
+        wholeOf(wrapper).element.focus()
+        await wholeOf(wrapper).setValue('1234')
+        await open(wrapper)
+
+        // Этот changed — от выхода из поля суммы, выбор валюты своего не добавляет.
+        expect(wrapper.emitted('changed')).toHaveLength(1)
+
+        await itemsOf(wrapper).find((item) => item.text() === 'JPY ¥').trigger('click')
+        await settle()
+
+        expect(values(wrapper).at(-1)).toEqual({ amount: null, currency: 'JPY' })
+        expect(wrapper.emitted('changed')).toHaveLength(1)
+        expect(parts(wrapper)).toEqual(['1 234', ''])
     })
 
     it('lang доходит до поля и поиска', async () => {
