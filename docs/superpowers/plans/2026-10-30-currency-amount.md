@@ -288,7 +288,7 @@ it('currencyLabel: USD $, AED, XOF F CFA', ...)
   Копейки и вид:
   - пустое поле без фокуса: разделитель и копейки скрыты; фокус показывает; уход из пустого скрывает; уход с суммой оставляет плейсхолдер;
   - `digits: 0` — блока нет; `digits: 3` — плейсхолдер `000`, `style.width` `3ch`;
-  - клик по пустому месту корня и по `prefix` ставит фокус в основную часть;
+  - нажатие мыши (`mousedown`) по пустому месту корня и по `prefix` ставит фокус в основную часть; при несохранённой правке `changed` нет, настоящий уход после этого — один `changed`; правая кнопка не трогает фокус;
   - `prefix` виден, основная часть называется им через `aria-label`.
 
   Значения:
@@ -310,11 +310,13 @@ it('currencyLabel: USD $, AED, XOF F CFA', ...)
 
   Вставка:
   - `1 234,56` заменяет сумму, `update:modelValue` с `123456`;
-  - отклонённая `-100.00` не меняет поле, событий нет.
+  - отклонённая `-100.00` не меняет поле, событий нет;
+  - `12,5` сразу показывает `12` и `50`, уход из основной части ничего не меняет; `12` оставляет копейки пустыми, с плейсхолдером.
 
   Крестик:
   - скрыт через `bb:invisible` при пустом поле, виден при сумме;
-  - клик шлёт `null` и `changed`, обе части пусты, повторного `changed` при уходе нет;
+  - клик шлёт `null` и `changed`, обе части пусты, повторного `changed` при уходе нет; `changed` есть и когда ввод ещё не давал `changed`;
+  - блокировка за время анимации крестика: ни очистки, ни событий;
   - в видимом фокусе клавиатуры фокус до очистки переходит в основную часть;
   - `mousedown` на крестике отменён;
   - `withEraser: false` — крестика нет, у корня `bb:pr-3`.
@@ -338,9 +340,10 @@ it('currencyLabel: USD $, AED, XOF F CFA', ...)
   - Обработчики `input` пишут `event.target.value` напрямую.
   - Основная часть: `@focus`, `@click`, `@keydown`, `@keyup`, `@select`, `@paste.prevent`. Метод `holdCaret()` оставляет выделение всего поля, иначе ставит курсор в конец.
   - `@focus` ставит курсор в конец безусловно, в `requestAnimationFrame`: браузер выделяет всё поле при Tab, это не выделение пользователя.
-  - Корень: `@click` (фокус в основную часть, если цель не `input` и не `button`), `@focusin`, `@focusout`. Выход из поля — `relatedTarget` вне корня. `commit()`: при `isUnmounted` или `isDisabled` выход; при `amount !== committed` — `committed = amount`, `changed`. Enter в обоих полях — `commit()`.
+  - Корень: `@mousedown` основной кнопкой (если цель не `closest('input, button')`, то `preventDefault()` и затем фокус в основную часть: `click` здесь не годится, `mousedown` успел бы снять фокус и дать лишний `changed`), `@focusin`, `@focusout`. Выход из поля — `relatedTarget` вне корня. `commit()`: при `isUnmounted` или `isDisabled` выход; при `amount !== committed` — `committed = amount`, `changed`. Enter в обоих полях — `commit()`.
   - Копейки: `@blur` работает только при непустых копейках: дополняет их нулями, пустая основная часть становится `0`. Две пустые части остаются пустыми.
-  - Крестик: `@mousedown.prevent`, `@clicked="erase"`, `:class="{ 'bb:invisible': isEmpty }"`, как ластики пакета: проверка `document.activeElement` и `:focus-visible`, `focus({ preventScroll: true })` до очистки.
+  - Крестик: `@mousedown.prevent`, `@clicked="erase"`, `:class="{ 'bb:invisible': isEmpty }"`, как ластики пакета: проверка `document.activeElement` и `:focus-visible`, `focus({ preventScroll: true })` до очистки. `erase`: при `isUnmounted` или `isDisabled` выход до очистки и событий, потому что `clicked` приходит после анимации; иначе части пусты, `committed = null`, `update:modelValue` с `null` и всегда `changed`.
+  - Вставка: непустые копейки принятой суммы дополняются нулями сразу, в `onPaste`; пустые остаются пустыми; `parsePastedAmount` не меняется.
   - Классы: корень `bb:flex bb:items-stretch bb:h-full bb:w-full bb:min-w-0 bb:pl-3 bb:rounded-[var(--bb-field-radius,0)] bb:has-focus-visible:focus-ring`; основная часть `bb:flex-1 bb:w-full bb:min-w-0 bb:bg-transparent bb:text-right bb:tabular-nums bb:focus:outline-hidden`; копейки `bb:flex-none bb:bg-transparent bb:tabular-nums bb:placeholder-gray-400 bb:focus:outline-hidden`; разделитель `bb:flex bb:items-center bb:text-gray-500`; `prefix` `bb:flex bb:flex-none bb:items-center bb:mr-2 bb:text-gray-400 bb:select-none`; крестик `bb:h-full bb:pr-2 bb:flex-none`.
 - [ ] **Step 4: Запуск** — `npm test -- --dir tests` с проверкой чистого вывода. PASS.
 - [ ] **Step 5: Commit** — `git add src tests && git commit -m "feat: добавить ядро поля суммы"`.
