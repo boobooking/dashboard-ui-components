@@ -8,6 +8,8 @@
             <select-single
                 :items="items"
                 :model-value="modelValue"
+                :with-search="withSearch"
+                :lang="lang"
                 :labelled-by="labelId"
                 @update:model-value="$emit('update:modelValue', $event)"
                 @changed="$emit('changed')"
@@ -48,6 +50,16 @@ export default {
         isRequired: {
             type: Boolean,
             default: false,
+        },
+        // Поле поиска над пунктами списка.
+        withSearch: {
+            type: Boolean,
+            default: false,
+        },
+        // Язык ядра; без него ядро берёт язык плагина.
+        lang: {
+            type: String,
+            default: null,
         },
     },
 

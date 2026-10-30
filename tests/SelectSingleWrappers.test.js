@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { h } from 'vue'
+import CrossButton from '../src/components/CrossButton.vue'
 import Dot from '../src/components/Dot.vue'
 import DropdownButton from '../src/components/DropdownButton.vue'
 import ElementHeader from '../src/components/ElementHeader.vue'
@@ -97,6 +98,40 @@ describe.each([
 
         expect(wrapper.emitted('update:modelValue')).toEqual([['b']])
         expect(document.activeElement).toBe(triggerOf(wrapper).element)
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+})
+
+describe.each([
+    ['SelectSingleFilter', SelectSingleFilter, { header: 'Вендор' }],
+    ['SelectSingleForm', SelectSingleForm, { label: 'Вендор' }],
+])('%s: поиск и язык', (name, component, labelProps) => {
+    it('по умолчанию поиска нет, язык не задан', () => {
+        const { wrapper, errors, warnings } = mountWrapper(component, { ...labelProps, items })
+        const core = wrapper.getComponent(SelectSingle)
+
+        expect(core.props('withSearch')).toBe(false)
+        expect(core.props('lang')).toBeNull()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('withSearch и lang доходят до ядра', () => {
+        const { wrapper, errors, warnings } = mountWrapper(component, { ...labelProps, items, withSearch: true, lang: 'en' })
+        const core = wrapper.getComponent(SelectSingle)
+
+        expect(core.props('withSearch')).toBe(true)
+        expect(core.props('lang')).toBe('en')
+        expect(panelOf(wrapper).get('input').attributes('placeholder')).toBe('Search')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('ластик получает lang', () => {
+        const { wrapper, errors, warnings } = mountWrapper(component, { ...labelProps, items, modelValue: 'a', lang: 'en' })
+
+        expect(wrapper.getComponent(CrossButton).text()).toBe('Clear')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })

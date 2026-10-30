@@ -36,9 +36,24 @@
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                              см. README, «Клавиатурная навигация». -->
                         <span
+                            v-if="withArrow"
+                            class="bb:flex bb:w-full bb:min-w-0 bb:h-full bb:pl-3 bb:pr-7 bb:py-2 bb:items-center bb:whitespace-nowrap bb:leading-none bb:pointer-events-none bb:cursor-default"
+                        >
+                            <span class="bb:truncate" v-text="title"/>
+                        </span>
+                        <span
+                            v-else
                             class="bb:flex bb:w-full bb:h-full bb:pl-3 bb:pr-12 bb:py-2 bb:items-center bb:whitespace-nowrap bb:leading-none bb:pointer-events-none bb:cursor-default"
                             v-text="title"
                         />
+                        <svg
+                            v-if="withArrow"
+                            class="bb:absolute bb:right-3 bb:top-1/2 bb:-translate-y-1/2 bb:w-2 bb:h-1.5 bb:fill-current bb:text-gray-500 bb:pointer-events-none"
+                            viewBox="0 0 8 6"
+                            aria-hidden="true"
+                        >
+                            <path d="M0 0h8L4 6z"/>
+                        </svg>
                     </button>
                 </template>
                 <template #default>
@@ -71,6 +86,12 @@ export default {
         hasValue: {
             type: Boolean,
             default: true,
+        },
+        // Стрелка в кнопке: текст обрезается многоточием, отступ справа
+        // меньше, чем под ластик.
+        withArrow: {
+            type: Boolean,
+            default: false,
         },
         // Выбранный пункт списка: от него считают стрелки.
         findSelected: {

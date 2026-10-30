@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, nextTick } from 'vue'
+import PopoverPanel from '../src/components/PopoverPanel.vue'
 import SelectSingle from '../src/components/SelectSingle.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
@@ -12,12 +13,20 @@ enableAutoUnmount(afterEach)
 // без него в happy-dom popovertarget список не откроет.
 let uninstallPopover
 
+// Ошибки и предупреждения Vue: тест через vueHandlers требует, чтобы их не было.
+let errors
+let warnings
+
 beforeEach(() => {
     uninstallPopover = installPopoverStub()
+    errors = []
+    warnings = []
 })
 
 afterEach(() => {
     uninstallPopover()
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
 })
 
 const items = [
@@ -30,9 +39,19 @@ const items = [
 // popover, и закрытый список был бы виден.
 const DISPLAY = /^bb:(block|inline-block|inline|flex|inline-flex|grid|inline-grid|table|contents|flow-root|hidden)$/
 
+// Настройки Vue для mount: ошибки уходят в errors, предупреждения — в warnings.
+function vueHandlers() {
+    return { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } }
+}
+
 // attachTo нужен фокусу: элементу вне документа его не дать.
 function mountSelect(props = {}) {
-    return mount(SelectSingleFilter, { props: { header: 'Вендор', items, ...props }, attachTo: document.body })
+    return mount(SelectSingleFilter, { props: { header: 'Вендор', items, ...props }, attachTo: document.body, global: vueHandlers() })
+}
+
+// Ядро без обёртки: внутренние пропы withClear и withArrow обёртки не передают.
+function mountCore(props = {}) {
+    return mount(SelectSingle, { props: { items, ...props }, attachTo: document.body, global: vueHandlers() })
 }
 
 function triggerOf(wrapper) {
@@ -644,5 +663,426 @@ describe('SelectSingle: клик после замены items', () => {
         expect(warnings).toEqual([])
         expect(wrapper.emitted('picked')).toEqual([['b']])
         expect(isOpen(wrapper)).toBe(false)
+    })
+})
+
+const CROSS_PATH = 'path[d="M6 18L18 6M6 6l12 12"]'
+
+// Кнопки пунктов: в панели с поиском есть ещё ластик поля.
+function itemButtons(wrapper) {
+    return panelOf(wrapper).findAll('button').filter((button) => !button.find(CROSS_PATH).exists())
+}
+
+function itemButton(wrapper, name) {
+    return itemButtons(wrapper).find((button) => button.text() === name)
+}
+
+describe('поиск', () => {
+    function fieldOf(wrapper) {
+        return panelOf(wrapper).get('input')
+    }
+
+    function itemNames(wrapper) {
+        return itemButtons(wrapper).map((button) => button.text())
+    }
+
+    // Ластик поля — в панели, ластик значения — рядом с кнопкой списка.
+    function searchEraserOf(wrapper) {
+        return panelOf(wrapper).findAll('button').find((button) => button.find(CROSS_PATH).exists())
+    }
+
+    // Остановка стрелок: поле или пункт с этим именем.
+    function stopOf(wrapper, name) {
+        return name === 'поле' ? fieldOf(wrapper).element : itemButton(wrapper, name).element
+    }
+
+    it('без withSearch поля нет, поведение прежнее', async () => {
+        const wrapper = mountCore()
+        await open(wrapper)
+
+        expect(panelOf(wrapper).find('input').exists()).toBe(false)
+
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+        expect(press('x').defaultPrevented).toBe(false)
+
+        press('Tab')
+
+        expect(document.activeElement.textContent).toBe('Второй')
+    })
+
+    it('при открытии фокус в поле, страница не прокручивается', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        const field = fieldOf(wrapper).element
+        const focusOptions = []
+        const focus = field.focus
+        field.focus = function (options) {
+            focusOptions.push(options)
+            return focus.call(this, options)
+        }
+
+        await open(wrapper)
+
+        expect(document.activeElement).toBe(field)
+        expect(focusOptions).toEqual([{ preventScroll: true }])
+    })
+
+    it('ввод оставляет совпавшие пункты', async () => {
+        const wrapper = mountCore({ withSearch: true, items: items.slice(0, 2) })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('вто')
+
+        expect(itemNames(wrapper)).toEqual(['Второй'])
+    })
+
+    it('фильтр без учёта регистра и с обрезкой', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('  ВТО ')
+
+        expect(itemNames(wrapper)).toEqual(['Второй'])
+    })
+
+    it.each([
+        { name: 'по-русски', props: {}, expected: 'Ничего не найдено' },
+        { name: 'lang en', props: { lang: 'en' }, expected: 'Nothing found' },
+    ])('нет совпадений, стрелки и Tab не падают: $name', async ({ props, expected }) => {
+        const wrapper = mountCore({ withSearch: true, ...props })
+        await open(wrapper)
+
+        expect(panelOf(wrapper).text()).not.toContain(expected)
+
+        await fieldOf(wrapper).setValue('zzz')
+
+        expect(panelOf(wrapper).text()).toContain(expected)
+        expect(itemButtons(wrapper)).toEqual([])
+
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+
+        press('ArrowUp')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+
+        press('Tab')
+
+        expect(document.activeElement).toBe(searchEraserOf(wrapper).element)
+
+        press('Tab')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
+    it('нет совпадений при выбранном пункте: стрелка с кнопки ведёт в поле', async () => {
+        const wrapper = mountCore({ withSearch: true, modelValue: 'a' })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('zzz')
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
+    it('выбор отфильтрованного пункта шлёт его id, закрывает список и сбрасывает запрос', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('вто')
+
+        await itemButton(wrapper, 'Второй').trigger('click')
+        await settle()
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([['b']])
+        expect(wrapper.emitted('changed')).toEqual([[]])
+        expect(isOpen(wrapper)).toBe(false)
+        expect(fieldOf(wrapper).element.value).toBe('')
+    })
+
+    // Индекс пункта считается по видимым пунктам: по всем он указал бы
+    // мимо, и в Safari фокус остался бы на body.
+    it('в Safari фокус после выбора отфильтрованного пункта — на кнопке', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('вто')
+        document.activeElement.blur()
+
+        itemButton(wrapper, 'Второй').element.click()
+        await settle()
+
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
+    })
+
+    it('закрытие сбрасывает запрос', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('вто')
+
+        press('Escape')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(fieldOf(wrapper).element.value).toBe('')
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
+    })
+
+    it('галочка выбранного пункта стоит при фильтрации', async () => {
+        const wrapper = mountCore({ withSearch: true, modelValue: 'b' })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('р')
+
+        expect(itemButtons(wrapper).map((button) => button.get('svg').element.style.display)).toEqual(['none', '', 'none'])
+
+        await fieldOf(wrapper).setValue('вто')
+
+        expect(itemNames(wrapper)).toEqual(['Второй'])
+        expect(itemButton(wrapper, 'Второй').get('svg').element.style.display).toBe('')
+    })
+
+    it('выбранный пункт, скрытый фильтром, остаётся в надписи', async () => {
+        const wrapper = mountCore({ withSearch: true, modelValue: 'a' })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('тре')
+
+        expect(itemNames(wrapper)).toEqual(['Третий'])
+        expect(triggerOf(wrapper).text()).toBe('Первый')
+    })
+
+    it.each([
+        { name: 'из поля вниз — первый пункт', from: 'поле', key: 'ArrowDown', to: 'Первый' },
+        { name: 'из поля вверх — последний пункт', from: 'поле', key: 'ArrowUp', to: 'Третий' },
+        { name: 'с первого пункта вверх — поле', from: 'Первый', key: 'ArrowUp', to: 'поле' },
+        { name: 'с последнего пункта вниз — поле', from: 'Третий', key: 'ArrowDown', to: 'поле' },
+    ])('круг стрелок через поле: $name', async ({ from, key, to }) => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        stopOf(wrapper, from).focus()
+
+        press(key)
+
+        expect(document.activeElement).toBe(stopOf(wrapper, to))
+    })
+
+    it('фокус снаружи без выбранного: вниз — первый пункт, вверх — последний', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowUp')
+
+        expect(document.activeElement.textContent).toBe('Третий')
+    })
+
+    // Индекс выбранного считается по видимым пунктам: по всем он указал
+    // бы мимо, и отсчёт пошёл бы от поля.
+    it('фокус снаружи с выбранным при фильтрации: отсчёт от него', async () => {
+        const wrapper = mountCore({ withSearch: true, modelValue: 'c' })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('т')
+
+        expect(itemNames(wrapper)).toEqual(['Второй', 'Третий'])
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement).toBe(fieldOf(wrapper).element)
+    })
+
+    it('выбранный пункт скрыт фильтром: отсчёт от поля', async () => {
+        const wrapper = mountCore({ withSearch: true, modelValue: 'a' })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('тре')
+
+        triggerOf(wrapper).element.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Третий')
+    })
+
+    it('ластик запроса в Tab, но не в стрелках', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('р')
+        const field = fieldOf(wrapper).element
+
+        field.focus()
+        press('Tab')
+
+        expect(document.activeElement).toBe(searchEraserOf(wrapper).element)
+
+        field.focus()
+        press('ArrowDown')
+
+        expect(document.activeElement.textContent).toBe('Первый')
+
+        press('ArrowUp')
+
+        expect(document.activeElement).toBe(field)
+    })
+
+    it('набор с пункта уходит в поле', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+        press('ArrowDown')
+
+        const event = press('x')
+
+        expect(event.defaultPrevented).toBe(true)
+
+        await nextTick()
+        const field = fieldOf(wrapper).element
+
+        expect(document.activeElement).toBe(field)
+        expect(field.value).toBe('йx')
+        expect(field.selectionStart).toBe(2)
+        expect(field.selectionEnd).toBe(2)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    })
+
+    it('пропажа пунктов сбрасывает запрос', async () => {
+        const wrapper = mountCore({ withSearch: true })
+        await open(wrapper)
+        await fieldOf(wrapper).setValue('й')
+
+        await wrapper.setProps({ items: [] })
+        await settle()
+
+        expect(wrapper.find('[popover]').exists()).toBe(false)
+        expect(wrapper.vm.isOpen).toBe(false)
+
+        await wrapper.setProps({ items })
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+
+        await open(wrapper)
+
+        expect(fieldOf(wrapper).element.value).toBe('')
+        expect(itemNames(wrapper)).toEqual(['Первый', 'Второй', 'Третий'])
+    })
+
+    it.each([
+        { name: 'с поиском — держится', props: { withSearch: true }, expected: true },
+        { name: 'без поиска — нет', props: {}, expected: false },
+    ])('размер панели: $name', ({ props, expected }) => {
+        const wrapper = mountCore(props)
+
+        expect(wrapper.findComponent(PopoverPanel).props('keepSize')).toBe(expected)
+    })
+
+    it('имя пункта не строка: фильтр и надпись без ошибок и предупреждений', async () => {
+        const wrapper = mountCore({
+            withSearch: true,
+            items: [...items, { id: 'd', name: null }, { id: 'e', name: 5 }],
+            'onUpdate:modelValue': (value) => wrapper.setProps({ modelValue: value }),
+        })
+        await open(wrapper)
+
+        await fieldOf(wrapper).setValue('5')
+
+        expect(itemNames(wrapper)).toEqual(['5'])
+
+        await itemButtons(wrapper)[0].trigger('click')
+
+        expect(triggerOf(wrapper).text()).toBe('5')
+    })
+})
+
+describe('withClear = false', () => {
+    function eraserOf(wrapper) {
+        return wrapper.findAll('button').find((button) => button.find(CROSS_PATH).exists())
+    }
+
+    it('ластика нет', () => {
+        const wrapper = mountCore({ withClear: false, modelValue: 'a' })
+
+        expect(eraserOf(wrapper)).toBeUndefined()
+    })
+
+    it('клик по выбранному закрывает список без событий', async () => {
+        const wrapper = mountCore({ withClear: false, modelValue: 'a' })
+        await open(wrapper)
+
+        await itemButton(wrapper, 'Первый').trigger('click')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(wrapper.vm.isOpen).toBe(false)
+        expect(document.activeElement).toBe(triggerOf(wrapper).element)
+        expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+        expect(wrapper.emitted('changed')).toBeUndefined()
+    })
+
+    it('клик по другому шлёт update:modelValue и changed', async () => {
+        const wrapper = mountCore({ withClear: false, modelValue: 'a' })
+        await open(wrapper)
+
+        await itemButton(wrapper, 'Второй').trigger('click')
+        await settle()
+
+        expect(isOpen(wrapper)).toBe(false)
+        expect(wrapper.emitted('update:modelValue')).toEqual([['b']])
+        expect(wrapper.emitted('changed')).toEqual([[]])
+    })
+
+    it('по умолчанию ластик есть, клик по выбранному снимает выбор', async () => {
+        const wrapper = mountCore({ modelValue: 'a' })
+
+        expect(eraserOf(wrapper).exists()).toBe(true)
+
+        await open(wrapper)
+        await itemButton(wrapper, 'Первый').trigger('click')
+        await settle()
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
+        expect(wrapper.emitted('changed')).toEqual([[]])
+    })
+})
+
+describe('withArrow', () => {
+    // Внешний span текста кнопки — первый потомок кнопки.
+    function textBoxOf(wrapper) {
+        return triggerOf(wrapper).get('span')
+    }
+
+    it('без пропа стрелки нет, текст прямо во внешнем span', () => {
+        const wrapper = mountCore({ modelValue: 'a' })
+
+        expect(triggerOf(wrapper).find('svg').exists()).toBe(false)
+        expect(triggerOf(wrapper).find('.bb\\:truncate').exists()).toBe(false)
+        expect(textBoxOf(wrapper).text()).toBe('Первый')
+        expect(textBoxOf(wrapper).classes()).toContain('bb:pr-12')
+        expect(textBoxOf(wrapper).classes()).not.toContain('bb:pr-7')
+        expect(textBoxOf(wrapper).classes()).not.toContain('bb:min-w-0')
+    })
+
+    it('с пропом стрелка в кнопке скрыта от чтения и не ловит указатель', () => {
+        const wrapper = mountCore({ withArrow: true })
+        const arrow = triggerOf(wrapper).get('svg')
+
+        expect(arrow.attributes('aria-hidden')).toBe('true')
+        expect(arrow.classes()).toEqual(expect.arrayContaining([
+            'bb:absolute', 'bb:right-3', 'bb:top-1/2', 'bb:-translate-y-1/2', 'bb:w-2', 'bb:h-1.5',
+            'bb:fill-current', 'bb:text-gray-500', 'bb:pointer-events-none',
+        ]))
+    })
+
+    it('с пропом текст в .bb\\:truncate, правый отступ bb:pr-7', () => {
+        const wrapper = mountCore({ withArrow: true, modelValue: 'a' })
+
+        expect(triggerOf(wrapper).get('.bb\\:truncate').text()).toBe('Первый')
+        expect(textBoxOf(wrapper).classes()).toEqual(expect.arrayContaining(['bb:min-w-0', 'bb:pr-7']))
+        expect(textBoxOf(wrapper).classes()).not.toContain('bb:pr-12')
     })
 })
