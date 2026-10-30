@@ -125,7 +125,7 @@ describe('носители focus-ring', () => {
         ['Search.vue', 'bb:focus:focus-ring', 1],
         ['RussianMobileFilter.vue', 'bb:focus:focus-ring', 1],
         ['DropdownButton.vue', 'bb:focus-visible:focus-ring', 1],
-        ['SelectMultiple.vue', 'bb:focus:focus-ring', 1],
+        ['ListSearchField.vue', 'bb:focus:focus-ring', 1],
         ['CrossButton.vue', 'bb:group-focus-visible:focus-ring', 1],
         ['TextPopover.vue', 'bb:focus-visible:focus-ring', 2],
         ['NotificationMessage.vue', 'bb:focus:focus-ring', 1],
