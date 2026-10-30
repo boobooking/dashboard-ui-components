@@ -61,5 +61,7 @@ export const ssrFixtures = {
     SelectMultipleList: { props: { label: 'Участники', items: [{ id: 'owner', name: 'Владельцы' }, { id: 'doctor', name: 'Ветеринарные врачи' }, { id: 'club', name: 'Клубы' }], modelValue: ['doctor'], columns: 2 } },
     SelectSingleCards: { props: { label: 'Бренд', items: [{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }], modelValue: 'eukanuba', isRequired: true } },
     SelectSingleForm: { props: { label: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
+    SelectCurrencyFilter: { props: { header: 'Валюта', modelValue: 'USD', currencies: ['RUB', 'USD'] } },
+    SelectCurrencyForm: { props: { label: 'Валюта', modelValue: 'USD' } },
     TextPopover: { props: { text: 'Полный текст сообщения', modelValue: true } },
 }

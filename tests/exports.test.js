@@ -20,7 +20,7 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно двадцать шесть компонентов, плагин и downloadFile', () => {
+    it('ровно двадцать восемь компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
             'ConfirmationModal',
@@ -37,6 +37,8 @@ describe('публичная поверхность пакета', () => {
             'PageTabs',
             'RussianMobileFilter',
             'Search',
+            'SelectCurrencyFilter',
+            'SelectCurrencyForm',
             'SelectDateFilter',
             'SelectDateForm',
             'SelectDateIntervalFilter',
@@ -51,6 +53,10 @@ describe('публичная поверхность пакета', () => {
             'dashboardUi',
             'downloadFile',
         ])
+    })
+
+    it('ListSearchField — внутренний, не экспортируется', () => {
+        expect(pkg).not.toHaveProperty('ListSearchField')
     })
 
     it('downloadFile — функция', () => {
