@@ -287,7 +287,7 @@ it('currencyLabel: USD $, AED, XOF F CFA', ...)
 
   Копейки и вид:
   - пустое поле без фокуса: разделитель и копейки скрыты; фокус показывает; уход из пустого скрывает; уход с суммой оставляет плейсхолдер;
-  - `digits: 0` — блока нет; `digits: 3` — плейсхолдер `000`, `style.width` `3ch`;
+  - `digits: 0` — блока нет; `digits: 3` — плейсхолдер `000`, `style.width` `calc(3ch + 2px)`;
   - нажатие мыши (`mousedown`) по пустому месту корня и по `prefix` ставит фокус в основную часть; при несохранённой правке `changed` нет, настоящий уход после этого — один `changed`; правая кнопка не трогает фокус;
   - `prefix` виден, основная часть называется им через `aria-label`.
 
@@ -431,7 +431,7 @@ it('currencyLabel: USD $, AED, XOF F CFA', ...)
 
   Только фильтр:
   - `withCurrency: false` — блока нет, `digits` из `currency: 'JPY'` — блока копеек нет; без `currency` — `AED`, 2 знака;
-  - высота и рамка `bb:h-18 bb:border bb:border-gray-200`, поля `bb:w-45`, блок `bb:w-24`, `bb:divide-x`;
+  - высота и рамка `bb:h-18 bb:border bb:border-gray-200`, поля `bb:w-46`, блок `bb:w-24`, `bb:divide-x`;
   - `isLoading` доходит до `ElementHeader`.
 
   Только форма:
