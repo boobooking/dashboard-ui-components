@@ -1,8 +1,8 @@
 // Поиск по пунктам списка: проп withSearch, запрос, отфильтрованные пункты,
 // остановки стрелок и Tab, набор с пункта. Компонент объявляет itemList и
 // hasItems, ставит ListSearchField с ref="search" и v-model="query", список
-// пунктов — с ref="list" и @keydown="onListKeydown", а из обработчика toggle
-// панели вызывает onSearchToggle. Внутренний модуль пакета.
+// пунктов — с ref="list" и @keydown="onListKeydown", а на событие toggle панели
+// вешает onSearchToggle. Внутренний модуль пакета.
 export const withListSearch = {
     props: {
         // Поле поиска над пунктами списка.

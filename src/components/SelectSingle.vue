@@ -13,7 +13,7 @@
             :keep-size="withSearch"
             :lang="lang"
             @erased="clear"
-            @toggle="onToggle"
+            @toggle="onSearchToggle"
         >
             <list-search-field
                 v-if="withSearch"
@@ -178,10 +178,6 @@ export default {
         // первый пункт, вверх — последний, как без поиска.
         arrowsOrigin() {
             return this.activeItemElement() ?? this.searchInput();
-        },
-
-        onToggle(isOpen) {
-            this.onSearchToggle(isOpen);
         },
     },
 };
