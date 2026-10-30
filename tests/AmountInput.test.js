@@ -56,6 +56,8 @@ const wholeOf = (wrapper) => wrapper.findAll('input')[0]
 const fractionOf = (wrapper) => wrapper.findAll('input')[1]
 const separatorOf = (wrapper) => fractionOf(wrapper).element.previousElementSibling
 const eraserOf = (wrapper) => wrapper.findComponent(CrossButton)
+const prefixOf = (wrapper) => wrapper.findAll('span').find((span) => span.text() === 'от').element
+const rootOf = (wrapper) => wrapper.element
 
 function parts(wrapper) {
     return wrapper.findAll('input').map((input) => input.element.value)
@@ -76,12 +78,36 @@ async function blur(input) {
     await nextTick()
 }
 
-function press(input, key) {
-    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+function press(input, key, modifiers = {}) {
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...modifiers })
 
     input.element.dispatchEvent(event)
 
     return event
+}
+
+// Настоящая последовательность нажатия. По неотменённому mousedown браузер
+// переводит фокус на элемент под указателем или снимает его, happy-dom — нет.
+function pressMouse(element, button = 0) {
+    const init = { bubbles: true, cancelable: true, button }
+    const mousedown = new MouseEvent('mousedown', init)
+
+    element.dispatchEvent(mousedown)
+    if (!mousedown.defaultPrevented) {
+        const focusable = element.closest('input, button')
+
+        if (focusable) {
+            focusable.focus()
+        } else {
+            document.activeElement?.blur()
+        }
+    }
+    element.dispatchEvent(new MouseEvent('mouseup', init))
+    if (button === 0) {
+        element.dispatchEvent(new MouseEvent('click', init))
+    }
+
+    return mousedown
 }
 
 function paste(input, text) {
@@ -203,6 +229,24 @@ describe('AmountInput: ввод', () => {
     })
 
     it.each([
+        ['metaKey', ','],
+        ['metaKey', '.'],
+        ['ctrlKey', ','],
+        ['ctrlKey', '.'],
+        ['altKey', ','],
+        ['altKey', '.'],
+    ])('%s с клавишей «%s» в копейки не ведёт и не отменяется', async (modifier, key) => {
+        const wrapper = mountAmount()
+        const whole = wholeOf(wrapper)
+
+        await focus(whole)
+        const event = press(whole, key, { [modifier]: true })
+
+        expect(document.activeElement).toBe(whole.element)
+        expect(event.defaultPrevented).toBe(false)
+    })
+
+    it.each([
         ['пустая основная часть становится нулём', '', '5', ['0', '50']],
         ['заполненная основная часть остаётся', '12', '5', ['12', '50']],
         ['полные копейки не меняются', '12', '56', ['12', '56']],
@@ -230,6 +274,62 @@ describe('AmountInput: ввод', () => {
 
         expect(fractionOf(wrapper).element.value).toBe(shown)
         expect(wrapper.emitted('update:modelValue')).toEqual([[Number(shown)]])
+    })
+
+    it.each([
+        [2, '2'],
+        [3, '3'],
+    ])('digits: %i — полные копейки не принимают новую цифру: maxlength %s', (digits, maxlength) => {
+        expect(fractionOf(mountAmount({ digits })).attributes('maxlength')).toBe(maxlength)
+    })
+
+    it.each([
+        ['буква в середине', '5a6', 2, '56', 1],
+        ['две буквы в середине', '5ab6', 3, '56', 1],
+        ['буква в начале', 'a56', 1, '56', 0],
+        ['буква в конце', '56a', 3, '56', 2],
+        ['цифра в середине', '576', 2, '576', 2],
+    ])('курсор копеек остаётся на месте: %s', async (_name, typed, caret, shown, expected) => {
+        const wrapper = mountAmount({ digits: 3 })
+        const fraction = fractionOf(wrapper)
+
+        fraction.element.value = typed
+        fraction.element.setSelectionRange(caret, caret)
+        await fraction.trigger('input')
+
+        expect(fraction.element.value).toBe(shown)
+        expect(selection(fraction)).toEqual([expected, expected])
+    })
+
+    it('уход из поля с пустой основной частью и копейками показывает ноль', async () => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+
+        await focus(wholeOf(wrapper))
+        await wholeOf(wrapper).setValue('')
+        await blur(wholeOf(wrapper))
+
+        expect(parts(wrapper)).toEqual(['0', '56'])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[56]])
+    })
+
+    it('уход из поля дополняет неполные копейки', async () => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+
+        await focus(wholeOf(wrapper))
+        await fractionOf(wrapper).setValue('5')
+        await blur(wholeOf(wrapper))
+
+        expect(parts(wrapper)).toEqual(['1 234', '50'])
+    })
+
+    it('переход на крестик внутри поля основную часть не заполняет', async () => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+
+        await focus(wholeOf(wrapper))
+        await wholeOf(wrapper).setValue('')
+        await focus(eraserOf(wrapper))
+
+        expect(parts(wrapper)).toEqual(['', '56'])
     })
 
     it('обход пустого поля: значение остаётся пустым, копейки снова скрыты, событий нет', async () => {
@@ -372,29 +472,82 @@ describe('AmountInput: копейки и вид', () => {
         expect(fractionOf(wrapper).element.style.width).toBe('3ch')
     })
 
-    it('клик по пустому месту корня ставит фокус в основную часть', async () => {
-        const wrapper = mountAmount()
-
-        await wrapper.trigger('click')
-
-        expect(document.activeElement).toBe(wholeOf(wrapper).element)
-    })
-
-    it('клик по prefix ставит фокус в основную часть', async () => {
+    it.each([
+        ['пустому месту корня', rootOf],
+        ['prefix', prefixOf],
+    ])('нажатие по %s ставит фокус в основную часть', async (_name, targetOf) => {
         const wrapper = mountAmount({ prefix: 'от' })
 
-        await wrapper.findAll('span').find((span) => span.text() === 'от').trigger('click')
+        const event = pressMouse(targetOf(wrapper))
+        await nextTick()
 
         expect(document.activeElement).toBe(wholeOf(wrapper).element)
+        expect(event.defaultPrevented).toBe(true)
     })
 
-    it('клик по копейкам фокус не уводит', async () => {
+    it.each([
+        ['пустому месту корня', rootOf],
+        ['prefix', prefixOf],
+    ])('нажатие по %s при несохранённой правке — ни одного changed, настоящий уход — один', async (_name, targetOf) => {
+        const { wrapper, changes } = mountBound({ prefix: 'от' })
+
+        await focus(wholeOf(wrapper))
+        await wholeOf(wrapper).setValue('1234')
+        pressMouse(targetOf(wrapper))
+        await nextTick()
+
+        expect(changes).toEqual([])
+        expect(document.activeElement).toBe(wholeOf(wrapper).element)
+
+        await blur(wholeOf(wrapper))
+
+        expect(changes).toEqual([123400])
+    })
+
+    it('нажатие по пустому месту из копеек — ни одного changed, фокус в основной части', async () => {
+        const { wrapper, changes } = mountBound()
+
+        await focus(fractionOf(wrapper))
+        await fractionOf(wrapper).setValue('5')
+        pressMouse(rootOf(wrapper))
+        await nextTick()
+
+        expect(document.activeElement).toBe(wholeOf(wrapper).element)
+        expect(parts(wrapper)).toEqual(['0', '50'])
+        expect(changes).toEqual([])
+    })
+
+    it('нажатие по пустому месту не скрывает копейки пустого поля в фокусе', async () => {
+        const wrapper = mountAmount()
+
+        await focus(wholeOf(wrapper))
+        pressMouse(rootOf(wrapper))
+        await nextTick()
+
+        expect(fractionOf(wrapper).element.style.display).toBe('')
+    })
+
+    it.each([
+        ['правая', 2],
+        ['средняя', 1],
+    ])('%s кнопка мыши фокус не трогает', async (_name, button) => {
+        const wrapper = mountAmount()
+
+        const event = pressMouse(rootOf(wrapper), button)
+        await nextTick()
+
+        expect(document.activeElement).not.toBe(wholeOf(wrapper).element)
+        expect(event.defaultPrevented).toBe(false)
+    })
+
+    it('нажатие по копейкам фокус не уводит', async () => {
         const wrapper = mountAmount({ modelValue: 123456 })
 
         await focus(fractionOf(wrapper))
-        await fractionOf(wrapper).trigger('click')
+        const event = pressMouse(fractionOf(wrapper).element)
 
         expect(document.activeElement).toBe(fractionOf(wrapper).element)
+        expect(event.defaultPrevented).toBe(false)
     })
 
     it('клик по крестику фокус не уводит', async () => {
@@ -629,9 +782,11 @@ describe('AmountInput: changed', () => {
 
             return removeChild(child)
         }
+        const shown = [wrapper.vm.whole, wrapper.vm.fraction]
         wrapper.unmount()
 
         expect(onChanged).not.toHaveBeenCalled()
+        expect([wrapper.vm.whole, wrapper.vm.fraction]).toEqual(shown)
     })
 })
 
@@ -645,6 +800,32 @@ describe('AmountInput: вставка', () => {
         expect(parts(wrapper)).toEqual(['1 234', '56'])
         expect(wrapper.emitted('update:modelValue')).toEqual([[123456]])
         expect(event.defaultPrevented).toBe(true)
+    })
+
+    it('неполные копейки дополняются нулями сразу, уход ничего не меняет', async () => {
+        const wrapper = mountAmount()
+
+        await focus(wholeOf(wrapper))
+        paste(wholeOf(wrapper), '12,5')
+        await nextTick()
+
+        expect(parts(wrapper)).toEqual(['12', '50'])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[1250]])
+
+        await blur(wholeOf(wrapper))
+
+        expect(parts(wrapper)).toEqual(['12', '50'])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[1250]])
+    })
+
+    it('вставка без дробной части оставляет копейки пустыми', async () => {
+        const wrapper = mountAmount()
+
+        paste(wholeOf(wrapper), '12')
+        await nextTick()
+
+        expect(parts(wrapper)).toEqual(['12', ''])
+        expect(wrapper.emitted('update:modelValue')).toEqual([[1200]])
     })
 
     it('разбирает текст по языку поля', async () => {
@@ -693,6 +874,39 @@ describe('AmountInput: крестик', () => {
         await blur(wholeOf(wrapper))
 
         expect(changes).toEqual([null])
+    })
+
+    it('ввод без прошлого changed и крестик — одно changed, при уходе повторного нет', async () => {
+        const { wrapper, value, changes } = mountBound()
+
+        await focus(wholeOf(wrapper))
+        await wholeOf(wrapper).setValue('12')
+        await pressEraser(wrapper)
+
+        expect(value.value).toBeNull()
+        expect(changes).toEqual([null])
+
+        await blur(wholeOf(wrapper))
+
+        expect(changes).toEqual([null])
+    })
+
+    it('блокировка за время анимации крестика — ни очистки, ни событий', async () => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+        const eraser = eraserOf(wrapper)
+
+        await eraser.trigger('click')
+        const animations = eraser.element.getAnimations()
+        await wrapper.setProps({ isDisabled: true })
+        await Promise.all(animations.map((animation) => animation.finished))
+        await flushPromises()
+
+        expectNoEvents(wrapper)
+
+        await wrapper.setProps({ isDisabled: false })
+
+        expect(parts(wrapper)).toEqual(['1 234', '56'])
+        expectNoEvents(wrapper)
     })
 
     it('в видимом фокусе клавиатуры фокус до очистки переходит в основную часть', async () => {
@@ -779,6 +993,16 @@ describe('AmountInput: блокировка', () => {
         await wrapper.setProps({ isDisabled: true })
 
         expect(fractionOf(wrapper).element.style.display).toBe('none')
+    })
+
+    // Отключённое поле пусто, поэтому запрет проверяется на заданном напрямую состоянии.
+    it('заблокированное поле части не дополняет', async () => {
+        const wrapper = mountAmount({ isDisabled: true })
+
+        wrapper.vm.fraction = '5'
+        fractionOf(wrapper).element.dispatchEvent(new FocusEvent('blur'))
+
+        expect([wrapper.vm.whole, wrapper.vm.fraction]).toEqual(['', '5'])
     })
 
     it('уход фокуса при включении блокировки не даёт changed', async () => {

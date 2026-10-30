@@ -2,7 +2,7 @@
     <div
         class="bb:flex bb:items-stretch bb:h-full bb:w-full bb:min-w-0 bb:pl-3 bb:rounded-[var(--bb-field-radius,0)] bb:has-focus-visible:focus-ring"
         :class="{ 'bb:pr-3': !withEraser }"
-        @click="onRootClick"
+        @mousedown="onRootMousedown"
         @focusin="hasFocus = true"
         @focusout="onFocusOut"
     >
@@ -36,12 +36,13 @@
                 autocomplete="off"
                 :value="fraction"
                 :disabled="isDisabled"
+                :maxlength="digits"
                 :placeholder="'0'.repeat(digits)"
                 :aria-label="texts.amountFraction"
                 :style="{ width: `${digits}ch` }"
                 class="bb:flex-none bb:bg-transparent bb:tabular-nums bb:placeholder-gray-400 bb:focus:outline-hidden"
                 @input="onFractionInput"
-                @blur="onFractionBlur"
+                @blur="completeParts"
                 @keydown.enter="commit"
                 @keydown.backspace="onFractionBackspace"
             />
@@ -218,11 +219,22 @@ export default {
             event.target.value = this.groupedWhole;
         },
 
+        // Запись значения уводит курсор в конец: если фильтр убрал символы, курсор
+        // возвращается на своё место за вычетом убранного.
         onFractionInput(event) {
-            const fraction = event.target.value.replace(/\D/g, "").slice(0, this.digits);
+            const input = event.target;
+            const typed = input.value;
+            const caret = input.selectionStart;
+            const fraction = typed.replace(/\D/g, "").slice(0, this.digits);
 
             this.applyParts(this.whole, fraction);
-            event.target.value = fraction;
+            input.value = fraction;
+
+            if (fraction !== typed) {
+                const position = Math.max(caret - (typed.length - fraction.length), 0);
+
+                input.setSelectionRange(position, position);
+            }
         },
 
         // Браузер выделяет всё поле при Tab уже после события focus, и первая
@@ -251,11 +263,14 @@ export default {
         },
 
         // Отмена по умолчанию нужна в обоих переходах фокуса: браузер применяет
-        // нажатие уже к полю, в котором оказался фокус.
+        // нажатие уже к полю, в котором оказался фокус. С модификатором запятая и
+        // точка — сочетания браузера и системы, они остаются им.
         onWholeKeydown(event) {
             this.holdCaret();
 
-            if (this.digits > 0 && isDecimalKey(event.key, this.resolvedLang)) {
+            const hasModifier = event.metaKey || event.ctrlKey || event.altKey;
+
+            if (this.digits > 0 && !hasModifier && isDecimalKey(event.key, this.resolvedLang)) {
                 event.preventDefault();
                 this.$refs.fractionInput.focus();
             }
@@ -268,27 +283,37 @@ export default {
             }
         },
 
-        onFractionBlur() {
-            if (this.fraction === "") {
+        padFraction(fraction) {
+            return fraction === "" ? "" : fraction.padEnd(this.digits, "0");
+        },
+
+        // Непустые копейки дополняются нулями, а пустая основная часть рядом с
+        // ними становится нулём. Две пустые части остаются пустыми.
+        completeParts() {
+            if (this.isUnmounted || this.isDisabled || this.fraction === "") {
                 return;
             }
 
-            this.fraction = this.fraction.padEnd(this.digits, "0");
+            this.fraction = this.padFraction(this.fraction);
             this.whole = this.whole || "0";
         },
 
         // Отклонённая вставка не меняет поле: сумма не должна молча стать другой.
+        // Фокус при вставке в основной части, поэтому копейки дополняются сразу.
         onPaste(event) {
             const text = event.clipboardData?.getData("text") ?? "";
             const parsed = parsePastedAmount(text, this.resolvedLang, this.digits);
 
             if (parsed !== null) {
-                this.applyParts(parsed.whole, parsed.fraction);
+                this.applyParts(parsed.whole, this.padFraction(parsed.fraction));
             }
         },
 
-        onRootClick(event) {
-            if (!event.target.closest("input, button")) {
+        // Действие браузера отменено, иначе он снял бы фокус с поля и нажатие
+        // внутри поля выглядело бы как выход из него.
+        onRootMousedown(event) {
+            if (event.button === 0 && !event.target.closest("input, button")) {
+                event.preventDefault();
                 this.$refs.wholeInput.focus();
             }
         },
@@ -300,6 +325,7 @@ export default {
             }
 
             this.hasFocus = false;
+            this.completeParts();
             this.commit();
         },
 
@@ -314,15 +340,22 @@ export default {
             }
         },
 
+        // CrossButton шлёт clicked после анимации: за это время поле могло
+        // заблокироваться или размонтироваться.
         erase() {
+            if (this.isUnmounted || this.isDisabled) {
+                return;
+            }
+
             this.moveFocusFromEraser();
             this.applyParts("", "");
-            this.commit();
+            this.committed = null;
+            this.$emit("changed");
         },
 
-        // Единственная точка эмита changed. Chrome шлёт blur и при удалении поля
-        // в фокусе, а changed со страницы, с которой уходят, запустил бы её
-        // перезагрузку. Блокировка событий не шлёт вовсе.
+        // Выход из поля и Enter: changed, только если сумма изменилась. Chrome шлёт
+        // blur и при удалении поля в фокусе, а changed со страницы, с которой
+        // уходят, запустил бы её перезагрузку. Блокировка событий не шлёт вовсе.
         commit() {
             if (this.isUnmounted || this.isDisabled || this.amount === this.committed) {
                 return;
