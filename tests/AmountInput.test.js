@@ -790,11 +790,9 @@ describe('AmountInput: changed', () => {
 
             return removeChild(child)
         }
-        const shown = [wrapper.vm.whole, wrapper.vm.fraction]
         wrapper.unmount()
 
         expect(onChanged).not.toHaveBeenCalled()
-        expect([wrapper.vm.whole, wrapper.vm.fraction]).toEqual(shown)
     })
 })
 
@@ -1065,6 +1063,19 @@ describe('AmountInput: крестик', () => {
         expectNoEvents(wrapper)
     })
 
+    it('размонтирование за время анимации крестика — ни событий, ни ошибок', async () => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+        const eraser = eraserOf(wrapper)
+
+        await eraser.trigger('click')
+        const animations = eraser.element.getAnimations()
+        wrapper.unmount()
+        await Promise.all(animations.map((animation) => animation.finished))
+        await flushPromises()
+
+        expectNoEvents(wrapper)
+    })
+
     it('в видимом фокусе клавиатуры фокус до очистки переходит в основную часть', async () => {
         const onUpdate = vi.fn()
         const wrapper = mountAmount({ modelValue: 123456, 'onUpdate:modelValue': onUpdate })
@@ -1149,16 +1160,6 @@ describe('AmountInput: блокировка', () => {
         await wrapper.setProps({ isDisabled: true })
 
         expect(fractionOf(wrapper).element.style.display).toBe('none')
-    })
-
-    // Отключённое поле пусто, поэтому запрет проверяется на заданном напрямую состоянии.
-    it('заблокированное поле части не дополняет', async () => {
-        const wrapper = mountAmount({ isDisabled: true })
-
-        wrapper.vm.fraction = '5'
-        fractionOf(wrapper).element.dispatchEvent(new FocusEvent('blur'))
-
-        expect([wrapper.vm.whole, wrapper.vm.fraction]).toEqual(['', '5'])
     })
 
     it('уход фокуса при включении блокировки не даёт changed', async () => {

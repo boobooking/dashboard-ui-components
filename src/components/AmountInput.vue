@@ -307,7 +307,7 @@ export default {
         // Непустые копейки дополняются нулями, а пустая основная часть рядом с
         // ними становится нулём. Две пустые части остаются пустыми.
         completeParts() {
-            if (this.isUnmounted || this.isDisabled || this.fraction === "") {
+            if (this.fraction === "") {
                 return;
             }
 
@@ -378,9 +378,9 @@ export default {
         },
 
         // CrossButton шлёт clicked после анимации: за это время поле могло
-        // заблокироваться или размонтироваться.
+        // заблокироваться. После размонтирования крестик clicked не шлёт.
         erase() {
-            if (this.isUnmounted || this.isDisabled) {
+            if (this.isDisabled) {
                 return;
             }
 
