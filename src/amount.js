@@ -59,7 +59,8 @@ export function isDecimalKey(key, lang) {
 // Разбор вставки. Порядок правил:
 // 1. пробелы, в том числе неразрывные, убираются;
 // 2. остаток — одно неотрицательное число, цифры через одиночные «,» или «.»;
-// 3. если есть оба символа, десятичный — тот, что последний;
+// 3. если есть оба символа, десятичный — тот, что последний, и он встречается
+//    один раз, иначе отказ;
 // 4. единственный символ, встреченный один раз, десятичный, кроме запятой в en;
 // 5. повторяющийся символ — разделитель разрядов;
 // 6. лишние цифры копеек или цифр всего — отказ (null).
@@ -76,6 +77,10 @@ export function parsePastedAmount(text, lang, digits) {
 
     if (kinds.size === 2) {
         decimal = separators[separators.length - 1]
+
+        if (separators.filter((separator) => separator === decimal).length > 1) {
+            return null
+        }
     } else if (separators.length === 1 && !(separators[0] === ',' && lang === 'en')) {
         decimal = separators[0]
     }

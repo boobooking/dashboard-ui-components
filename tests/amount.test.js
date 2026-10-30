@@ -39,6 +39,15 @@ describe('splitAmount', () => {
     })
 })
 
+describe('splitAmount и joinAmount', () => {
+    it.each([0, 2, 3])('максимальная сумма проходит круг при digits %s', (digits) => {
+        const amount = 10 ** 15 - 1
+        const { whole, fraction } = splitAmount(amount, digits)
+
+        expect(joinAmount(whole, fraction, digits)).toBe(amount)
+    })
+})
+
 describe('joinAmount', () => {
     it.each([
         { whole: '1234', fraction: '', digits: 2, expected: 123400 },
@@ -56,6 +65,7 @@ describe('cleanWhole', () => {
         { name: 'буквы и пробелы выбрасываются, ведущие нули убираются', text: '00a1 2', digits: 2, expected: '12' },
         { name: 'одни нули дают один ноль', text: '000', digits: 2, expected: '0' },
         { name: 'при digits 2 остаётся 13 цифр', text: '1'.repeat(20), digits: 2, expected: '1'.repeat(13) },
+        { name: 'ведущие нули перед цифрами убираются', text: '0005', digits: 2, expected: '5' },
         { name: 'при digits 0 остаётся 15 цифр', text: '1'.repeat(20), digits: 0, expected: '1'.repeat(15) },
     ])('$name', ({ text, digits, expected }) => {
         expect(cleanWhole(text, digits)).toBe(expected)
@@ -118,6 +128,10 @@ describe('parsePastedAmount', () => {
         { text: '1 234,56 ₽', lang: 'ru', digits: 2, expected: null },
         { text: '.50', lang: 'ru', digits: 2, expected: null },
         { text: '', lang: 'ru', digits: 2, expected: null },
+        { text: '1.2,3.4', lang: 'ru', digits: 2, expected: null },
+        { text: '1,2.3,4', lang: 'ru', digits: 2, expected: null },
+        { text: '1,234,567.89', lang: 'en', digits: 2, expected: { whole: '1234567', fraction: '89' } },
+        { text: '12,34,567.89', lang: 'en', digits: 2, expected: { whole: '1234567', fraction: '89' } },
     ])('«$text» в $lang при digits $digits', ({ text, lang, digits, expected }) => {
         expect(parsePastedAmount(text, lang, digits)).toEqual(expected)
     })
