@@ -4,6 +4,8 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import ElementHeader from '../src/components/ElementHeader.vue'
 import SelectCurrencyFilter from '../src/components/SelectCurrencyFilter.vue'
 import SelectCurrencyForm from '../src/components/SelectCurrencyForm.vue'
+import SelectSingle from '../src/components/SelectSingle.vue'
+import Dot from '../src/components/Dot.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 
 enableAutoUnmount(afterEach)
@@ -85,20 +87,6 @@ describe.each([
         expect(warnings).toEqual([])
     })
 
-    it('пустой currencies — кнопки нет, подпись и рамка остались', () => {
-        const { wrapper, errors, warnings } = mountCurrency({ currencies: [] })
-
-        expect(wrapper.find('button').exists()).toBe(false)
-        expect(wrapper.text()).toContain('Валюта')
-        if (labelProps.header) {
-            expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb:h-18', 'bb:border', 'bb:border-gray-200']))
-        } else {
-            expect(wrapper.find('.bb\\:border-gray-300').exists()).toBe(true)
-        }
-        expect(errors).toEqual([])
-        expect(warnings).toEqual([])
-    })
-
     it('неизвестный код пропущен', async () => {
         const { wrapper, errors, warnings } = mountCurrency({ currencies: ['RUB', 'XXX', 'USD'] })
         await open(wrapper)
@@ -166,6 +154,36 @@ describe.each([
         expect(warnings).toEqual([])
     })
 
+    it('смена currencies меняет пункты', async () => {
+        const { wrapper, errors, warnings } = mountCurrency({ currencies: ['RUB'] })
+        await open(wrapper)
+
+        expect(itemsOf(wrapper).map((item) => item.text())).toEqual(['RUB ₽'])
+
+        await wrapper.setProps({ currencies: ['USD', 'EUR'] })
+        await settle()
+
+        expect(itemsOf(wrapper).map((item) => item.text())).toEqual(['USD $', 'EUR €'])
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('modelValue показывается меткой на кнопке', () => {
+        const { wrapper, errors, warnings } = mountCurrency({ modelValue: 'USD' })
+
+        expect(triggerOf(wrapper).text()).toBe('USD $')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('data-атрибут ложится на корень', () => {
+        const { wrapper, errors, warnings } = mountCurrency({}, { 'data-test': 'currency' })
+
+        expect(wrapper.attributes('data-test')).toBe('currency')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('class ложится на корень', () => {
         const { wrapper, errors, warnings } = mountCurrency({}, { class: 'ml-2' })
 
@@ -179,6 +197,49 @@ describe.each([
         await open(wrapper)
 
         expect(panelOf(wrapper).get('input').attributes('placeholder')).toBe('Search')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+})
+
+// Без пунктов кнопки нет, подпись или заголовок и рамка остаются.
+describe.each([
+    [
+        'SelectCurrencyFilter',
+        SelectCurrencyFilter,
+        { header: 'Валюта' },
+        (wrapper) => wrapper.element,
+        ['bb:h-18', 'bb:border', 'bb:border-gray-200'],
+    ],
+    [
+        'SelectCurrencyForm',
+        SelectCurrencyForm,
+        { label: 'Валюта' },
+        (wrapper) => wrapper.getComponent(SelectSingle).element.parentElement,
+        ['bb:border', 'bb:border-gray-300'],
+    ],
+])('%s: пустой currencies', (name, component, labelProps, frameOf, frameClasses) => {
+    it('кнопки нет, подпись и рамка остались', () => {
+        const { wrapper, errors, warnings } = mountWrapper(component, { ...labelProps, currencies: [] })
+
+        expect(wrapper.find('button').exists()).toBe(false)
+        expect(wrapper.text()).toContain('Валюта')
+        expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining(frameClasses))
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+})
+
+describe('SelectCurrencyForm: точка isRequired', () => {
+    it('isRequired показывает точку', async () => {
+        const { wrapper, errors, warnings } = mountWrapper(SelectCurrencyForm, { label: 'Валюта' })
+        const dot = () => wrapper.getComponent(Dot)
+
+        expect(dot().element.style.display).toBe('none')
+
+        await wrapper.setProps({ isRequired: true })
+
+        expect(dot().element.style.display).toBe('')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })
