@@ -160,7 +160,7 @@ export const CURRENCIES = [
     { code: 'YER', digits: 2, symbol: null },
     { code: 'ZAR', digits: 2, symbol: 'R' },
     { code: 'ZMW', digits: 2, symbol: 'ZK' },
-    { code: 'ZWG', digits: 2, symbol: '- ' },
+    { code: 'ZWG', digits: 2, symbol: null },
 ]
 
 // null и undefined — весь список; не массив — пустой. Иначе записи по кодам в

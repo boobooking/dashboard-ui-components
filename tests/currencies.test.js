@@ -29,6 +29,19 @@ describe('CURRENCIES', () => {
         },
     )
 
+    it('symbol — null или непустая строка без пробелов по краям и не «-»', () => {
+        for (const currency of CURRENCIES) {
+            if (currency.symbol === null) {
+                continue
+            }
+
+            expect(typeof currency.symbol, currency.code).toBe('string')
+            expect(currency.symbol, currency.code).not.toBe('')
+            expect(currency.symbol, currency.code).toBe(currency.symbol.trim())
+            expect(currency.symbol, currency.code).not.toBe('-')
+        }
+    })
+
     it('IQD — 3 знака, JPY — 0, KWD — 3', () => {
         expect(digitsOf('IQD')).toBe(3)
         expect(digitsOf('JPY')).toBe(0)
@@ -37,13 +50,30 @@ describe('CURRENCIES', () => {
 })
 
 describe('pickCurrencies', () => {
-    it('выбирает записи по кодам', () => {
+    const codesOf = (codes) => pickCurrencies(codes).map((currency) => currency.code)
+
+    it('null — весь список', () => {
         expect(pickCurrencies(null)).toBe(CURRENCIES)
+    })
+
+    it('undefined — весь список', () => {
         expect(pickCurrencies(undefined)).toBe(CURRENCIES)
+    })
+
+    it('пустой массив — пустой список', () => {
         expect(pickCurrencies([])).toEqual([])
+    })
+
+    it('не массив — пустой список', () => {
         expect(pickCurrencies('USD')).toEqual([])
-        expect(pickCurrencies(['USD', 'RUB']).map((c) => c.code)).toEqual(['USD', 'RUB'])
-        expect(pickCurrencies(['USD', 'XXX', 'USD', 'usd']).map((c) => c.code)).toEqual(['USD'])
+    })
+
+    it('записи идут в порядке массива', () => {
+        expect(codesOf(['USD', 'RUB'])).toEqual(['USD', 'RUB'])
+    })
+
+    it('повторы, неизвестные коды и другой регистр пропускаются', () => {
+        expect(codesOf(['USD', 'XXX', 'USD', 'usd'])).toEqual(['USD'])
     })
 })
 
@@ -54,5 +84,6 @@ describe('currencyLabel', () => {
         expect(currencyLabel(find('USD'))).toBe('USD $')
         expect(currencyLabel(find('AED'))).toBe('AED')
         expect(currencyLabel(find('XOF'))).toBe('XOF F CFA')
+        expect(currencyLabel(find('ZWG'))).toBe('ZWG')
     })
 })
