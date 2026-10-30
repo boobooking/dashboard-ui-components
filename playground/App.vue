@@ -127,6 +127,44 @@
             <select-multiple-filter header="Мероприятие" :items="eventItems" v-model="events" with-search/>
         </section>
 
+        <!-- Значения всех примеров — в строке под ними. Тот же перевод показывает смену
+             числа знаков, а единственная XOF — самую длинную метку в блоке валюты. -->
+        <section>
+            <h2>Валюта и сумма</h2>
+            <div class="demo-form">
+                <select-currency-form label="Валюта договора" v-model="formCurrency"/>
+                <amount-form label="Сумма перевода" :currencies="['RUB', 'USD', 'JPY', 'KWD', 'XOF']" v-model="transfer"/>
+                <amount-form label="Сумма в рублях" :currencies="['RUB']" v-model="rubleAmount"/>
+                <amount-form label="Сумма во франках КФА" :currencies="['XOF']" v-model="xofAmount"/>
+                <amount-form label="Сумма без крестика" :with-eraser="false" v-model="plainAmount"/>
+                <amount-interval-form
+                    label="Диапазон суммы"
+                    v-model:amount-from="formAmountFrom"
+                    v-model:amount-to="formAmountTo"
+                    v-model:currency="formAmountCurrency"
+                />
+                <select-single-form label="Вендор с поиском" :items="vendorItems" v-model="searchVendor" with-search/>
+            </div>
+            <div class="demo-row demo-gap">
+                <select-currency-filter header="Валюта отчёта" v-model="filterCurrency"/>
+                <amount-interval-filter
+                    header="Сумма заказа"
+                    v-model:amount-from="filterAmountFrom"
+                    v-model:amount-to="filterAmountTo"
+                    v-model:currency="filterAmountCurrency"
+                />
+                <amount-interval-filter
+                    header="Сумма заказа в рублях"
+                    :with-currency="false"
+                    currency="RUB"
+                    v-model:amount-from="rubleAmountFrom"
+                    v-model:amount-to="rubleAmountTo"
+                />
+                <select-single-filter header="Вендор с поиском в панели" :items="vendorItems" v-model="searchFilterVendor" with-search/>
+            </div>
+            <p data-testid="amount-values">{{ JSON.stringify(amountValues) }}</p>
+        </section>
+
         <section>
             <h2>Цвета</h2>
             <table class="demo-colors">
@@ -391,6 +429,11 @@ import {
     SelectSingleFilter,
     SelectSingleForm,
     SelectSingleCards,
+    SelectCurrencyFilter,
+    SelectCurrencyForm,
+    AmountForm,
+    AmountIntervalFilter,
+    AmountIntervalForm,
     SelectMultipleFilter,
     SelectMultipleForm,
     SelectMultipleList,
@@ -423,6 +466,11 @@ export default {
         SelectSingleFilter,
         SelectSingleForm,
         SelectSingleCards,
+        SelectCurrencyFilter,
+        SelectCurrencyForm,
+        AmountForm,
+        AmountIntervalFilter,
+        AmountIntervalForm,
         SelectMultipleFilter,
         SelectMultipleForm,
         SelectMultipleList,
@@ -537,6 +585,22 @@ export default {
             brands: [],
             brandCommits: 0,
             events: [],
+            formCurrency: null,
+            filterCurrency: null,
+            transfer: { amount: 123456, currency: 'USD' },
+            rubleAmount: { amount: 50000, currency: 'RUB' },
+            xofAmount: { amount: 1500, currency: 'XOF' },
+            plainAmount: null,
+            formAmountFrom: null,
+            formAmountTo: null,
+            formAmountCurrency: null,
+            filterAmountFrom: null,
+            filterAmountTo: null,
+            filterAmountCurrency: 'USD',
+            rubleAmountFrom: null,
+            rubleAmountTo: null,
+            searchVendor: null,
+            searchFilterVendor: null,
             errorObject: {
                 email: 'Неверный email',
                 password: 'Пароль слишком короткий',
@@ -573,6 +637,28 @@ export default {
     },
 
     computed: {
+        // Значения раздела «Валюта и сумма» для строки под примерами.
+        amountValues() {
+            return {
+                formCurrency: this.formCurrency,
+                filterCurrency: this.filterCurrency,
+                transfer: this.transfer,
+                rubleAmount: this.rubleAmount,
+                xofAmount: this.xofAmount,
+                plainAmount: this.plainAmount,
+                formAmountFrom: this.formAmountFrom,
+                formAmountTo: this.formAmountTo,
+                formAmountCurrency: this.formAmountCurrency,
+                filterAmountFrom: this.filterAmountFrom,
+                filterAmountTo: this.filterAmountTo,
+                filterAmountCurrency: this.filterAmountCurrency,
+                rubleAmountFrom: this.rubleAmountFrom,
+                rubleAmountTo: this.rubleAmountTo,
+                searchVendor: this.searchVendor,
+                searchFilterVendor: this.searchFilterVendor,
+            };
+        },
+
         // Тридцать пунктов: список выше окна, высота ограничена местом до
         // края, и он прокручивается внутри.
         longItems() {
