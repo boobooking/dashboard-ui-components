@@ -1,4 +1,4 @@
-import { test, expect, pages, openPlayground, expectColor } from './helpers.js'
+import { test, expect, pages, openPlayground, expectColor, expectFocusRing } from './helpers.js'
 
 const sectionOf = (page) => page.locator('section').filter({
     has: page.locator('h2', { hasText: 'SelectSingleCards и SelectMultipleList' }),
@@ -24,13 +24,6 @@ const computed = (locator, properties) => locator.evaluate((element, names) => {
     const style = getComputedStyle(element)
     return Object.fromEntries(names.map((name) => [name, style.getPropertyValue(name)]))
 }, properties)
-
-// Видимое кольцо пакета: линия blue-300 в 1px и ореол.
-async function expectFocusRing(locator) {
-    await expectColor(locator, 'outline-color', 'blue-300')
-    await expect(locator).toHaveCSS('outline-width', '1px')
-    await expect(locator).not.toHaveCSS('box-shadow', 'none')
-}
 
 // Кольца не видно: обводки нет или она прозрачная (@tailwindcss/forms ставит
 // галочке в фокусе `outline: 2px solid transparent`), ореола нет. Значения

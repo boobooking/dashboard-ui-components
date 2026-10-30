@@ -1,5 +1,5 @@
 import {
-    test, expect, pages, openPlayground, expectColor, openPanel, waitForMenuReady, scrollToTrigger,
+    test, expect, pages, openPlayground, expectColor, expectFocusRing, openPanel, waitForMenuReady, scrollToTrigger,
 } from './helpers.js'
 
 const sectionOf = (page) => page.locator('section').filter({
@@ -67,13 +67,6 @@ async function expectTabOrder(page, start, stops) {
         await page.keyboard.press('Tab')
         await expect(stop).toBeFocused()
     }
-}
-
-// Видимое кольцо пакета: линия blue-300 в 1px и ореол.
-async function expectFocusRing(locator) {
-    await expectColor(locator, 'outline-color', 'blue-300')
-    await expect(locator).toHaveCSS('outline-width', '1px')
-    await expect(locator).not.toHaveCSS('box-shadow', 'none')
 }
 
 // Поиск оставляет единственный пункт: стрелка ставит на него фокус, Enter
@@ -262,6 +255,7 @@ for (const file of pages) {
                     await page.keyboard.type('5')
                     await expectTabOrder(page, whole, [fraction(field), eraser(field)])
 
+                    // 3px — ореол утилиты focus-ring (ring-3) вокруг значка.
                     const icon = await eraserIcon(field).boundingBox()
                     const box = await field.boundingBox()
                     expect(icon.x - 3).toBeGreaterThanOrEqual(box.x)
@@ -347,13 +341,14 @@ for (const file of pages) {
             test('кольцо рисует корень поля, а не input', async ({ page }) => {
                 const whole = wholeOf(section, 'Сумма перевода')
                 const field = fieldOf(whole)
-                await expectTabOrder(page, listButton(example(section, 'Валюта договора')), [whole, fraction(field)])
-                await expectFocusRing(field)
-                await page.keyboard.press('Shift+Tab')
-                await expect(whole).toBeFocused()
-                await expectFocusRing(field)
+                await listButton(example(section, 'Валюта договора')).focus()
 
+                // Плагин @tailwindcss/forms рисует кольцо на :focus, поэтому стили
+                // проверяются, пока часть в фокусе.
                 for (const input of [whole, fraction(field)]) {
+                    await page.keyboard.press('Tab')
+                    await expect(input).toBeFocused()
+                    await expectFocusRing(field)
                     await expect(input).toHaveCSS('outline-style', 'none')
                     await expect(input).toHaveCSS('box-shadow', 'none')
                     await expect(input).toHaveCSS('border-top-width', '0px')

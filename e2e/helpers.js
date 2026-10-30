@@ -108,3 +108,10 @@ export async function expectColor(locator, property, name) {
     expect(expected, `токен --bb-color-${name}`).not.toBe('rgba(0, 0, 0, 0)')
     await expect(locator).toHaveCSS(property, expected)
 }
+
+// Видимое кольцо пакета: линия blue-300 в 1px и ореол.
+export async function expectFocusRing(locator) {
+    await expectColor(locator, 'outline-color', 'blue-300')
+    await expect(locator).toHaveCSS('outline-width', '1px')
+    await expect(locator).not.toHaveCSS('box-shadow', 'none')
+}
