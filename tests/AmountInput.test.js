@@ -481,6 +481,37 @@ describe('AmountInput: конец длинной суммы', () => {
 
         expect(whole.element.scrollLeft).toBe(200)
     })
+
+    it('принятая вставка в следующем кадре ставит курсор в конец и прокручивает', async () => {
+        const wrapper = mountLong()
+        const whole = wholeOf(wrapper)
+
+        whole.element.focus()
+        await frame()
+        whole.element.scrollLeft = 0
+        selectRange(wrapper, whole, 0, 5)
+        paste(whole, '9 876,54')
+        await frame()
+
+        expect(whole.element.value).toBe('9 876')
+        expect(selection(whole)).toEqual([5, 5])
+        expect(whole.element.scrollLeft).toBe(200)
+    })
+
+    it('отклонённая вставка не трогает выделение и прокрутку', async () => {
+        const wrapper = mountLong()
+        const whole = wholeOf(wrapper)
+
+        whole.element.focus()
+        await frame()
+        whole.element.scrollLeft = 0
+        selectRange(wrapper, whole, 0, 5)
+        paste(whole, '-100.00')
+        await frame()
+
+        expect(selection(whole)).toEqual([0, 5])
+        expect(whole.element.scrollLeft).toBe(0)
+    })
 })
 
 describe('AmountInput: копейки и вид', () => {

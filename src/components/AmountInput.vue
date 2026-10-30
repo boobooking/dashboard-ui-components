@@ -329,12 +329,15 @@ export default {
 
         // Отклонённая вставка не меняет поле: сумма не должна молча стать другой.
         // Фокус при вставке в основной части, поэтому копейки дополняются сразу.
+        // Vue перепишет поле позже, поэтому курсор и прокрутка ставятся в следующем
+        // кадре. Ждать клавишу нельзя: на вставке из меню её нет.
         onWholePaste(event) {
             const text = event.clipboardData?.getData("text") ?? "";
             const parsed = parsePastedAmount(text, this.resolvedLang, this.digits);
 
             if (parsed !== null) {
                 this.applyParts(parsed.whole, this.padFraction(parsed.fraction));
+                this.onWholeFocus();
             }
         },
 

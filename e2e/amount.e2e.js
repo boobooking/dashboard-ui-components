@@ -739,6 +739,30 @@ for (const file of pages) {
                 await expect.poll(() => shownAmount(whole)).toBe('5,45')
             })
 
+            test('тройной клик выделяет всю часть, выделение держится, Backspace очищает её', async ({ page }) => {
+                await whole.click({ clickCount: 3, delay: 50 })
+                await expectAllSelected(whole)
+                await framePassed(page)
+                await expectAllSelected(whole)
+                await page.keyboard.press('Backspace')
+                await expect(whole).toHaveValue('')
+                await expect.poll(() => shownAmount(whole)).toBe(',45')
+                await expect(values(section)).toContainText('"filterAmountFrom":45,')
+            })
+
+            test('отклонённая вставка оставляет выделение всей части', async ({ page, browserName }) => {
+                await copyText(page, browserName, '-100.00')
+                await whole.click()
+                await framePassed(page)
+                await page.keyboard.press('ControlOrMeta+A')
+                await expectAllSelected(whole)
+                await pressPaste(page, whole)
+                await framePassed(page)
+                await expectAllSelected(whole)
+                await expect.poll(() => shownAmount(whole)).toBe('1 234 567 890 123,45')
+                await expectHandledEvent(page, '-100.00')
+            })
+
             test('после ухода снова многоточие и начало суммы', async ({ page }) => {
                 await whole.click()
                 await framePassed(page)
@@ -749,6 +773,28 @@ for (const file of pages) {
                 await expect.poll(() => scrollOffset(whole)).toBe(0)
                 await expect(whole).toHaveAttribute('title', '1 234 567 890 123,45')
             })
+        })
+
+        // Клавиши зажаты до конца проверки: отпускание само запускает holdCaret и
+        // скрыло бы дефект. Поле пустое: у заполненного осталась бы прежняя прокрутка.
+        test('вставка длинной суммы показывает конец до отпускания клавиш', async ({ page, browserName }) => {
+            const whole = fromOf(example(section, 'Сумма заказа'))
+            await copyText(page, browserName, '1 234 567 890 123,45')
+            await whole.click()
+            await framePassed(page)
+            await watchEvent(whole, 'paste')
+
+            await page.keyboard.down('ControlOrMeta')
+            await page.keyboard.down('v')
+            await expect.poll(() => watchedEvents(page)).toHaveLength(1)
+            await expect.poll(() => shownAmount(whole)).toBe('1 234 567 890 123,45')
+            await expectHandledEvent(page, '1 234 567 890 123,45')
+            expect(await fitsInput(whole)).toBe(false)
+            await expectEndVisible(whole)
+            await expectCaretAtEnd(whole)
+
+            await page.keyboard.up('v')
+            await page.keyboard.up('ControlOrMeta')
         })
 
         test('короткая сумма в фокусе не прокручивается', async ({ page }) => {
