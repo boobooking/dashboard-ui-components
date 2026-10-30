@@ -45,6 +45,12 @@ export const messages = {
         search: 'Поиск',
         // SelectMultiple: строка вместо пунктов, когда поиск ничего не нашёл.
         nothingFound: 'Ничего не найдено',
+        // Поле суммы: подсказки границ диапазона и доступное имя поля копеек.
+        amountFrom: 'от',
+        amountTo: 'до',
+        amountFraction: 'Копейки',
+        // Поле суммы: доступное имя кнопки валюты.
+        currency: 'Валюта',
     },
     en: {
         cancel: 'Cancel',
@@ -75,5 +81,9 @@ export const messages = {
         selected: 'Selected',
         search: 'Search',
         nothingFound: 'Nothing found',
+        amountFrom: 'from',
+        amountTo: 'to',
+        amountFraction: 'Fractional part',
+        currency: 'Currency',
     },
 }

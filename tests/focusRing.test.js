@@ -132,6 +132,7 @@ describe('носители focus-ring', () => {
         ['ConfirmationModal.vue', 'bb:focus:focus-ring', 2],
         ['DropdownButtonWithAction.vue', 'bb:focus:focus-ring', 3],
         ['SelectSingleCards.vue', 'bb:has-focus-visible:focus-ring', 1],
+        ['AmountInput.vue', 'bb:has-focus-visible:focus-ring', 1],
         ['SelectMultipleList.vue', 'bb:focus-visible:focus-ring', 1],
     ]
 
