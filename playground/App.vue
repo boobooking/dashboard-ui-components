@@ -127,16 +127,19 @@
             <select-multiple-filter header="Мероприятие" :items="eventItems" v-model="events" with-search/>
         </section>
 
-        <!-- Значения всех примеров — в строке под ними. Тот же перевод показывает смену
-             числа знаков, а единственная XOF — самую длинную метку в блоке валюты. -->
+        <!-- Значения всех примеров — в строке под ними, там же счётчик changed перевода.
+             Тот же перевод показывает смену числа знаков, а единственная XOF — самую
+             длинную метку в блоке валюты. -->
         <section>
             <h2>Валюта и сумма</h2>
             <div class="demo-form">
                 <select-currency-form label="Валюта договора" v-model="formCurrency"/>
-                <amount-form label="Сумма перевода" :currencies="['RUB', 'USD', 'JPY', 'KWD', 'XOF']" v-model="transfer"/>
+                <amount-form label="Сумма перевода" :currencies="['RUB', 'USD', 'JPY', 'KWD', 'XOF']" v-model="transfer" @changed="transferChanges += 1"/>
                 <amount-form label="Сумма в рублях" :currencies="['RUB']" v-model="rubleAmount"/>
                 <amount-form label="Сумма во франках КФА" :currencies="['XOF']" v-model="xofAmount"/>
                 <amount-form label="Сумма без крестика" :with-eraser="false" v-model="plainAmount"/>
+                <amount-form label="Сумма на английском" lang="en" :currencies="['USD']" v-model="englishAmount"/>
+                <amount-form label="Сумма без валют" :currencies="[]" v-model="blockedAmount"/>
                 <amount-interval-form
                     label="Диапазон суммы"
                     v-model:amount-from="formAmountFrom"
@@ -588,9 +591,12 @@ export default {
             formCurrency: null,
             filterCurrency: null,
             transfer: { amount: 123456, currency: 'USD' },
+            transferChanges: 0,
             rubleAmount: { amount: 50000, currency: 'RUB' },
             xofAmount: { amount: 1500, currency: 'XOF' },
             plainAmount: null,
+            englishAmount: { amount: 123456, currency: 'USD' },
+            blockedAmount: { amount: 123456, currency: 'USD' },
             formAmountFrom: null,
             formAmountTo: null,
             formAmountCurrency: null,
@@ -643,9 +649,12 @@ export default {
                 formCurrency: this.formCurrency,
                 filterCurrency: this.filterCurrency,
                 transfer: this.transfer,
+                transferChanges: this.transferChanges,
                 rubleAmount: this.rubleAmount,
                 xofAmount: this.xofAmount,
                 plainAmount: this.plainAmount,
+                englishAmount: this.englishAmount,
+                blockedAmount: this.blockedAmount,
                 formAmountFrom: this.formAmountFrom,
                 formAmountTo: this.formAmountTo,
                 formAmountCurrency: this.formAmountCurrency,

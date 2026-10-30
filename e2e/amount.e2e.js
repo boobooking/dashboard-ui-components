@@ -56,8 +56,8 @@ async function expectAllSelected(input) {
 // Сумма на экране: основная часть, разделитель и копейки, а без копеек только
 // основная часть.
 const shownAmount = (whole) => whole.evaluate((input) => {
-    const part = input.parentElement.querySelector('[aria-label="Копейки"]')
-    return part === null ? input.value : `${input.value}${part.previousElementSibling.textContent}${part.value}`
+    const part = input.parentElement.querySelectorAll('input')[1]
+    return part === undefined ? input.value : `${input.value}${part.previousElementSibling.textContent}${part.value}`
 })
 
 // После каждого Tab фокус на следующей остановке.
@@ -90,6 +90,86 @@ const codeAndLabelEdges = (label) => label.evaluate((element) => {
     range.setEnd(element.firstChild, 'XOF'.length)
     return { code: range.getBoundingClientRect().right, label: element.getBoundingClientRect().right }
 })
+
+// Журнал одного события страницы: «ничего не изменилось» иначе прошло бы и там,
+// где события не было. Запись на window идёт после обработчиков поля.
+const watchEvent = (input, type) => input.evaluate((element, name) => {
+    window.watchedEvents = []
+    window.addEventListener(name, (event) => {
+        window.watchedEvents.push({
+            onField: event.target === element,
+            isPrevented: event.defaultPrevented,
+            text: (event.clipboardData ?? event.dataTransfer).getData('text'),
+        })
+    }, { once: true })
+}, type)
+
+const watchedEvents = (page) => page.evaluate(() => window.watchedEvents)
+
+const expectHandledEvent = async (page, text) => {
+    expect(await watchedEvents(page)).toEqual([{ onField: true, isPrevented: true, text }])
+}
+
+// Временное поле с текстом вне полей суммы.
+async function addSourceText(page, text) {
+    await page.evaluate(() => {
+        const area = document.createElement('textarea')
+        area.dataset.testid = 'amount-text-source'
+        area.style.cssText = 'position: fixed; top: 0; left: 0; z-index: 10; width: 200px; height: 60px'
+        document.body.append(area)
+    })
+    const source = page.getByTestId('amount-text-source')
+    await source.fill(text)
+    return source
+}
+
+// Настоящая запись в буфер. WebKit не знает разрешения clipboard-write, поэтому
+// там текст копируется клавишами из временного поля. Копировать нужно до установки
+// курсора в поле суммы: в WebKit фокус уходит во временное поле.
+async function copyText(page, browserName, text) {
+    if (browserName === 'chromium') {
+        await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+        await page.evaluate((value) => navigator.clipboard.writeText(value), text)
+        expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(text)
+        return
+    }
+
+    const source = await addSourceText(page, text)
+    await source.focus()
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.press('ControlOrMeta+C')
+    await source.evaluate((element) => element.remove())
+}
+
+async function pressPaste(page, input) {
+    await watchEvent(input, 'paste')
+    await page.keyboard.press('ControlOrMeta+V')
+    await expect.poll(() => watchedEvents(page)).toHaveLength(1)
+}
+
+async function selectAllIn(page, input) {
+    await input.click()
+    await framePassed(page)
+    await page.keyboard.press('ControlOrMeta+A')
+    await expectAllSelected(input)
+}
+
+// Точка на тексте: основная часть прижата вправо, копейки шириной в две цифры.
+async function textPoint(input) {
+    const { x, y, width, height } = await input.boundingBox()
+    return { x: x + width - 8, y: y + height / 2 }
+}
+
+// Настоящее перетаскивание выделения. На macOS текст тащится, только если кнопка
+// удержана дольше 150 мс, раньше движение лишь меняет выделение.
+async function dragText(page, from, to) {
+    await page.mouse.move(from.x, from.y)
+    await page.mouse.down()
+    await page.waitForTimeout(300)
+    await page.mouse.move(to.x, to.y, { steps: 10 })
+    await page.mouse.up()
+    await expect.poll(() => watchedEvents(page)).toHaveLength(1)
+}
 
 const fitsInput = (input) => input.evaluate((element) => element.scrollWidth <= element.clientWidth)
 const scrollOffset = (input) => input.evaluate((element) => element.scrollLeft)
@@ -390,6 +470,194 @@ for (const file of pages) {
                 }
             })
         }
+
+        test.describe('вставка из буфера', () => {
+            let whole
+
+            test.beforeEach(() => {
+                whole = wholeOf(section, 'Сумма перевода')
+            })
+
+            const accepted = [
+                ['9 876,54', '9 876,54', 987654],
+                ['  9 876,5\n', '9 876,50', 987650],
+                ['100 200', '100 200,', 10020000],
+                ['9\u202f876,54', '9 876,54', 987654],
+            ]
+
+            for (const [text, shown, amount] of accepted) {
+                test(`основная часть принимает ${JSON.stringify(text)}`, async ({ page, browserName }) => {
+                    await copyText(page, browserName, text)
+                    await whole.focus()
+                    await framePassed(page)
+                    await pressPaste(page, whole)
+                    await expect.poll(() => shownAmount(whole)).toBe(shown)
+                    await expectHandledEvent(page, text)
+                    await expect(values(section)).toContainText(`"transfer":{"amount":${amount},"currency":"USD"}`)
+
+                    await section.locator('h2').click()
+                    await expect(values(section)).toContainText('"transferChanges":1')
+                })
+            }
+
+            test('основная часть отклоняет неоднозначный текст: сумма и события те же', async ({ page, browserName }) => {
+                const before = await values(section).textContent()
+
+                for (const text of ['100\t200', '100\n200', '1.2.3', '1,23,45', '1 23,45', '-100.00']) {
+                    await copyText(page, browserName, text)
+                    await whole.focus()
+                    await framePassed(page)
+                    await pressPaste(page, whole)
+                    expect(await shownAmount(whole), text).toBe('1 234,56')
+                    await expectHandledEvent(page, text)
+                }
+
+                await section.locator('h2').click()
+                await expect(values(section)).toHaveText(before)
+            })
+
+            test('в en запятая — разделитель разрядов, 1,234 проходит, 12,50 и 1,5 — нет', async ({ page, browserName }) => {
+                const english = wholeOf(section, 'Сумма на английском')
+
+                for (const text of ['12,50', '1,5']) {
+                    await copyText(page, browserName, text)
+                    await english.focus()
+                    await framePassed(page)
+                    await pressPaste(page, english)
+                    expect(await shownAmount(english), text).toBe('1,234.56')
+                    await expectHandledEvent(page, text)
+                }
+
+                await copyText(page, browserName, '1,234')
+                await english.focus()
+                await framePassed(page)
+                await pressPaste(page, english)
+                await expect.poll(() => shownAmount(english)).toBe('1,234.')
+                await expect(values(section)).toContainText('"englishAmount":{"amount":123400,"currency":"USD"}')
+            })
+
+            test('копейки отклоняют текст не из цифр: сумма и выделение те же', async ({ page, browserName }) => {
+                const part = fraction(fieldOf(whole))
+                const before = await values(section).textContent()
+
+                for (const text of ['1 234,56', '12,50', '1,5', 'ab12']) {
+                    await copyText(page, browserName, text)
+                    await part.focus()
+                    await page.keyboard.press('ControlOrMeta+ArrowLeft')
+                    await page.keyboard.press('Shift+ArrowRight')
+                    await expect.poll(() => caret(part)).toEqual([0, 1])
+                    await pressPaste(page, part)
+                    expect(await shownAmount(whole), text).toBe('1 234,56')
+                    expect(await caret(part), text).toEqual([0, 1])
+                    await expectHandledEvent(page, text)
+                }
+
+                await section.locator('h2').click()
+                await expect(values(section)).toHaveText(before)
+            })
+
+            test('цифра заменяет выделение копеек, курсор после неё', async ({ page, browserName }) => {
+                const part = fraction(fieldOf(whole))
+                await copyText(page, browserName, '7')
+                await part.focus()
+                await page.keyboard.press('ControlOrMeta+ArrowLeft')
+                await page.keyboard.press('Shift+ArrowRight')
+                await expect.poll(() => caret(part)).toEqual([0, 1])
+                await pressPaste(page, part)
+                await expect.poll(() => shownAmount(whole)).toBe('1 234,76')
+                expect(await caret(part)).toEqual([1, 1])
+                await expectHandledEvent(page, '7')
+                await expect(values(section)).toContainText('"transfer":{"amount":123476,"currency":"USD"}')
+            })
+        })
+
+        test.describe('перетаскивание текста', () => {
+            let whole
+
+            test.beforeEach(() => {
+                whole = wholeOf(section, 'Сумма перевода')
+            })
+
+            async function expectNothingChanged(before) {
+                await expect.poll(() => shownAmount(whole)).toBe('1 234,56')
+                await section.locator('h2').click()
+                await expect(values(section)).toHaveText(before)
+            }
+
+            const betweenParts = [
+                ['из основной части в копейки', (input) => input, (input) => fraction(fieldOf(input)), '1 234'],
+                ['из копеек в основную часть', (input) => fraction(fieldOf(input)), (input) => input, '56'],
+            ]
+
+            for (const [name, sourceOf, targetOf, text] of betweenParts) {
+                test(`выделенный текст ${name}: сумма и события те же`, async ({ page }) => {
+                    const before = await values(section).textContent()
+                    const source = sourceOf(whole)
+                    const target = targetOf(whole)
+                    await selectAllIn(page, source)
+                    await watchEvent(target, 'drop')
+                    await dragText(page, await textPoint(source), await textPoint(target))
+                    await expectNothingChanged(before)
+                    await expectHandledEvent(page, text)
+                })
+            }
+
+            const targets = [
+                ['в основную часть', (input) => input],
+                ['в копейки', (input) => fraction(fieldOf(input))],
+            ]
+
+            for (const [name, targetOf] of targets) {
+                test(`текст со страницы ${name}: сумма и события те же`, async ({ page }) => {
+                    const before = await values(section).textContent()
+                    const target = targetOf(whole)
+                    const source = await addSourceText(page, '999')
+                    await source.focus()
+                    await page.keyboard.press('ControlOrMeta+A')
+                    await watchEvent(target, 'drop')
+                    const box = await source.boundingBox()
+                    await dragText(page, { x: box.x + 8, y: box.y + 10 }, await textPoint(target))
+                    await expect(source).toHaveValue('999')
+                    await source.evaluate((element) => element.remove())
+                    await expectNothingChanged(before)
+                    await expectHandledEvent(page, '999')
+                })
+            }
+        })
+
+        test('длинная сумма без фокуса: многоточие, полная сумма в title', async ({ page }) => {
+            const whole = fromOf(example(section, 'Сумма заказа'))
+            await whole.click()
+            await page.keyboard.type('1234567890123,45')
+            await expect.poll(() => shownAmount(whole)).toBe('1 234 567 890 123,45')
+            await section.locator('h2').click()
+            await expect(whole).not.toBeFocused()
+
+            await expect(whole).toHaveAttribute('title', '1 234 567 890 123,45')
+            await expect(whole).toHaveCSS('text-overflow', 'ellipsis')
+            expect(await fitsInput(whole)).toBe(false)
+            expect(await scrollOffset(whole)).toBe(0)
+        })
+
+        test('lang="en": разделители и подписи английские', async () => {
+            const whole = wholeOf(section, 'Сумма на английском')
+            const field = fieldOf(whole)
+            await expect.poll(() => shownAmount(whole)).toBe('1,234.56')
+            await expect(field.getByRole('textbox', { name: 'Fractional part', exact: true })).toBeVisible()
+            await expect(field.getByRole('button', { name: 'Clear', exact: true })).toBeVisible()
+        })
+
+        test('currencies: [] — поле заблокировано и пусто, значение родителя остаётся', async () => {
+            const whole = wholeOf(section, 'Сумма без валют')
+            const field = fieldOf(whole)
+            await expect(whole).toBeDisabled()
+            await expect(whole).toHaveValue('')
+            await expect(whole).not.toHaveAttribute('title')
+            await expect(fraction(field)).toBeHidden()
+            await expect(eraser(field)).toBeHidden()
+            await expect(listButton(example(section, 'Сумма без валют'))).toHaveCount(0)
+            await expect(values(section)).toContainText('"blockedAmount":{"amount":123456,"currency":"USD"}')
+        })
 
         test.describe('список с поиском', () => {
             const lists = [
