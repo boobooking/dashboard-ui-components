@@ -10,20 +10,23 @@ describe('публичная поверхность пакета', () => {
     // Внутренние части: Popup и CrossButton используют другие компоненты,
     // PickDay компонента в пакете нет. Ядра SelectSingle, SelectMultiple,
     // SelectDate и SelectDateInterval тоже не экспортируются: проекты
-    // используют только обёртки Filter и Form.
+    // используют только обёртки Filter и Form. Поля суммы AmountInput и
+    // AmountCurrency и ядро AmountInterval — тоже внутренние.
     it.each(['Popup', 'PickDay', 'CrossButton'])('%s — внутренний, не экспортируется', (name) => {
         expect(pkg).not.toHaveProperty(name)
     })
 
     // Ядра обёрток …Filter и …Form: проекты берут обёртки.
-    it.each(['SelectSingle', 'SelectMultiple', 'SelectDate', 'SelectDateInterval'])('%s — ядро, не экспортируется', (name) => {
+    it.each(['SelectSingle', 'SelectMultiple', 'SelectDate', 'SelectDateInterval', 'AmountInput', 'AmountCurrency', 'AmountInterval'])('%s — ядро, не экспортируется', (name) => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно двадцать девять компонентов, плагин и downloadFile', () => {
+    it('ровно тридцать один компонент, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
             'AmountForm',
+            'AmountIntervalFilter',
+            'AmountIntervalForm',
             'ConfirmationModal',
             'DataTable',
             'Dot',

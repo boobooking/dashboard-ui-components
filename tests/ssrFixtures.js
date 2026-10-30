@@ -63,6 +63,8 @@ export const ssrFixtures = {
     SelectSingleForm: { props: { label: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
     SelectCurrencyFilter: { props: { header: 'Валюта', modelValue: 'USD', currencies: ['RUB', 'USD'] } },
     SelectCurrencyForm: { props: { label: 'Валюта', modelValue: 'USD' } },
+    AmountIntervalFilter: { props: { header: 'Сумма', amountFrom: 100000, amountTo: 500000, currency: 'USD' } },
+    AmountIntervalForm: { props: { label: 'Сумма', amountFrom: 100000, amountTo: 500000, currency: 'USD' } },
     AmountForm: { props: { label: 'Сумма', modelValue: { amount: 123456, currency: 'USD' } } },
     TextPopover: { props: { text: 'Полный текст сообщения', modelValue: true } },
 }
