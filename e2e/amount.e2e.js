@@ -171,6 +171,13 @@ async function dragText(page, from, to) {
     await expect.poll(() => watchedEvents(page)).toHaveLength(1)
 }
 
+// Конец текста виден: правый край области с точностью до округления ширин. Одного
+// ненулевого сдвига мало, видимая область могла остановиться посередине.
+async function expectEndVisible(input) {
+    await expect.poll(() => input.evaluate((element) => element.scrollWidth - element.clientWidth - element.scrollLeft))
+        .toBeLessThanOrEqual(1)
+}
+
 const fitsInput = (input) => input.evaluate((element) => element.scrollWidth <= element.clientWidth)
 const scrollOffset = (input) => input.evaluate((element) => element.scrollLeft)
 
@@ -663,6 +670,94 @@ for (const file of pages) {
             await expect(whole).toHaveAttribute('title', '1 234 567 890 123,45')
             await expect(whole).toHaveCSS('text-overflow', 'ellipsis')
             expect(await fitsInput(whole)).toBe(false)
+            expect(await scrollOffset(whole)).toBe(0)
+        })
+
+        test.describe('длинная сумма в фокусе', () => {
+            let interval
+            let whole
+
+            test.beforeEach(async ({ page }) => {
+                interval = example(section, 'Сумма заказа')
+                whole = fromOf(interval)
+                await whole.click()
+                await page.keyboard.type('1234567890123,45')
+                await section.locator('h2').click()
+                await expect(whole).not.toBeFocused()
+                expect(await fitsInput(whole)).toBe(false)
+            })
+
+            test('клик показывает конец суммы', async ({ page }) => {
+                await whole.click()
+                await framePassed(page)
+                await expectEndVisible(whole)
+                await expectCaretAtEnd(whole)
+            })
+
+            test('Tab показывает конец суммы', async ({ page }) => {
+                await expectTabOrder(page, listButton(example(section, 'Валюта отчёта')), [whole])
+                await framePassed(page)
+                await expectEndVisible(whole)
+            })
+
+            test('ввод показывает конец суммы', async ({ page }) => {
+                await whole.click()
+                await framePassed(page)
+
+                for (const key of ['Backspace', '7']) {
+                    await whole.evaluate((input) => {
+                        input.scrollLeft = 0
+                    })
+                    await page.keyboard.press(key)
+                    await expectEndVisible(whole)
+                }
+            })
+
+            test('курсор уже в конце, видимая область слева: клавиша и клик показывают конец', async ({ page }) => {
+                await whole.click()
+                await framePassed(page)
+
+                await whole.evaluate((input) => {
+                    input.scrollLeft = 0
+                })
+                await page.keyboard.press('ArrowRight')
+                await expectEndVisible(whole)
+
+                await whole.evaluate((input) => {
+                    input.scrollLeft = 0
+                })
+                await whole.click()
+                await expectEndVisible(whole)
+            })
+
+            test('Cmd+A выделяет всю часть, ввод заменяет её', async ({ page }) => {
+                await whole.click()
+                await framePassed(page)
+                await page.keyboard.press('ControlOrMeta+A')
+                await expectAllSelected(whole)
+                await page.keyboard.type('5')
+                await expect.poll(() => shownAmount(whole)).toBe('5,45')
+            })
+
+            test('после ухода снова многоточие и начало суммы', async ({ page }) => {
+                await whole.click()
+                await framePassed(page)
+                await expectEndVisible(whole)
+                await section.locator('h2').click()
+                await expect(whole).not.toBeFocused()
+                await expect(whole).toHaveCSS('text-overflow', 'ellipsis')
+                await expect.poll(() => scrollOffset(whole)).toBe(0)
+                await expect(whole).toHaveAttribute('title', '1 234 567 890 123,45')
+            })
+        })
+
+        test('короткая сумма в фокусе не прокручивается', async ({ page }) => {
+            const whole = fromOf(example(section, 'Сумма заказа'))
+            await whole.click()
+            await page.keyboard.type('100000000')
+            await framePassed(page)
+            await page.keyboard.press('ArrowRight')
+            expect(await fitsInput(whole)).toBe(true)
             expect(await scrollOffset(whole)).toBe(0)
         })
 

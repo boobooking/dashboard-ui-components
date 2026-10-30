@@ -427,6 +427,62 @@ describe('AmountInput: курсор основной части', () => {
     })
 })
 
+describe('AmountInput: конец длинной суммы', () => {
+    const events = ['keydown', 'keyup', 'click', 'select']
+
+    // Раскладки в happy-dom нет: ширина текста задаётся напрямую.
+    function mountLong() {
+        const wrapper = mountAmount({ modelValue: 123456 })
+
+        Object.defineProperty(wholeOf(wrapper).element, 'scrollWidth', { configurable: true, value: 200 })
+
+        return wrapper
+    }
+
+    it.each(events)('%s прокручивает к правому краю, когда курсор уже в конце', async (name) => {
+        const wrapper = mountLong()
+        const whole = wholeOf(wrapper)
+
+        selectRange(wrapper, whole, 5, 5)
+        await whole.trigger(name)
+
+        expect(whole.element.scrollLeft).toBe(200)
+        expect(selection(whole)).toEqual([5, 5])
+    })
+
+    it.each(events)('%s возвращает курсор из середины и прокручивает к правому краю', async (name) => {
+        const wrapper = mountLong()
+        const whole = wholeOf(wrapper)
+
+        selectRange(wrapper, whole, 2, 2)
+        await whole.trigger(name)
+
+        expect(whole.element.scrollLeft).toBe(200)
+        expect(selection(whole)).toEqual([5, 5])
+    })
+
+    it.each(events)('%s оставляет выделение всей части и не прокручивает', async (name) => {
+        const wrapper = mountLong()
+        const whole = wholeOf(wrapper)
+
+        selectRange(wrapper, whole, 0, 5)
+        await whole.trigger(name)
+
+        expect(whole.element.scrollLeft).toBe(0)
+        expect(selection(whole)).toEqual([0, 5])
+    })
+
+    it('фокус прокручивает к правому краю', async () => {
+        const wrapper = mountLong()
+        const whole = wholeOf(wrapper)
+
+        whole.element.focus()
+        await frame()
+
+        expect(whole.element.scrollLeft).toBe(200)
+    })
+})
+
 describe('AmountInput: копейки и вид', () => {
     it('пустое поле показывает копейки только с фокусом внутри', async () => {
         const wrapper = mountAmount()

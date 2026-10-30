@@ -266,20 +266,29 @@ export default {
 
                 if (document.activeElement === input) {
                     input.setSelectionRange(input.value.length, input.value.length);
+                    input.scrollLeft = input.scrollWidth;
                 }
             });
         },
 
-        // Курсор основной части всегда в конце. Выделение всей части остаётся:
-        // сумму можно скопировать, а ввод и вставка её заменят.
+        // Курсор основной части всегда в конце и виден: сама установка курсора
+        // длинную сумму не прокручивает, а видимая область может стоять слева и при
+        // курсоре в конце. Выделение всей части остаётся: сумму можно скопировать,
+        // а ввод и вставка её заменят.
         holdCaret() {
             const input = this.$refs.wholeInput;
             const end = input.value.length;
             const isAllSelected = input.selectionStart === 0 && input.selectionEnd === end;
 
-            if (!isAllSelected && input.selectionStart !== end) {
+            if (isAllSelected) {
+                return;
+            }
+
+            if (input.selectionStart !== end) {
                 input.setSelectionRange(end, end);
             }
+
+            input.scrollLeft = input.scrollWidth;
         },
 
         // Отмена по умолчанию нужна в обоих переходах фокуса: браузер применяет
