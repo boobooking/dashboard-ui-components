@@ -416,13 +416,13 @@ describe('AmountIntervalFilter', () => {
         expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb:h-18', 'bb:border', 'bb:border-gray-200', 'bb:w-fit']))
     })
 
-    it('поля шириной 180px и блок валюты шириной 6rem, между ними divide-x', () => {
+    it('поля шириной 184px и блок валюты шириной 6rem, между ними divide-x', () => {
         const wrapper = mountInterval(AmountIntervalFilter, filterBase, { currency: 'USD', currencies: ['USD'] })
         const [from, to] = fieldsOf(wrapper)
         const row = from.element.parentElement.parentElement
 
-        expect(from.element.parentElement.classList).toContain('bb:w-45')
-        expect(to.element.parentElement.classList).toContain('bb:w-45')
+        expect(from.element.parentElement.classList).toContain('bb:w-46')
+        expect(to.element.parentElement.classList).toContain('bb:w-46')
         expect(to.element.parentElement.parentElement).toBe(row)
         expect(blockOf(wrapper).element.parentElement.classList).toContain('bb:w-24')
         expect(blockOf(wrapper).element.parentElement.parentElement).toBe(row)

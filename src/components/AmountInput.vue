@@ -39,7 +39,7 @@
                 :maxlength="digits"
                 :placeholder="'0'.repeat(digits)"
                 :aria-label="texts.amountFraction"
-                :style="{ width: `${digits}ch` }"
+                :style="{ width: `calc(${digits}ch + 2px)` }"
                 class="bb:flex-none bb:bg-transparent bb:tabular-nums bb:placeholder-gray-400 bb:focus:outline-hidden"
                 @input="onFractionInput"
                 @blur="completeParts"

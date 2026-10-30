@@ -15,9 +15,9 @@
                     @update:currency="$emit('update:currency', $event)"
                     @changed="$emit('changed')"
                 >
-                    <!-- Поля по 180px и блок валюты, между ними вертикальные линии. -->
+                    <!-- Поля по 184px и блок валюты, между ними вертикальные линии. -->
                     <div class="bb:flex bb:h-full bb:divide-x bb:divide-gray-200">
-                        <div class="bb:w-45 bb:flex-none bb:text-sm">
+                        <div class="bb:w-46 bb:flex-none bb:text-sm">
                             <amount-input
                                 :model-value="from.value"
                                 :digits="currencyField.digits"
@@ -29,7 +29,7 @@
                                 @changed="from.changed"
                             />
                         </div>
-                        <div class="bb:w-45 bb:flex-none bb:text-sm">
+                        <div class="bb:w-46 bb:flex-none bb:text-sm">
                             <amount-input
                                 :model-value="to.value"
                                 :digits="currencyField.digits"

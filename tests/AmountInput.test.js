@@ -465,11 +465,11 @@ describe('AmountInput: копейки и вид', () => {
         expect(wrapper.text()).not.toContain(',')
     })
 
-    it('digits: 3 — плейсхолдер из трёх нулей, ширина 3ch', () => {
+    it('digits: 3 — плейсхолдер из трёх нулей, ширина 3ch и запас 2px', () => {
         const wrapper = mountAmount({ digits: 3 })
 
         expect(fractionOf(wrapper).attributes('placeholder')).toBe('000')
-        expect(fractionOf(wrapper).element.style.width).toBe('3ch')
+        expect(fractionOf(wrapper).element.style.width).toBe('calc(3ch + 2px)')
     })
 
     it.each([
