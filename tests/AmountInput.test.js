@@ -963,6 +963,49 @@ describe('AmountInput: перетаскивание', () => {
     })
 })
 
+describe('AmountInput: длинная сумма', () => {
+    it('основная часть обрезается многоточием', () => {
+        expect(wholeOf(mountAmount()).classes()).toContain('bb:text-ellipsis')
+    })
+
+    it.each([
+        ['ru', 2, 123456789012345, '1 234 567 890 123,45'],
+        ['en', 2, 123456789012345, '1,234,567,890,123.45'],
+        ['ru', 3, 123456789012345, '123 456 789 012,345'],
+        ['ru', 0, 123456789012345, '123 456 789 012 345'],
+        ['ru', 2, 5, '0,05'],
+    ])('%s, digits: %i — title %i с полной суммой', (lang, digits, modelValue, title) => {
+        const wrapper = mountAmount({ lang, digits, modelValue })
+
+        expect(wholeOf(wrapper).attributes('title')).toBe(title)
+    })
+
+    it('пустые и неполные копейки в title считаются нулями: как в сумме наружу', async () => {
+        const wrapper = mountAmount()
+
+        await wholeOf(wrapper).setValue('1234')
+        expect(wholeOf(wrapper).attributes('title')).toBe('1 234,00')
+
+        await fractionOf(wrapper).setValue('5')
+        expect(wholeOf(wrapper).attributes('title')).toBe('1 234,50')
+    })
+
+    it.each([
+        ['пустое поле', {}],
+        ['блокировка', { modelValue: 123456, isDisabled: true }],
+    ])('без суммы нет title: %s', (_name, props) => {
+        expect(wholeOf(mountAmount(props)).attributes('title')).toBeUndefined()
+    })
+
+    it('очистка убирает title', async () => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+
+        await pressEraser(wrapper)
+
+        expect(wholeOf(wrapper).attributes('title')).toBeUndefined()
+    })
+})
+
 describe('AmountInput: крестик', () => {
     it('скрыт при пустом поле, виден при сумме', async () => {
         const wrapper = mountAmount()

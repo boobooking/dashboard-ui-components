@@ -16,7 +16,8 @@
             :value="groupedWhole"
             :disabled="isDisabled"
             :aria-label="prefix"
-            class="bb:flex-1 bb:w-full bb:min-w-0 bb:bg-transparent bb:text-right bb:tabular-nums bb:focus:outline-hidden"
+            :title="fullAmount"
+            class="bb:flex-1 bb:w-full bb:min-w-0 bb:bg-transparent bb:text-right bb:text-ellipsis bb:tabular-nums bb:focus:outline-hidden"
             @input="onWholeInput"
             @focus="onWholeFocus"
             @click="holdCaret"
@@ -145,6 +146,19 @@ export default {
 
         separator() {
             return decimalSeparator(this.resolvedLang);
+        },
+
+        // Полная запись для title: без фокуса основная часть обрезается многоточием.
+        // Строится из суммы, а не из частей: пустые копейки в ней — нули.
+        fullAmount() {
+            if (this.isEmpty) {
+                return null;
+            }
+
+            const { whole, fraction } = splitAmount(this.amount, this.digits);
+            const grouped = groupWhole(whole, this.resolvedLang);
+
+            return fraction === "" ? grouped : `${grouped}${this.separator}${fraction}`;
         },
     },
 
