@@ -132,6 +132,19 @@ describe('parsePastedAmount', () => {
         { text: '1,2.3,4', lang: 'ru', digits: 2, expected: null },
         { text: '1,234,567.89', lang: 'en', digits: 2, expected: { whole: '1234567', fraction: '89' } },
         { text: '12,34,567.89', lang: 'en', digits: 2, expected: { whole: '1234567', fraction: '89' } },
+        { text: '12,50', lang: 'en', digits: 2, expected: null },
+        { text: '1,5', lang: 'en', digits: 2, expected: null },
+        { text: '1.2.3', lang: 'ru', digits: 2, expected: null },
+        { text: '1,23,45', lang: 'ru', digits: 2, expected: null },
+        { text: '1 23,45', lang: 'ru', digits: 2, expected: null },
+        { text: '100\t200', lang: 'ru', digits: 2, expected: null },
+        { text: '100\n200', lang: 'ru', digits: 2, expected: null },
+        { text: '1  234,56', lang: 'ru', digits: 2, expected: null },
+        { text: '1.2 3', lang: 'ru', digits: 3, expected: null },
+        { text: '  1 234,56\n', lang: 'ru', digits: 2, expected: { whole: '1234', fraction: '56' } },
+        { text: '100 200', lang: 'ru', digits: 2, expected: { whole: '100200', fraction: '' } },
+        { text: '1\u202f234,56', lang: 'ru', digits: 2, expected: { whole: '1234', fraction: '56' } },
+        { text: '\u00a01\u00a0234,56\u202f', lang: 'ru', digits: 2, expected: { whole: '1234', fraction: '56' } },
     ])('«$text» в $lang при digits $digits', ({ text, lang, digits, expected }) => {
         expect(parsePastedAmount(text, lang, digits)).toEqual(expected)
     })

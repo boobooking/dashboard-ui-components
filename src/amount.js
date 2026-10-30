@@ -57,21 +57,25 @@ export function isDecimalKey(key, lang) {
 }
 
 // Разбор вставки. Порядок правил:
-// 1. пробелы, в том числе неразрывные, убираются;
-// 2. остаток — одно неотрицательное число, цифры через одиночные «,» или «.»;
+// 1. пробельные символы по краям убираются;
+// 2. остаток — одно неотрицательное число: цифры, разделённые одиночными пробелами,
+//    неразрывными пробелами, запятыми или точками;
 // 3. если есть оба символа, десятичный — тот, что последний, и он встречается
 //    один раз, иначе отказ;
 // 4. единственный символ, встреченный один раз, десятичный, кроме запятой в en;
 // 5. повторяющийся символ — разделитель разрядов;
-// 6. лишние цифры копеек или цифр всего — отказ (null).
+// 6. после десятичного символа только цифры;
+// 7. целая часть делится разделителями разрядов и пробелами: если групп больше
+//    одной, в последней ровно три цифры;
+// 8. лишние цифры копеек или цифр всего — отказ (null).
 export function parsePastedAmount(text, lang, digits) {
-    const compact = text.replace(/\s/g, '')
+    const trimmed = text.trim()
 
-    if (!/^\d+([.,]\d+)*$/.test(compact)) {
+    if (!/^\d+([ \u00a0\u202f.,]\d+)*$/.test(trimmed)) {
         return null
     }
 
-    const separators = compact.match(/[.,]/g) ?? []
+    const separators = trimmed.match(/[.,]/g) ?? []
     const kinds = new Set(separators)
     let decimal = null
 
@@ -85,17 +89,23 @@ export function parsePastedAmount(text, lang, digits) {
         decimal = separators[0]
     }
 
-    let wholeText = compact
+    let wholeText = trimmed
     let fraction = ''
 
     if (decimal !== null) {
-        const index = compact.lastIndexOf(decimal)
+        const index = trimmed.lastIndexOf(decimal)
 
-        wholeText = compact.slice(0, index)
-        fraction = compact.slice(index + 1)
+        wholeText = trimmed.slice(0, index)
+        fraction = trimmed.slice(index + 1)
     }
 
-    const whole = wholeText.replace(/\D/g, '').replace(/^0+(?=\d)/, '')
+    const groups = wholeText.split(/[ \u00a0\u202f.,]/)
+
+    if (!/^\d*$/.test(fraction) || (groups.length > 1 && groups[groups.length - 1].length !== 3)) {
+        return null
+    }
+
+    const whole = groups.join('').replace(/^0+(?=\d)/, '')
 
     if (fraction.length > digits || whole.length > MAX_DIGITS - digits) {
         return null
