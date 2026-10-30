@@ -48,7 +48,7 @@
                         />
                         <svg
                             v-if="withArrow"
-                            class="bb:absolute bb:right-3 bb:top-1/2 bb:-translate-y-1/2 bb:w-2 bb:h-1.5 bb:fill-current bb:text-gray-500 bb:pointer-events-none"
+                            class="bb:absolute bb:right-3 bb:top-1/2 bb:-translate-y-1/2 bb:w-2 bb:h-1.5 bb:fill-current bb:text-gray-500 bb:pointer-events-none bb:cursor-default"
                             viewBox="0 0 8 6"
                             aria-hidden="true"
                         >

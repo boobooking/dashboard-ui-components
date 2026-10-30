@@ -1074,7 +1074,7 @@ describe('withArrow', () => {
         expect(arrow.attributes('aria-hidden')).toBe('true')
         expect(arrow.classes()).toEqual(expect.arrayContaining([
             'bb:absolute', 'bb:right-3', 'bb:top-1/2', 'bb:-translate-y-1/2', 'bb:w-2', 'bb:h-1.5',
-            'bb:fill-current', 'bb:text-gray-500', 'bb:pointer-events-none',
+            'bb:fill-current', 'bb:text-gray-500', 'bb:pointer-events-none', 'bb:cursor-default',
         ]))
     })
 

@@ -12,6 +12,7 @@ import RussianMobileFilter from '../src/components/RussianMobileFilter.vue'
 import Search from '../src/components/Search.vue'
 import SelectDateIntervalFilter from '../src/components/SelectDateIntervalFilter.vue'
 import SelectMultipleFilter from '../src/components/SelectMultipleFilter.vue'
+import SelectSingle from '../src/components/SelectSingle.vue'
 import SelectSingleFilter from '../src/components/SelectSingleFilter.vue'
 import TextPopover from '../src/components/TextPopover.vue'
 import { installPopoverStub } from './popoverStub.js'
@@ -111,6 +112,15 @@ const cases = [
         name: 'SelectSingle — кнопка списка',
         mount: () => mount(SelectSingleFilter, {
             props: { header: 'Вендор', items: [{ id: 'a', name: 'Сбер' }], modelValue: 'a' },
+            attachTo: document.body,
+        }),
+        button: (wrapper) => wrapper.find('button[popovertarget]'),
+        label: null,
+    },
+    {
+        name: 'SelectSingle — кнопка списка со стрелкой',
+        mount: () => mount(SelectSingle, {
+            props: { items: [{ id: 'a', name: 'Сбер' }], withArrow: true },
             attachTo: document.body,
         }),
         button: (wrapper) => wrapper.find('button[popovertarget]'),
