@@ -74,6 +74,7 @@ import {
     isDecimalKey,
     joinAmount,
     normalizeAmount,
+    onlyDigits,
     parsePastedAmount,
     splitAmount,
 } from "../amount.js";
@@ -242,7 +243,7 @@ export default {
             const input = event.target;
             const typed = input.value;
             const caret = input.selectionStart;
-            const fraction = typed.replace(/\D/g, "").slice(0, this.digits);
+            const fraction = onlyDigits(typed).slice(0, this.digits);
 
             this.applyParts(this.whole, fraction);
             input.value = fraction;

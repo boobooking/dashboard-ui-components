@@ -20,7 +20,7 @@
 
 <script>
 import { useId } from "vue";
-import { currencyLabel } from "../currencies.js";
+import { currencyItems } from "../currencies.js";
 import { withLang } from "../lang.js";
 import SelectSingle from "./SelectSingle.vue";
 
@@ -55,7 +55,7 @@ export default {
 
     computed: {
         items() {
-            return this.currencies.map((currency) => ({ id: currency.code, name: currencyLabel(currency) }));
+            return currencyItems(this.currencies);
         },
     },
 };

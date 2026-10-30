@@ -191,3 +191,8 @@ export function pickCurrencies(codes) {
 export function currencyLabel(currency) {
     return currency.symbol === null ? currency.code : `${currency.code} ${currency.symbol}`
 }
+
+// Пункты списка валют: записи таблицы в виде { id, name }.
+export function currencyItems(list) {
+    return list.map((currency) => ({ id: currency.code, name: currencyLabel(currency) }))
+}

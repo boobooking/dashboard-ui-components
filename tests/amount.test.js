@@ -8,6 +8,7 @@ import {
     groupWhole,
     decimalSeparator,
     isDecimalKey,
+    onlyDigits,
     parsePastedAmount,
 } from '../src/amount.js'
 
@@ -57,6 +58,17 @@ describe('joinAmount', () => {
         { whole: '123456', fraction: '', digits: 0, expected: 123456 },
     ])('«$whole» + «$fraction» при digits $digits', ({ whole, fraction, digits, expected }) => {
         expect(joinAmount(whole, fraction, digits)).toBe(expected)
+    })
+})
+
+describe('onlyDigits', () => {
+    it.each([
+        { text: '1 234,56', expected: '123456' },
+        { text: 'a1b2', expected: '12' },
+        { text: 'abc', expected: '' },
+        { text: '', expected: '' },
+    ])('«$text»', ({ text, expected }) => {
+        expect(onlyDigits(text)).toBe(expected)
     })
 })
 

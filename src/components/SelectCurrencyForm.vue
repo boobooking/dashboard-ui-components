@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { currencyLabel, pickCurrencies } from "../currencies.js";
+import { currencyItems, pickCurrencies } from "../currencies.js";
 import SelectSingleForm from "./SelectSingleForm.vue";
 
 // Выбор валюты в форме: SelectSingleForm с пунктами из списка валют.
@@ -55,7 +55,7 @@ export default {
 
     computed: {
         items() {
-            return pickCurrencies(this.currencies).map((currency) => ({ id: currency.code, name: currencyLabel(currency) }));
+            return currencyItems(pickCurrencies(this.currencies));
         },
     },
 };

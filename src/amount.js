@@ -33,10 +33,15 @@ export function joinAmount(whole, fraction, digits) {
     return Number((whole || '0') + fraction.padEnd(digits, '0'))
 }
 
+// Фильтр ввода: остаются только цифры.
+export function onlyDigits(text) {
+    return text.replace(/\D/g, '')
+}
+
 // Основная часть вмещает столько цифр, сколько остаётся после копеек. Лишнее
 // справа отбрасывается, ведущие нули убираются, но один ноль остаётся.
 export function cleanWhole(text, digits) {
-    const stripped = text.replace(/\D/g, '').replace(/^0+(?=\d)/, '')
+    const stripped = onlyDigits(text).replace(/^0+(?=\d)/, '')
 
     return stripped.slice(0, MAX_DIGITS - digits)
 }

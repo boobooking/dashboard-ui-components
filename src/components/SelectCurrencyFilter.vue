@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { currencyLabel, pickCurrencies } from "../currencies.js";
+import { currencyItems, pickCurrencies } from "../currencies.js";
 import SelectSingleFilter from "./SelectSingleFilter.vue";
 
 // Выбор валюты в панели фильтров: SelectSingleFilter с пунктами из списка
@@ -60,7 +60,7 @@ export default {
 
     computed: {
         items() {
-            return pickCurrencies(this.currencies).map((currency) => ({ id: currency.code, name: currencyLabel(currency) }));
+            return currencyItems(pickCurrencies(this.currencies));
         },
     },
 };

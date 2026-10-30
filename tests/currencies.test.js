@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { CURRENCIES, pickCurrencies, currencyLabel } from '../src/currencies.js'
+import { CURRENCIES, pickCurrencies, currencyLabel, currencyItems } from '../src/currencies.js'
 
 const digitsOf = (code) => CURRENCIES.find((currency) => currency.code === code).digits
 
@@ -85,5 +85,18 @@ describe('currencyLabel', () => {
         expect(currencyLabel(find('AED'))).toBe('AED')
         expect(currencyLabel(find('XOF'))).toBe('XOF F CFA')
         expect(currencyLabel(find('ZWG'))).toBe('ZWG')
+    })
+})
+
+describe('currencyItems', () => {
+    it('записи таблицы становятся пунктами списка в том же порядке', () => {
+        expect(currencyItems(pickCurrencies(['USD', 'AED']))).toEqual([
+            { id: 'USD', name: 'USD $' },
+            { id: 'AED', name: 'AED' },
+        ])
+    })
+
+    it('пустой список — нет пунктов', () => {
+        expect(currencyItems([])).toEqual([])
     })
 })
