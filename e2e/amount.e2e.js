@@ -584,21 +584,48 @@ for (const file of pages) {
                 await expect(values(section)).toHaveText(before)
             }
 
-            const betweenParts = [
-                ['из основной части в копейки', (input) => input, (input) => fraction(fieldOf(input)), '1 234'],
-                ['из копеек в основную часть', (input) => fraction(fieldOf(input)), (input) => input, '56'],
+            const parts = [
+                ['основной части', (input) => input, (input) => fraction(fieldOf(input)), '1 234'],
+                ['копеек', (input) => fraction(fieldOf(input)), (input) => input, '56'],
             ]
 
-            for (const [name, sourceOf, targetOf, text] of betweenParts) {
-                test(`выделенный текст ${name}: сумма и события те же`, async ({ page }) => {
+            for (const [name, sourceOf, otherOf, text] of parts) {
+                test(`из ${name} в другую часть: dragstart отменён, сумма и события те же`, async ({ page }) => {
                     const before = await values(section).textContent()
                     const source = sourceOf(whole)
-                    const target = targetOf(whole)
                     await selectAllIn(page, source)
-                    await watchEvent(target, 'drop')
-                    await dragText(page, await textPoint(source), await textPoint(target))
+                    await watchEvent(source, 'dragstart')
+                    await dragText(page, await textPoint(source), await textPoint(otherOf(whole)))
                     await expectNothingChanged(before)
                     await expectHandledEvent(page, text)
+                })
+
+                test(`из ${name} наружу: dragstart отменён, сумма и события те же`, async ({ page }) => {
+                    const before = await values(section).textContent()
+                    const source = sourceOf(whole)
+                    const outside = await addSourceText(page, '')
+                    await selectAllIn(page, source)
+                    await watchEvent(source, 'dragstart')
+                    const box = await outside.boundingBox()
+                    await dragText(page, await textPoint(source), { x: box.x + 50, y: box.y + 20 })
+                    await expect.poll(() => shownAmount(whole)).toBe('1 234,56')
+                    await expect(outside).toHaveValue('')
+                    await outside.evaluate((element) => element.remove())
+                    await expectNothingChanged(before)
+                    await expectHandledEvent(page, text)
+                })
+
+                test(`копирование из ${name} клавишами работает`, async ({ page }) => {
+                    const before = await values(section).textContent()
+                    const source = sourceOf(whole)
+                    const outside = await addSourceText(page, '')
+                    await selectAllIn(page, source)
+                    await page.keyboard.press('ControlOrMeta+C')
+                    await outside.focus()
+                    await page.keyboard.press('ControlOrMeta+V')
+                    await expect(outside).toHaveValue(text)
+                    await outside.evaluate((element) => element.remove())
+                    await expectNothingChanged(before)
                 })
             }
 

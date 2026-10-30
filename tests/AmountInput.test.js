@@ -949,6 +949,21 @@ describe('AmountInput: перетаскивание', () => {
     it.each([
         ['основная часть', wholeOf],
         ['копейки', fractionOf],
+    ])('из поля отменяется в dragstart, сумма и события не меняются: %s', async (_name, inputOf) => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+        const event = new Event('dragstart', { bubbles: true, cancelable: true })
+
+        inputOf(wrapper).element.dispatchEvent(event)
+        await nextTick()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(parts(wrapper)).toEqual(['1 234', '56'])
+        expectNoEvents(wrapper)
+    })
+
+    it.each([
+        ['основная часть', wholeOf],
+        ['копейки', fractionOf],
     ])('отклоняется, сумма и события не меняются: %s', async (_name, inputOf) => {
         const wrapper = mountAmount({ modelValue: 123456 })
 

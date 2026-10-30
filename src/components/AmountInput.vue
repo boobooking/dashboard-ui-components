@@ -26,6 +26,7 @@
             @keyup="holdCaret"
             @select="holdCaret"
             @paste.prevent="onWholePaste"
+            @dragstart.prevent
             @drop.prevent
         />
         <template v-if="digits > 0">
@@ -48,6 +49,7 @@
                 @keydown.enter="commit"
                 @keydown.backspace="onFractionBackspace"
                 @paste.prevent="onFractionPaste"
+                @dragstart.prevent
                 @drop.prevent
             />
         </template>
