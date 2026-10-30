@@ -25,6 +25,7 @@
             @keyup="holdCaret"
             @select="holdCaret"
             @paste.prevent="onPaste"
+            @drop.prevent
         />
         <template v-if="digits > 0">
             <span v-show="!isCollapsed" class="bb:flex bb:items-center bb:text-gray-500">{{ separator }}</span>
@@ -45,6 +46,7 @@
                 @blur="completeParts"
                 @keydown.enter="commit"
                 @keydown.backspace="onFractionBackspace"
+                @drop.prevent
             />
         </template>
         <cross-button

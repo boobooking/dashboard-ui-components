@@ -119,6 +119,14 @@ function paste(input, text) {
     return event
 }
 
+function drop(input) {
+    const event = new Event('drop', { bubbles: true, cancelable: true })
+
+    input.element.dispatchEvent(event)
+
+    return event
+}
+
 // happy-dom шлёт select прямо из setSelectionRange, и поле вернуло бы курсор
 // раньше проверяемого события; браузер шлёт его отдельной задачей.
 function selectRange(wrapper, input, start, end) {
@@ -847,6 +855,22 @@ describe('AmountInput: вставка', () => {
         expect(parts(wrapper)).toEqual(['1 234', '56'])
         expectNoEvents(wrapper)
         expect(event.defaultPrevented).toBe(true)
+    })
+})
+
+describe('AmountInput: перетаскивание', () => {
+    it.each([
+        ['основная часть', wholeOf],
+        ['копейки', fractionOf],
+    ])('отклоняется, сумма и события не меняются: %s', async (_name, inputOf) => {
+        const wrapper = mountAmount({ modelValue: 123456 })
+
+        const event = drop(inputOf(wrapper))
+        await nextTick()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(parts(wrapper)).toEqual(['1 234', '56'])
+        expectNoEvents(wrapper)
     })
 })
 
