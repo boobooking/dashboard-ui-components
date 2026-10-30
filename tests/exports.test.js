@@ -20,9 +20,10 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно двадцать восемь компонентов, плагин и downloadFile', () => {
+    it('ровно двадцать девять компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionPill',
+            'AmountForm',
             'ConfirmationModal',
             'DataTable',
             'Dot',
