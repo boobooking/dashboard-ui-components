@@ -4,10 +4,12 @@
 
         <section>
             <h2>Dot</h2>
-            <dot color="red"/>
-            <dot color="green"/>
-            <dot color="red" :with-pulse="true"/>
-            <dot v-for="color in colors" :key="color" :color="color"/>
+            <div class="demo-row">
+                <dot color="red"/>
+                <dot color="green"/>
+                <dot color="red" :with-pulse="true"/>
+                <dot v-for="color in colors" :key="color" :color="color"/>
+            </div>
         </section>
 
         <section>
@@ -391,22 +393,24 @@
 
         <section>
             <h2>lang="en"</h2>
-            <select-date-interval-filter header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
-            <text-popover lang="en" text="Full text in English"/>
-            <dropdown-button-with-action lang="en" :actions="[{ label: 'Action', onSelect: countSelection }, { label: 'Another action', onSelect: countSelection }]"/>
-            <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
-            <page-tabs lang="en" :tabs="pageTabs" active-key="orders"/>
-            <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
-            <confirmation-modal
-                :is-open="englishModalIsOpen"
-                lang="en"
-                confirmation-heading="Delete?"
-                confirmation-text="This cannot be undone."
-                action-button-text="Delete"
-                @action-confirmed="englishModalIsOpen = false"
-                @action-canceled="englishModalIsOpen = false"
-            />
-            <data-table lang="en" :rows="tableRows.slice(0, 2)" :columns="tableColumnsWithoutCost" row-key="uuid" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
+            <div class="demo-stack">
+                <select-date-interval-filter header="Period" lang="en" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
+                <text-popover lang="en" text="Full text in English"/>
+                <dropdown-button-with-action lang="en" :actions="[{ label: 'Action', onSelect: countSelection }, { label: 'Another action', onSelect: countSelection }]"/>
+                <hamburger-menu lang="en" :actions="[{ label: 'Log out', onSelect: countProfileSelection }]"/>
+                <page-tabs lang="en" :tabs="pageTabs" active-key="orders"/>
+                <button type="button" class="demo-button" @click="englishModalIsOpen = true">Open modal</button>
+                <confirmation-modal
+                    :is-open="englishModalIsOpen"
+                    lang="en"
+                    confirmation-heading="Delete?"
+                    confirmation-text="This cannot be undone."
+                    action-button-text="Delete"
+                    @action-confirmed="englishModalIsOpen = false"
+                    @action-canceled="englishModalIsOpen = false"
+                />
+                <data-table class="demo-stack-wide" lang="en" :rows="tableRows.slice(0, 2)" :columns="tableColumnsWithoutCost" row-key="uuid" :links="{ prev: '/list?page=1', next: '/list?page=3' }" :meta="{ from: 16, to: 30, total: 40 }"/>
+            </div>
         </section>
 
         <section id="page-card">

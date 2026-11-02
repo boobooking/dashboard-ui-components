@@ -5,6 +5,7 @@
 .page,
 .demo-button,
 .demo-row,
+.demo-stack,
 .demo-card,
 .demo-card-column,
 .demo-header,
@@ -66,6 +67,19 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+/* Разные компоненты подряд: у каждого своя строка и расстояние до соседа. */
+.demo-stack {
+    display: grid;
+    gap: 24px;
+    justify-items: start;
+}
+
+/* Таблице нужна вся ширина страницы. */
+.demo-stack-wide {
+    justify-self: stretch;
+    min-width: 0;
 }
 
 /* Подсказкам у правого края есть куда раскрыться влево. */
@@ -141,6 +155,10 @@
 
 /* Полоса демо HamburgerMenu — как шапка проектов: белая, с тенью, кнопка
    у правого края. */
+.demo-header + .demo-header {
+    margin-top: 16px;
+}
+
 .demo-header {
     display: flex;
     align-items: center;
