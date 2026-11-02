@@ -130,7 +130,7 @@ describe('вид', () => {
         expect(inputs).toHaveLength(4)
         for (const input of inputs) {
             expect(input.classes()).toEqual(
-                expect.arrayContaining(['bb:size-4', 'bb:rounded', 'bb:border', 'bb:bg-none', 'bb:focus-visible:focus-ring'])
+                expect.arrayContaining(['bb:size-4', 'bb:rounded', 'bb:choice-border', 'bb:bg-none', 'bb:focus-visible:focus-ring'])
             )
         }
     })

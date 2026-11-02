@@ -123,6 +123,7 @@ describe('вид', () => {
 
         expect(isSelectedCard(card)).toBe(true)
         expect(circle.classes()).toContain('bb:border-indigo-600')
+        expect(circle.classes()).toContain('bb:choice-border')
         expect(circle.find('span').classes()).toContain('bb:bg-indigo-600')
         expect(card.get('input').element.checked).toBe(true)
     })
@@ -134,7 +135,7 @@ describe('вид', () => {
 
         expect(card.classes()).toEqual(expect.arrayContaining(['bb:border-gray-300', 'bb:bg-white', 'bb:hover:bg-gray-50']))
         expect(isSelectedCard(card)).toBe(false)
-        expect(circle.classes()).toContain('bb:border-gray-400')
+        expect(circle.classes()).toContain('bb:border-gray-300')
         expect(circle.find('span').exists()).toBe(false)
     })
 

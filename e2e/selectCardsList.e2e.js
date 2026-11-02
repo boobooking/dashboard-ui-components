@@ -209,6 +209,27 @@ for (const file of pages) {
         // медиазапрос (forced-colors: active), но цвета системными не заменяет:
         // элемент с красным фоном остаётся красным, а forced-color-adjust WebKit
         // не знает. Там тест проверял бы классы, а не режим.
+        test('рамка невыбранного кружка и квадрата — цвета рамки полей', async ({ page }) => {
+            const section = sectionOf(page)
+
+            await expectColor(card(section, 'Бренд', 'Royal Canin').locator('span').first(), 'border-top-color', 'gray-300')
+            await expectColor(checkbox(section, 'Участники', 'Будущие владельцы'), 'border-top-color', 'gray-300')
+            await expectColor(field(section), 'border-top-color', 'gray-300')
+        })
+
+        test.describe('плотный экран', () => {
+            test.use({ deviceScaleFactor: 2 })
+            // Эмуляция плотности в Chromium округляет рамку до 1px, настоящая
+            // плотность 2 даёт 1.5px, как и WebKit.
+            test.skip(({ browserName }) => browserName === 'chromium', 'эмуляция плотности округляет рамку')
+
+            test('рамка кружка и квадрата одной толщины, 1,5 px', async ({ page }) => {
+                const section = sectionOf(page)
+                await expect(card(section, 'Бренд', 'Royal Canin').locator('span').first()).toHaveCSS('border-top-width', '1.5px')
+                await expect(checkbox(section, 'Участники', 'Будущие владельцы')).toHaveCSS('border-top-width', '1.5px')
+            })
+        })
+
         test.describe('режим высокой контрастности', () => {
             test.skip(({ browserName }) => browserName !== 'chromium', 'WebKit не заменяет цвета в режиме forced-colors')
 

@@ -15,7 +15,7 @@
                     <input
                         type="checkbox"
                         :checked="isChecked(item)"
-                        class="bb:size-4 bb:rounded bb:border bb:bg-none bb:focus-visible:focus-ring bb:forced-colors:appearance-auto"
+                        class="bb:size-4 bb:rounded bb:choice-border bb:bg-none bb:focus-visible:focus-ring bb:forced-colors:appearance-auto"
                         :class="isChecked(item) ? 'bb:border-indigo-600 bb:bg-indigo-600' : 'bb:border-gray-300 bb:bg-white'"
                         @change="toggle(item)"
                     />
