@@ -1,4 +1,5 @@
 import { h } from 'vue'
+import DetailRow from '../src/components/DetailRow.vue'
 
 // Минимальные пропсы и слоты каждого экспортируемого компонента для серверного
 // рендера и гидратации. Компоненты, чьё содержимое зависит от значения, — в
@@ -25,6 +26,8 @@ export const ssrFixtures = {
     InfoPill: { props: { text: 'Новый', color: 'green' } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
+    DetailList: { slots: { default: () => h(DetailRow, { title: 'Телефон' }, () => '+7 999') } },
+    DetailRow: { props: { title: 'Телефон' }, slots: { default: () => '+7 999' } },
     PageCard: { props: { fallbackUrl: '/list' }, slots: { default: () => h('h3', 'Заголовок') } },
     PageTabs: {
         props: {

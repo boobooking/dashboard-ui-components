@@ -421,6 +421,37 @@
         </section>
 
         <section>
+            <h2>DetailList</h2>
+            <page-card>
+                <div class="detail-card-demo-head">
+                    <h3 class="page-card-demo-heading">Визит 03.11</h3>
+                </div>
+                <detail-list>
+                    <template v-if="detailRowsAreShown">
+                        <detail-row title="Регистрация">02.11.2026 17:10</detail-row>
+                        <detail-row v-if="detailPhoneIsShown" title="Телефон">+7 916 000 00 00</detail-row>
+                        <detail-row title="Код">
+                            12345 <info-pill class="detail-card-demo-pill" text="подтверждён" color="green"/>
+                        </detail-row>
+                        <detail-row v-for="row in detailExtraRows" :key="row.title" :title="row.title">
+                            <info-pill v-if="row.pill" :text="row.pill" color="green"/>
+                            <template v-else>{{ row.value }}</template>
+                        </detail-row>
+                        <detail-row title="Породы">
+                            <div>Померанский шпиц</div>
+                            <div>Мейн-кун</div>
+                        </detail-row>
+                        <detail-row title="IP">192.0.2.10</detail-row>
+                    </template>
+                </detail-list>
+            </page-card>
+            <p>
+                <button type="button" class="demo-button" @click="detailPhoneIsShown = !detailPhoneIsShown">{{ detailPhoneIsShown ? 'Спрятать телефон' : 'Показать телефон' }}</button>
+                <button type="button" class="demo-button" @click="detailRowsAreShown = !detailRowsAreShown">{{ detailRowsAreShown ? 'Спрятать все строки' : 'Показать все строки' }}</button>
+            </p>
+        </section>
+
+        <section>
             <h2>NotificationMessage</h2>
             <div class="demo-row">
                 <button type="button" class="demo-button" @click="showNotice('confirmation')">Подтверждение</button>
@@ -466,6 +497,8 @@ import {
     NavigationMenuElement,
     PageTabs,
     PageCard,
+    DetailList,
+    DetailRow,
     NotificationMessage,
     TextPopover,
     downloadFile,
@@ -503,6 +536,8 @@ export default {
         NavigationMenuElement,
         PageTabs,
         PageCard,
+        DetailList,
+        DetailRow,
         NotificationMessage,
         TextPopover,
     },
@@ -550,6 +585,14 @@ export default {
             participantsThree: [],
             participantsFour: [],
             pageCardTitle: 'Поле формы',
+            detailPhoneIsShown: true,
+            detailRowsAreShown: true,
+            // Строки из v-for идут в общем счёте чередования. Адрес — длинное
+            // значение без пробелов.
+            detailExtraRows: [
+                { title: 'Согласие получать маркетинговые материалы', pill: 'согласен' },
+                { title: 'Адрес', value: 'Длинноезначениебезпробелов'.repeat(4) },
+            ],
             markAdminName: false,
             markAdminEmail: false,
             markAdminPassword: false,

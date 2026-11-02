@@ -94,7 +94,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует тридцать один компонент: `Dot`, `RussianMobileFilter`,
+Пакет экспортирует тридцать три компонента: `Dot`, `RussianMobileFilter`,
 `Search`, `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`,
 `SelectDateIntervalForm`,
 `SelectSingleFilter`, `SelectSingleForm`, `SelectCurrencyFilter`,
@@ -103,8 +103,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 `SelectMultipleForm`, `SelectSingleCards`, `SelectMultipleList`, `InfoPill`,
 `ErrorMessages`, `FormInput`, `ActionPill`,
 `ConfirmationModal`, `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
-`NavigationMenuElement`, `PageTabs`, `PageCard`, `NotificationMessage`,
-`TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
+`NavigationMenuElement`, `PageTabs`, `PageCard`, `DetailList`, `DetailRow`,
+`NotificationMessage`, `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
 (`files: ["dist"]`) исходники не попадают, поэтому контракт каждого
 компонента — здесь и в playground, а не в исходном коде.
 
@@ -1406,7 +1406,7 @@ Escape, клик по пункту, прокрутка и изменение р�
         <div class="px-6 py-5 border-b border-gray-200">
             <h3 class="pr-(--bb-closer-space) text-lg font-medium">{{ name }}</h3>
         </div>
-        <div class="overflow-hidden rounded-b-lg">…строки…</div>
+        <detail-list>…строки…</detail-list>
     </page-card>
 
 **Куда ведёт крестик.** Плагин `dashboardUi` с `currentUrl` (см.
@@ -1498,8 +1498,7 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 
 Карточка не обрезает содержимое, как у `ConfirmationModal`: выпадающие
 списки и календари могут выходить за её край. Блок со своим фоном у края
-карточки скругляет свои углы сам — например, нижний блок строк:
-`overflow-hidden rounded-b-lg`.
+карточки скругляет свои углы сам: так делает `DetailList` в конце карточки.
 
 Крестик доступен с клавиатуры: Tab, Enter, пробел; в порядке табуляции
 крестик идёт после содержимого карточки; при фокусе с клавиатуры вокруг
@@ -1523,6 +1522,53 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 - если вернуться в карточку «Назад» или «Вперёд» после ухода из неё не
   через крестик, адрес возврата — страница, с которой пришли в этот раз;
 - на одной странице — одна карточка.
+
+### DetailList
+
+Строки карточки записи на странице просмотра: слева название, справа значение,
+строки чередуются по цвету. Внешний вид карточки, шапку и крестик даёт
+`PageCard`, блок страницы стоит над списком, а не внутри него.
+
+    <page-card :fallback-url="route('consumers')">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h3 class="pr-(--bb-closer-space) text-lg font-medium">{{ eventName }}</h3>
+        </div>
+        <detail-list>
+            <detail-row title="Регистрация">{{ registeredAt }}</detail-row>
+            <detail-row v-if="phone !== null" title="Телефон">{{ phone }}</detail-row>
+            <detail-row v-if="code !== null" title="Код">
+                {{ code }} <info-pill class="ml-2" text="подтверждён" color="green" />
+            </detail-row>
+            <detail-row title="Согласие получать маркетинговые материалы">
+                <info-pill text="согласен" color="green" />
+            </detail-row>
+        </detail-list>
+    </page-card>
+
+Пропсов и событий нет, в слоте только строки `DetailRow`. Первая видимая строка
+серая, следующая белая, и так далее. Чередование считает строки в итоговой
+разметке: `v-if`, `v-for`, `<template v-if>` и `<template v-for>` ему не мешают,
+а `v-show` и обёртка вокруг строки сбивают его.
+
+Нижние углы скругляет и обрезает сам список: он стоит в конце карточки. Если все
+строки скрыты, список остаётся пустым блоком без высоты.
+
+Ресет пакета на список и значения не распространяется: разметка страницы в
+значении выглядит так же, как вне списка. Внутри `.prose` список не
+поддерживается: правила `@tailwindcss/typography` сильнее правил пакета.
+
+### DetailRow
+
+Строка `DetailList`. Значение — в слоте: текст, пилюля, ссылка, список, любая
+разметка страницы.
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `title` | `String` | обязателен | Название строки |
+
+Название занимает одну колонку из трёх, значение — две, на любой ширине окна.
+Длинное название и длинное значение без пробелов переносятся внутри своих
+колонок. Высота строки растёт по содержимому.
 
 ### NotificationMessage
 
@@ -1783,7 +1829,7 @@ Inertia SSR), а серверная разметка гидратируется 
 
     npm run playground
 
-Поднимает демо-страницы со всеми тридцатью одним компонентом в двух окружениях:
+Поднимает демо-страницы со всеми тридцатью тремя компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не
