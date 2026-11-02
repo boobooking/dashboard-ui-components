@@ -27,11 +27,14 @@ export function isPopoverOpen(element) {
 // правому краю кнопки; у края окна он ушёл бы за экран, а верхний слой
 // не прокручивается. Высота ограничена местом с той стороны, куда элемент
 // открылся, ширина у "start" — местом с той стороны, куда он растёт, и у
-// обоих — maxWidth, если он задан. Поместился ли элемент, видно только
+// обоих — maxWidth, если он задан. shift — для элемента со своей шириной
+// при "end": его ограничивает только окно, а не поместившись слева, он
+// сдвигается вправо и встаёт у края окна. Поместился ли элемент, видно только
 // после его появления (fitPopover), поэтому в beforetoggle, до появления,
-// функцию зовут без fitsBelow и fitsRight. Координаты ставятся все каждый
-// раз: прошлое открытие могло быть у другой кнопки или другой стороной.
-export function placePopover(anchor, popover, { maxWidth = null, align = 'end', fitsBelow = true, fitsRight = true } = {}) {
+// функцию зовут без fitsBelow, fitsRight и popoverWidth. Координаты ставятся
+// все каждый раз: прошлое открытие могло быть у другой кнопки или другой
+// стороной.
+export function placePopover(anchor, popover, { maxWidth = null, align = 'end', fitsBelow = true, fitsRight = true, shift = false, popoverWidth = 0 } = {}) {
     const rect = anchor.getBoundingClientRect()
     const viewportWidth = document.documentElement.clientWidth
     const viewportHeight = document.documentElement.clientHeight
@@ -45,19 +48,25 @@ export function placePopover(anchor, popover, { maxWidth = null, align = 'end', 
     const spaceAbove = Math.max(0, rect.top - GAP - VIEWPORT_MARGIN)
     const opensBelow = fitsBelow || spaceBelow >= spaceAbove
 
-    // Меню без maxWidth ширину задаёт себе само (bb:w-56).
+    // Элемент без maxWidth при "end" ширину задаёт себе сам.
     let width = ''
     if (align === 'start') {
         const space = growsRight ? spaceRight : spaceLeft
         width = `${maxWidth === null ? space : Math.min(maxWidth, space)}px`
+    } else if (shift) {
+        width = `${Math.max(0, viewportWidth - 2 * VIEWPORT_MARGIN)}px`
     } else if (maxWidth !== null) {
         width = `${Math.min(maxWidth, spaceLeft)}px`
     }
 
+    const rightOffset = shift
+        ? Math.max(VIEWPORT_MARGIN, Math.min(right, viewportWidth - VIEWPORT_MARGIN - popoverWidth))
+        : right
+
     Object.assign(popover.style, {
         top: opensBelow ? `${rect.bottom + GAP}px` : 'auto',
         bottom: opensBelow ? 'auto' : `${viewportHeight - rect.top + GAP}px`,
-        right: growsRight ? 'auto' : `${right}px`,
+        right: growsRight ? 'auto' : `${rightOffset}px`,
         left: growsRight ? `${left}px` : 'auto',
         maxHeight: `${opensBelow ? spaceBelow : spaceAbove}px`,
         maxWidth: width,
@@ -68,15 +77,21 @@ export function placePopover(anchor, popover, { maxWidth = null, align = 'end', 
 // элемент, содержимое которого не поместилось под кнопкой или, у "start",
 // справа, placePopover ставит заново, туда, где места больше. Пиксель
 // запаса — на дробные размеры: scrollWidth и scrollHeight округлены.
+// Элементу с shift ширина нужна и когда содержимое поместилось: сдвигает его
+// нехватка места слева, а не переполнение.
 export function fitPopover(anchor, popover, options = {}) {
     const fitsBelow = popover.scrollHeight <= popover.clientHeight + 1
     const fitsRight = popover.scrollWidth <= popover.clientWidth + 1
 
-    if (fitsBelow && fitsRight) {
-        return
+    if (!fitsBelow || !fitsRight) {
+        placePopover(anchor, popover, { ...options, fitsBelow, fitsRight })
     }
 
-    placePopover(anchor, popover, { ...options, fitsBelow, fitsRight })
+    // Ширина меряется после разворота: он меняет высоту, и полоса прокрутки
+    // могла исчезнуть.
+    if (options.shift) {
+        placePopover(anchor, popover, { ...options, fitsBelow, fitsRight, popoverWidth: popover.getBoundingClientRect().width })
+    }
 }
 
 // Прокрутка любого блока страницы и изменение размера окна закрывают элемент:

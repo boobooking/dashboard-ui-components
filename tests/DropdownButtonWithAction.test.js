@@ -166,18 +166,21 @@ describe('DropdownButtonWithAction без привязки', () => {
         expect(isOpen(wrapper)).toBe(false)
     })
 
-    it('у стрелки возле левого края окна меню сужается до места слева', async () => {
+    it('у стрелки возле левого края окна меню сдвигается вправо', async () => {
         Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 })
         Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 800 })
         const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
         arrowOf(wrapper).element.getBoundingClientRect = () => ({ top: 100, bottom: 120, left: 120, right: 140 })
+        menuOf(wrapper).element.getBoundingClientRect = () => ({ width: 300 })
 
         try {
             await arrowOf(wrapper).trigger('click')
             await settle()
+            // Сдвиг — после появления меню, в кадре анимации (fitPopover).
+            await new Promise(requestAnimationFrame)
 
-            expect(menuOf(wrapper).element.style.maxWidth).toBe('132px')
-            expect(menuOf(wrapper).element.style.right).toBe('860px')
+            expect(menuOf(wrapper).element.style.maxWidth).toBe('984px')
+            expect(menuOf(wrapper).element.style.right).toBe('692px')
         } finally {
             delete document.documentElement.clientWidth
             delete document.documentElement.clientHeight
@@ -667,6 +670,7 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         { name: 'href null и onSelect', item: { label: 'Удалить', href: null, onSelect: fn } },
         { name: 'onSelect-строка без href', item: { label: 'Удалить', onSelect: 'ошибка' } },
         { name: 'неверный color', item: { label: 'Удалить', color: 'blue', onSelect: fn } },
+        { name: 'неверный icon', item: { label: 'Удалить', icon: 'pin', onSelect: fn } },
     ])('неверный пункт ($name) — предупреждение Vue', ({ item }) => {
         const { warnings } = mountChecked([{ label: 'Верный', onSelect: fn }, item])
 
@@ -681,6 +685,9 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
         { name: 'действие с color: purple', item: { label: 'Отметить', color: 'purple', onSelect: fn } },
         { name: 'пункт с лишним полем danger', item: { label: 'Удалить', danger: true, onSelect: fn } },
         { name: 'поле со значением undefined', item: { label: 'Открыть', href: '#open', onSelect: undefined } },
+        { name: 'переход с icon: plus', item: { label: 'Открыть', href: '#open', icon: 'plus' } },
+        { name: 'действие с icon: plus и цветом', item: { label: 'Добавить', icon: 'plus', color: 'green', onSelect: fn } },
+        { name: 'icon со значением undefined', item: { label: 'Добавить', icon: undefined, onSelect: fn } },
     ])('верный пункт ($name) — без предупреждений', ({ item }) => {
         const { warnings } = mountChecked([item])
 
@@ -1246,5 +1253,56 @@ describe('DropdownButtonWithAction: фокус после закрытия в Sa
         await settle()
         expect(wrapper.vm.open).toBe(false)
         expect(document.activeElement).toBe(arrowOf(wrapper).element)
+    })
+})
+
+describe('DropdownButtonWithAction: иконка основной кнопки', () => {
+    it.each([
+        { name: 'ссылка', tag: 'a', action: { label: 'Добавить', icon: 'plus', href: '#add' } },
+        { name: 'кнопка', tag: 'button', action: { label: 'Добавить', icon: 'plus', onSelect: () => {} } },
+    ])('$name: иконка слева от подписи', ({ tag, action }) => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [action] } })
+        const main = wrapper.get(tag)
+
+        expect(main.element.firstElementChild.tagName.toLowerCase()).toBe('svg')
+        expect(main.text()).toBe('Добавить')
+        expect(main.classes()).toContain('bb:gap-2')
+    })
+
+    it('с цветом действия иконка остаётся, цвет — у кнопки', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Добавить', icon: 'plus', color: 'green', onSelect: () => {} }] },
+        })
+        const main = wrapper.get('button')
+
+        expect(main.find('svg').exists()).toBe(true)
+        expect(main.classes()).toContain('bb:bg-green-100')
+    })
+
+    it('без icon иконки нет', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Добавить', onSelect: () => {} }] },
+        })
+
+        expect(wrapper.get('button').find('svg').exists()).toBe(false)
+    })
+
+    it('с неверным icon иконки нет, кнопка на месте', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Добавить', icon: 'pin', onSelect: () => {} }] },
+            global: { config: { warnHandler: () => {} } },
+        })
+
+        expect(wrapper.get('button').find('svg').exists()).toBe(false)
+        expect(wrapper.get('button').text()).toBe('Добавить')
+    })
+
+    it('без действий иконка не считается', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [] } })
+
+        expect(wrapper.find('svg').exists()).toBe(false)
     })
 })

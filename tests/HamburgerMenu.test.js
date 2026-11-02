@@ -245,6 +245,7 @@ describe('HamburgerMenu: проверка пунктов', () => {
         { name: 'нет label', item: { href: '#users' } },
         { name: 'ни href, ни onSelect', item: { label: 'Выйти' } },
         { name: 'неверный color', item: { label: 'Удалить', color: 'blue', onSelect: () => {} } },
+        { name: 'неверный icon', item: { label: 'Удалить', icon: 'pin', onSelect: () => {} } },
     ])('неверный пункт ($name) — ровно одно предупреждение валидатора и без ошибок', ({ item }) => {
         const { warnings, errors } = mountChecked([...profileActions(), item])
 
@@ -545,5 +546,110 @@ describe('HamburgerMenu: фокус после закрытия в Safari', () =
         await settle()
         expect(wrapper.vm.open).toBe(false)
         expect(document.activeElement).toBe(buttonOf(wrapper).element)
+    })
+})
+
+describe.each([
+    { name: 'HamburgerMenu', component: HamburgerMenu, toActions: (items) => items },
+    {
+        name: 'DropdownButtonWithAction',
+        component: DropdownButtonWithAction,
+        toActions: (items) => [{ label: 'Основное', onSelect: () => {} }, ...items],
+    },
+])('$name: иконки пунктов меню', ({ component, toActions }) => {
+    const onSelect = () => {}
+
+    function mountMenu(items, options = {}) {
+        return mount(component, { attachTo: document.body, props: { actions: toActions(items) }, ...options })
+    }
+
+    // Пустой блок — первый из двух дочерних элементов пункта, не иконка.
+    const blanks = (wrapper) => menuOf(wrapper).findAll('[role="menuitem"] > span:first-child:not(:last-child)')
+
+    it('иконка у перехода и у действия: слева от подписи', () => {
+        const wrapper = mountMenu([
+            { label: 'Ключи', icon: 'plus', href: '#keys' },
+            { label: 'Группа', icon: 'plus', onSelect },
+        ])
+
+        const items = itemsOf(wrapper)
+        expect(items.map((item) => item.element.tagName)).toEqual(['A', 'BUTTON'])
+        for (const item of items) {
+            expect(item.element.firstElementChild.tagName.toLowerCase()).toBe('svg')
+        }
+        expect(items.map((item) => item.text())).toEqual(['Ключи', 'Группа'])
+    })
+
+    it('иконка у одного пункта: у остальных пустой блок', () => {
+        const wrapper = mountMenu([
+            { label: 'A', icon: 'plus', onSelect },
+            { label: 'B', href: '#b' },
+            { label: 'C', onSelect },
+        ])
+
+        expect(menuOf(wrapper).findAll('svg')).toHaveLength(1)
+        expect(blanks(wrapper)).toHaveLength(2)
+    })
+
+    it('без иконок — ни иконок, ни пустых блоков', () => {
+        const wrapper = mountMenu([{ label: 'A', onSelect }, { label: 'B', href: '#b' }])
+
+        expect(menuOf(wrapper).findAll('svg')).toHaveLength(0)
+        expect(blanks(wrapper)).toHaveLength(0)
+    })
+
+    it('неверное имя рядом с верной иконкой — пустой блок и одно предупреждение', () => {
+        const warnings = []
+        const wrapper = mountMenu(
+            [{ label: 'A', icon: 'plus', onSelect }, { label: 'B', icon: 'pin', onSelect }],
+            { global: { config: { warnHandler: (message) => warnings.push(message) } } },
+        )
+
+        expect(menuOf(wrapper).findAll('svg')).toHaveLength(1)
+        expect(blanks(wrapper)).toHaveLength(1)
+        expect(warnings.filter((message) => message.includes(VALIDATOR_WARNING))).toHaveLength(1)
+    })
+
+    it('неверное имя без других иконок — без пустых блоков', () => {
+        const wrapper = mountMenu(
+            [{ label: 'A', icon: 'pin', onSelect }, { label: 'B', onSelect }],
+            { global: { config: { warnHandler: () => {} } } },
+        )
+
+        expect(blanks(wrapper)).toHaveLength(0)
+    })
+
+    it('иконки пропали из actions при открытом меню — пустых блоков нет', async () => {
+        const wrapper = mountMenu([{ label: 'A', icon: 'plus', onSelect }, { label: 'B', onSelect }])
+        await buttonOf(wrapper).trigger('click')
+        await flushToggles()
+        await flushPromises()
+        expect(blanks(wrapper)).toHaveLength(1)
+
+        await wrapper.setProps({ actions: toActions([{ label: 'A', onSelect }, { label: 'B', onSelect }]) })
+
+        expect(menuOf(wrapper).findAll('svg')).toHaveLength(0)
+        expect(blanks(wrapper)).toHaveLength(0)
+    })
+
+    it('подпись пункта в своём элементе: в одну строку', () => {
+        const wrapper = mountMenu([{ label: 'A', onSelect }, { label: 'B', href: '#b' }])
+
+        for (const item of itemsOf(wrapper)) {
+            const label = item.get('span')
+            expect(label.text()).toBe(item.text())
+            expect(label.classes()).toEqual(expect.arrayContaining(['bb:min-w-0', 'bb:truncate']))
+        }
+    })
+})
+
+describe('DropdownButtonWithAction: иконка первого действия и меню', () => {
+    it('иконка первого действия не даёт пустых блоков в меню', () => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ label: 'Основное', icon: 'plus', onSelect: () => {} }, { label: 'Пункт', onSelect: () => {} }] },
+        })
+
+        expect(menuOf(wrapper).findAll('[role="menuitem"] > span')).toHaveLength(1)
     })
 })

@@ -1,12 +1,14 @@
 // Пункты меню DropdownButtonWithAction и HamburgerMenu: проверка для
-// валидаторов пропа actions, разбор и цвет для PopoverMenu.
+// валидаторов пропа actions, разбор, цвет и иконка для PopoverMenu.
 // Внутренний модуль пакета.
 
+import { isActionIcon } from './actionIcons.js'
 import { isColor } from './colors.js'
 
 // Пункт меню — ровно одна из двух форм: переход (href без onSelect) или
 // действие (onSelect без href). Поле отсутствует, если оно undefined.
 // Цвет — color: имя из общего списка цветов (src/colors.js).
+// Иконка — icon: имя из списка иконок действий (src/actionIcons.js).
 export function isMenuItem(item) {
     if (typeof item !== 'object' || item === null) {
         return false
@@ -17,6 +19,10 @@ export function isMenuItem(item) {
     }
 
     if (item.color !== undefined && !isColor(item.color)) {
+        return false
+    }
+
+    if (item.icon !== undefined && !isActionIcon(item.icon)) {
         return false
     }
 
@@ -47,4 +53,10 @@ export function isLinkItem(item) {
 // пункт с неверным color валидатор отклоняет, и рисуется он обычным.
 export function itemColor(item) {
     return isColor(item.color) ? item.color : null
+}
+
+// Иконка пункта. Без icon и с icon вне списка — без иконки: пункт с неверным
+// icon валидатор отклоняет, и рисуется он без иконки.
+export function itemIcon(item) {
+    return isActionIcon(item.icon) ? item.icon : null
 }

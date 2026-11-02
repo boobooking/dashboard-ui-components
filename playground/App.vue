@@ -281,6 +281,15 @@
                 <button type="button" class="demo-button" @click="dropdownIsOpen = !dropdownIsOpen">Переключить снаружи</button>
             </p>
             <p>Выбрано действий: {{ menuSelections }}, последний переход: {{ lastNavigation || '—' }}</p>
+
+            <h3>С иконками: на кнопке и в пунктах меню</h3>
+            <div class="demo-row">
+                <dropdown-button-with-action :actions="[{ label: 'Добавить ключи', icon: 'plus', href: '#keys' }]"/>
+                <dropdown-button-with-action :actions="iconActions"/>
+                <dropdown-button-with-action
+                    :actions="[{ label: 'Добавить', icon: 'plus', color: 'green', onSelect: countSelection }, { label: 'Добавить в чёрный список', icon: 'plus', color: 'red', onSelect: countSelection }]"
+                />
+            </div>
         </section>
 
         <section>
@@ -290,6 +299,12 @@
             <div class="demo-header">
                 <span>Шапка</span>
                 <hamburger-menu :actions="profileActions"/>
+            </div>
+            <div class="demo-header">
+                <span>Шапка с иконкой</span>
+                <hamburger-menu
+                    :actions="[{ label: 'Добавить администратора', icon: 'plus', onSelect: countProfileSelection }, { label: 'Выйти', onSelect: countProfileSelection }]"
+                />
             </div>
             <p>Выбрано действий: {{ profileSelections }}</p>
         </section>
@@ -697,8 +712,8 @@ export default {
 
         // Как кнопка страницы администраторов: основная кнопка — переход,
         // в меню обычный, жёлтый и красный пункты. Длинный пункт показывает
-        // перенос строки в меню шириной w-56. Переходы — по hash: в голом
-        // окружении без navigate страница не уходит.
+        // одну строку и рост меню. Переходы — по hash: в голом окружении
+        // без navigate страница не уходит.
         menuActions() {
             return [
                 { label: 'Редактировать', href: '#edit' },
@@ -723,6 +738,17 @@ export default {
             return [
                 { label: 'Отправить заново', color: 'yellow', onSelect: this.countSelection },
                 { label: 'Зафиксировать как неотправленное', onSelect: this.countSelection },
+            ];
+        },
+
+        // Иконка у основного действия и части пунктов: текст всех пунктов
+        // стоит на одной линии.
+        iconActions() {
+            return [
+                { label: 'Добавить ключи', icon: 'plus', href: '#keys' },
+                { label: 'Добавить группу', icon: 'plus', onSelect: this.countSelection },
+                { label: 'Поменять пароль', href: '#password' },
+                { label: 'Удалить', color: 'red', onSelect: this.countSelection },
             ];
         },
 

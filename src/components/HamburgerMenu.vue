@@ -35,7 +35,7 @@ export default {
     props: {
         // Пункты меню — как у DropdownButtonWithAction: { label, href } —
         // переход, { label, onSelect } — действие, color — имя из общего
-        // списка цветов.
+        // списка цветов, icon — имя из списка иконок действий.
         actions: {
             type: Array,
             default: () => [],

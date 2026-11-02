@@ -160,6 +160,42 @@ const cases = [
         label: 'Открыть меню',
     },
     {
+        name: 'DropdownButtonWithAction — основная кнопка с иконкой',
+        mount: () => mount(DropdownButtonWithAction, {
+            props: { actions: [{ label: 'Добавить', icon: 'plus', onSelect: () => {} }] },
+            attachTo: document.body,
+        }),
+        button: (wrapper) => wrapper.find('button'),
+        label: null,
+    },
+    {
+        name: 'DropdownButtonWithAction — основная ссылка с иконкой',
+        mount: () => mount(DropdownButtonWithAction, {
+            props: { actions: [{ label: 'Добавить', icon: 'plus', href: '#add' }] },
+            attachTo: document.body,
+        }),
+        button: (wrapper) => wrapper.find('a'),
+        label: null,
+    },
+    {
+        name: 'PopoverMenu — пункт с иконкой',
+        mount: () => mount(HamburgerMenu, {
+            props: { actions: [{ label: 'Добавить', icon: 'plus', onSelect: () => {} }, { label: 'Выйти', onSelect: () => {} }] },
+            attachTo: document.body,
+        }),
+        button: (wrapper) => wrapper.findAll('[role="menuitem"]')[0],
+        label: null,
+    },
+    {
+        name: 'PopoverMenu — пункт с пустым блоком на месте иконки',
+        mount: () => mount(HamburgerMenu, {
+            props: { actions: [{ label: 'Добавить', icon: 'plus', onSelect: () => {} }, { label: 'Выйти', onSelect: () => {} }] },
+            attachTo: document.body,
+        }),
+        button: (wrapper) => wrapper.findAll('[role="menuitem"]')[1],
+        label: null,
+    },
+    {
         name: 'NotificationMessage — крестик',
         mount: () => mount(NotificationMessage, { props: { modelValue: 'Текст', type: 'warning' }, attachTo: document.body }),
         button: (wrapper) => wrapper.find('button'),

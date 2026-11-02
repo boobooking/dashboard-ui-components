@@ -260,3 +260,27 @@ describe('TextPopover: запрет выделения страницы', () => 
         expect(pageSelection()).toBe('text')
     })
 })
+
+describe('TextPopover: у левого края окна', () => {
+    it('сужается до места слева, а не сдвигается', async () => {
+        Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 })
+        Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 800 })
+        const wrapper = mountPopover()
+        const button = wrapper.get('button[popovertarget]')
+        const panel = wrapper.get('[popover]')
+        button.element.getBoundingClientRect = () => ({ top: 100, bottom: 120, left: 120, right: 140 })
+        panel.element.getBoundingClientRect = () => ({ width: 300 })
+
+        try {
+            await button.trigger('click')
+            await settle()
+            await new Promise(requestAnimationFrame)
+
+            expect(panel.element.style.maxWidth).toBe('132px')
+            expect(panel.element.style.right).toBe('860px')
+        } finally {
+            delete document.documentElement.clientWidth
+            delete document.documentElement.clientHeight
+        }
+    })
+})

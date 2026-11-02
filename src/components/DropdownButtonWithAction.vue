@@ -8,29 +8,33 @@
              ссылка через navigate плагина, действие — кнопка, которая
              вызывает onSelect. Проекту не нужно ловить клик самому и
              зависеть от разметки кнопки. Без меню стрелки нет, и кнопка
-             скругляется с обеих сторон. -->
+             скругляется с обеих сторон. Иконка действия — слева от подписи. -->
         <a
             v-if="isLink(mainAction)"
             :href="mainAction.href"
-            class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
+            class="bb:relative bb:inline-flex bb:items-center bb:gap-2 bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
             :class="[
                 { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
                 mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
             ]"
             @click="followLink($event, mainAction.href)"
-            v-text="mainAction.label"
-        ></a>
+        >
+            <action-icon v-if="mainIcon !== null" :name="mainIcon"/>
+            <span class="bb:pointer-events-none bb:cursor-default" v-text="mainAction.label"></span>
+        </a>
         <button
             v-else
             type="button"
-            class="bb:relative bb:inline-flex bb:items-center bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
+            class="bb:relative bb:inline-flex bb:items-center bb:gap-2 bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
             :class="[
                 { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
                 mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
             ]"
             @click="select(mainAction)"
-            v-text="mainAction.label"
-        ></button>
+        >
+            <action-icon v-if="mainIcon !== null" :name="mainIcon"/>
+            <span class="bb:pointer-events-none bb:cursor-default" v-text="mainAction.label"></span>
+        </button>
         <!-- Меню, его пункты и поведение — PopoverMenu; здесь только стрелка,
              которая его открывает. Обёртка стрелки — flex: стрелка
              растягивается по высоте основной кнопки. Без пунктов меню
@@ -74,12 +78,14 @@
 <script>
 import { withColors } from "../colors.js";
 import { withLang } from "../lang.js";
-import { isLinkItem, isMenuItem, itemColor, toMenuItems } from "../menuItems.js";
+import { isLinkItem, isMenuItem, itemColor, itemIcon, toMenuItems } from "../menuItems.js";
 import { withNavigation } from "../navigation.js";
+import ActionIcon from "./ActionIcon.vue";
 import PopoverMenu from "./PopoverMenu.vue";
 
 export default {
     components: {
+        ActionIcon,
         PopoverMenu,
     },
 
@@ -90,7 +96,8 @@ export default {
     props: {
         // Действия: первое — основная кнопка, остальные — пункты меню.
         // { label, href } — переход, { label, onSelect } — действие,
-        // color — имя из общего списка цветов.
+        // color — имя из общего списка цветов, icon — имя из списка иконок
+        // действий.
         actions: {
             type: Array,
             default: () => [],
@@ -127,6 +134,10 @@ export default {
         // Цвет первого действия — цвет всей кнопки, вместе со стрелкой.
         mainColor() {
             return this.hasActions ? itemColor(this.mainAction) : null;
+        },
+
+        mainIcon() {
+            return this.hasActions ? itemIcon(this.mainAction) : null;
         },
 
         menuActions() {

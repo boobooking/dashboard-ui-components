@@ -232,6 +232,101 @@ describe('fitPopover', () => {
     })
 })
 
+describe('сдвиг вправо (shift)', () => {
+    // Панель с шириной: у happy-dom размеры элемента — нули. Ширина — число
+    // или функция: разворот вверх может её поменять.
+    function withWidth(width) {
+        const popover = document.createElement('div')
+        popover.getBoundingClientRect = () => ({ width: typeof width === 'function' ? width(popover) : width })
+        return popover
+    }
+
+    const nearLeftEdge = { top: 100, bottom: 120, left: 120, right: 140 }
+
+    it('max-width — окно минус 16 px, right — по кнопке', () => {
+        viewport(1000, 800)
+        const popover = withWidth(300)
+
+        placePopover(anchorAt(nearLeftEdge), popover, { shift: true })
+
+        expect(popover.style.maxWidth).toBe('984px')
+        expect(popover.style.right).toBe('860px')
+    })
+
+    it('меню шире места слева — левый край в 8 px', () => {
+        viewport(1000, 800)
+        const popover = withWidth(300)
+        const anchor = anchorAt(nearLeftEdge)
+
+        placePopover(anchor, popover, { shift: true })
+        fitPopover(anchor, popover, { shift: true })
+
+        expect(popover.style.right).toBe('692px')
+    })
+
+    it('меню помещается слева — right по кнопке', () => {
+        viewport(1000, 800)
+        const popover = withWidth(300)
+        const anchor = anchorAt({ top: 100, bottom: 120, left: 900, right: 920 })
+
+        placePopover(anchor, popover, { shift: true })
+        fitPopover(anchor, popover, { shift: true })
+
+        expect(popover.style.right).toBe('80px')
+    })
+
+    it('меню во всё окно — right 8 px', () => {
+        viewport(1000, 800)
+        const popover = withWidth(984)
+        const anchor = anchorAt(nearLeftEdge)
+
+        placePopover(anchor, popover, { shift: true })
+        fitPopover(anchor, popover, { shift: true })
+
+        expect(popover.style.right).toBe('8px')
+    })
+
+    it('ширина меряется после разворота вверх', () => {
+        viewport(1000, 800)
+        const popover = withWidth((element) => (element.style.top === 'auto' ? 300 : 315))
+        Object.defineProperty(popover, 'clientHeight', { configurable: true, value: 40 })
+        Object.defineProperty(popover, 'scrollHeight', { configurable: true, value: 120 })
+        const anchor = anchorAt({ top: 700, bottom: 720, left: 120, right: 140 })
+
+        placePopover(anchor, popover, { shift: true })
+        fitPopover(anchor, popover, { shift: true })
+
+        expect(popover.style.top).toBe('auto')
+        expect(popover.style.right).toBe('692px')
+    })
+
+    it('следующее открытие возвращает right к кнопке', () => {
+        viewport(1000, 800)
+        const popover = withWidth(300)
+        const anchor = anchorAt(nearLeftEdge)
+        placePopover(anchor, popover, { shift: true })
+        fitPopover(anchor, popover, { shift: true })
+
+        placePopover(anchorAt({ top: 100, bottom: 120, left: 900, right: 920 }), popover, { shift: true })
+
+        expect(popover.style.right).toBe('80px')
+    })
+
+    it('без shift fitPopover ширину не меряет и right не меняет', () => {
+        viewport(1000, 800)
+        const popover = withWidth(300)
+        const measure = vi.spyOn(popover, 'getBoundingClientRect')
+        const anchor = anchorAt(nearLeftEdge)
+
+        placePopover(anchor, popover, { maxWidth: 224 })
+        fitPopover(anchor, popover, { maxWidth: 224 })
+
+        expect(measure).not.toHaveBeenCalled()
+        expect(popover.style.right).toBe('860px')
+        expect(popover.style.maxWidth).toBe('132px')
+    })
+})
+
 describe('canControlPopover и isPopoverOpen', () => {
     it('без Popover API — нельзя управлять и закрыто', () => {
         const element = document.createElement('div')

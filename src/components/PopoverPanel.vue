@@ -73,6 +73,12 @@ export default {
             type: Number,
             default: null,
         },
+        // Панель со своей шириной при align "end": шире окна не становится,
+        // а не поместившись слева, сдвигается вправо вместо сужения.
+        shift: {
+            type: Boolean,
+            default: false,
+        },
         // Стрелки ведут фокус по кнопкам и ссылкам панели.
         arrows: {
             type: Boolean,
@@ -281,7 +287,7 @@ export default {
         onBeforeToggle(event) {
             if (event.newState === "open") {
                 const button = document.getElementById(this.buttonId);
-                const options = { maxWidth: this.maxWidth, align: this.align };
+                const options = { maxWidth: this.maxWidth, align: this.align, shift: this.shift };
                 // Размер прошлого открытия сбрасывается при любом keepSize:
                 // keepSize мог выключиться после прошлого открытия, а
                 // удержанный размер остаётся на панели и после закрытия.
