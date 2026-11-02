@@ -1306,3 +1306,23 @@ describe('AmountInput: тексты', () => {
         expect(messages.en[key]).toBe(en)
     })
 })
+
+describe('AmountInput: describedBy', () => {
+    const described = (wrapper) => wrapper.findAll('input').map((input) => input.attributes('aria-describedby'))
+
+    it('с копейками — на обоих полях', () => {
+        expect(described(mount(AmountInput, { props: { digits: 2, describedBy: 'hint' }, ...mountOptions() }))).toEqual(['hint', 'hint'])
+    })
+
+    it('без копеек — на одном поле', () => {
+        expect(described(mount(AmountInput, { props: { digits: 0, describedBy: 'hint' }, ...mountOptions() }))).toEqual(['hint'])
+    })
+
+    it('заблокированное поле сохраняет связь', () => {
+        expect(described(mount(AmountInput, { props: { digits: 2, describedBy: 'hint', isDisabled: true }, ...mountOptions() }))).toEqual(['hint', 'hint'])
+    })
+
+    it('без него атрибута нет', () => {
+        expect(described(mount(AmountInput, { props: { digits: 2 }, ...mountOptions() }))).toEqual([undefined, undefined])
+    })
+})

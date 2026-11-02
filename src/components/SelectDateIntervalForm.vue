@@ -4,7 +4,7 @@
             <span :id="labelId" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label ?? ''"/>
             <dot v-show="isRequired" color="red" class="bb:ml-2"/>
         </div>
-        <div class="bb:mt-1 bb:grid bb:grid-cols-2 bb:gap-3" role="group" :aria-labelledby="labelId">
+        <div class="bb:mt-1 bb:grid bb:grid-cols-2 bb:gap-3" role="group" :aria-labelledby="labelId" :aria-describedby="descriptionId(labelId)">
             <select-date-interval
                 v-slot="{ from, to }"
                 :date-from="dateFrom"
@@ -36,12 +36,15 @@
                 </div>
             </select-date-interval>
         </div>
+        <field-description v-if="hasDescription()" :id="descriptionId(labelId)"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 import SelectDate from "./SelectDate.vue";
 import SelectDateInterval from "./SelectDateInterval.vue";
 
@@ -52,9 +55,12 @@ import SelectDateInterval from "./SelectDateInterval.vue";
 export default {
     components: {
         Dot,
+        FieldDescription,
         SelectDate,
         SelectDateInterval,
     },
+
+    mixins: [withFieldDescription],
 
     emits: ["update:dateFrom", "update:dateTo", "changed"],
 

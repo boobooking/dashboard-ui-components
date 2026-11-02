@@ -16,6 +16,7 @@
             :value="groupedWhole"
             :disabled="isDisabled"
             :aria-label="prefix"
+            :aria-describedby="describedBy"
             :title="fullAmount"
             class="bb:flex-1 bb:w-full bb:min-w-0 bb:bg-transparent bb:text-right bb:text-ellipsis bb:tabular-nums bb:focus:outline-hidden"
             @input="onWholeInput"
@@ -42,6 +43,7 @@
                 :maxlength="digits"
                 :placeholder="'0'.repeat(digits)"
                 :aria-label="texts.amountFraction"
+                :aria-describedby="describedBy"
                 :style="{ width: `calc(${digits}ch + 2px)` }"
                 class="bb:flex-none bb:bg-transparent bb:tabular-nums bb:placeholder-gray-400 bb:focus:outline-hidden"
                 @input="onFractionInput"
@@ -108,6 +110,11 @@ export default {
         },
         // id основной части для внешней подписи <label for>.
         inputId: {
+            type: String,
+            default: null,
+        },
+        // id описания поля формы: aria-describedby основной части и копеек.
+        describedBy: {
             type: String,
             default: null,
         },

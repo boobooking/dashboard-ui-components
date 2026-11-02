@@ -4,7 +4,7 @@
             <span :id="labelId" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label ?? ''"/>
             <dot v-show="isRequired" color="red" class="bb:ml-2"/>
         </div>
-        <div v-if="itemList.length > 0" role="group" :aria-labelledby="labelId" class="bb:mt-1 bb:grid bb:gap-x-4 bb:gap-y-2" :style="gridStyle">
+        <div v-if="itemList.length > 0" role="group" :aria-labelledby="labelId" :aria-describedby="descriptionId(labelId)" class="bb:mt-1 bb:grid bb:gap-x-4 bb:gap-y-2" :style="gridStyle">
             <!-- :key="index": id бывают булевыми и повторяться, а checked всё равно задаёт проп.
                  bb:bg-none снимает галочку @tailwindcss/forms приложения у :checked: ресет пакета
                  background-image не трогает. Белая галочка svg лежит поверх input; путь тот же, что у плагина.
@@ -26,13 +26,16 @@
                 <span class="bb:ml-3 bb:text-sm bb:font-medium bb:text-gray-700" v-text="itemName(item)"/>
             </label>
         </div>
+        <field-description v-if="hasDescription()" :id="descriptionId(labelId)"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import { columnCount, gridPlacement, gridTemplate, isColumnCount } from "../columns.js";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 
 // Поле формы вида FormInput: подпись над списком галочек с выбором нескольких
 // пунктов. isRequired только рисует красную точку. Значение и события проходят
@@ -40,7 +43,10 @@ import Dot from "./Dot.vue";
 export default {
     components: {
         Dot,
+        FieldDescription,
     },
+
+    mixins: [withFieldDescription],
 
     emits: ["update:modelValue", "changed"],
 

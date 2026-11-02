@@ -9,17 +9,21 @@
                 class="bb:flex-1"
                 :model-value="modelValue"
                 :labelled-by="labelId"
+                :described-by="descriptionId(labelId)"
                 :lang="lang"
                 @update:model-value="$emit('update:modelValue', $event)"
                 @changed="$emit('changed')"
             />
         </div>
+        <field-description v-if="hasDescription()" :id="descriptionId(labelId)"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 import SelectDate from "./SelectDate.vue";
 
 // Поле формы вида FormInput: подпись над рамкой, в рамке ядро SelectDate.
@@ -28,8 +32,11 @@ import SelectDate from "./SelectDate.vue";
 export default {
     components: {
         Dot,
+        FieldDescription,
         SelectDate,
     },
+
+    mixins: [withFieldDescription],
 
     emits: ["update:modelValue", "changed"],
 

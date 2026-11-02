@@ -1295,3 +1295,16 @@ describe('SelectMultiple: клик после замены items', () => {
         expect(isOpen(wrapper)).toBe(false)
     })
 })
+
+describe('SelectMultiple: describedBy', () => {
+    const items = [{ id: 'a', name: 'Альфа' }]
+    const mountCore = (props) => mount(SelectMultiple, { props, attachTo: document.body, global: vueHandlers() })
+
+    it('на кнопке списка', () => {
+        expect(triggerOf(mountCore({ items, describedBy: 'hint' })).attributes('aria-describedby')).toBe('hint')
+    })
+
+    it('без него атрибута нет', () => {
+        expect(triggerOf(mountCore({ items })).attributes('aria-describedby')).toBeUndefined()
+    })
+})

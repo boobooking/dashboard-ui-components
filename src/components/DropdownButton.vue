@@ -31,6 +31,7 @@
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
                         :aria-labelledby="labelledBy ? labelledBy + ' ' + trigger.id : null"
+                        :aria-describedby="describedBy"
                         class="bb:flex bb:w-full bb:h-full bb:items-center bb:focus-visible:focus-ring bb:cursor-pointer bb:rounded-[var(--bb-field-radius,0)]"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
@@ -122,6 +123,11 @@ export default {
         // aria-labelledby ссылается на подпись и на саму кнопку. Без него
         // атрибута нет.
         labelledBy: {
+            type: String,
+            default: null,
+        },
+        // id описания поля формы: aria-describedby кнопки.
+        describedBy: {
             type: String,
             default: null,
         },

@@ -1086,3 +1086,15 @@ describe('withArrow', () => {
         expect(textBoxOf(wrapper).classes()).not.toContain('bb:pr-12')
     })
 })
+
+describe('SelectSingle: describedBy', () => {
+    const items = [{ id: 'a', name: 'Альфа' }]
+
+    it('на кнопке списка', () => {
+        expect(triggerOf(mountCore({ items, describedBy: 'hint' })).attributes('aria-describedby')).toBe('hint')
+    })
+
+    it('без него атрибута нет', () => {
+        expect(triggerOf(mountCore({ items })).attributes('aria-describedby')).toBeUndefined()
+    })
+})

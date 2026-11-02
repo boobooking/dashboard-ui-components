@@ -6,13 +6,17 @@
         :is-required="isRequired"
         :with-search="withSearch"
         :lang="lang"
+        :description="description"
         @update:model-value="$emit('update:modelValue', $event)"
         @changed="$emit('changed')"
-    />
+    >
+        <template v-if="$slots.description" #description><slot name="description"></slot></template>
+    </select-single-form>
 </template>
 
 <script>
 import { currencyItems, pickCurrencies } from "../currencies.js";
+import { withFieldDescription } from "../fieldDescription.js";
 import SelectSingleForm from "./SelectSingleForm.vue";
 
 // Выбор валюты в форме: SelectSingleForm с пунктами из списка валют.
@@ -22,6 +26,8 @@ export default {
     components: {
         SelectSingleForm,
     },
+
+    mixins: [withFieldDescription],
 
     emits: ["update:modelValue", "changed"],
 

@@ -25,6 +25,7 @@
                         :id="trigger.id"
                         :popovertarget="trigger.popovertarget"
                         :aria-labelledby="labelledBy ? labelledBy + ' ' + trigger.id : null"
+                        :aria-describedby="describedBy"
                         class="bb:absolute bb:inset-0 bb:cursor-pointer bb:focus-visible:focus-ring bb:rounded-[var(--bb-field-radius,0)]"
                     >
                         <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
@@ -53,6 +54,7 @@
                             :value="dayValue"
                             :placeholder="placeholderText"
                             :aria-labelledby="labelledBy || null"
+                            :aria-describedby="describedBy"
                             class="bb:w-full bb:h-full bb:py-2 bb:pl-3 bb:pr-3 bb:leading-none bb:border bb:border-transparent bb:whitespace-nowrap bb:bg-transparent bb:placeholder:text-sm bb:placeholder-gray-300 bb:cursor-pointer bb:focus:focus-ring bb:rounded-[var(--bb-field-radius,0)]"
                         />
                     </label>
@@ -109,6 +111,11 @@ export default {
         // кнопку. Поле ввода называется подписью, дата остаётся его значением.
         // Без него атрибутов нет.
         labelledBy: {
+            type: String,
+            default: null,
+        },
+        // id описания поля формы: aria-describedby кнопки и поля.
+        describedBy: {
             type: String,
             default: null,
         },

@@ -4,7 +4,7 @@
             <span :id="labelId" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label ?? ''"/>
             <dot v-show="isRequired" color="red" class="bb:ml-2"/>
         </div>
-        <div class="bb:mt-1 bb:grid bb:grid-cols-[1fr_1fr_6rem] bb:gap-3" role="group" :aria-labelledby="labelId">
+        <div class="bb:mt-1 bb:grid bb:grid-cols-[1fr_1fr_6rem] bb:gap-3" role="group" :aria-labelledby="labelId" :aria-describedby="descriptionId(labelId)">
             <amount-interval
                 v-slot="{ from, to, currency: currencyField }"
                 :amount-from="amountFrom"
@@ -53,15 +53,18 @@
                 </div>
             </amount-interval>
         </div>
+        <field-description v-if="hasDescription()" :id="descriptionId(labelId)"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import AmountCurrency from "./AmountCurrency.vue";
 import AmountInput from "./AmountInput.vue";
 import AmountInterval from "./AmountInterval.vue";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 
 // Поле формы вида FormInput: подпись над двумя полями суммы «от» и «до» и
 // блоком валюты, которые ядро AmountInterval отдаёт в слот; у каждого своя
@@ -73,7 +76,10 @@ export default {
         AmountInput,
         AmountInterval,
         Dot,
+        FieldDescription,
     },
+
+    mixins: [withFieldDescription],
 
     emits: ["update:amountFrom", "update:amountTo", "update:currency", "changed"],
 

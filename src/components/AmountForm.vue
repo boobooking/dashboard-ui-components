@@ -10,6 +10,7 @@
                     :model-value="passedAmount"
                     :digits="fractionDigits"
                     :input-id="inputId"
+                    :described-by="descriptionId(inputId)"
                     :with-eraser="withEraser"
                     :is-disabled="isBlocked"
                     :lang="lang"
@@ -26,16 +27,19 @@
                 />
             </div>
         </div>
+        <field-description v-if="hasDescription()" :id="descriptionId(inputId)"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import { normalizeAmount } from "../amount.js";
 import { withAmountCurrency } from "../amountCurrency.js";
 import AmountCurrency from "./AmountCurrency.vue";
 import AmountInput from "./AmountInput.vue";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 
 // Поле формы вида FormInput: подпись над строкой из рамки суммы и рамки блока
 // валюты. Значение — { amount, currency }, каждое событие несёт новый объект.
@@ -45,9 +49,10 @@ export default {
         AmountCurrency,
         AmountInput,
         Dot,
+        FieldDescription,
     },
 
-    mixins: [withAmountCurrency],
+    mixins: [withAmountCurrency, withFieldDescription],
 
     emits: ["update:modelValue", "changed"],
 

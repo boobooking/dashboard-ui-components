@@ -175,6 +175,38 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 изменённое родителем, поле показывает сразу и без событий: ответный
 `update:modelValue` вернул бы родителю его же значение.
 
+### Описание поля
+
+У всех полей форм — `FormInput`, `SelectSingleForm`, `SelectCurrencyForm`,
+`SelectMultipleForm`, `SelectDateForm`, `SelectDateIntervalForm`, `AmountForm`,
+`AmountIntervalForm`, `SelectSingleCards`, `SelectMultipleList` — есть описание под
+полем. Текст задаёт проп `description`, разметку, например ссылку, — слот
+`description`.
+
+    <form-input v-model="email" label="Email" description="На этот адрес придёт письмо" />
+
+    <select-single-form v-model="country" label="Country" :items="countryItems">
+        <template v-if="countryItems.length === 0" #description>
+            Add them in <Link :href="route('settings.countries')" class="text-indigo-500">Settings</Link> first.
+        </template>
+    </select-single-form>
+
+Без пропа, с `null` и пустой строкой описания нет, поле выглядит как обычно. Текст
+пропа выводится как текст: разметка в нём не срабатывает. Если заданы и проп,
+и слот, показан слот. Описание считается заданным, если слот передан, поэтому
+условие ставится на шаблон слота, а не внутрь него.
+
+Вид у всех полей один и не зависит от состояния поля: 12 px, `gray-500`, в 4 px под
+полем. У полей из нескольких частей и у карточек описание стоит под всей группой.
+Ссылку в слоте оформляет страница: внутри компонента она берёт цвет текста и не
+подчёркнута.
+
+Поле связано с описанием через `aria-describedby`: скринридер прочитает текст вместе
+с полем. Без пунктов у выпадающих полей нет кнопки, поэтому описание остаётся, а
+связи нет. В `SelectDateForm` связаны кнопка и поле даты, в `AmountForm` — поля
+суммы, блок валюты — нет. `aria-describedby`, переданный на `FormInput`,
+сохраняется: на поле оба `id` через пробел.
+
 ### FormInput
 
 Поле формы с подписью над ним. Значение забирает форма: у поля нет
@@ -190,6 +222,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `label` | `String` | обязателен | Подпись над полем |
 | `type` | `String` | `"text"` | `"text"`, `"email"`, `"password"`, `"tel"`, `"url"` или `"search"` |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 
 Событие `update:modelValue` уходит на каждый ввод со строкой из поля как
 есть: пробелы не обрезаются, это решение формы. Исключение — `type="email"`
@@ -279,6 +312,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `modelValue` | `String` | `""` | Выбранная дата |
 | `label` | `String` | обязателен | Подпись над полем |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует на календарь и на подпись ластика для скринридера (у самого поля текста нет) |
 
 События: `update:modelValue` и `changed` — когда значение выбрал пользователь,
@@ -366,6 +400,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `dateTo` | `String` | `""` | Конец интервала |
 | `label` | `String` | обязателен | Подпись над полями |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"`; действует и на подсказки полей, и на оба календаря |
 
 События те же, что у `SelectDateIntervalFilter`: `update:dateFrom`,
@@ -460,6 +495,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `modelValue` | `String \| Number` | `null` | `id` выбранного элемента или `null` |
 | `label` | `String` | обязателен | Подпись над полем |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `withSearch` | `Boolean` | `false` | Поле поиска вверху списка |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` — поле поиска, «Ничего не найдено», подпись ластика |
 
@@ -490,6 +526,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `withSearch` | `Boolean` | `true` | Поле поиска вверху списка |
 | `label` | `String` | обязателен | Подпись над полем |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` — поле поиска, «Ничего не найдено», подпись ластика |
 
 `currencies` — массив кодов в порядке показа; повторы и неизвестные коды
@@ -540,6 +577,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 | `currencies` | `Array` | `null` | Коды допустимых валют, как у `SelectCurrencyForm` |
 | `label` | `String` | обязателен | Подпись над полем |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `withEraser` | `Boolean` | `true` | Крестик очистки в поле суммы |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` — разделители, подписи полей и крестика, поиск валют |
 
@@ -731,6 +769,7 @@ Tab. Он стирает обе части, шлёт `update:modelValue` с `amo
 | `currencies` | `Array` | `null` | Коды допустимых валют, как у `SelectCurrencyForm` |
 | `label` | `String` | обязателен | Подпись над полями |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `withEraser` | `Boolean` | `true` | Крестики полей |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` — как у `AmountForm` |
 
@@ -837,6 +876,7 @@ Tab. Он стирает обе части, шлёт `update:modelValue` с `amo
 | `modelValue` | `Array` | `[]` | `id` выбранных пунктов |
 | `label` | `String` | обязателен | Подпись над полем |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `withSearch` | `Boolean` | `false` | Поле поиска вверху списка |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` — надпись, поле поиска, «Ничего не найдено», подписи обоих ластиков |
 
@@ -866,6 +906,7 @@ Tab. Он стирает обе части, шлёт `update:modelValue` с `amo
 | `modelValue` | `String \| Number \| Boolean` | `null` | `id` выбранного пункта или `null` |
 | `label` | `String` | обязателен | Подпись над карточками |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `columns` | `Number` | `2` | Число колонок, целое от 1; иначе — две колонки. Vue предупреждает о нецелом, меньшем 1 и нечисловом значении, но не о `null` |
 
 Событий два: `update:modelValue` с `id` выбранного пункта и сразу за ним
@@ -939,6 +980,7 @@ Tab. Он стирает обе части, шлёт `update:modelValue` с `amo
 | `modelValue` | `Array` | `[]` | `id` отмеченных пунктов |
 | `label` | `String` | обязателен | Подпись над списком |
 | `isRequired` | `Boolean` | `false` | Красная точка у подписи |
+| `description` | `String` | `null` | Текст под полем, см. «Описание поля» |
 | `columns` | `Number` | `2` | Число колонок, целое от 1; иначе — две колонки. Vue предупреждает о нецелом, меньшем 1 и нечисловом значении, но не о `null` |
 
 Событий два: `update:modelValue` с новым массивом и сразу за ним `changed`,

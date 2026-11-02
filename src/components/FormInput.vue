@@ -8,15 +8,19 @@
             v-model="value"
             v-bind="{ ...inputAttrs() }"
             :id="inputId()"
+            :aria-describedby="inputDescribedBy()"
             :type="inputType"
             class="bb:mt-1 bb:block bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:px-3 bb:py-2 bb:text-sm bb:leading-5 bb:shadow-xs bb:focus:focus-ring"
         />
+        <field-description v-if="hasDescription()" :id="descriptionId(inputId())"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 
 const TYPES = ["text", "email", "password", "tel", "url", "search"];
 
@@ -24,7 +28,9 @@ const TYPES = ["text", "email", "password", "tel", "url", "search"];
 // только рисует красную точку: атрибутов required и aria-* поле от него
 // не получает.
 export default {
-    components: { Dot },
+    components: { Dot, FieldDescription },
+
+    mixins: [withFieldDescription],
 
     // Атрибуты приложения (placeholder, autocomplete, disabled, слушатели)
     // ставятся на поле, а не на корень; class и style — на корень явно.
@@ -82,6 +88,13 @@ export default {
         // в каждом рендере.
         inputId() {
             return this.$attrs.id ?? this.generatedId;
+        },
+
+        // aria-describedby страницы не теряется: оба id через пробел.
+        inputDescribedBy() {
+            const ids = [this.$attrs["aria-describedby"], this.descriptionId(this.inputId())].filter(Boolean);
+
+            return ids.length > 0 ? ids.join(" ") : null;
         },
 
         inputAttrs() {

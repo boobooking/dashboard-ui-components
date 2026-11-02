@@ -43,7 +43,10 @@ export const ssrFixtures = {
     SelectDateFilter: { props: { header: 'Дата', modelValue: '01.03.2026' } },
     SelectDateForm: { props: { label: 'Дата', modelValue: '01.03.2026' } },
     SelectDateIntervalFilter: { props: { header: 'Интервал', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
-    SelectDateIntervalForm: { props: { label: 'Период', dateFrom: '01.03.2026', dateTo: '15.03.2026' } },
+    SelectDateIntervalForm: {
+        props: { label: 'Период', dateFrom: '01.03.2026', dateTo: '15.03.2026' },
+        slots: { description: () => h('a', { href: '#' }, 'Пояснение') },
+    },
     SelectMultipleFilter: {
         props: {
             header: 'Бренд',
@@ -63,11 +66,11 @@ export const ssrFixtures = {
     SelectSingleFilter: { props: { header: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
     SelectMultipleList: { props: { label: 'Участники', items: [{ id: 'owner', name: 'Владельцы' }, { id: 'doctor', name: 'Ветеринарные врачи' }, { id: 'club', name: 'Клубы' }], modelValue: ['doctor'], columns: 2 } },
     SelectSingleCards: { props: { label: 'Бренд', items: [{ id: 'rc', name: 'Royal Canin' }, { id: 'eukanuba', name: 'Eukanuba' }], modelValue: 'eukanuba', isRequired: true } },
-    SelectSingleForm: { props: { label: 'Вендор', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
+    SelectSingleForm: { props: { label: 'Вендор', description: 'Пояснение', items: [{ id: 'a', name: 'Первый' }], modelValue: 'a' } },
     SelectCurrencyFilter: { props: { header: 'Валюта', modelValue: 'USD', currencies: ['RUB', 'USD'] } },
     SelectCurrencyForm: { props: { label: 'Валюта', modelValue: 'USD' } },
     AmountIntervalFilter: { props: { header: 'Сумма', amountFrom: 100000, amountTo: 500000, currency: 'USD' } },
     AmountIntervalForm: { props: { label: 'Сумма', amountFrom: 100000, amountTo: 500000, currency: 'USD' } },
-    AmountForm: { props: { label: 'Сумма', modelValue: { amount: 123456, currency: 'USD' } } },
+    AmountForm: { props: { label: 'Сумма', description: 'Пояснение', modelValue: { amount: 123456, currency: 'USD' } } },
     TextPopover: { props: { text: 'Полный текст сообщения', modelValue: true } },
 }

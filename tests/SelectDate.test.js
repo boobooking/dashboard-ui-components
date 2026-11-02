@@ -627,6 +627,33 @@ describe('SelectDate: ядро без вида', () => {
         expect(warnings).toEqual([])
     })
 
+    it('describedBy: на кнопке и на поле, в том числе при открытом календаре', async () => {
+        const { wrapper, errors, warnings } = mountField({ describedBy: 'hint', modelValue: '15.03.2026' })
+        await pikadayLoaded()
+        const trigger = wrapper.get('button[popovertarget]')
+
+        expect(trigger.attributes('aria-describedby')).toBe('hint')
+        expect(wrapper.get('input').attributes('aria-describedby')).toBe('hint')
+
+        await trigger.trigger('click')
+        await flushToggles()
+        await flushPromises()
+
+        expect(wrapper.get('input').attributes('aria-describedby')).toBe('hint')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('без describedBy атрибутов нет', async () => {
+        const { wrapper, errors, warnings } = mountField({ modelValue: '15.03.2026' })
+        await pikadayLoaded()
+
+        expect(wrapper.get('button[popovertarget]').attributes('aria-describedby')).toBeUndefined()
+        expect(wrapper.get('input').attributes('aria-describedby')).toBeUndefined()
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
     it('без labelledBy атрибутов нет', async () => {
         const { wrapper, errors, warnings } = mountField({ modelValue: '15.03.2026' })
         await pikadayLoaded()

@@ -452,6 +452,31 @@
         </section>
 
         <section>
+            <h2>Описание поля</h2>
+            <div class="demo-form">
+                <form-input label="FormInput" description="Описание под полем"/>
+                <select-single-form label="SelectSingleForm" :items="descriptionItems" description="Описание под полем"/>
+                <select-currency-form label="SelectCurrencyForm" description="Описание под полем"/>
+                <select-multiple-form label="SelectMultipleForm" :items="descriptionItems" description="Описание под полем"/>
+                <select-date-form label="SelectDateForm" description="Описание под полем"/>
+                <select-date-interval-form label="SelectDateIntervalForm" description="Описание под полем"/>
+                <amount-form label="AmountForm" description="Описание под полем"/>
+                <amount-interval-form label="AmountIntervalForm" description="Описание под полем"/>
+                <select-single-cards label="SelectSingleCards" :items="descriptionItems" description="Описание под полем"/>
+                <select-multiple-list label="SelectMultipleList" :items="descriptionItems" description="Описание под полем"/>
+                <select-single-form label="Ссылка в слоте" :items="descriptionItems">
+                    <template #description>
+                        Add them in <a href="#description-link" class="description-demo-link">Settings</a> first.
+                    </template>
+                </select-single-form>
+                <div class="description-demo-narrow">
+                    <form-input label="Обёртка по содержимому" description="Длинное описание не должно раздвигать поле, стоящее в обёртке без своей ширины"/>
+                </div>
+                <form-input label="Длинное слово" :description="'W'.repeat(200)"/>
+            </div>
+        </section>
+
+        <section>
             <h2>NotificationMessage</h2>
             <div class="demo-row">
                 <button type="button" class="demo-button" @click="showNotice('confirmation')">Подтверждение</button>
@@ -585,6 +610,7 @@ export default {
             participantsThree: [],
             participantsFour: [],
             pageCardTitle: 'Поле формы',
+            descriptionItems: [{ id: 'a', name: 'Первый' }, { id: 'b', name: 'Второй' }],
             detailPhoneIsShown: true,
             detailRowsAreShown: true,
             // Строки из v-for идут в общем счёте чередования. Адрес — длинное

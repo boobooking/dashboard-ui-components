@@ -11,16 +11,20 @@
                 :with-search="withSearch"
                 :lang="lang"
                 :labelled-by="labelId"
+                :described-by="descriptionId(labelId)"
                 @update:model-value="$emit('update:modelValue', $event)"
                 @changed="$emit('changed')"
             />
         </div>
+        <field-description v-if="hasDescription()" :id="descriptionId(labelId)"><slot name="description">{{ description }}</slot></field-description>
     </div>
 </template>
 
 <script>
 import { useId } from "vue";
+import { withFieldDescription } from "../fieldDescription.js";
 import Dot from "./Dot.vue";
+import FieldDescription from "./FieldDescription.vue";
 import SelectMultiple from "./SelectMultiple.vue";
 
 // Поле формы вида FormInput: подпись над рамкой, в рамке ядро SelectMultiple.
@@ -29,8 +33,11 @@ import SelectMultiple from "./SelectMultiple.vue";
 export default {
     components: {
         Dot,
+        FieldDescription,
         SelectMultiple,
     },
+
+    mixins: [withFieldDescription],
 
     emits: ["update:modelValue", "changed"],
 

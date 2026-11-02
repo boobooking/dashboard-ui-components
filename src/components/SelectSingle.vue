@@ -7,6 +7,7 @@
             :has-value="withClear && hasValue"
             :with-arrow="withArrow"
             :labelled-by="labelledBy"
+            :described-by="describedBy"
             :find-selected="arrowsOrigin"
             :find-stops="searchStops"
             :find-tab-stops="tabStops"
@@ -84,6 +85,11 @@ export default {
         // id подписи поля формы: SelectSingleForm связывает её с кнопкой
         // (DropdownButton). У фильтра не задан.
         labelledBy: {
+            type: String,
+            default: null,
+        },
+        // id описания поля формы: aria-describedby кнопки (DropdownButton).
+        describedBy: {
             type: String,
             default: null,
         },
