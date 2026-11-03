@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import ActionButton from '../src/components/ActionButton.vue'
 import ActionPill from '../src/components/ActionPill.vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import HamburgerMenu from '../src/components/HamburgerMenu.vue'
@@ -206,6 +207,18 @@ const cases = [
         mount: () => mount(TextPopover, { props: { text: 'Полный текст сообщения' }, attachTo: document.body }),
         button: (wrapper) => wrapper.find('button[popovertarget]'),
         label: 'Показать текст',
+    },
+    {
+        name: 'ActionButton — кнопка с иконкой',
+        mount: () => mount(ActionButton, { props: { label: 'Создать', icon: 'plus' } }),
+        button: (wrapper) => wrapper.find('button'),
+        label: null,
+    },
+    {
+        name: 'ActionButton — ссылка с иконкой',
+        mount: () => mount(ActionButton, { props: { label: 'Создать', icon: 'plus', href: '/users/create' } }),
+        button: (wrapper) => wrapper.find('a'),
+        label: null,
     },
     {
         name: 'ActionPill — иконка скачивания',

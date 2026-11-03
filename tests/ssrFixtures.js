@@ -6,6 +6,7 @@ import DetailRow from '../src/components/DetailRow.vue'
 // открытом состоянии, чтобы на сервере рендерилось и оно. Компонент без
 // фикстуры роняет tests/ssr.test.js.
 export const ssrFixtures = {
+    ActionButton: { props: { label: 'Создать', color: 'green-solid', icon: 'plus' } },
     ActionPill: { props: { title: 'скачать xlsx', icon: 'download', isLoading: true, loadingText: 'формируется отчёт' } },
     ConfirmationModal: { props: { isOpen: true, actionButtonText: 'Удалить', confirmationHeading: 'Удалить запись?', confirmationText: 'Действие нельзя отменить.' } },
     DataTable: {

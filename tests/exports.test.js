@@ -21,8 +21,9 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно тридцать три компонента, плагин и downloadFile', () => {
+    it('ровно тридцать четыре компонента, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
+            'ActionButton',
             'ActionPill',
             'AmountForm',
             'AmountIntervalFilter',

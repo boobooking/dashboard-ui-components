@@ -119,6 +119,7 @@ function focusRingStrings(fileName) {
 describe('носители focus-ring', () => {
     const carriers = [
         ['FormInput.vue', 'bb:focus:focus-ring', 1],
+        ['ActionButton.vue', 'bb:focus:focus-ring', 2],
         ['ActionPill.vue', 'bb:focus-visible:focus-ring', 1],
         ['PageTabs.vue', 'bb:focus-visible:focus-ring', 1],
         ['Pagination.vue', 'bb:focus-visible:focus-ring', 2],
