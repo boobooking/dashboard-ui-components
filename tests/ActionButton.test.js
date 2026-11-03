@@ -262,6 +262,32 @@ describe('ActionButton: выключенная', () => {
         expect(wrapper.emitted('click')).toHaveLength(1)
         expect(warn).not.toHaveBeenCalled()
     })
+
+    it('isDisabled на лету у ссылки — корень меняется, атрибуты остаются на нём', async () => {
+        const wrapper = mountButton({ href: '/users/create' }, { attrs: { class: 'bb:w-full', 'data-dialog-focus': '' } })
+
+        await wrapper.setProps({ isDisabled: true })
+
+        expect(wrapper.element.tagName).toBe('BUTTON')
+        expect(wrapper.attributes()).toHaveProperty('disabled')
+        expect(wrapper.attributes()).not.toHaveProperty('href')
+        expect(wrapper.classes()).toContain('bb:w-full')
+        expect(wrapper.attributes()).toHaveProperty('data-dialog-focus')
+
+        await wrapper.setProps({ isDisabled: false })
+
+        expect(wrapper.element.tagName).toBe('A')
+        expect(wrapper.attributes('href')).toBe('/users/create')
+        expect(wrapper.attributes()).not.toHaveProperty('disabled')
+        expect(wrapper.classes()).toContain('bb:w-full')
+        expect(wrapper.attributes()).toHaveProperty('data-dialog-focus')
+
+        await wrapper.trigger('click')
+
+        expect(navigation).toEqual(['/users/create'])
+        expect(wrapper.emitted('click')).toBeUndefined()
+        expect(warn).not.toHaveBeenCalled()
+    })
 })
 
 describe('ActionButton: атрибуты на корень', () => {
