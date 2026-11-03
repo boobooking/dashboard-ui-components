@@ -4,37 +4,22 @@
          красит основную кнопку вместе со стрелкой, цвет пункта меню — только
          этот пункт. -->
     <span v-if="hasActions" class="bb-dashboard-ui bb:relative bb:inline-flex bb:shadow-xs bb:rounded-md">
-        <!-- Основное действие выполняет пакет, как и пункт меню: переход —
-             ссылка через navigate плагина, действие — кнопка, которая
+        <!-- Основное действие выполняет ActionButton, как и пункт меню:
+             переход — ссылка через navigate плагина, действие — кнопка, которая
              вызывает onSelect. Проекту не нужно ловить клик самому и
-             зависеть от разметки кнопки. Без меню стрелки нет, и кнопка
-             скругляется с обеих сторон. Иконка действия — слева от подписи. -->
-        <a
-            v-if="isLink(mainAction)"
-            :href="mainAction.href"
-            class="bb:relative bb:inline-flex bb:items-center bb:gap-2 bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
-            :class="[
-                { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
-                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : [colorClass(mainColor, 'button'), colorClass(mainColor, 'buttonHover')],
-            ]"
-            @click="followLink($event, mainAction.href)"
-        >
-            <action-icon v-if="mainIcon !== null" :name="mainIcon"/>
-            <span class="bb:pointer-events-none bb:cursor-default" v-text="mainAction.label"></span>
-        </a>
-        <button
-            v-else
-            type="button"
-            class="bb:relative bb:inline-flex bb:items-center bb:gap-2 bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
-            :class="[
-                { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
-                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : [colorClass(mainColor, 'button'), colorClass(mainColor, 'buttonHover')],
-            ]"
+             зависеть от разметки кнопки. Тень у обёртки, а не у кнопки, —
+             кнопка и стрелка выглядят одним целым. Без меню стрелки нет, и
+             кнопка скругляется с обеих сторон. Иконка действия — слева от
+             подписи. -->
+        <action-button
+            :label="mainAction.label"
+            :color="mainColor"
+            :icon="mainIcon"
+            :href="isLink(mainAction) ? mainAction.href : null"
+            class="bb:shadow-none! bb:focus:z-10"
+            :class="{ 'bb:rounded-r-none!': hasMenu }"
             @click="select(mainAction)"
-        >
-            <action-icon v-if="mainIcon !== null" :name="mainIcon"/>
-            <span class="bb:pointer-events-none bb:cursor-default" v-text="mainAction.label"></span>
-        </button>
+        />
         <!-- Меню, его пункты и поведение — PopoverMenu; здесь только стрелка,
              которая его открывает. Обёртка стрелки — flex: стрелка
              растягивается по высоте основной кнопки. Без пунктов меню
@@ -80,12 +65,12 @@ import { withColors } from "../colors.js";
 import { withLang } from "../lang.js";
 import { isLinkItem, isMenuItem, itemColor, itemIcon, toMenuItems } from "../menuItems.js";
 import { withNavigation } from "../navigation.js";
-import ActionIcon from "./ActionIcon.vue";
+import ActionButton from "./ActionButton.vue";
 import PopoverMenu from "./PopoverMenu.vue";
 
 export default {
     components: {
-        ActionIcon,
+        ActionButton,
         PopoverMenu,
     },
 

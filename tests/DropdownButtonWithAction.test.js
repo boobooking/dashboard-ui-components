@@ -5,6 +5,7 @@ import { h } from 'vue'
 import DropdownButtonWithAction from '../src/components/DropdownButtonWithAction.vue'
 import { COLOR_NAMES, colorClass } from '../src/colors.js'
 import { dashboardUi } from '../src/plugin.js'
+import ActionButton from '../src/components/ActionButton.vue'
 import ConfirmationModal from '../src/components/ConfirmationModal.vue'
 import { flushToggles, installPopoverStub } from './popoverStub.js'
 import { installSafariFocus } from './safariFocus.js'
@@ -822,6 +823,32 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         navigation.length = 0
     })
 
+    it('основная кнопка — ActionButton без своей тени, с тенью у обёртки', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions } })
+        const mainButton = wrapper.findComponent(ActionButton)
+
+        expect(mainButton.exists()).toBe(true)
+        expect(mainButton.classes()).toEqual(expect.arrayContaining(['bb:shadow-none!', 'bb:focus:z-10', 'bb:rounded-r-none!']))
+        expect(wrapper.get('.bb-dashboard-ui').classes()).toContain('bb:shadow-xs')
+    })
+
+    it('без меню основная кнопка скругляется с обеих сторон', () => {
+        const wrapper = mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [main] } })
+
+        expect(wrapper.findComponent(ActionButton).classes()).not.toContain('bb:rounded-r-none!')
+    })
+
+    it.each(['green-solid', 'yellow-solid'])('цвет %s красит основную кнопку и стрелку', (color) => {
+        const wrapper = mount(DropdownButtonWithAction, {
+            attachTo: document.body,
+            props: { actions: [{ ...main, color }, { label: 'Удалить', onSelect: () => {} }] },
+        })
+        const tokens = [...colorClass(color, 'button').split(' '), ...colorClass(color, 'buttonHover').split(' ')]
+
+        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(tokens))
+        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(tokens))
+    })
+
     it('без действий ничего не рисуется', () => {
         mount(DropdownButtonWithAction, { attachTo: document.body, props: { actions: [] } })
 
@@ -846,7 +873,7 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         })
 
         expect(mainOf(wrapper).text()).toBe('Редактировать')
-        expect(mainOf(wrapper).classes()).toContain('bb:rounded-l-md')
+        expect(mainOf(wrapper).classes()).toContain('bb:rounded-r-none!')
         expect(menuOf(wrapper).findAll('[role="menuitem"]').map((item) => item.text())).toEqual(['Поменять пароль', 'Удалить'])
     })
 
