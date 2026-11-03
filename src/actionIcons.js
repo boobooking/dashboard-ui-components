@@ -1,6 +1,7 @@
 // Иконки действий ActionButton, ActionPill, DropdownButtonWithAction и
-// HamburgerMenu: имя из поля icon (пропа icon) — компонент иконки. Новая иконка — файл в components/icons без своего
-// размера и новое имя здесь. Внутренний модуль пакета.
+// HamburgerMenu: имя из поля icon пункта меню или из пропа icon — компонент
+// иконки. Новая иконка — файл в components/icons без своего размера и новое имя
+// здесь. Внутренний модуль пакета.
 
 import Plus from './components/icons/Plus.vue'
 import Download from './components/icons/Download.vue'
