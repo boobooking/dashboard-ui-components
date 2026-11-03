@@ -83,7 +83,9 @@ describe('ConfirmationModal: кнопки', () => {
         expect(cancel.attributes()).toHaveProperty('data-dialog-focus')
     })
 
-    it('клики по кнопкам дают по одному событию', async () => {
+    it('клики по кнопкам дают по одному событию без предупреждений', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {})
         const wrapper = mount(ConfirmationModal, { props: { isOpen: true, actionButtonText: 'Да' } })
 
         await buttonByText(wrapper, 'Да').trigger('click')
@@ -93,6 +95,10 @@ describe('ConfirmationModal: кнопки', () => {
         await buttonByText(wrapper, 'Отмена').trigger('click')
         expect(wrapper.emitted('actionCanceled')).toHaveLength(1)
         expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
+        expect(warn).not.toHaveBeenCalled()
+        expect(error).not.toHaveBeenCalled()
+        warn.mockRestore()
+        error.mockRestore()
     })
 })
 
