@@ -7,7 +7,7 @@
 **Architecture:**
 - Цвета — `src/colors.js`: двенадцать записей литералами, у каждой наборы `pill`, `pillHover`, `button`, `buttonHover`, `menuItem`, `mark`. Наведение кнопки вынесено из `button` в `buttonHover` по образцу `pill`/`pillHover`: выключенная кнопка не берёт наведение.
 - Иконки — прежние `src/actionIcons.js` и `ActionIcon.vue`: список расширяется, имена модуля и компонента не меняются.
-- `ActionButton.vue` — `<a>` или `<button>` с иконкой (`ActionIcon`) и подписью; внутренний проп `groupPart` даёт `DropdownButtonWithAction` скругление и тень группы.
+- `ActionButton.vue` — `<a>` или `<button>` с иконкой (`ActionIcon`) и подписью. `DropdownButtonWithAction` убирает у своей основной кнопки тень и правое скругление классами `!important` на корне (`bb:shadow-none!`, `bb:rounded-r-none!`): обычные утилиты на одном узле с `bb:shadow-xs`/`bb:rounded-md` зависели бы от порядка в CSS.
 
 **Tech Stack:** Vue 3.5 (Options API), vitest + happy-dom, Playwright 1.63 (Chromium, WebKit), Tailwind 4 с префиксом `bb`.
 
@@ -37,7 +37,7 @@
 
 ### Task 1: Двенадцать цветов
 
-Переименование атомарно: после задачи в `src/`, `tests/` и `playground/` нет прежних имён, все тесты проходят.
+Переименование атомарно: после задачи в `src/` и `playground/` нет прежних имён, в `tests/` они остаются только как неизвестные имена в отрицательных проверках; все тесты проходят.
 
 **Files:**
 - Modify: `src/colors.js`, `src/components/DropdownButtonWithAction.vue`, `src/components/ActionPill.vue` (умолчание `color`), `src/components/DataTable.vue:17`, `src/components/ElementHeader.vue:7-8`, строка 5 в `FormInput.vue`, `AmountForm.vue`, `AmountIntervalForm.vue`, `SelectSingleForm.vue`, `SelectMultipleForm.vue`, `SelectDateForm.vue`, `SelectDateIntervalForm.vue`, `SelectSingleCards.vue`, `SelectMultipleList.vue`; `playground/App.vue:637-638` и прочие имена цветов в демо
@@ -70,8 +70,8 @@ Expected: FAIL — имена прежние.
 
 - [ ] **Step 4: Проверить, что прежних имён не осталось**
 
-Run: `grep -rnE "(color[=:] *|['\"])(gray|green|yellow|red|indigo|purple)['\"]" src tests playground/App.vue`
-Expected: пусто.
+Run: `grep -rnE "(color[=:] *|['\"])(gray|green|yellow|red|indigo|purple)['\"]" src playground/App.vue`
+Expected: пусто. Тот же поиск по `tests` находит только отрицательные проверки (`isColor`, неизвестное имя → без цвета и предупреждение).
 
 - [ ] **Step 5: Прогнать тесты**
 
@@ -132,7 +132,7 @@ git commit -m "feat: добавить иконки перевода и обме�
 
 **Interfaces:**
 - Consumes: `colorClass`, `isColor` (Task 1); `ActionIcon`, `isActionIcon` (Task 2); `withNavigation.followLink`.
-- Produces: `ActionButton`, пропы `label: String (required)`, `color: String|null = null`, `icon: String|null = null`, `href: String|null = null`, `type: 'button'|'submit' = 'button'`, `isDisabled: Boolean = false`, внутренний `groupPart: null|'whole'|'start' = null`; событие `click(event: MouseEvent)`.
+- Produces: `ActionButton`, пропы `label: String (required)`, `color: String|null = null`, `icon: String|null = null`, `href: String|null = null`, `type: 'button'|'submit' = 'button'`, `isDisabled: Boolean = false`; событие `click(event: MouseEvent)`.
 
 - [ ] **Step 1: Написать падающие тесты в `tests/ActionButton.test.js`**
 
@@ -144,17 +144,16 @@ git commit -m "feat: добавить иконки перевода и обме�
 - `it.each(Object.keys(ACTION_ICONS))('%s — иконка слева от подписи')`: первый дочерний элемент — `svg` `aria-hidden="true"`, второй — подпись; `icon: 'pin'` — одно предупреждение, `svg` нет; `icon: ''` и `null` — без иконки и без предупреждений.
 - `click передаёт MouseEvent`: `trigger('click')` → `emitted('click')[0][0]` — `MouseEvent`.
 - `@click.prevent работает`: родитель `<action-button label="Создать" @click.prevent="onClick"/>`, клик → `onClick` вызван один раз, ошибок нет.
-- `type="submit" в форме`: `type="submit"`; родитель `<form @submit="onSubmit"><action-button label="Войти" type="submit" @click.prevent="onClick"/></form>` — `onClick` вызван, `onSubmit` нет; `type: 'reset'` — одно предупреждение, `type="button"`.
+- `type="submit" в форме`: у корня `type="submit"`. Форма монтируется с `attachTo: document.body` и размонтируется в конце теста (без подключения к документу happy-dom не отправляет форму вовсе). Положительный контроль: `<form @submit.prevent="onSubmit"><action-button label="Войти" type="submit" @click="onClick"/></form>` — клик вызывает `onClick` и один `onSubmit`. Отмена: `<form @submit.prevent="onSubmit"><action-button label="Войти" type="submit" @click.prevent="onClick"/></form>` — `onClick` вызван, `onSubmit` нет; без `.prevent` у кнопки этот тест падает. `type: 'reset'` — одно предупреждение, `type="button"`.
 - `ссылка`: `href: '/users/create'` → корень `A` с этим `href`, без `type` и `disabled`; клик уходит в `navigate` (`navigation` равен `['/users/create']`), `emitted('click')` нет; `href: ''` и `null` — кнопка.
 - `выключенная`: `isDisabled: true` → `disabled`, `bb:opacity-50 bb:cursor-not-allowed`, нет `bb:cursor-pointer` и токенов наведения (`bb:hover:bg-gray-50`; с `color: 'green-solid'` — нет `bb:hover:bg-green-700`); клик — `emitted('click')` нет.
 - `выключенная ссылка`: `href` и `isDisabled` → корень `BUTTON` `disabled`, атрибута `href` нет, `navigation` пуст, `emitted('click')` нет.
 - `isDisabled на лету`: `setProps({ isDisabled: true })` и обратно `false` — `disabled`, прозрачность и токены наведения переключаются, после возврата клик снова даёт `click`.
 - `атрибуты на корень`: `class="bb:w-full"`, `data-dialog-focus` — на корневом элементе и у кнопки, и у ссылки.
-- `groupPart`: `'start'` — `bb:rounded-l-md bb:focus:z-10`, нет `bb:rounded-md` и `bb:shadow-xs`; `'whole'` — `bb:rounded-md bb:focus:z-10`, нет `bb:shadow-xs`.
 
 Ещё:
 - `keyboardNavigation.test.js` — случаи «ActionButton — кнопка с иконкой» и «ActionButton — ссылка с иконкой» (`label: null`);
-- `focusRing.test.js` — носитель `['ActionButton.vue', 'bb:focus:focus-ring', 1]`;
+- `focusRing.test.js` — носитель `['ActionButton.vue', 'bb:focus:focus-ring', 2]`: тест считает строки шаблона, а у ссылки и кнопки они отдельные;
 - `exports.test.js` — `ActionButton` в списке экспорта;
 - `ssrFixtures.js` — `ActionButton: { props: { label: 'Создать', color: 'green-solid', icon: 'plus' } }`.
 
@@ -167,9 +166,8 @@ Expected: FAIL — компонента нет.
 
 - Миксины `withColors`, `withNavigation`; `emits: ['click']`.
 - Два корня через `v-if`: `<a>` при непустом `href` и `!isDisabled`, иначе `<button :type :disabled>`. У ссылки `@click="followLink($event, href)"`, у кнопки `@click="$emit('click', $event)"`.
-- Классы: общие с `bb-dashboard-ui bb:relative bb:inline-flex bb:items-center bb:whitespace-nowrap` и токенами Global Constraints; скругление и тень по `groupPart` (`null` — `bb:rounded-md bb:shadow-xs`; `'whole'` — `bb:rounded-md bb:focus:z-10`; `'start'` — `bb:rounded-l-md bb:focus:z-10`); цвет — `colorClass(color, 'button')` или вид без цвета; наведение — `colorClass(color, 'buttonHover')` или `bb:hover:bg-gray-50`, только у включённой.
-- Валидаторы: `color` — `null`, `''` или `isColor`; `icon` — `null`, `''` или `isActionIcon`; `type` — `'button'`, `'submit'`; `groupPart` — `null`, `'whole'`, `'start'`. Неверный `type` рисуется как `'button'`.
-- Комментарий: `groupPart` — внутренний проп для `DropdownButtonWithAction`, в README не описан.
+- Классы: общие с `bb-dashboard-ui bb:relative bb:inline-flex bb:items-center bb:whitespace-nowrap` и токенами Global Constraints, `bb:rounded-md bb:shadow-xs`; цвет — `colorClass(color, 'button')` или вид без цвета; наведение — `colorClass(color, 'buttonHover')` или `bb:hover:bg-gray-50`, только у включённой.
+- Валидаторы: `color` — `null`, `''` или `isColor`; `icon` — `null`, `''` или `isActionIcon`; `type` — `'button'`, `'submit'`. Неверный `type` рисуется как `'button'`.
 - `src/index.js`: экспорт `ActionButton` перед `ActionPill`.
 
 - [ ] **Step 4: Прогнать тесты**
@@ -228,11 +226,11 @@ git commit -m "feat: перевести кнопки ConfirmationModal на Acti
 - Test: `tests/DropdownButtonWithAction.test.js`, `tests/focusRing.test.js`, `tests/keyboardNavigation.test.js`
 
 **Interfaces:**
-- Consumes: `ActionButton` с `groupPart` (Task 3).
+- Consumes: `ActionButton` (Task 3); атрибуты и классы на `<action-button>` попадают на корень.
 
 - [ ] **Step 1: Написать падающие тесты**
 
-- `основная кнопка — ActionButton`: `findComponent(ActionButton)` есть; без меню `groupPart` `'whole'`, с меню `'start'`; у основной кнопки нет `bb:shadow-xs`, у обёртки есть.
+- `основная кнопка — ActionButton`: `findComponent(ActionButton)` есть; у основной кнопки `bb:shadow-none!` и `bb:focus:z-10`; с меню — `bb:rounded-r-none!`, без меню его нет; у обёртки `bb:shadow-xs`.
 - `it.each(['green-solid', 'yellow-solid'])` — основная и стрелка с токенами `colorClass(c, 'button')` и `colorClass(c, 'buttonHover')`.
 - `focusRing.test.js`: `DropdownButtonWithAction.vue` — один носитель (стрелка).
 - Существующие тесты основной кнопки (переход через `navigate`, `onSelect`, отказ `onSelect` уходит в обработчик ошибок Vue, иконка, цвета) проходят без изменения смысла; поиск основной кнопки в помощнике `mainOf` при необходимости обновить.
@@ -244,7 +242,7 @@ Expected: FAIL — `ActionButton` не найден.
 
 - [ ] **Step 3: Реализовать**
 
-Ветки `<a>`/`<button>` основной кнопки заменить одной `<action-button :label="mainAction.label" :color="mainColor" :icon="mainIcon" :href="isLink(mainAction) ? mainAction.href : null" :group-part="hasMenu ? 'start' : 'whole'" @click="select(mainAction)"/>`; `select` по-прежнему возвращает результат `onSelect`. Комментарии о главной кнопке обновить: переход и клик выполняет `ActionButton`.
+Ветки `<a>`/`<button>` основной кнопки заменить одной `<action-button :label="mainAction.label" :color="mainColor" :icon="mainIcon" :href="isLink(mainAction) ? mainAction.href : null" class="bb:shadow-none! bb:focus:z-10" :class="{ 'bb:rounded-r-none!': hasMenu }" @click="select(mainAction)"/>`; `select` по-прежнему возвращает результат `onSelect`. Комментарии о главной кнопке обновить: переход и клик выполняет `ActionButton`.
 
 - [ ] **Step 4: Прогнать тесты**
 
@@ -271,6 +269,7 @@ git commit -m "feat: перевести основную кнопку DropdownBu
 - [ ] **Step 2: Браузерные тесты `e2e/actionButton.e2e.js`**
 
 - высота `ActionButton` 38 px и равна высоте основной кнопки `DropdownButtonWithAction`; иконка 16 × 16 px;
+- основная кнопка `DropdownButtonWithAction` с меню: правые углы `0px`, левые `6px`, своя тень без `shadow-xs` (в `box-shadow` нет её смещения `0 1px 2px`); в фокусе кольцо видно; без меню все четыре угла `6px`;
 - ссылка: клик уходит в `navigate` (счётчик), страница не перезагружается;
 - выключенная: клик не меняет счётчик; после переключателя — меняет;
 - `ConfirmationModal`: после открытия кнопкой фокус на «Отмене» и кольцо видно (`expectFocusRing` из `e2e/helpers.js`);
@@ -281,7 +280,7 @@ Expected: все тесты проходят в Chromium и WebKit.
 
 - [ ] **Step 3: README**
 
-- «Компоненты»: `ActionButton` в перечне, «тридцать четыре»; раздел `ActionButton` перед `ActionPill` — пример спеки §6.1, таблица пропов §6.2 (без `groupPart`), событие `click` с `MouseEvent` и `.prevent`, ссылка, выключенная ссылка, атрибуты на корне.
+- «Компоненты»: `ActionButton` в перечне, «тридцать четыре»; раздел `ActionButton` перед `ActionPill` — пример спеки §6.1, таблица пропов §6.2, событие `click` с `MouseEvent` и `.prevent`, ссылка, выключенная ссылка, атрибуты на корне.
 - «Цвета»: двенадцать имён; таблица §4.3; оттенки ярких §4.2.
 - Новый раздел «Иконки» после «Цвета»: пять имён, кто берёт список, размер 16 px.
 - Разделы `InfoPill`, `ActionPill` (иконки — любое имя списка), `Dot`, `DataTable`, `DropdownButtonWithAction`, `HamburgerMenu`, `ConfirmationModal` (жёлтая кнопка с тёмным текстом): новые имена в примерах и таблицах.
