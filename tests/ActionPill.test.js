@@ -45,7 +45,7 @@ describe('ActionPill: вид', () => {
         expect(iconPath(mountPill({ icon: 'refresh', title: 'запросить статусы' }))).toBe(REFRESH_PATH)
     })
 
-    it('цвет по умолчанию — purple, с наведением', () => {
+    it('цвет по умолчанию — purple-pale, с наведением', () => {
         expect(colorClasses(mountPill())).toEqual([...colorClass('purple-pale', 'pill').split(' '), colorClass('purple-pale', 'pillHover')])
     })
 

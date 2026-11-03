@@ -319,7 +319,7 @@ describe('DataTable: бейдж, пустое состояние, пагинац
         expect(wrapper.find('.export').exists()).toBe(true)
     })
 
-    it('бейджи «Найдено» и пустого списка — InfoPill цвета indigo', () => {
+    it('бейджи «Найдено» и пустого списка — InfoPill цвета indigo-pale', () => {
         const found = mountTable({ meta, links, foundText: 'Найдено ордеров' })
         const empty = mountTable({ rows: [], emptyText: 'Не найдено ордеров' })
 

@@ -680,9 +680,9 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
     it.each([
         { name: 'переход', item: { label: 'Открыть', href: '#open' } },
         { name: 'действие', item: { label: 'Удалить', onSelect: fn } },
-        { name: 'переход с color: red', item: { label: 'Открыть', href: '#open', color: 'red-pale' } },
-        { name: 'действие с color: yellow', item: { label: 'Удалить', color: 'yellow-pale', onSelect: fn } },
-        { name: 'действие с color: purple', item: { label: 'Отметить', color: 'purple-pale', onSelect: fn } },
+        { name: 'переход с цветом red-pale', item: { label: 'Открыть', href: '#open', color: 'red-pale' } },
+        { name: 'действие с цветом yellow-pale', item: { label: 'Удалить', color: 'yellow-pale', onSelect: fn } },
+        { name: 'действие с цветом purple-pale', item: { label: 'Отметить', color: 'purple-pale', onSelect: fn } },
         { name: 'пункт с лишним полем danger', item: { label: 'Удалить', danger: true, onSelect: fn } },
         { name: 'поле со значением undefined', item: { label: 'Открыть', href: '#open', onSelect: undefined } },
         { name: 'переход с icon: plus', item: { label: 'Открыть', href: '#open', icon: 'plus' } },
@@ -959,16 +959,22 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-500', 'bb:hover:bg-gray-50']))
     })
 
-    it.each(COLOR_NAMES)('первое действие цвета %s — основная кнопка и стрелка с классами button', (color) => {
-        const wrapper = mount(DropdownButtonWithAction, {
-            attachTo: document.body,
-            props: { actions: [{ ...main, color }, { label: 'Удалить', onSelect: () => {} }] },
-        })
-        const expected = colorClass(color, 'button').split(' ')
+    it.each([
+        { kind: 'ссылка', first: main },
+        { kind: 'действие', first: { label: 'Редактировать', onSelect: () => {} } },
+    ])('первое действие-$kind каждого цвета — основная кнопка и стрелка с классами button и buttonHover', ({ first }) => {
+        COLOR_NAMES.forEach((color) => {
+            const wrapper = mount(DropdownButtonWithAction, {
+                attachTo: document.body,
+                props: { actions: [{ ...first, color }, { label: 'Удалить', onSelect: () => {} }] },
+            })
+            const expected = [...colorClass(color, 'button').split(' '), colorClass(color, 'buttonHover')]
 
-        expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(expected))
-        expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(expected))
-        expect(mainOf(wrapper).classes()).not.toContain('bb:bg-white')
+            expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(expected))
+            expect(arrowOf(wrapper).classes()).toEqual(expect.arrayContaining(expected))
+            expect(mainOf(wrapper).classes()).not.toContain('bb:bg-white')
+            wrapper.unmount()
+        })
     })
 
     it('цвет пункта меню основную кнопку и стрелку не красит', () => {
