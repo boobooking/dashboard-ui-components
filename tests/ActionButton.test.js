@@ -9,7 +9,7 @@ import { dashboardUi } from '../src/plugin.js'
 enableAutoUnmount(afterEach)
 
 // Вид кнопки из Global Constraints: размеры, рамка, текст и фокус.
-const BUTTON_LOOK = ['bb:px-4', 'bb:py-2', 'bb:border', 'bb:rounded-md', 'bb:shadow-xs', 'bb:text-sm', 'bb:font-medium', 'bb:gap-2', 'bb:focus:focus-ring']
+const BUTTON_LOOK = ['bb:px-4', 'bb:py-2', 'bb:border', 'bb:rounded-md', 'bb:shadow-xs', 'bb:text-sm', 'bb:font-medium', 'bb:gap-2', 'bb:justify-center', 'bb:focus:focus-ring']
 
 // Вид без цвета: белая кнопка с серой рамкой и наведением.
 const PLAIN_LOOK = ['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-700', 'bb:hover:bg-gray-50']
@@ -188,6 +188,7 @@ describe('ActionButton: ссылка', () => {
         expect(wrapper.attributes('href')).toBe('/users/create')
         expect(wrapper.attributes()).not.toHaveProperty('type')
         expect(wrapper.attributes()).not.toHaveProperty('disabled')
+        expect(wrapper.classes()).toContain('bb:justify-center')
 
         await wrapper.trigger('click')
 

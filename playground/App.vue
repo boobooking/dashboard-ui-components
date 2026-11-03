@@ -227,6 +227,12 @@
                 <action-button label="Создать пользователя" color="indigo-solid" icon="plus" href="#create"/>
             </div>
 
+            <h3>Растянутая на всю ширину</h3>
+            <div style="width: 12rem;">
+                <action-button label="Создать" color="green-solid" style="width: 100%;" @click="buttonClicks++"/>
+                <action-button label="Создать пользователя" color="indigo-solid" href="#create" style="width: 100%; margin-top: 8px;"/>
+            </div>
+
             <h3>Выключенные</h3>
             <div class="demo-row">
                 <action-button label="Без цвета" :is-disabled="buttonsAreDisabled" @click="buttonClicks++"/>

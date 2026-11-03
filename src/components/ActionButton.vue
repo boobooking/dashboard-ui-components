@@ -2,7 +2,7 @@
     <a
         v-if="isLink"
         :href="href"
-        class="bb-dashboard-ui bb:relative bb:inline-flex bb:items-center bb:whitespace-nowrap bb:gap-2 bb:px-4 bb:py-2 bb:border bb:rounded-md bb:shadow-xs bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:focus-ring"
+        class="bb-dashboard-ui bb:relative bb:inline-flex bb:items-center bb:justify-center bb:whitespace-nowrap bb:gap-2 bb:px-4 bb:py-2 bb:border bb:rounded-md bb:shadow-xs bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:focus-ring"
         :class="hasColor ? [colorClass(color, 'button'), colorClass(color, 'buttonHover')] : 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50'"
         @click="followLink($event, href)"
     >
@@ -13,7 +13,7 @@
         v-else
         :type="buttonType"
         :disabled="isDisabled"
-        class="bb-dashboard-ui bb:relative bb:inline-flex bb:items-center bb:whitespace-nowrap bb:gap-2 bb:px-4 bb:py-2 bb:border bb:rounded-md bb:shadow-xs bb:text-sm bb:font-medium bb:focus:focus-ring"
+        class="bb-dashboard-ui bb:relative bb:inline-flex bb:items-center bb:justify-center bb:whitespace-nowrap bb:gap-2 bb:px-4 bb:py-2 bb:border bb:rounded-md bb:shadow-xs bb:text-sm bb:font-medium bb:focus:focus-ring"
         :class="[
             hasColor ? colorClass(color, 'button') : 'bb:bg-white bb:border-gray-300 bb:text-gray-700',
             isDisabled ? 'bb:opacity-50 bb:cursor-not-allowed' : 'bb:cursor-pointer',

@@ -64,6 +64,16 @@ for (const file of pages) {
             expect([icon.width, icon.height]).toEqual([16, 16])
         })
 
+        test('растянутая кнопка и ссылка: подпись по центру', async ({ page }) => {
+            const stretched = row(section(page), 'Растянутая')
+            for (const target of [stretched.locator('button'), stretched.locator('a')]) {
+                const box = await target.boundingBox()
+                const label = await target.locator('span').boundingBox()
+                expect(box.width).toBeGreaterThan(180)
+                expect(Math.abs((label.x + label.width / 2) - (box.x + box.width / 2))).toBeLessThanOrEqual(1)
+            }
+        })
+
         test('основная кнопка DropdownButtonWithAction: углы, своей тени нет, кольцо фокуса видно', async ({ page }) => {
             const plain = row(section(page), 'двенадцать цветов').getByRole('button', { name: 'Без цвета' })
             const withMenu = dropdownMain(page, 'Несколько действий')
