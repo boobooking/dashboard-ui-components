@@ -59,7 +59,7 @@ export default {
         // Имя из общего списка цветов (src/colors.js).
         color: {
             type: String,
-            default: "purple",
+            default: "purple-pale",
             validator: isColor,
         },
         // Идёт работа: пилюля погашена, вместо иконки — часы.

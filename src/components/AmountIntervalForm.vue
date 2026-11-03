@@ -2,7 +2,7 @@
     <div class="bb-dashboard-ui">
         <div class="bb:flex bb:items-center">
             <span :id="labelId" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label ?? ''"/>
-            <dot v-show="isRequired" color="red" class="bb:ml-2"/>
+            <dot v-show="isRequired" color="red-pale" class="bb:ml-2"/>
         </div>
         <div class="bb:mt-1 bb:grid bb:grid-cols-[1fr_1fr_6rem] bb:gap-3" role="group" :aria-labelledby="labelId" :aria-describedby="descriptionId(labelId)">
             <amount-interval

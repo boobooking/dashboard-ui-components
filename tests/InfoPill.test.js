@@ -15,9 +15,9 @@ function mountPill(props, warnings = null) {
     })
 }
 
-// Цветовые классы: фон и текст с тоном, без размера текста bb:text-xs.
+// Цветовые классы: фон и текст с тоном, без размера текста bb:text-xs; белый текст ярких цветов входит.
 function colorClasses(wrapper) {
-    return wrapper.classes().filter((name) => /^bb:(?:bg|text)-[a-z]+-\d+$/.test(name))
+    return wrapper.classes().filter((name) => /^bb:(?:(?:bg|text)-[a-z]+-\d+|text-white)$/.test(name))
 }
 
 describe('InfoPill', () => {
@@ -29,7 +29,7 @@ describe('InfoPill', () => {
     })
 
     it('форма пилюли и ресет пакета на корне', () => {
-        const wrapper = mountPill({ text: 'Найдено: 40', color: 'indigo' })
+        const wrapper = mountPill({ text: 'Найдено: 40', color: 'indigo-pale' })
 
         expect(wrapper.element.tagName).toBe('SPAN')
         expect(wrapper.classes()).toEqual(expect.arrayContaining([
@@ -40,7 +40,7 @@ describe('InfoPill', () => {
 
     it('null вместо текста — пустая пилюля; Vue отмечает только тип text', () => {
         const warnings = []
-        const wrapper = mountPill({ text: null, color: 'gray' }, warnings)
+        const wrapper = mountPill({ text: null, color: 'gray-pale' }, warnings)
 
         expect(wrapper.text()).toBe('')
         expect(warnings.length).toBeGreaterThan(0)

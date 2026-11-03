@@ -15,8 +15,8 @@ describe('Dot', () => {
     })
 
     it('withPulse — пульсация, без него — нет', () => {
-        expect(mount(Dot, { props: { color: 'red', withPulse: true } }).classes()).toContain('bb:animate-pulse')
-        expect(mount(Dot, { props: { color: 'red' } }).classes()).not.toContain('bb:animate-pulse')
+        expect(mount(Dot, { props: { color: 'red-pale', withPulse: true } }).classes()).toContain('bb:animate-pulse')
+        expect(mount(Dot, { props: { color: 'red-pale' } }).classes()).not.toContain('bb:animate-pulse')
     })
 
     it('цвет вне списка — предупреждение валидатора, точка без цвета', () => {

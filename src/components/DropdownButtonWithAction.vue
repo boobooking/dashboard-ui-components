@@ -15,7 +15,7 @@
             class="bb:relative bb:inline-flex bb:items-center bb:gap-2 bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
             :class="[
                 { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
-                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
+                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : [colorClass(mainColor, 'button'), colorClass(mainColor, 'buttonHover')],
             ]"
             @click="followLink($event, mainAction.href)"
         >
@@ -28,7 +28,7 @@
             class="bb:relative bb:inline-flex bb:items-center bb:gap-2 bb:px-4 bb:py-2 bb:border bb:text-sm bb:font-medium bb:cursor-pointer bb:focus:z-10 bb:focus:focus-ring"
             :class="[
                 { 'bb:rounded-l-md': hasMenu, 'bb:rounded-md': !hasMenu },
-                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : colorClass(mainColor, 'button'),
+                mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-700 bb:hover:bg-gray-50' : [colorClass(mainColor, 'button'), colorClass(mainColor, 'buttonHover')],
             ]"
             @click="select(mainAction)"
         >
@@ -51,7 +51,7 @@
                     :id="trigger.id"
                     :popovertarget="trigger.popovertarget"
                     class="bb:relative bb:inline-flex bb:items-center bb:px-2 bb:py-2 bb:rounded-r-md bb:border bb:text-sm bb:font-medium bb:focus:z-10 bb:focus:focus-ring"
-                    :class="mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-500 bb:hover:bg-gray-50' : colorClass(mainColor, 'button')"
+                    :class="mainColor === null ? 'bb:bg-white bb:border-gray-300 bb:text-gray-500 bb:hover:bg-gray-50' : [colorClass(mainColor, 'button'), colorClass(mainColor, 'buttonHover')]"
                 >
                     <!-- Содержимое кнопки не ловит указатель и без курсора-руки:
                          см. README, «Клавиатурная навигация». -->

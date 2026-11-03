@@ -273,7 +273,7 @@ describe('SelectSingleForm', () => {
         expect(labelOf(wrapper).classes()).toEqual(
             expect.arrayContaining(['bb:block', 'bb:text-sm', 'bb:font-medium', 'bb:leading-5', 'bb:text-gray-700']),
         )
-        expect(dot().props('color')).toBe('red')
+        expect(dot().props('color')).toBe('red-pale')
         expect(dot().classes()).toContain('bb:ml-2')
         expect(dot().element.style.display).toBe('none')
 

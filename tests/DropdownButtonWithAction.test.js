@@ -279,8 +279,8 @@ describe('DropdownButtonWithAction без привязки', () => {
                     main,
                     { label: 'Поменять пароль', href: '#password' },
                     { label: 'Зафиксировать', onSelect: () => {} },
-                    { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
-                    { label: 'Удалить', color: 'red', onSelect: () => {} },
+                    { label: 'Отправить заново', color: 'yellow-pale', onSelect: () => {} },
+                    { label: 'Удалить', color: 'red-pale', onSelect: () => {} },
                 ],
             },
         })
@@ -438,7 +438,7 @@ describe('DropdownButtonWithAction: стрелки', () => {
     // Переход и действие: стрелки ходят и по ссылкам, и по кнопкам.
     const twoActions = [
         { label: 'Поменять пароль', href: '#password' },
-        { label: 'Удалить', color: 'red', onSelect: () => {} },
+        { label: 'Удалить', color: 'red-pale', onSelect: () => {} },
     ]
 
     function press(key) {
@@ -511,7 +511,7 @@ describe('DropdownButtonWithAction: пункты из пропа actions', () =>
     it('переход рисуется ссылкой, действие — кнопкой', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            props: { actions: [main, { label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', color: 'red', onSelect: () => {} }] },
+            props: { actions: [main, { label: 'Поменять пароль', href: '#password' }, { label: 'Удалить', color: 'red-pale', onSelect: () => {} }] },
         })
 
         const [link, button] = itemsOf(wrapper)
@@ -680,13 +680,13 @@ describe('DropdownButtonWithAction: проверка пунктов', () => {
     it.each([
         { name: 'переход', item: { label: 'Открыть', href: '#open' } },
         { name: 'действие', item: { label: 'Удалить', onSelect: fn } },
-        { name: 'переход с color: red', item: { label: 'Открыть', href: '#open', color: 'red' } },
-        { name: 'действие с color: yellow', item: { label: 'Удалить', color: 'yellow', onSelect: fn } },
-        { name: 'действие с color: purple', item: { label: 'Отметить', color: 'purple', onSelect: fn } },
+        { name: 'переход с color: red', item: { label: 'Открыть', href: '#open', color: 'red-pale' } },
+        { name: 'действие с color: yellow', item: { label: 'Удалить', color: 'yellow-pale', onSelect: fn } },
+        { name: 'действие с color: purple', item: { label: 'Отметить', color: 'purple-pale', onSelect: fn } },
         { name: 'пункт с лишним полем danger', item: { label: 'Удалить', danger: true, onSelect: fn } },
         { name: 'поле со значением undefined', item: { label: 'Открыть', href: '#open', onSelect: undefined } },
         { name: 'переход с icon: plus', item: { label: 'Открыть', href: '#open', icon: 'plus' } },
-        { name: 'действие с icon: plus и цветом', item: { label: 'Добавить', icon: 'plus', color: 'green', onSelect: fn } },
+        { name: 'действие с icon: plus и цветом', item: { label: 'Добавить', icon: 'plus', color: 'green-pale', onSelect: fn } },
         { name: 'icon со значением undefined', item: { label: 'Добавить', icon: undefined, onSelect: fn } },
     ])('верный пункт ($name) — без предупреждений', ({ item }) => {
         const { warnings } = mountChecked([item])
@@ -788,7 +788,7 @@ describe('DropdownButtonWithAction: без предупреждений об у�
                 actions: [
                     main,
                     { label: 'Опасное', danger: true, onSelect: () => {} },
-                    { label: 'Удалить', danger: true, color: 'red', onSelect: () => {} },
+                    { label: 'Удалить', danger: true, color: 'red-pale', onSelect: () => {} },
                 ],
             },
         })
@@ -974,7 +974,7 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
     it('цвет пункта меню основную кнопку и стрелку не красит', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            props: { actions: [main, { label: 'Удалить', color: 'red', onSelect: () => {} }] },
+            props: { actions: [main, { label: 'Удалить', color: 'red-pale', onSelect: () => {} }] },
         })
 
         expect(mainOf(wrapper).classes()).toContain('bb:bg-white')
@@ -1272,7 +1272,7 @@ describe('DropdownButtonWithAction: иконка основной кнопки',
     it('с цветом действия иконка остаётся, цвет — у кнопки', () => {
         const wrapper = mount(DropdownButtonWithAction, {
             attachTo: document.body,
-            props: { actions: [{ label: 'Добавить', icon: 'plus', color: 'green', onSelect: () => {} }] },
+            props: { actions: [{ label: 'Добавить', icon: 'plus', color: 'green-pale', onSelect: () => {} }] },
         })
         const main = wrapper.get('button')
 

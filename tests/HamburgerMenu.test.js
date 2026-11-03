@@ -257,8 +257,8 @@ describe('HamburgerMenu: проверка пунктов', () => {
     it('верные пункты, и цветные тоже, — без предупреждений', () => {
         const { warnings, errors } = mountChecked([
             ...profileActions(),
-            { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
-            { label: 'Удалить', color: 'red', onSelect: () => {} },
+            { label: 'Отправить заново', color: 'yellow-pale', onSelect: () => {} },
+            { label: 'Удалить', color: 'red-pale', onSelect: () => {} },
         ])
 
         expect(warnings).toEqual([])
@@ -273,8 +273,8 @@ describe('HamburgerMenu: цвета пунктов', () => {
             props: {
                 actions: [
                     { label: 'Администраторы', href: '#users' },
-                    { label: 'Отправить заново', color: 'yellow', onSelect: () => {} },
-                    { label: 'Удалить', color: 'red', onSelect: () => {} },
+                    { label: 'Отправить заново', color: 'yellow-pale', onSelect: () => {} },
+                    { label: 'Удалить', color: 'red-pale', onSelect: () => {} },
                 ],
             },
         })
@@ -307,7 +307,7 @@ describe('HamburgerMenu: пункт с полем danger', () => {
                 actions: [
                     ...profileActions(),
                     { label: 'Опасное', danger: true, onSelect: () => {} },
-                    { label: 'Удалить', danger: true, color: 'red', onSelect: () => {} },
+                    { label: 'Удалить', danger: true, color: 'red-pale', onSelect: () => {} },
                 ],
             },
             global: { config: { warnHandler: (message) => warnings.push(message) } },

@@ -68,7 +68,7 @@ describe('подпись и точка', () => {
         const hidden = mountCards()
         const visible = mountCards({ isRequired: true })
 
-        expect(hidden.wrapper.getComponent({ name: 'Dot' }).props('color')).toBe('red')
+        expect(hidden.wrapper.getComponent({ name: 'Dot' }).props('color')).toBe('red-pale')
         expect(hidden.wrapper.getComponent({ name: 'Dot' }).element.style.display).toBe('none')
         expect(visible.wrapper.getComponent({ name: 'Dot' }).element.style.display).not.toBe('none')
     })

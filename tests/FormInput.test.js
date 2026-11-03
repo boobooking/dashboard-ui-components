@@ -169,7 +169,7 @@ describe('FormInput', () => {
         }
         const dot = () => wrapper.findComponent(Dot)
 
-        expect(dot().props('color')).toBe('red')
+        expect(dot().props('color')).toBe('red-pale')
         expect(dot().element.style.display).toBe('none')
         noRequiredAttrs()
 

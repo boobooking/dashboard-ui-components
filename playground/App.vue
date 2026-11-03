@@ -5,9 +5,9 @@
         <section>
             <h2>Dot</h2>
             <div class="demo-row">
-                <dot color="red"/>
-                <dot color="green"/>
-                <dot color="red" :with-pulse="true"/>
+                <dot color="red-pale"/>
+                <dot color="green-pale"/>
+                <dot color="red-pale" :with-pulse="true"/>
                 <dot v-for="color in colors" :key="color" :color="color"/>
             </div>
         </section>
@@ -184,7 +184,7 @@
                     </tr>
                     <tr v-for="color in colors" :key="color">
                         <td>{{ color }}</td>
-                        <td><info-pill :text="color === 'indigo' ? 'Найдено: 40' : 'статус'" :color="color"/></td>
+                        <td><info-pill :text="color === 'indigo-pale' ? 'Найдено: 40' : 'статус'" :color="color"/></td>
                         <td><action-pill icon="download" title="скачать xlsx" :color="color" :is-loading="pillsLoading" loading-text="формируется отчёт"/></td>
                         <td><dropdown-button-with-action :actions="[{ label: 'Действие', color, onSelect: countSelection }, { label: 'Пункт', color, onSelect: countSelection }]"/></td>
                         <td><dot :color="color"/></td>
@@ -264,8 +264,8 @@
             <h3>Одно действие: кнопка без стрелки в цвете действия</h3>
             <div class="demo-row">
                 <dropdown-button-with-action :actions="[{ label: 'Посмотреть', href: '#view' }]"/>
-                <dropdown-button-with-action :actions="[{ label: 'Отправить заново', color: 'yellow', onSelect: countSelection }]"/>
-                <dropdown-button-with-action :actions="[{ label: 'Delete', color: 'red', onSelect: countSelection }]"/>
+                <dropdown-button-with-action :actions="[{ label: 'Отправить заново', color: 'yellow-pale', onSelect: countSelection }]"/>
+                <dropdown-button-with-action :actions="[{ label: 'Delete', color: 'red-pale', onSelect: countSelection }]"/>
             </div>
 
             <h3>Несколько действий: первое — кнопка, стрелка открывает остальные</h3>
@@ -289,7 +289,7 @@
                 <dropdown-button-with-action :actions="[{ label: 'Добавить ключи', icon: 'plus', href: '#keys' }]"/>
                 <dropdown-button-with-action :actions="iconActions"/>
                 <dropdown-button-with-action
-                    :actions="[{ label: 'Добавить', icon: 'plus', color: 'green', onSelect: countSelection }, { label: 'Добавить в чёрный список', icon: 'plus', color: 'red', onSelect: countSelection }]"
+                    :actions="[{ label: 'Добавить', icon: 'plus', color: 'green-pale', onSelect: countSelection }, { label: 'Добавить в чёрный список', icon: 'plus', color: 'red-pale', onSelect: countSelection }]"
                 />
             </div>
         </section>
@@ -350,7 +350,7 @@
                             <info-pill :text="row.status" :color="row.statusColor"/>
                         </template>
                         <template #cell-actions>
-                            <dropdown-button-with-action :actions="[{ label: 'Редактировать', href: '#edit' }, { label: 'Удалить', color: 'red', onSelect: countSelection }]"/>
+                            <dropdown-button-with-action :actions="[{ label: 'Редактировать', href: '#edit' }, { label: 'Удалить', color: 'red-pale', onSelect: countSelection }]"/>
                         </template>
                     </data-table>
                 </div>
@@ -435,10 +435,10 @@
                         <detail-row title="Регистрация">02.11.2026 17:10</detail-row>
                         <detail-row v-if="detailPhoneIsShown" title="Телефон">+7 916 000 00 00</detail-row>
                         <detail-row title="Код">
-                            12345 <info-pill class="detail-card-demo-pill" text="подтверждён" color="green"/>
+                            12345 <info-pill class="detail-card-demo-pill" text="подтверждён" color="green-pale"/>
                         </detail-row>
                         <detail-row v-for="row in detailExtraRows" :key="row.title" :title="row.title">
-                            <info-pill v-if="row.pill" :text="row.pill" color="green"/>
+                            <info-pill v-if="row.pill" :text="row.pill" color="green-pale"/>
                             <template v-else>{{ row.value }}</template>
                         </detail-row>
                         <detail-row title="Породы">
@@ -533,6 +533,7 @@ import {
     downloadFile,
 } from '../dist/index.js';
 import { lastNavigation } from './navigation-log.js';
+import { COLOR_NAMES } from '../src/colors.js';
 
 export default {
     components: {
@@ -634,8 +635,8 @@ export default {
                 { key: 'messages', name: 'Sms', url: '/tabs/messages' },
             ],
             // Имена списка цветов пакета: таблица «Цвета».
-            colors: ['gray', 'green', 'yellow', 'red', 'indigo', 'purple'],
-            stripeRows: [null, 'gray', 'green', 'yellow', 'red', 'indigo', 'purple'].map((color) => ({ uuid: String(color), name: color || 'без цвета', color })),
+            colors: COLOR_NAMES,
+            stripeRows: [null, ...COLOR_NAMES].map((color) => ({ uuid: String(color), name: color || 'без цвета', color })),
             pillsLoading: false,
             downloadLoading: false,
             downloadResult: '',
@@ -722,10 +723,10 @@ export default {
                 amount: `${(index + 1) * 500} ₽`,
                 cost: `${(index + 1) * 2},50 ₽`,
                 status: index % 3 === 0 ? 'Доставлено' : 'В очереди',
-                statusColor: index % 3 === 0 ? 'green' : 'gray',
+                statusColor: index % 3 === 0 ? 'green-pale' : 'gray-pale',
                 comment: 'Провайдер принял сообщение, итог доставки пока не получен — длинное пояснение переносится',
                 createdAt: '06.10.2026',
-                stripe: [null, 'red', 'yellow', 'green', null, 'indigo', 'purple', 'gray', null, null][index],
+                stripe: [null, 'red-pale', 'yellow-pale', 'green-pale', null, 'indigo-pale', 'purple-pale', 'gray-pale', null, null][index],
             })),
         };
     },
@@ -791,8 +792,8 @@ export default {
             return [
                 { label: 'Редактировать', href: '#edit' },
                 { label: 'Поменять пароль', href: '#password' },
-                { label: 'Отправить письмо с новым паролем на старый и новый адрес', color: 'yellow', onSelect: this.countSelection },
-                { label: 'Удалить', color: 'red', onSelect: this.countSelection },
+                { label: 'Отправить письмо с новым паролем на старый и новый адрес', color: 'yellow-pale', onSelect: this.countSelection },
+                { label: 'Удалить', color: 'red-pale', onSelect: this.countSelection },
             ];
         },
 
@@ -801,7 +802,7 @@ export default {
         modalMenuActions() {
             return [
                 { label: 'Изменить', href: '#edit' },
-                { label: 'Удалить', color: 'red', onSelect: () => { this.dangerousModalIsOpen = true; } },
+                { label: 'Удалить', color: 'red-pale', onSelect: () => { this.dangerousModalIsOpen = true; } },
             ];
         },
 
@@ -809,7 +810,7 @@ export default {
         // жёлтое.
         retryActions() {
             return [
-                { label: 'Отправить заново', color: 'yellow', onSelect: this.countSelection },
+                { label: 'Отправить заново', color: 'yellow-pale', onSelect: this.countSelection },
                 { label: 'Зафиксировать как неотправленное', onSelect: this.countSelection },
             ];
         },
@@ -821,14 +822,14 @@ export default {
                 { label: 'Добавить ключи', icon: 'plus', href: '#keys' },
                 { label: 'Добавить группу', icon: 'plus', onSelect: this.countSelection },
                 { label: 'Поменять пароль', href: '#password' },
-                { label: 'Удалить', color: 'red', onSelect: this.countSelection },
+                { label: 'Удалить', color: 'red-pale', onSelect: this.countSelection },
             ];
         },
 
         // Красное основное действие и переход в меню.
         deleteActions() {
             return [
-                { label: 'Удалить', color: 'red', onSelect: this.countSelection },
+                { label: 'Удалить', color: 'red-pale', onSelect: this.countSelection },
                 { label: 'Поменять пароль', href: '#password' },
             ];
         },
@@ -840,7 +841,7 @@ export default {
             return [
                 { label: 'Администраторы', href: '#users' },
                 { label: 'Поменять пароль', href: '#password' },
-                { label: 'Выйти на всех устройствах', color: 'yellow', onSelect: this.countProfileSelection },
+                { label: 'Выйти на всех устройствах', color: 'yellow-pale', onSelect: this.countProfileSelection },
                 { label: 'Выйти', onSelect: this.countProfileSelection },
             ];
         },

@@ -22,7 +22,7 @@ function iconPath(wrapper) {
 
 // Цветовые классы: фон и текст с тоном и наведение с тоном.
 function colorClasses(wrapper) {
-    return wrapper.classes().filter((name) => /^bb:(?:hover:)?(?:bg|text)-[a-z]+-\d+$/.test(name))
+    return wrapper.classes().filter((name) => /^bb:(?:hover:)?(?:(?:bg|text)-[a-z]+-\d+|text-white)$/.test(name))
 }
 
 describe('ActionPill: вид', () => {
@@ -46,7 +46,7 @@ describe('ActionPill: вид', () => {
     })
 
     it('цвет по умолчанию — purple, с наведением', () => {
-        expect(colorClasses(mountPill())).toEqual([...colorClass('purple', 'pill').split(' '), colorClass('purple', 'pillHover')])
+        expect(colorClasses(mountPill())).toEqual([...colorClass('purple-pale', 'pill').split(' '), colorClass('purple-pale', 'pillHover')])
     })
 
     it.each(COLOR_NAMES)('%s — классы pill и pillHover из списка', (color) => {
@@ -70,7 +70,7 @@ describe('ActionPill: идёт работа', () => {
         expect(wrapper.attributes('aria-busy')).toBe('true')
         expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb:opacity-60', 'bb:cursor-not-allowed']))
         expect(wrapper.classes()).not.toContain('bb:cursor-pointer')
-        expect(colorClasses(wrapper)).toEqual(colorClass('purple', 'pill').split(' '))
+        expect(colorClasses(wrapper)).toEqual(colorClass('purple-pale', 'pill').split(' '))
         expect(wrapper.find('svg circle').exists()).toBe(true)
         expect(wrapper.find(`path[d="${DOWNLOAD_PATH}"]`).exists()).toBe(false)
         expect(wrapper.text()).toBe('формируется отчёт')
@@ -101,7 +101,7 @@ describe('ActionPill: идёт работа', () => {
         expect(wrapper.attributes('aria-busy')).toBeUndefined()
         expect(iconPath(wrapper)).toBe(DOWNLOAD_PATH)
         expect(wrapper.text()).toBe('скачать xlsx')
-        expect(wrapper.classes()).toContain(colorClass('purple', 'pillHover'))
+        expect(wrapper.classes()).toContain(colorClass('purple-pale', 'pillHover'))
     })
 
     it('часы: стрелки крутятся вокруг центра, при «уменьшить движение» стоят', () => {

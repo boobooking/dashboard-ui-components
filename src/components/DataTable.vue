@@ -14,7 +14,7 @@
             class="bb:flex bb:justify-center bb:items-center bb:space-x-2"
             :class="isCard ? '' : 'bb:my-4'"
         >
-            <info-pill v-if="badgeText !== null" :text="badgeText" color="indigo"/>
+            <info-pill v-if="badgeText !== null" :text="badgeText" color="indigo-pale"/>
             <slot v-if="hasRecords" name="results-actions"></slot>
         </div>
 

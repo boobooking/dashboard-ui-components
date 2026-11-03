@@ -2,7 +2,7 @@
     <div class="bb-dashboard-ui" :class="$attrs.class" :style="$attrs.style">
         <div class="bb:flex bb:items-center">
             <label :for="inputId()" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label"/>
-            <dot v-show="isRequired" color="red" class="bb:ml-2"/>
+            <dot v-show="isRequired" color="red-pale" class="bb:ml-2"/>
         </div>
         <input
             v-model="value"

@@ -2,7 +2,7 @@
     <div class="bb-dashboard-ui">
         <div class="bb:flex bb:items-center">
             <span :id="labelId" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label ?? ''"/>
-            <dot v-show="isRequired" color="red" class="bb:ml-2"/>
+            <dot v-show="isRequired" color="red-pale" class="bb:ml-2"/>
         </div>
         <div v-if="itemList.length > 0" role="radiogroup" :aria-labelledby="labelId" :aria-describedby="descriptionId(labelId)" class="bb:mt-2 bb:grid bb:gap-3" :style="gridStyle">
             <!-- :key="index": id бывают булевыми и повторяться, а checked всё равно задаёт проп.

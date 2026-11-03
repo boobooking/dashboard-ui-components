@@ -137,7 +137,7 @@ describe('DataTable: строки', () => {
     }
 
     it('строки полосатые всегда', () => {
-        const wrapper = mountTable({ rowStripe: () => 'red' })
+        const wrapper = mountTable({ rowStripe: () => 'red-pale' })
 
         for (const row of wrapper.findAll('tbody tr')) {
             expect(row.classes()).toEqual(['bb:bg-white', 'bb:even:bg-gray-50'])
@@ -147,7 +147,7 @@ describe('DataTable: строки', () => {
     it('rowStripe: полоска цвета mark в первой видимой ячейке строки', () => {
         const wrapper = mountTable({
             columns: [{ key: 'hidden', label: 'Скрытый', visible: false }, ...columns],
-            rowStripe: (row) => (row.uuid === 'a' ? 'red' : null),
+            rowStripe: (row) => (row.uuid === 'a' ? 'red-pale' : null),
         })
 
         const stripe = stripeIn(cellsOf(wrapper, 0)[0])
@@ -158,7 +158,7 @@ describe('DataTable: строки', () => {
     })
 
     it('полоска стоит перед содержимым слота первой ячейки', () => {
-        const wrapper = mountTable({ rowStripe: () => 'yellow' }, { 'cell-phone': ({ row }) => h('b', row.phone) })
+        const wrapper = mountTable({ rowStripe: () => 'yellow-pale' }, { 'cell-phone': ({ row }) => h('b', row.phone) })
         const cell = cellsOf(wrapper, 0)[0]
 
         expect(cell.element.firstElementChild.tagName).toBe('SPAN')
@@ -323,8 +323,8 @@ describe('DataTable: бейдж, пустое состояние, пагинац
         const found = mountTable({ meta, links, foundText: 'Найдено ордеров' })
         const empty = mountTable({ rows: [], emptyText: 'Не найдено ордеров' })
 
-        expect(found.getComponent(InfoPill).props()).toEqual({ text: 'Найдено ордеров: 40', color: 'indigo' })
-        expect(empty.getComponent(InfoPill).props()).toEqual({ text: 'Не найдено ордеров', color: 'indigo' })
+        expect(found.getComponent(InfoPill).props()).toEqual({ text: 'Найдено ордеров: 40', color: 'indigo-pale' })
+        expect(empty.getComponent(InfoPill).props()).toEqual({ text: 'Не найдено ордеров', color: 'indigo-pale' })
     })
 })
 

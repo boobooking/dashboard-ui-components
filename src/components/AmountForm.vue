@@ -2,7 +2,7 @@
     <div class="bb-dashboard-ui">
         <div class="bb:flex bb:items-center">
             <label :for="inputId" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label"/>
-            <dot v-show="isRequired" color="red" class="bb:ml-2"/>
+            <dot v-show="isRequired" color="red-pale" class="bb:ml-2"/>
         </div>
         <div class="bb:mt-1 bb:flex bb:gap-3">
             <div class="bb:flex-1 bb:min-w-0 bb:h-9.5 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:leading-5 bb:shadow-xs bb:[--bb-field-radius:0.375rem]">
