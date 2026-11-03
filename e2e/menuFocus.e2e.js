@@ -91,7 +91,7 @@ for (const file of pages) {
         // close() в PopoverPanel.onClick) охраняют модульные тесты обоих
         // порядков: настоящий браузер выставить этот порядок не может.
         test.describe('пункт меню открывает ConfirmationModal', () => {
-            const cancel = (page) => page.getByRole('button', { name: 'Отмена' })
+            const cancel = (page) => page.getByRole('dialog').getByRole('button', { name: 'Отмена' })
 
             test('пункт выбран мышью: фокус на «Отмена», после Escape модалки на кнопке меню', async ({ page }) => {
                 const trigger = modalMenuTrigger(page)

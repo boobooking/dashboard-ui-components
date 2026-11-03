@@ -7,7 +7,7 @@
 // Внутренний модуль пакета.
 //
 // pill — InfoPill и ActionPill; pillHover — ActionPill, пока не идёт
-// работа; button — основная кнопка и стрелка DropdownButtonWithAction;
+// работа; button — ActionButton и стрелка DropdownButtonWithAction;
 // buttonHover — наведение кнопки и стрелки отдельным набором, чтобы
 // не брать его у выключенной кнопки; menuItem — пункт PopoverMenu: фон
 // цвета всегда, темнее при наведении и фокусе; mark — Dot и полоска

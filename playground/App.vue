@@ -207,6 +207,46 @@
             <error-messages class="demo-gap" :messages="errorArray" type="dangerous"/>
         </section>
 
+        <!-- Нажатия обычных кнопок и переход ссылки — в строке под разделом;
+             отправки и отмены формы — в строке под формой. -->
+        <section>
+            <h2>ActionButton</h2>
+            <h3>Без цвета и двенадцать цветов</h3>
+            <div class="demo-row">
+                <action-button label="Без цвета" @click="buttonClicks++"/>
+                <action-button v-for="color in colors" :key="color" :label="color" :color="color" @click="buttonClicks++"/>
+            </div>
+
+            <h3>Иконки</h3>
+            <div class="demo-row">
+                <action-button v-for="icon in icons" :key="icon" :label="icon" :icon="icon" @click="buttonClicks++"/>
+            </div>
+
+            <h3>Ссылка: переход через navigate</h3>
+            <div class="demo-row">
+                <action-button label="Создать пользователя" color="indigo-solid" icon="plus" href="#create"/>
+            </div>
+
+            <h3>Выключенные</h3>
+            <div class="demo-row">
+                <action-button label="Без цвета" :is-disabled="buttonsAreDisabled" @click="buttonClicks++"/>
+                <action-button label="green-solid" color="green-solid" :is-disabled="buttonsAreDisabled" @click="buttonClicks++"/>
+                <action-button label="green-pale" color="green-pale" :is-disabled="buttonsAreDisabled" @click="buttonClicks++"/>
+                <button type="button" class="demo-button" @click="buttonsAreDisabled = !buttonsAreDisabled">isDisabled: {{ buttonsAreDisabled ? 'да' : 'нет' }}</button>
+            </div>
+            <p>Нажатий кнопок: {{ buttonClicks }}, последний переход: {{ lastNavigation || '—' }}</p>
+
+            <h3>Форма: «Создать» отправляет форму</h3>
+            <form class="demo-form" @submit.prevent="buttonFormSubmits++">
+                <form-input v-model="buttonFormName" label="Название группы"/>
+                <div class="demo-row demo-row-end">
+                    <action-button label="Отмена" @click="buttonFormCancels++"/>
+                    <action-button label="Создать" color="green-solid" type="submit"/>
+                </div>
+            </form>
+            <p>Отправок формы: {{ buttonFormSubmits }}, отмен: {{ buttonFormCancels }}</p>
+        </section>
+
         <section>
             <h2>ActionPill и downloadFile</h2>
             <div class="demo-row">
@@ -215,6 +255,14 @@
                 <action-pill icon="refresh" title="запросить статусы" loading-text="запрашиваем статусы" :is-loading="refreshLoading" @click="refreshForTwoSeconds"/>
             </div>
             <p>Скачивание: {{ downloadResult || '—' }}; запросов статусов: {{ refreshes }}</p>
+
+            <h3>Яркий цвет и иконки перевода и обмена</h3>
+            <div class="demo-row">
+                <action-pill icon="bank-transfer" title="перевести на счёт" color="indigo-solid" @click="pillClicks++"/>
+                <action-pill icon="currency-exchange" title="обменять валюту" color="green-solid" @click="pillClicks++"/>
+                <action-pill icon="currency-exchange" title="обменять валюту" color="green-pale" @click="pillClicks++"/>
+            </div>
+            <p>Нажатий пилюль: {{ pillClicks }}</p>
         </section>
 
         <section>
@@ -291,6 +339,7 @@
                 <dropdown-button-with-action
                     :actions="[{ label: 'Добавить', icon: 'plus', color: 'green-pale', onSelect: countSelection }, { label: 'Добавить в чёрный список', icon: 'plus', color: 'red-pale', onSelect: countSelection }]"
                 />
+                <dropdown-button-with-action :actions="solidActions"/>
             </div>
         </section>
 
@@ -518,6 +567,7 @@ import {
     InfoPill,
     ErrorMessages,
     FormInput,
+    ActionButton,
     ActionPill,
     ConfirmationModal,
     DropdownButtonWithAction,
@@ -534,6 +584,7 @@ import {
 } from '../dist/index.js';
 import { lastNavigation } from './navigation-log.js';
 import { COLOR_NAMES } from '../src/colors.js';
+import { ACTION_ICONS } from '../src/actionIcons.js';
 
 export default {
     components: {
@@ -558,6 +609,7 @@ export default {
         InfoPill,
         ErrorMessages,
         FormInput,
+        ActionButton,
         ActionPill,
         ConfirmationModal,
         DropdownButtonWithAction,
@@ -636,6 +688,14 @@ export default {
             ],
             // Имена списка цветов пакета: таблица «Цвета».
             colors: COLOR_NAMES,
+            // Имена общего списка иконок: раздел «ActionButton».
+            icons: Object.keys(ACTION_ICONS),
+            buttonClicks: 0,
+            buttonsAreDisabled: true,
+            buttonFormName: '',
+            buttonFormSubmits: 0,
+            buttonFormCancels: 0,
+            pillClicks: 0,
             stripeRows: [null, ...COLOR_NAMES].map((color) => ({ uuid: String(color), name: color || 'без цвета', color })),
             pillsLoading: false,
             downloadLoading: false,
@@ -823,6 +883,17 @@ export default {
                 { label: 'Добавить группу', icon: 'plus', onSelect: this.countSelection },
                 { label: 'Поменять пароль', href: '#password' },
                 { label: 'Удалить', color: 'red-pale', onSelect: this.countSelection },
+            ];
+        },
+
+        // Яркие цвета и иконки перевода и обмена: на основной кнопке со
+        // стрелкой и в пунктах меню.
+        solidActions() {
+            return [
+                { label: 'Перевести', icon: 'bank-transfer', color: 'indigo-solid', onSelect: this.countSelection },
+                { label: 'Обменять валюту', icon: 'currency-exchange', color: 'green-solid', onSelect: this.countSelection },
+                { label: 'Перевести на другой счёт', icon: 'bank-transfer', color: 'purple-solid', onSelect: this.countSelection },
+                { label: 'Обменять по старому курсу', icon: 'currency-exchange', onSelect: this.countSelection },
             ];
         },
 
