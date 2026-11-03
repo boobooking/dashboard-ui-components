@@ -130,7 +130,6 @@ describe('носители focus-ring', () => {
         ['CrossButton.vue', 'bb:group-focus-visible:focus-ring', 1],
         ['TextPopover.vue', 'bb:focus-visible:focus-ring', 2],
         ['NotificationMessage.vue', 'bb:focus:focus-ring', 1],
-        ['ConfirmationModal.vue', 'bb:focus:focus-ring', 2],
         ['DropdownButtonWithAction.vue', 'bb:focus:focus-ring', 3],
         ['SelectSingleCards.vue', 'bb:has-focus-visible:focus-ring', 1],
         ['AmountInput.vue', 'bb:has-focus-visible:focus-ring', 1],

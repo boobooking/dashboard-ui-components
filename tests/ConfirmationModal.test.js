@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { h } from 'vue'
 import ConfirmationModal from '../src/components/ConfirmationModal.vue'
+import { colorClass } from '../src/colors.js'
 
 enableAutoUnmount(afterEach)
 
@@ -49,6 +50,49 @@ describe('ConfirmationModal', () => {
         expect(blocks).toHaveLength(2)
         expect(blocks[0].classList).toContain('bb:rounded-t-lg')
         expect(blocks[1].classList).toContain('bb:rounded-b-lg')
+    })
+})
+
+describe('ConfirmationModal: кнопки', () => {
+    function buttonByText(wrapper, text) {
+        return wrapper.findAll('button').find((button) => button.text() === text)
+    }
+
+    it.each([
+        ['dangerous', 'red-solid'],
+        ['warning', 'yellow-solid'],
+    ])('кнопка действия при type=%s — %s', (type, color) => {
+        const wrapper = mount(ConfirmationModal, { props: { isOpen: true, type, actionButtonText: 'Да' } })
+
+        const classes = buttonByText(wrapper, 'Да').classes()
+        for (const token of colorClass(color, 'button').split(/\s+/)) {
+            expect(classes).toContain(token)
+        }
+        if (type === 'warning') {
+            expect(classes).toContain('bb:text-yellow-950')
+        }
+    })
+
+    it('отмена — кнопка без цвета с data-dialog-focus', () => {
+        const wrapper = mount(ConfirmationModal, { props: { isOpen: true, actionButtonText: 'Да' } })
+
+        const cancel = buttonByText(wrapper, 'Отмена')
+        expect(cancel.classes()).toEqual(
+            expect.arrayContaining(['bb:bg-white', 'bb:border-gray-300', 'bb:text-gray-700']),
+        )
+        expect(cancel.attributes()).toHaveProperty('data-dialog-focus')
+    })
+
+    it('клики по кнопкам дают по одному событию', async () => {
+        const wrapper = mount(ConfirmationModal, { props: { isOpen: true, actionButtonText: 'Да' } })
+
+        await buttonByText(wrapper, 'Да').trigger('click')
+        expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
+        expect(wrapper.emitted('actionCanceled')).toBeUndefined()
+
+        await buttonByText(wrapper, 'Отмена').trigger('click')
+        expect(wrapper.emitted('actionCanceled')).toHaveLength(1)
+        expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
     })
 })
 

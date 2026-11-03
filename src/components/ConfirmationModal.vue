@@ -23,33 +23,27 @@
             </div>
         </div>
         <div class="bb:bg-gray-50 bb:rounded-b-lg bb:px-6 bb:py-3 bb:flex bb:flex-row-reverse">
-            <button
-                type="button"
-                class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-transparent bb:shadow-xs bb:px-4 bb:py-2 bb:text-sm bb:font-medium bb:text-white bb:focus:focus-ring bb:ml-3"
-                :class="{
-                    'bb:bg-red-600 bb:hover:bg-red-700': isDangerous,
-                    'bb:bg-yellow-400 bb:hover:bg-yellow-500': isWarning,
-                }"
+            <action-button
+                class="bb:ml-3"
+                :label="actionButtonText"
+                :color="actionColor"
                 @click.prevent="$emit('actionConfirmed')"
-            >
-                {{ actionButtonText }}
-            </button>
+            />
             <!-- Фокус открытой модалки — на отмене: Enter сразу после
                  открытия действие не выполнит. -->
-            <button
-                type="button"
-                class="bb:inline-flex bb:justify-center bb:rounded-md bb:border bb:border-gray-300 bb:shadow-xs bb:px-4 bb:py-2 bb:bg-white bb:text-sm bb:font-medium bb:text-gray-700 bb:hover:bg-gray-50 bb:focus:focus-ring bb:ml-3"
+            <action-button
+                class="bb:ml-3"
+                :label="cancelButtonText ?? texts.cancel"
                 data-dialog-focus
                 @click.prevent="$emit('actionCanceled')"
-            >
-                {{ cancelButtonText ?? texts.cancel }}
-            </button>
+            />
         </div>
     </modal>
 </template>
 
 <script>
 import { useId } from "vue";
+import ActionButton from "./ActionButton.vue";
 import Modal from "./Modal.vue";
 import Dangerous from "./icons/Dangerous.vue";
 import Warning from "./icons/Warning.vue";
@@ -57,6 +51,7 @@ import { withLang } from "../lang.js";
 
 export default {
     components: {
+        ActionButton,
         Modal,
         Dangerous,
         Warning,
@@ -113,6 +108,16 @@ export default {
 
         isWarning() {
             return this.type === "warning";
+        },
+
+        actionColor() {
+            if (this.isDangerous) {
+                return "red-solid";
+            }
+            if (this.isWarning) {
+                return "yellow-solid";
+            }
+            return null;
         },
     },
 };
