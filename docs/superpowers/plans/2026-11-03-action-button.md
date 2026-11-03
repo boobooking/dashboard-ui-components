@@ -259,7 +259,7 @@ git commit -m "feat: перевести основную кнопку DropdownBu
 ### Task 6: Playground, браузерные тесты, README
 
 **Files:**
-- Modify: `playground/App.vue`, `README.md`
+- Modify: `playground/App.vue`, `README.md`, `e2e/menuFocus.e2e.js:94` (локатор «Отмена» — внутри `getByRole('dialog')`: в Playground появляется вторая «Отмена»), `src/colors.js` (комментарий набора `button` — и `ActionButton`)
 - Create: `e2e/actionButton.e2e.js`
 
 - [ ] **Step 1: Раздел Playground `ActionButton`** (над `ActionPill и downloadFile`)
@@ -293,7 +293,7 @@ Expected: только таблица замены в «Обновление с 
 - [ ] **Step 4: Закоммитить**
 
 ```bash
-git add playground/App.vue e2e/actionButton.e2e.js README.md
+git add playground/App.vue e2e/actionButton.e2e.js e2e/menuFocus.e2e.js src/colors.js README.md
 git commit -m "docs: описать ActionButton, цвета и иконки, показать в Playground"
 ```
 
