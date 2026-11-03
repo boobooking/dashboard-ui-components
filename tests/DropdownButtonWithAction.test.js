@@ -829,7 +829,8 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
 
         expect(mainButton.exists()).toBe(true)
         expect(mainButton.classes()).toEqual(expect.arrayContaining(['bb:shadow-none!', 'bb:focus:z-10', 'bb:rounded-r-none!']))
-        expect(wrapper.get('.bb-dashboard-ui').classes()).toContain('bb:shadow-xs')
+        expect(mainOf(wrapper).element.parentElement.classList).toContain('bb:shadow-xs')
+        expect(mainOf(wrapper).classes()).toContain('bb:shadow-none!')
     })
 
     it('без меню основная кнопка скругляется с обеих сторон', () => {
@@ -863,7 +864,7 @@ describe('DropdownButtonWithAction: кнопка из действий', () => {
         expect(wrapper.find('[role="menu"]').exists()).toBe(false)
         expect(mainOf(wrapper).text()).toBe('Редактировать')
         expect(mainOf(wrapper).classes()).toEqual(expect.arrayContaining(['bb:rounded-md', 'bb:px-4', 'bb:py-2', 'bb:text-sm', 'bb:font-medium']))
-        expect(mainOf(wrapper).classes()).not.toContain('bb:rounded-l-md')
+        expect(mainOf(wrapper).classes()).not.toContain('bb:rounded-r-none!')
     })
 
     it('несколько действий — первое основная кнопка, остальные в меню по порядку', () => {
