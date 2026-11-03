@@ -63,8 +63,13 @@ describe('ConfirmationModal: кнопки', () => {
     })
 
     afterEach(() => {
-        warn.mockRestore()
-        error.mockRestore()
+        try {
+            expect(warn).not.toHaveBeenCalled()
+            expect(error).not.toHaveBeenCalled()
+        } finally {
+            warn.mockRestore()
+            error.mockRestore()
+        }
     })
 
     function buttonByText(wrapper, text) {
@@ -106,8 +111,6 @@ describe('ConfirmationModal: кнопки', () => {
         await buttonByText(wrapper, 'Отмена').trigger('click')
         expect(wrapper.emitted('actionCanceled')).toHaveLength(1)
         expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
-        expect(warn).not.toHaveBeenCalled()
-        expect(error).not.toHaveBeenCalled()
     })
 })
 
