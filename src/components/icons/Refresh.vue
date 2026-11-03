@@ -1,5 +1,5 @@
 <template>
-    <svg class="bb:w-4 bb:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -10,5 +10,6 @@
 </template>
 
 <script>
+// Своего размера нет: размер иконок действий задаёт ActionIcon.
 export default {};
 </script>

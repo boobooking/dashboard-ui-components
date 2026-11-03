@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import ActionPill from '../src/components/ActionPill.vue'
 import { COLOR_NAMES, colorClass } from '../src/colors.js'
+import { ACTION_ICONS } from '../src/actionIcons.js'
+import ActionIcon from '../src/components/ActionIcon.vue'
 
 enableAutoUnmount(afterEach)
 
@@ -43,6 +45,22 @@ describe('ActionPill: вид', () => {
 
     it('icon refresh — стрелки обновления', () => {
         expect(iconPath(mountPill({ icon: 'refresh', title: 'запросить статусы' }))).toBe(REFRESH_PATH)
+    })
+
+    it.each(Object.keys(ACTION_ICONS))('icon %s — иконка из общего списка, без предупреждений', (icon) => {
+        const warnings = []
+        const wrapper = mountPill({ icon }, warnings)
+
+        expect(iconPath(wrapper)).toBe(iconPath(mount(ActionIcon, { props: { name: icon } })))
+        expect(wrapper.get('svg').classes()).toEqual(expect.arrayContaining(['bb:w-4', 'bb:h-4', 'bb:pointer-events-none', 'bb:cursor-default']))
+        expect(warnings).toEqual([])
+    })
+
+    it('при isLoading — часы, а не иконка', () => {
+        const wrapper = mountPill({ icon: 'refresh', isLoading: true })
+
+        expect(wrapper.findAll('svg')).toHaveLength(1)
+        expect(wrapper.find('svg line').exists()).toBe(true)
     })
 
     it('цвет по умолчанию — purple-pale, с наведением', () => {
@@ -117,10 +135,11 @@ describe('ActionPill: идёт работа', () => {
 describe('ActionPill: неверные значения', () => {
     it('неизвестная иконка — предупреждение валидатора, пилюля без иконки', () => {
         const warnings = []
-        const wrapper = mountPill({ icon: 'trash' }, warnings)
+        const wrapper = mountPill({ icon: 'pin' }, warnings)
 
         expect(warnings.some((message) => message.includes('Invalid prop: custom validator check failed for prop "icon"'))).toBe(true)
         expect(wrapper.find('svg').exists()).toBe(false)
+        expect(wrapper.find('span.bb\\:w-4').exists()).toBe(false)
         expect(wrapper.text()).toBe('скачать xlsx')
     })
 

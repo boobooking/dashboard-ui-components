@@ -16,20 +16,16 @@
              иконка — пилюля без иконки. Содержимое кнопки не ловит указатель
              и без курсора-руки: см. README, «Клавиатурная навигация». -->
         <clock-icon v-if="isLoading" class="bb:pointer-events-none bb:cursor-default"/>
-        <download-icon v-else-if="icon === 'download'" class="bb:pointer-events-none bb:cursor-default"/>
-        <refresh-icon v-else-if="icon === 'refresh'" class="bb:pointer-events-none bb:cursor-default"/>
+        <action-icon v-else-if="hasIcon" :name="icon"/>
         <span class="bb:ml-1 bb:pointer-events-none bb:cursor-default" v-text="label"></span>
     </button>
 </template>
 
 <script>
 import Clock from "./icons/Clock.vue";
-import Download from "./icons/Download.vue";
-import Refresh from "./icons/Refresh.vue";
+import ActionIcon from "./ActionIcon.vue";
+import { isActionIcon } from "../actionIcons.js";
 import { isColor, withColors } from "../colors.js";
-
-// Иконки действий: новое действие — новая иконка и новое имя здесь.
-const ICONS = ["download", "refresh"];
 
 // Пилюля, которой запускают действие. Что делает действие, пилюля не знает:
 // страница слушает click и сама передаёт isLoading, пока действие идёт.
@@ -37,8 +33,7 @@ const ICONS = ["download", "refresh"];
 export default {
     components: {
         "clock-icon": Clock,
-        "download-icon": Download,
-        "refresh-icon": Refresh,
+        "action-icon": ActionIcon,
     },
 
     mixins: [withColors],
@@ -54,7 +49,7 @@ export default {
         icon: {
             type: String,
             required: true,
-            validator: (value) => ICONS.includes(value),
+            validator: isActionIcon,
         },
         // Имя из общего списка цветов (src/colors.js).
         color: {
@@ -75,6 +70,10 @@ export default {
     },
 
     computed: {
+        hasIcon() {
+            return isActionIcon(this.icon);
+        },
+
         label() {
             const text = this.isLoading && typeof this.loadingText === "string" && this.loadingText !== ""
                 ? this.loadingText

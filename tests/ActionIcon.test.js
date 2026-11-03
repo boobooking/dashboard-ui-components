@@ -19,6 +19,21 @@ describe('ActionIcon', () => {
         expect([icon.attributes('stroke'), icon.attributes('fill')]).toContain('currentColor')
     })
 
+    it('список иконок общий и упорядочен', () => {
+        expect(Object.keys(ACTION_ICONS)).toEqual(['plus', 'download', 'refresh', 'bank-transfer', 'currency-exchange'])
+    })
+
+    it.each([
+        ['bank-transfer', 'M2 9l10-7 10 7H2zM4.5 12v6M9.5 12v6M14.5 12v6M19.5 12v6M3.5 18h17M2 22h20'],
+        ['currency-exchange', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
+    ])('%s: путь и штрих как у остальных иконок', (name, path) => {
+        const pathElement = mount(ActionIcon, { props: { name } }).get('svg path')
+
+        expect(pathElement.attributes()).toMatchObject({
+            d: path, 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+        })
+    })
+
     it('без имени — пустой блок того же размера', () => {
         const wrapper = mount(ActionIcon)
 
