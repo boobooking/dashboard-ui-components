@@ -54,6 +54,19 @@ describe('ConfirmationModal', () => {
 })
 
 describe('ConfirmationModal: кнопки', () => {
+    let warn
+    let error
+
+    beforeEach(() => {
+        warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        warn.mockRestore()
+        error.mockRestore()
+    })
+
     function buttonByText(wrapper, text) {
         return wrapper.findAll('button').find((button) => button.text() === text)
     }
@@ -84,8 +97,6 @@ describe('ConfirmationModal: кнопки', () => {
     })
 
     it('клики по кнопкам дают по одному событию без предупреждений', async () => {
-        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {})
         const wrapper = mount(ConfirmationModal, { props: { isOpen: true, actionButtonText: 'Да' } })
 
         await buttonByText(wrapper, 'Да').trigger('click')
@@ -97,8 +108,6 @@ describe('ConfirmationModal: кнопки', () => {
         expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
         expect(warn).not.toHaveBeenCalled()
         expect(error).not.toHaveBeenCalled()
-        warn.mockRestore()
-        error.mockRestore()
     })
 })
 
