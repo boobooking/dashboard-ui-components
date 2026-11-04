@@ -35,13 +35,25 @@ describe('утилита field-frame', () => {
     })
 })
 
-// Статические атрибуты class="…" из шаблона (без :class и panel-class).
-function staticClasses(fileName) {
-    const source = fs.readFileSync(`${componentsDir}/${fileName}`, 'utf8')
-    const template = source.slice(source.indexOf('<template>'), source.indexOf('</template>'))
+// Статические атрибуты class="…" из шаблона (без :class и panel-class); шаблон
+// заканчивается последним </template>, вложенные <template #слот> входят в него.
+function classesOf(source) {
+    const template = source.slice(source.indexOf('<template>'), source.lastIndexOf('</template>'))
 
     return [...template.matchAll(/(?<![:\w-])class="([^"]*)"/g)].map((match) => match[1])
 }
+
+function staticClasses(fileName) {
+    return classesOf(fs.readFileSync(`${componentsDir}/${fileName}`, 'utf8'))
+}
+
+describe('выборка статических class', () => {
+    it('видит class после вложенного <template #слот>', () => {
+        const source = '<template>\n<div class="a">\n<template #x><i class="b"/></template>\n<p class="c"/>\n</div>\n</template>\n<script setup>\n</script>'
+
+        expect(classesOf(source)).toEqual(['a', 'b', 'c'])
+    })
+})
 
 describe('носители field-frame', () => {
     const carriers = [
