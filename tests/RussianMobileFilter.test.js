@@ -140,3 +140,25 @@ describe('RussianMobileFilter: единый фокус', () => {
         expect(classes).not.toContain('bb:focus:outline-hidden')
     })
 })
+
+describe('RussianMobileFilter: рамка фильтра', () => {
+    it('корень — высота и рамка фильтра', () => {
+        const wrapper = mount(RussianMobileFilter, { props: { header: 'Телефон' } })
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(['bb:h-18', 'bb:border', 'bb:border-gray-200']))
+    })
+
+    it('классы страницы — на корне вместе с рамкой пакета', () => {
+        const errors = []
+        const warnings = []
+        const wrapper = mount(RussianMobileFilter, {
+            props: { header: 'Телефон' },
+            attrs: { class: 'ml-2 h-18 border border-gray-200' },
+            global: { config: { errorHandler: (error) => errors.push(error), warnHandler: (message) => warnings.push(message) } },
+        })
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(['ml-2', 'h-18', 'border', 'border-gray-200', 'bb:h-18', 'bb:border', 'bb:border-gray-200']))
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+})

@@ -22,6 +22,9 @@
             <h2>Search</h2>
             <search v-model="search" header="Поиск"/>
             <p>Значение: {{ search === '' ? '(пусто)' : search }}</p>
+
+            <h3>В окне со своей рамкой: заголовок, поле и ластик помещаются, углы не перекрыты</h3>
+            <search class="border border-gray-300 rounded-md overflow-hidden" header="Search" v-model="windowSearch"/>
         </section>
 
         <!-- Основной способ: точки появляются после «Создать», ввод в поле снимает свою,
@@ -82,13 +85,15 @@
 
         <section>
             <h2>Панель фильтров</h2>
-            <!-- Четыре фильтра и фильтр без пунктов в одном ряду: высота и рамки одинаковые. -->
+            <!-- Семь фильтров в одном ряду: четыре с пунктами, фильтр без пунктов, телефон и поиск; высота и рамки одинаковые. -->
             <div class="demo-row">
                 <select-single-filter header="Вендор" :items="vendorItems" v-model="vendor"/>
                 <select-multiple-filter header="Бренд" :items="brandItems" v-model="brands"/>
                 <select-date-filter header="Дата" v-model="day"/>
                 <select-date-interval-filter header="Интервал" v-model:date-from="dateFrom" v-model:date-to="dateTo"/>
                 <select-single-filter header="Без пунктов" :items="[]"/>
+                <russian-mobile-filter header="Телефон"/>
+                <search header="Поиск"/>
             </div>
         </section>
 
@@ -772,6 +777,7 @@ export default {
             phone: '',
             phoneCommits: 0,
             search: '',
+            windowSearch: 'евро',
             day: '',
             dateFrom: '',
             dateTo: '',
