@@ -111,7 +111,7 @@ git commit -m "refactor: вынести рамку поля в утилиту fi
 
 `e2e/fieldFrame.e2e.js`, цикл по `pages`:
 
-- `все видимые рамки полей`: `page.locator('[class~="bb:field-frame"]:visible')` — поля поиска закрытых панелей остаются в DOM со `display: none`, `:visible` отсекает их до обхода; прокрутка для проверок computed style не нужна. У каждой `border-top-width` `1px`, `expectColor(..., 'border-top-color', 'gray-300')`, `border-top-left-radius` `6px`, `background-color` `rgb(255, 255, 255)`, `box-shadow` не `none`, `getComputedStyle(el).getPropertyValue('--bb-field-radius').trim()` — `0.375rem`; число видимых больше 20 (защита от пустой выборки; полноту миграции проверяет таблица носителей Task 1).
+- `все видимые рамки полей`: `page.locator('[class~="bb:field-frame"]:visible')` — поля поиска закрытых панелей остаются в DOM со `display: none`, `:visible` отсекает их до обхода; прокрутка для проверок computed style не нужна. У каждой `border-top-width` `1px`, `expectColor(..., 'border-top-color', 'gray-300')`, `border-top-left-radius` `6px`, `background-color` `rgb(255, 255, 255)`, `box-shadow` не `none`, `getComputedStyle(el).getPropertyValue('--bb-field-radius').trim()` непустая и строго равна `getPropertyValue('--bb-radius-md').trim()` того же элемента (собранный CSS пишет `.375rem` без ведущего нуля — сравнивается связь, а не строка; 6px проверяет `border-top-left-radius`; отклонение D-1, согласовано с Codex); число видимых больше 20 (защита от пустой выборки; полноту миграции проверяет таблица носителей Task 1).
 - `поле поиска в панели` — отдельный сценарий: открыть панель «Вендор с поиском», затем её поле поиска — рамка, фон, скругление как выше, `box-shadow` не `none`; после фокуса — `expectFocusRing`.
 
 - [ ] **Step 2: Запустить**
