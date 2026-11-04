@@ -26,14 +26,21 @@ for (const file of pages) {
 
             for (let index = 0; index < count; index++) {
                 const frame = frames.nth(index)
-                await expectFieldFrame(frame)
-                // Значение берётся из токена скругления: запись числа зависит от минификации.
-                const [fieldRadius, tokenRadius] = await frame.evaluate((element) => {
-                    const style = getComputedStyle(element)
-                    return ['--bb-field-radius', '--bb-radius-md'].map((name) => style.getPropertyValue(name).trim())
-                })
-                expect(fieldRadius).not.toBe('')
-                expect(fieldRadius).toBe(tokenRadius)
+                // Рамка №index и её начало разметки: по сообщению видно, какое поле не прошло.
+                const name = await frame.evaluate((element, number) => `рамка №${number} ${element.outerHTML.slice(0, 120)}`, index)
+                try {
+                    await expectFieldFrame(frame)
+                    // Значение берётся из токена скругления: запись числа зависит от минификации.
+                    const [fieldRadius, tokenRadius] = await frame.evaluate((element) => {
+                        const style = getComputedStyle(element)
+                        return ['--bb-field-radius', '--bb-radius-md'].map((property) => style.getPropertyValue(property).trim())
+                    })
+                    expect(fieldRadius, '--bb-field-radius').not.toBe('')
+                    expect(fieldRadius, '--bb-field-radius равна --bb-radius-md').toBe(tokenRadius)
+                } catch (error) {
+                    error.message = `${name}\n${error.message}`
+                    throw error
+                }
             }
         })
 
