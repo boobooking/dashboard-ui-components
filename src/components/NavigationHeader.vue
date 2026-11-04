@@ -16,7 +16,7 @@
                     />
                 </div>
             </div>
-            <div class="bb:flex bb:items-center">
+            <div class="bb:flex bb:items-center bb:ml-6">
                 <hamburger-menu :actions="actions" :lang="lang"/>
             </div>
         </div>

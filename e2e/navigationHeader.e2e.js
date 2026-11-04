@@ -35,6 +35,8 @@ for (const file of pages) {
 
             // Цвет читается до фокуса: в фокусе подчёркивание indigo-700.
             await expectColor(active, 'border-bottom-color', 'indigo-400')
+            // Пункт на всю высоту строки: подчёркивание у нижнего края шапки.
+            await expect(active).toHaveCSS('height', '64px')
             await expect(active).toHaveAttribute('aria-current', 'page')
             for (const index of [0, 2, 3]) {
                 await expect(links(page, 'full').nth(index)).not.toHaveAttribute('aria-current', /.*/)
@@ -51,6 +53,8 @@ for (const file of pages) {
             const button = await rect(menuButton(page, 'full'))
 
             expect(Math.abs(navigation.right - button.right - 32)).toBeLessThanOrEqual(1)
+            // Минимальный зазор до пунктов задаёт margin-left правого блока.
+            await expect(header(page, 'full').locator('> div > div:last-child')).toHaveCSS('margin-left', '24px')
         })
 
         test('логотип в 32px от края, первый пункт в 32px от логотипа', async ({ page }) => {
