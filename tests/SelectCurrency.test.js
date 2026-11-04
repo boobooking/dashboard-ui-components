@@ -216,7 +216,7 @@ describe.each([
         SelectCurrencyForm,
         { label: 'Валюта' },
         (wrapper) => wrapper.getComponent(SelectSingle).element.parentElement,
-        ['bb:border', 'bb:border-gray-300'],
+        ['bb:field-frame'],
     ],
 ])('%s: пустой currencies', (name, component, labelProps, frameOf, frameClasses) => {
     it('кнопки нет, подпись и рамка остались', () => {

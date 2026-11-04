@@ -288,8 +288,7 @@ describe('SelectSingleForm', () => {
         const { wrapper, errors, warnings } = mountForm()
 
         expect([...frameOf(wrapper).classList].sort()).toEqual([
-            'bb:mt-1', 'bb:h-9.5', 'bb:w-full', 'bb:rounded-md', 'bb:border', 'bb:border-gray-300', 'bb:bg-white',
-            'bb:shadow-xs', 'bb:text-sm', 'bb:[--bb-field-radius:0.375rem]', 'bb:flex', 'bb:flex-col',
+            'bb:mt-1', 'bb:h-9.5', 'bb:w-full', 'bb:field-frame', 'bb:text-sm', 'bb:flex', 'bb:flex-col',
         ].sort())
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
@@ -298,7 +297,7 @@ describe('SelectSingleForm', () => {
     it('без пунктов рамка остаётся', () => {
         const { wrapper, errors, warnings } = mountForm({ items: [] })
 
-        expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:rounded-md', 'bb:border-gray-300']))
+        expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining(['bb:h-9.5', 'bb:field-frame']))
         expect(wrapper.find('button').exists()).toBe(false)
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
@@ -307,7 +306,7 @@ describe('SelectSingleForm', () => {
     it('рамка задаёт радиус поля, кнопка берёт его из переменной', () => {
         const { wrapper, errors, warnings } = mountForm()
 
-        expect([...frameOf(wrapper).classList]).toContain('bb:[--bb-field-radius:0.375rem]')
+        expect([...frameOf(wrapper).classList]).toContain('bb:field-frame')
         expect(triggerOf(wrapper).classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
         expect(errors).toEqual([])
         expect(warnings).toEqual([])

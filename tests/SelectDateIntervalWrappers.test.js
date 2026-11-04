@@ -317,7 +317,7 @@ describe('SelectDateIntervalForm', () => {
         const { wrapper, errors, warnings } = mountForm()
 
         for (const field of wrapper.findAllComponents(SelectDate)) {
-            expect([...field.element.parentElement.classList]).toContain('bb:[--bb-field-radius:0.375rem]')
+            expect([...field.element.parentElement.classList]).toContain('bb:field-frame')
             expect(field.classes()).toContain('bb:flex-1')
             expect(field.classes()).not.toContain('bb:pl-3')
             expect(field.get('button[popovertarget]').classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
@@ -352,8 +352,7 @@ describe('SelectDateIntervalForm', () => {
         expect(frames[0]).not.toBe(frames[1])
         expect(fromClasses).toEqual(toClasses)
         expect(fromClasses).toEqual(expect.arrayContaining([
-            'bb:flex', 'bb:h-9.5', 'bb:w-full', 'bb:rounded-md', 'bb:border', 'bb:border-gray-300',
-            'bb:bg-white', 'bb:shadow-xs', 'bb:text-sm', 'bb:[--bb-field-radius:0.375rem]',
+            'bb:flex', 'bb:h-9.5', 'bb:w-full', 'bb:field-frame', 'bb:text-sm',
         ]))
         expect(fromClasses).not.toContain('bb:mt-1')
         expect(errors).toEqual([])

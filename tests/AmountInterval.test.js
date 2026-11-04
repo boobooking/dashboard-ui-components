@@ -33,13 +33,8 @@ enableAutoUnmount(afterEach)
 const CROSS_PATH = 'path[d="M6 18L18 6M6 6l12 12"]'
 const FRAME_CLASSES = [
     'bb:h-9.5',
-    'bb:rounded-md',
-    'bb:border',
-    'bb:border-gray-300',
-    'bb:bg-white',
-    'bb:shadow-xs',
+    'bb:field-frame',
     'bb:text-sm',
-    'bb:[--bb-field-radius:0.375rem]',
 ]
 
 const COMPONENTS = [
@@ -432,7 +427,7 @@ describe('AmountIntervalFilter', () => {
     it('у блоков фильтра нет рамок формы', () => {
         const wrapper = mountInterval(AmountIntervalFilter, filterBase, { currency: 'USD', currencies: ['USD'] })
         const frames = [fieldsOf(wrapper)[0], fieldsOf(wrapper)[1], blockOf(wrapper)].map((part) => part.element.parentElement)
-        const formClasses = ['bb:[--bb-field-radius:0.375rem]', 'bb:border', 'bb:border-gray-300', 'bb:rounded-md', 'bb:shadow-xs', 'bb:bg-white']
+        const formClasses = ['bb:field-frame']
 
         expect(frames).toHaveLength(3)
         for (const frame of frames) {

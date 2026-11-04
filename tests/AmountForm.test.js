@@ -31,13 +31,8 @@ enableAutoUnmount(afterEach)
 const CROSS_PATH = 'path[d="M6 18L18 6M6 6l12 12"]'
 const FRAME_CLASSES = [
     'bb:h-9.5',
-    'bb:rounded-md',
-    'bb:border',
-    'bb:border-gray-300',
-    'bb:bg-white',
-    'bb:shadow-xs',
+    'bb:field-frame',
     'bb:text-sm',
-    'bb:[--bb-field-radius:0.375rem]',
 ]
 
 // attachTo нужен фокусу: элементу вне документа его не дать.

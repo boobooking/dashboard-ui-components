@@ -10,7 +10,7 @@
             :id="inputId()"
             :aria-describedby="inputDescribedBy()"
             :type="inputType"
-            class="bb:mt-1 bb:block bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:px-3 bb:py-2 bb:text-sm bb:leading-5 bb:shadow-xs bb:focus:focus-ring"
+            class="bb:mt-1 bb:block bb:w-full bb:field-frame bb:px-3 bb:py-2 bb:text-sm bb:focus:focus-ring"
         />
         <field-description v-if="hasDescription()" :id="descriptionId(inputId())"><slot name="description">{{ description }}</slot></field-description>
     </div>

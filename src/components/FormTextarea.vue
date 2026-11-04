@@ -17,7 +17,7 @@
             :id="textareaId()"
             :aria-describedby="textareaDescribedBy()"
             :rows="textareaRows"
-            class="bb:mt-1 bb:block bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:px-3 bb:py-2 bb:text-sm bb:leading-5 bb:shadow-xs bb:focus:focus-ring bb:resize-y"
+            class="bb:mt-1 bb:block bb:w-full bb:field-frame bb:px-3 bb:py-2 bb:text-sm bb:focus:focus-ring bb:resize-y"
             @input="text = $event.target.value"
         />
         <field-description v-if="hasDescription()" :id="descriptionId(textareaId())"><slot name="description">{{ description }}</slot></field-description>

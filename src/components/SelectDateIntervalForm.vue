@@ -16,7 +16,7 @@
             >
                 <!-- Рамки — как у SelectDateForm, без отступа сверху: отступ
                      от подписи уже у группы. -->
-                <div class="bb:flex bb:h-9.5 bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm bb:[--bb-field-radius:0.375rem]">
+                <div class="bb:flex bb:h-9.5 bb:w-full bb:field-frame bb:text-sm">
                     <select-date
                         class="bb:flex-1"
                         :model-value="from.value"
@@ -25,7 +25,7 @@
                         @update:model-value="from.update"
                     />
                 </div>
-                <div class="bb:flex bb:h-9.5 bb:w-full bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:shadow-xs bb:text-sm bb:[--bb-field-radius:0.375rem]">
+                <div class="bb:flex bb:h-9.5 bb:w-full bb:field-frame bb:text-sm">
                     <select-date
                         class="bb:flex-1"
                         :model-value="to.value"

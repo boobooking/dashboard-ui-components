@@ -5,7 +5,7 @@
             <dot v-show="isRequired" color="red-pale" class="bb:ml-2"/>
         </div>
         <div class="bb:mt-1 bb:flex bb:gap-3">
-            <div class="bb:flex-1 bb:min-w-0 bb:h-9.5 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:leading-5 bb:shadow-xs bb:[--bb-field-radius:0.375rem]">
+            <div class="bb:flex-1 bb:min-w-0 bb:h-9.5 bb:field-frame bb:text-sm">
                 <amount-input
                     :model-value="passedAmount"
                     :digits="fractionDigits"
@@ -18,7 +18,7 @@
                     @changed="$emit('changed')"
                 />
             </div>
-            <div class="bb:w-24 bb:flex-none bb:h-9.5 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:shadow-xs bb:[--bb-field-radius:0.375rem]">
+            <div class="bb:w-24 bb:flex-none bb:h-9.5 bb:field-frame bb:text-sm">
                 <amount-currency
                     :currencies="currencyList"
                     :model-value="activeCode"

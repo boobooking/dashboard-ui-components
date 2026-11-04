@@ -19,7 +19,7 @@
             >
                 <!-- Рамки — как у AmountForm, без отступа сверху: отступ от
                      подписи уже у группы. -->
-                <div class="bb:min-w-0 bb:h-9.5 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:shadow-xs bb:[--bb-field-radius:0.375rem]">
+                <div class="bb:min-w-0 bb:h-9.5 bb:field-frame bb:text-sm">
                     <amount-input
                         :model-value="from.value"
                         :digits="currencyField.digits"
@@ -31,7 +31,7 @@
                         @changed="from.changed"
                     />
                 </div>
-                <div class="bb:min-w-0 bb:h-9.5 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:shadow-xs bb:[--bb-field-radius:0.375rem]">
+                <div class="bb:min-w-0 bb:h-9.5 bb:field-frame bb:text-sm">
                     <amount-input
                         :model-value="to.value"
                         :digits="currencyField.digits"
@@ -43,7 +43,7 @@
                         @changed="to.changed"
                     />
                 </div>
-                <div class="bb:h-9.5 bb:rounded-md bb:border bb:border-gray-300 bb:bg-white bb:text-sm bb:shadow-xs bb:[--bb-field-radius:0.375rem]">
+                <div class="bb:h-9.5 bb:field-frame bb:text-sm">
                     <amount-currency
                         :currencies="currencyField.list"
                         :model-value="currencyField.code"

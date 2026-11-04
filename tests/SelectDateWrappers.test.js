@@ -213,8 +213,7 @@ describe('SelectDateForm', () => {
         const { wrapper, errors, warnings } = mountForm()
 
         expect([...frameOf(wrapper).classList]).toEqual(expect.arrayContaining([
-            'bb:mt-1', 'bb:flex', 'bb:h-9.5', 'bb:w-full', 'bb:rounded-md', 'bb:border', 'bb:border-gray-300',
-            'bb:bg-white', 'bb:shadow-xs', 'bb:text-sm', 'bb:[--bb-field-radius:0.375rem]',
+            'bb:mt-1', 'bb:flex', 'bb:h-9.5', 'bb:w-full', 'bb:field-frame', 'bb:text-sm',
         ]))
         expect(wrapper.getComponent(SelectDate).classes()).toContain('bb:flex-1')
         expect(triggerOf(wrapper).classes()).toContain('bb:rounded-[var(--bb-field-radius,0)]')
