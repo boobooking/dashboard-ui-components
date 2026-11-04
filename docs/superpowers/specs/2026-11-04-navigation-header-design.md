@@ -43,10 +43,18 @@ cashback-vetkit-backend, belarus, russia, health-days-backend, overweight
   те же пункты, но меню профиля и мобильное меню свёрстаны вручную
   (`popup`, кнопка ☰, `mobile-navigation-menu-element`). Логотип Royal Canin у
   всех пяти. Часть пунктов — только для администратора (`v-if="isAdmin"`).
-- **Активный пункт** во всех восьми — по `$page.component` Inertia, иногда по
+- **Активный пункт** в семи проектах — по `$page.component` Inertia, иногда по
   нескольким страницам: `["Settings/Index", "Settings/Countries",
   "Settings/Calendars"]` в payments, `["Events/Index", "Archive/Index"]` в
   russia и health-days-backend.
+- **belarus** определяет активный пункт не по имени страницы, а по префиксу
+  адреса (`$page.url`). При переводе belarus на компонент список имён страниц
+  каждого раздела должен покрывать те же страницы, что и прежние префиксы.
+- **Ширина и отступ логотипа:** russia, health-days-backend и
+  cashback-vetkit-backend ограничивают содержимое шапки `max-w-13xl` (143rem);
+  у них и у belarus между логотипом и пунктами 24px. Компонент занимает ширину
+  родителя без ограничения и ставит 32px, как cashback, — это унификация, а
+  не «как сейчас» для этих проектов.
 - **Тень:** `shadow-sm` — certificates, payments, cashback,
   health-days-backend, cashback-vetkit-backend (пять); `shadow` — belarus,
   russia, overweight (три).
@@ -130,6 +138,8 @@ activeKey() {
   логотип и пункты, справа меню профиля, по центру по вертикали.
 - Слот `logo` — в блоке `shrink-0 flex items-center`; между логотипом и
   первым пунктом 32px. Размер картинки задаёт страница.
+- Цвет подчёркивания активного пункта (`indigo-400`) проверяется без фокуса:
+  в фокусе `NavigationMenuElement` меняет его на `indigo-700`.
 - Пункты — `NavigationMenuElement` подряд с промежутком 32px, на всю высоту
   строки (подчёркивание активного — у нижнего края шапки, как сейчас).
   Активный пункт получает `aria-current="page"` (атрибут ложится на `<a>`).
