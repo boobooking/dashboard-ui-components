@@ -453,6 +453,33 @@
         </section>
 
         <section>
+            <h2>NavigationHeader</h2>
+            <div class="demo-stack">
+                <navigation-header
+                    class="demo-stack-wide"
+                    data-demo="header-full"
+                    :items="headerItems"
+                    active-key="forms"
+                    :actions="profileActions"
+                >
+                    <template #logo>
+                        <svg width="40" height="20" viewBox="0 0 40 20" role="img" aria-label="Логотип">
+                            <rect width="40" height="20" rx="4" fill="#4f46e5"/>
+                        </svg>
+                    </template>
+                </navigation-header>
+                <navigation-header class="demo-stack-wide" data-demo="header-plain" :items="headerItems" active-key="orders"/>
+                <navigation-header
+                    class="demo-stack-wide"
+                    data-demo="header-unknown"
+                    :items="headerItems"
+                    active-key="missing"
+                    :actions="profileActions"
+                />
+            </div>
+        </section>
+
+        <section>
             <h2>PageTabs</h2>
             <page-tabs :tabs="pageTabs" active-key="certificates"/>
             <p>Последний переход: {{ lastNavigation || '—' }}</p>
@@ -593,6 +620,7 @@ import {
     DropdownButtonWithAction,
     HamburgerMenu,
     DataTable,
+    NavigationHeader,
     NavigationMenuElement,
     PageTabs,
     PageCard,
@@ -636,6 +664,7 @@ export default {
         DropdownButtonWithAction,
         HamburgerMenu,
         DataTable,
+        NavigationHeader,
         NavigationMenuElement,
         PageTabs,
         PageCard,
@@ -705,6 +734,12 @@ export default {
             markAdminPassword: false,
             englishModalIsOpen: false,
             // Табы PageTabs: адреса условные, переход виден в строке «Последний переход».
+            headerItems: [
+                { key: 'orders', name: 'Ордера', url: '#orders' },
+                { key: 'forms', name: 'Анкеты VetKit', url: '#forms' },
+                { key: 'groups', name: 'Группы', url: '#groups' },
+                { key: 'users', name: 'Пользователи', url: '#users' },
+            ],
             pageTabs: [
                 { key: 'orders', name: 'Ордера', url: '/tabs/orders' },
                 { key: 'certificates', name: 'Сертификаты', url: '/tabs/certificates' },

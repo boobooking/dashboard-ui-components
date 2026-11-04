@@ -131,7 +131,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует тридцать пять компонентов: `Dot`, `RussianMobileFilter`,
+Пакет экспортирует тридцать шесть компонентов: `Dot`, `RussianMobileFilter`,
 `Search`, `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`,
 `SelectDateIntervalForm`,
 `SelectSingleFilter`, `SelectSingleForm`, `SelectCurrencyFilter`,
@@ -140,8 +140,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 `SelectMultipleForm`, `SelectSingleCards`, `SelectMultipleList`, `InfoPill`,
 `ErrorMessages`, `FormInput`, `FormTextarea`, `ActionButton`, `ActionPill`,
 `ConfirmationModal`, `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
-`NavigationMenuElement`, `PageTabs`, `PageCard`, `DetailList`, `DetailRow`,
-`NotificationMessage`, `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
+`NavigationHeader`, `NavigationMenuElement`, `PageTabs`, `PageCard`,
+`DetailList`, `DetailRow`, `NotificationMessage`, `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
 (`files: ["dist"]`) исходники не попадают, поэтому контракт каждого
 компонента — здесь и в playground, а не в исходном коде.
 
@@ -1557,6 +1557,63 @@ Escape, клик по пункту, прокрутка и изменение р�
 таблица прокручивается в своей карточке. Ссылки пагинации — через
 `navigate` плагина. Событий нет.
 
+### NavigationHeader
+
+Шапка дашборда: белая полоса с логотипом и пунктами разделов слева и меню
+профиля справа. Пункты, ключ открытого раздела и пункты меню профиля
+передаёт страница; логотип — слот.
+
+    <navigation-header :items="items" :active-key="activeKey" :actions="menuActions">
+        <template #logo>
+            <img src="/dashboard/images/logo-crown.png" alt="Royal Canin" class="h-5 w-auto">
+        </template>
+    </navigation-header>
+
+    items() {
+        return [
+            { key: 'orders', name: 'Ордера', url: this.route('orders') },
+            { key: 'groups', name: 'Группы', url: this.route('groups') },
+            ...(this.isAdmin ? [{ key: 'users', name: 'Пользователи', url: this.route('users') }] : []),
+        ];
+    },
+    activeKey() {
+        const sections = { orders: ['Orders/Index'], groups: ['Groups/Index'], users: ['Users/Index'] };
+
+        return Object.keys(sections).find((key) => sections[key].includes(this.$page.component)) ?? null;
+    },
+
+| Что | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `items` | `Array` | `[]` | Пункты разделов `[{ key, name, url }]`, все поля — строки |
+| `activeKey` | `String` | `null` | Ключ открытого раздела |
+| `actions` | `Array` | `[]` | Пункты меню профиля — передаются в `HamburgerMenu` как есть |
+| `lang` | `String` | язык плагина | `"ru"` или `"en"` — имя шапки для скринридера и подпись кнопки меню |
+| слот `logo` | разметка | — | Логотип слева от пунктов |
+
+`items`, который не массив, — пунктов нет; элементы, которые не объекты,
+пропускаются. Ключ сравнивается с `activeKey` строго, поэтому ключи — строки;
+если ключа нет в списке или `activeKey` равен `null`, не выделен ни один
+пункт. Страница вычисляет `activeKey` сама, обычно по `$page.component`, и
+может отнести к одному разделу несколько страниц; пункт только для
+администратора она просто не кладёт в массив. Без `actions` кнопки меню
+нет, высота шапки та же. Без слота `logo` пункты начинаются от левого
+отступа шапки. Пакет Inertia не импортирует: ссылки идут через `navigate`
+плагина. Событий и `v-model` нет. Атрибуты `class`, `style`, `data-*` ложатся
+на корневой `<nav>`.
+
+Если проект определял открытый раздел по префиксу адреса (`$page.url`, как
+belarus), при переводе на компонент список имён страниц каждого раздела
+должен покрывать те же страницы, что прежние префиксы.
+
+Вид: белый фон, тень `shadow-sm`, на всю ширину родителя. Строка высотой 64px
+с отступами 32px слева и справа; меню профиля справа по центру по
+вертикали. Логотип лежит в блоке, который не сжимается, размер картинки
+задаёт страница; до первого пункта 32px. Пункты идут через 32px, каждый на
+всю высоту строки, подчёркивание открытого — у нижнего края шапки. Пункты
+в одну строку, без переноса, порогов ширины нет: восемь пунктов в узком окне
+не поместятся. Открытый пункт получает `aria-current="page"`, у шапки есть
+имя для скринридера («Разделы» / «Sections»).
+
 ### NavigationMenuElement
 
 Пункт меню шапки: ссылка с подчёркиванием активного раздела.
@@ -1865,6 +1922,7 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 | `AmountForm`, `AmountIntervalFilter`, `AmountIntervalForm` — имя кнопки валюты | Валюта | Currency |
 | `DataTable` — пагинация | Предыдущая / Следующая / Показаны результаты X - Y из Z | Previous / Next / Showing X - Y of Z results |
 | `FormTextarea` — текст счётчика для скринридера | Символов: N из M | Characters: N of M |
+| `NavigationHeader` — имя шапки для скринридера | Разделы | Sections |
 | `PageTabs` — имя навигации для скринридера | Закладки | Tabs |
 | `PageCard` — доступное имя крестика | Назад | Back |
 | `NotificationMessage` — подпись крестика для скринридера | Закрыть | Close |
@@ -2049,7 +2107,7 @@ Inertia SSR), а серверная разметка гидратируется 
 
     npm run playground
 
-Поднимает демо-страницы со всеми тридцатью пятью компонентами в двух окружениях:
+Поднимает демо-страницы со всеми тридцатью шестью компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не
