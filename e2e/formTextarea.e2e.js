@@ -117,5 +117,12 @@ for (const file of pages) {
 
             expect(Math.abs(ten.height - six.height - 80)).toBeLessThanOrEqual(1)
         })
+
+        test('fieldClass: моноширинное поле, подпись без изменений', async ({ page }) => {
+            await expect(field(page, 'Ключи')).toHaveCSS('font-family', /monospace/)
+
+            const expected = await labelOf(page, 'Комментарий').evaluate((node) => getComputedStyle(node).fontFamily)
+            await expect(labelOf(page, 'Ключи')).toHaveCSS('font-family', expected)
+        })
     })
 }

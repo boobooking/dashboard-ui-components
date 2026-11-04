@@ -59,6 +59,8 @@
                 <form-textarea v-model="reminderText" label="Текст сообщения" :is-required="reminderText.trim() === ''" :character-limit="279"/>
                 <form-textarea v-model="overLimitText" label="Сверх лимита" :character-limit="279"/>
                 <form-textarea label="Десять строк" :rows="10"/>
+                <!-- font-mono собирает Tailwind страницы приложения, demo-mono — правило голой страницы. -->
+                <form-textarea label="Ключи" field-class="font-mono demo-mono" :rows="4"/>
                 <form-textarea v-model="disabledText" label="Заблокировано" disabled :character-limit="279"/>
                 <form-textarea label="Очень длинный заголовок поля, который не помещается в одну строку и переносится" :character-limit="279"/>
             </div>
