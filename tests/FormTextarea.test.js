@@ -482,7 +482,7 @@ describe('FormTextarea fieldClass', () => {
         wrapper.get('label').element,
         wrapper.getComponent(Dot).element,
         wrapper.get('[id$="-description"]').element,
-        wrapper.get('[aria-hidden="true"]').element,
+        wrapper.getComponent(CharacterCounter).element,
     ]
 
     it.each([
