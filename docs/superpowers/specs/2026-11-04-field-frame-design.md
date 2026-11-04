@@ -37,7 +37,8 @@
 
 Рамка поля в пакете одна по виду. Замер в Playground, окружение приложения:
 у всех полей формы рамка 1px `gray-300`, скругление 6px (`rounded-md`), белый
-фон, тень `shadow-xs`, высота 38px, шрифт 14px, строка 20px.
+фон, тень `shadow-xs`, шрифт 14px, строка 20px; у однострочных полей высота
+38px, у `FormTextarea` высота задаётся `rows` (6 строк — 138px).
 
 Классы в исходниках различаются:
 
@@ -46,7 +47,7 @@
 | `FormInput.vue` — `<input>` | `rounded-md border border-gray-300 bg-white shadow-xs` + `text-sm leading-5` | `leading-5` |
 | `FormTextarea.vue` — `<textarea>` | то же | `leading-5` |
 | `AmountForm.vue` — сумма | то же + `[--bb-field-radius:0.375rem]` + `text-sm leading-5` | `leading-5` |
-| `AmountForm.vue` — копейки | то же + `[--bb-field-radius:0.375rem]` + `text-sm` | — |
+| `AmountForm.vue` — валюта | то же + `[--bb-field-radius:0.375rem]` + `text-sm` | — |
 | `AmountIntervalForm.vue` — три части | то же + `[--bb-field-radius:0.375rem]` + `text-sm` | — |
 | `SelectDateForm.vue` | то же + `[--bb-field-radius:0.375rem]` + `text-sm` | — |
 | `SelectDateIntervalForm.vue` — две части | то же + `[--bb-field-radius:0.375rem]` + `text-sm` | — |
@@ -120,7 +121,8 @@
 
 Только `ListSearchField`: у поля поиска в панели появляется тень `shadow-xs`.
 Остальные поля выглядят как сейчас: рамка, скругление, фон, тень, высота,
-шрифт и высота строки совпадают с замером раздела 2.
+шрифт и высота строки совпадают с замером раздела 2: однострочные поля —
+38px, `FormTextarea` — прежняя высота при том же `rows`.
 
 ## 5. Тесты
 
