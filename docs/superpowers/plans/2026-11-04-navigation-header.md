@@ -84,7 +84,7 @@ Expected: FAIL — компонента нет.
                     :is-active="item.key === activeKey" :aria-current="item.key === activeKey ? 'page' : null"/>
             </div>
         </div>
-        <div class="bb:flex bb:items-center"><hamburger-menu :actions="actions" :lang="lang"/></div>
+        <div class="bb:flex bb:items-center bb:ml-6"><hamburger-menu :actions="actions" :lang="lang"/></div>
     </div>
 </nav>
 ```
@@ -124,7 +124,8 @@ git commit -m "feat: добавить компонент NavigationHeader"
 
 - высота шапки 64px, `background-color` белый, `box-shadow` не `none` — у шапки с меню и у шапки без меню (одинаковая высота);
 - активный пункт: `aria-current="page"`, `expectColor(link, 'border-bottom-color', 'indigo-400')` до фокуса; у остальных `aria-current` нет;
-- кнопка меню справа: правый край кнопки на 32px левее правого края шапки (±1);
+- кнопка меню справа: правый край кнопки на 32px левее правого края шапки (±1); у правого блока `margin-left: 24px` (минимальный зазор до пунктов; отклонение D-1, согласовано с Codex);
+- активная ссылка высотой 64px — подчёркивание у нижнего края шапки;
 - логотип слева: левый край в 32px от края шапки, первый пункт в 32px от правого края логотипа (±1);
 - шапка с `activeKey` вне списка — ни у одной ссылки нет `aria-current`;
 - `page.setViewportSize({ width: 1024, height: 768 })`: все пункты видны, `top` у них одинаковый, и подпись с пробелом (в демо есть пункт из двух слов) занимает одну строку — высота её текста (`Range.getClientRects().length === 1`).
@@ -138,6 +139,7 @@ Expected: всё проходит в Chromium и WebKit, `consoleProblems` пу�
 
 - `### NavigationHeader` рядом с `### NavigationMenuElement`: пример раздела 4.1 спеки (с `activeKey` по `$page.component` и несколькими страницами на раздел, пункт администратора), таблица пропов и слота, поведение раздела 4.2, вид раздела 5. Абзац о переводе с `$page.url`-префиксов (belarus): список имён страниц раздела должен покрывать те же страницы.
 - Список экспортов: тридцать шесть, `NavigationHeader`; «Playground»: тридцатью шестью.
+- «Правила API пакета»: пункты `NavigationHeader` — в перечне компонентов, чьи ссылки идут через `navigate`.
 - «Языки»: строка `NavigationHeader` — имя шапки для скринридера «Разделы» / «Sections».
 
 - [ ] **Step 5: Закоммитить**
