@@ -87,7 +87,7 @@ Expected: FAIL — модуля `CharacterCounter.vue` нет.
 
 `src/i18n.js`: ключи из Interfaces в `ru` и `en`, с комментарием «CharacterCounter: текст счётчика для скринридера, «Символов: 112 из 279»».
 
-`src/components/CharacterCounter.vue`, миксин `withLang`. Корень `<span>` с классами `bb:text-xs bb:leading-4 bb:font-normal bb:text-gray-500 bb:tabular-nums bb:whitespace-nowrap`; внутри `<span aria-hidden="true">` с числом (`:class="isOverLimit ? 'bb:text-red-600' : null"`, отдельный `<span>`), ` / ` и лимитом; рядом `<span :id="id" class="bb:sr-only">` с `` `${texts.characterCount}: ${count} ${texts.characterCountOf} ${limit}` ``. `count` — `Array.from(this.text ?? '').length`; `isOverLimit` — `count > limit`. Комментарий у компонента: что считает (code points, как `mb_strlen` в Laravel), что внутренний и вид задан только здесь.
+`src/components/CharacterCounter.vue`, миксин `withLang`. Корень `<span>` с классами `bb:text-xs bb:leading-4 bb:font-normal bb:text-gray-500 bb:tabular-nums bb:whitespace-nowrap`; внутри `<span aria-hidden="true">` с числом (`:class="{ 'bb:text-red-600': isOverLimit }"`, отдельный `<span>`; `null` в `:class` сторож `utilityPrefix` не принимает), ` / ` и лимитом; рядом `<span :id="id" class="bb:sr-only">` с `` `${texts.characterCount}: ${count} ${texts.characterCountOf} ${limit}` ``. `count` — `Array.from(this.text ?? '').length`; `isOverLimit` — `count > limit`. Комментарий у компонента: что считает (code points, как `mb_strlen` в Laravel), что внутренний и вид задан только здесь.
 
 - [ ] **Step 4: Запустить — проходят**
 
@@ -149,10 +149,12 @@ it('composition: счётчик меняется сразу, событие — 
 
 it.each([['а\r\nб'], ['а\rб']])('modelValue %j — счётчик 3, поле «а\\nб», событий нет', ...)
 it('смена modelValue родителем на значение с \\r\\n — 3, событий нет', ...)
+it.each([[42], [{}], [[]]])('modelValue %j при монтировании и setProps — предупреждение, без ошибок, поле пустое, «0 / 10»', ...)
 ```
 
 `tests/exports.test.js`: `'FormTextarea'` в списке после `'FormInput'`; `CharacterCounter` в экспортах отсутствует (если в файле нет такой проверки — добавить `expect(Object.keys(pkg)).not.toContain('CharacterCounter')`).
 `tests/ssrFixtures.js`: `FormTextarea: { props: { label: 'Комментарий', modelValue: 'Первая\r\nвторая', isRequired: true, characterLimit: 10, description: 'Подпись' } }`.
+`tests/FormTextarea.test.js`, отдельный тест SSR по образцу `hydrate()` из `tests/hydration.test.js`: для этой фикстуры серверный HTML содержит `13 / 10` и «Символов: 13 из 10» (не 14); после гидратации — те же числа, `textarea.value === 'Первая\nвторая'`, предупреждений нет.
 `tests/focusRing.test.js`: в `carriers` строка `['FormTextarea.vue', 'bb:focus:focus-ring', 1]`.
 `tests/fieldDescription.test.js`: в `fields` строка `{ name: 'FormTextarea', component: FormTextarea, props: { label: 'Комментарий' }, carrier: (wrapper) => wrapper.find('textarea') }`; если в файле есть отдельный блок «FormInput: связь описания» с `aria-describedby` страницы — такой же для `FormTextarea` не нужен, это покрывает `tests/FormTextarea.test.js`.
 
@@ -170,7 +172,8 @@ Expected: FAIL в новых и дополненных тестах — `FormTex
 ```js
 // Так переносы приводит сам <textarea>: счётчик до первого ввода
 // показывает то же число, что после.
-const normalizeLineBreaks = (value) => (value ?? '').replace(/\r\n?/g, '\n')
+// Не строка (null, число, объект) — пустая строка: компонент не падает.
+const normalizeLineBreaks = (value) => (typeof value === 'string' ? value.replace(/\r\n?/g, '\n') : '')
 ```
 
 - `data()`: `text: normalizeLineBreaks(this.modelValue)`; `watch.modelValue`: `this.text = normalizeLineBreaks(value)`.
@@ -244,10 +247,11 @@ git commit -m "feat: добавить компонент FormTextarea"
 `e2e/formTextarea.e2e.js`, цикл по `pages`; `section` — по заголовку `FormTextarea`; поле — `section.getByLabel(<заголовок>)`; счётчик поля — родитель `[id="<id поля>-counter"]`.
 
 - `рамка как у FormInput`: у `textarea` «Комментарий» и `input` «Имя» раздела FormInput совпадают `border-top-color`, `border-top-width`, `border-radius`, `background-color`, `padding-left`, `padding-top`, `font-family`, `font-size`, `line-height`, `box-shadow`; после `focus()` — `expectFocusRing(textarea)`.
-- `счётчик: место и вид` («Текст сообщения»): правый край счётчика = правый край поля (±0,5); центр счётчика по вертикали = центр первой строки заголовка (`Range.getClientRects()[0]`, ±1); `textarea.top − корень.top` одинаков у «Текст сообщения» и «Комментарий» (±0,5); `font-size` `12px`, `line-height` `16px`, `expectColor(..., 'color', 'gray-500')`; текст `0 / 279`.
+- Перед измерениями — `scrollIntoViewIfNeeded()` поля, затем свежий `boundingBox()`: раздел ниже длинного FormInput. Счётчик измеряется по корню `CharacterCounter` (родитель `[id$="-counter"]`), а не по обёртке `h-5`. Центр первой строки заголовка — `label.top + parseFloat(getComputedStyle(label).lineHeight) / 2`.
+- `счётчик: место и вид` («Текст сообщения»): правый край счётчика = правый край поля (±0,5); центр счётчика по вертикали = центр первой строки заголовка (±1); `textarea.top − корень.top` одинаков у «Текст сообщения» и «Комментарий» (±0,5); `font-size` `12px`, `line-height` `16px`, `expectColor(..., 'color', 'gray-500')`; текст `0 / 279`.
 - `сверх лимита первое число red-600` («Сверх лимита»): `expectColor(первое число, 'color', 'red-600')`, текст `306 / 279`.
 - `ввод меняет счётчик`: `fill('абв')` в «Текст сообщения» → `3 / 279`.
-- `длинный заголовок`: высота счётчика ≤ 16,5 (одна строка); центр счётчика = центр первой строки заголовка (±1); у заголовка больше одной строки (`getClientRects().length > 1`).
+- `длинный заголовок`: высота счётчика ≤ 16,5 (одна строка); центр счётчика = центр первой строки заголовка (±1); высота `label` больше одной `line-height` (заголовок перенёсся).
 - `растягивание по высоте`: `toHaveCSS('resize', 'vertical')`; перетаскивание мышью от точки (right − 3, bottom − 3) на (+60, +40): высота выросла, ширина та же (±0,5).
 - `rows`: высота «Десять строк» − высота «Комментарий» = 80 (4 строки × 20px, ±1).
 
