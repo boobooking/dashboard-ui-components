@@ -42,8 +42,10 @@ describe('CharacterCounter', () => {
     it.each([[9, false], [10, false], [11, true]])('%i символов при лимите 10 — красный: %s', (length, isRed) => {
         const { wrapper, errors, warnings } = mountCounter({ text: 'я'.repeat(length), limit: 10, id: 'c-counter' })
 
-        expect(wrapper.find('.bb\\:text-red-600').exists()).toBe(isRed)
-        if (isRed) expect(wrapper.get('.bb\\:text-red-600').text()).toBe('11')
+        const firstNumber = visible(wrapper).get('span')
+
+        expect(firstNumber.text()).toBe(String(length))
+        expect(firstNumber.classes().includes('bb:text-red-600')).toBe(isRed)
         expect(errors).toEqual([])
         expect(warnings).toEqual([])
     })

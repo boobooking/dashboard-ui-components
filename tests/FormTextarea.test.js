@@ -279,7 +279,7 @@ describe('FormTextarea', () => {
     it.each([[0], [-1], [1.5], ['10']])('rows %j — предупреждение и 6', (rows) => {
         const { wrapper, errors, warnings } = mountTextarea({ rows })
 
-        expect(warnings).not.toEqual([])
+        expect(warnings).toContainEqual(expect.stringContaining('prop "rows"'))
         expect(wrapper.find('textarea').attributes('rows')).toBe('6')
         expect(errors).toEqual([])
     })
@@ -312,7 +312,7 @@ describe('FormTextarea', () => {
     it.each([[0], [-5], [2.5], ['279']])('characterLimit %j — предупреждение, счётчика нет', (characterLimit) => {
         const { wrapper, errors, warnings } = mountTextarea({ characterLimit })
 
-        expect(warnings).not.toEqual([])
+        expect(warnings).toContainEqual(expect.stringContaining('prop "characterLimit"'))
         expect(wrapper.findComponent(CharacterCounter).exists()).toBe(false)
         expect(wrapper.find('textarea').attributes('aria-describedby')).toBeUndefined()
         expect(errors).toEqual([])
@@ -470,5 +470,6 @@ describe('FormTextarea', () => {
         expect(container.querySelector('textarea').value).toBe('Первая\nвторая')
         expect(warnings).toEqual([])
         expect(errors).toEqual([])
+        client.unmount()
     })
 })

@@ -9,13 +9,13 @@ const counter = async (page, label) => {
 
     return page.locator(`[id="${id}-counter"]`).locator('xpath=..')
 }
-// Корень компонента: родитель строки заголовка.
-const componentRoot = (page, label) => labelOf(page, label).locator('xpath=../..')
+// Корень компонента: родитель строки подписи.
 const labelOf = (page, label) => textareaSection(page).locator('label', { hasText: label })
+const componentRoot = (page, label) => labelOf(page, label).locator('xpath=../..')
 
 const LONG_LABEL = 'Очень длинный заголовок поля, который не помещается в одну строку и переносится'
 
-// Центр первой строки заголовка.
+// Центр первой строки подписи.
 const firstLineCenter = async (label) => {
     const box = await label.boundingBox()
     const lineHeight = await label.evaluate((node) => parseFloat(getComputedStyle(node).lineHeight))
@@ -59,7 +59,7 @@ for (const file of pages) {
             const commentBox = await comment.boundingBox()
             const commentTop = (await componentRoot(page, 'Комментарий').boundingBox()).y
             const messageTop = (await componentRoot(page, 'Текст сообщения').boundingBox()).y
-            // Строка заголовка со счётчиком и без него одной высоты.
+            // Строка подписи со счётчиком и без него одной высоты.
             const messageBox = await textarea.boundingBox()
             expect(Math.abs((messageBox.y - messageTop) - (commentBox.y - commentTop))).toBeLessThanOrEqual(0.5)
 
@@ -82,7 +82,7 @@ for (const file of pages) {
             await expect((await counter(page, 'Текст сообщения')).locator('[aria-hidden="true"]')).toHaveText('3 / 279')
         })
 
-        test('длинный заголовок', async ({ page }) => {
+        test('длинная подпись', async ({ page }) => {
             const label = labelOf(page, LONG_LABEL)
             const root = await counter(page, LONG_LABEL)
             await field(page, LONG_LABEL).scrollIntoViewIfNeeded()
