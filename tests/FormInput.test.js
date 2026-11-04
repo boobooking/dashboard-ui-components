@@ -249,10 +249,11 @@ describe('FormInput', () => {
 
 // fieldClass — классы приложения только для самого поля; подпись, описание остаются стилем пакета
 describe('FormInput fieldClass', () => {
-    const fieldProps = { description: 'Подсказка' }
+    const fieldProps = { description: 'Подсказка', isRequired: true }
     const nodesWithoutAppClasses = (wrapper) => [
         wrapper.element,
         wrapper.get('label').element,
+        wrapper.getComponent(Dot).element,
         wrapper.get('[id$="-description"]').element,
     ]
 

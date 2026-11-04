@@ -476,10 +476,11 @@ describe('FormTextarea', () => {
 
 // fieldClass — классы приложения только для самого поля; подпись, описание и счётчик остаются стилем пакета
 describe('FormTextarea fieldClass', () => {
-    const fieldProps = { description: 'Подсказка', characterLimit: 10 }
+    const fieldProps = { description: 'Подсказка', characterLimit: 10, isRequired: true }
     const nodesWithoutAppClasses = (wrapper) => [
         wrapper.element,
         wrapper.get('label').element,
+        wrapper.getComponent(Dot).element,
         wrapper.get('[id$="-description"]').element,
         wrapper.get('[aria-hidden="true"]').element,
     ]
