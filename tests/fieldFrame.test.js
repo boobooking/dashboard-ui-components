@@ -27,7 +27,7 @@ describe('утилита field-frame', () => {
         expect(rule).toContain('border-color: var(--bb-color-gray-300)')
         expect(rule).toContain('border-radius: var(--bb-radius-md)')
         expect(rule).toContain('background-color: var(--bb-color-white)')
-        expect(rule).toContain('--tw-shadow')
+        expect(rule).toContain('--tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.05))')
         expect(rule).toContain('box-shadow:')
         // скругление и переменная для частей внутри рамки — одно значение
         expect(rule).toContain('--bb-field-radius: var(--bb-radius-md)')
