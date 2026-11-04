@@ -39,11 +39,12 @@
 В обоих файлах тестов одна таблица (`it.each`) по значениям `'font-mono'`, `['font-mono', 'text-xs']`, `{ 'font-mono': true, 'text-xs': false }`:
 
 ```js
+// монтирование с description (и characterLimit у FormTextarea), чтобы описание и счётчик были в DOM;
 // поле: содержит ожидаемые классы приложения и bb:field-frame; корень, label,
 // FieldDescription (и CharacterCounter у FormTextarea) — без 'font-mono'
 it.each(cases)('fieldClass %j — только на поле', ...)
 it.each([[null], [''], [[]], [{}]])('fieldClass %j — на поле только классы пакета', ...)
-it('смена fieldClass после монтирования', ...)        // setProps → классы обновились
+it('смена fieldClass после монтирования', ...)        // setProps 'font-mono' → 'text-xs': новый класс есть, прежнего нет
 it('class со страницы — на корне, не на поле', ...)   // attrs: { class: 'mt-4' }
 it.each([[5], [true]])('fieldClass %j — предупреждение о типе, без ошибок', ...)
 ```
