@@ -44,7 +44,7 @@ Run: `npx vitest run --dir tests tests/RussianMobileFilter.test.js tests/Search.
 
 - [ ] **Step 2: Реализация** — классы на корне по Global Constraints. Run: `npx vitest run --dir tests` — всё зелёное.
 
-- [ ] **Step 3: Playground и e2e** — в «Панели фильтров» (`playground/App.vue`, раздел `<h2>Панель фильтров</h2>`) добавить `<russian-mobile-filter header="Телефон">` и `<search header="Поиск">` в ряд; обновить комментарий раздела (число фильтров). `e2e/filterFrame.e2e.js`, цикл по `pages`: у каждого прямого потомка ряда (`.demo-row > .bb-dashboard-ui`) высота 72px (`boundingBox`), `border-top-width` `1px`, `expectColor(…, 'border-top-color', 'gray-200')`. Run: `npm run test:browser` — всё проходит в Chromium и WebKit, `consoleProblems` пуст.
+- [ ] **Step 3: Playground и e2e** — в «Панели фильтров» (`playground/App.vue`, раздел `<h2>Панель фильтров</h2>`) добавить `<russian-mobile-filter header="Телефон">` и `<search header="Поиск">` в ряд; обновить комментарий раздела (число фильтров). В разделе `Search` — второе демо как окно payments: `<search class="border border-gray-300 rounded-md overflow-hidden" header="Search" v-model=…>` с непустым значением, для приёмки (заголовок, поле и ластик помещаются, углы не перекрыты). `e2e/filterFrame.e2e.js`, цикл по `pages`: секция — `section` с точным заголовком `<h2>` «Панель фильтров»; внутри `.demo-row > .bb-dashboard-ui`, сначала `toHaveCount(7)`; у каждого высота 72px (`boundingBox`), `border-top-width` `1px`, `expectColor(…, 'border-top-color', 'gray-200')`. Run: `npm run test:browser` — всё проходит в Chromium и WebKit, `consoleProblems` пуст.
 
 - [ ] **Step 4: README** — по разделу 6 спеки.
 
