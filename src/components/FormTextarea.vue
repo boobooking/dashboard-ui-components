@@ -5,7 +5,7 @@
                 <label :for="textareaId()" class="bb:block bb:text-sm bb:font-medium bb:leading-5 bb:text-gray-700" v-text="label"/>
                 <dot v-show="isRequired" color="red-pale" class="bb:ml-2"/>
             </div>
-            <!-- h-5 — высота строки заголовка: счётчик по центру первой строки,
+            <!-- h-5 — высота строки подписи: счётчик по центру первой строки,
                  и строка со счётчиком не выше строки без него. -->
             <div v-if="hasCounter" class="bb:flex bb:h-5 bb:shrink-0 bb:items-center">
                 <character-counter :id="`${textareaId()}-counter`" :text="text" :limit="characterLimit" :lang="lang"/>
@@ -132,7 +132,7 @@ export default {
             return this.$attrs.id ?? this.generatedId;
         },
 
-        // aria-describedby страницы не теряется: id страницы, подписи и
+        // aria-describedby страницы не теряется: id страницы, описания и
         // счётчика через пробел.
         textareaDescribedBy() {
             const ids = [
