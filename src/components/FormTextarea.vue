@@ -18,6 +18,7 @@
             :aria-describedby="textareaDescribedBy()"
             :rows="textareaRows"
             class="bb:mt-1 bb:block bb:w-full bb:field-frame bb:px-3 bb:py-2 bb:text-sm bb:focus:focus-ring bb:resize-y"
+            :class="fieldClass"
             @input="text = $event.target.value"
         />
         <field-description v-if="hasDescription()" :id="descriptionId(textareaId())"><slot name="description">{{ description }}</slot></field-description>
@@ -77,6 +78,12 @@ export default {
             type: Number,
             default: null,
             validator: isPositiveInteger,
+        },
+        // Классы приложения для самого поля: подпись остаётся стилем пакета.
+        // Пишутся без префикса bb:, как class на корне.
+        fieldClass: {
+            type: [String, Array, Object],
+            default: null,
         },
     },
 

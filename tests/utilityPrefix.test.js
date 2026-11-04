@@ -64,6 +64,12 @@ function classLiterals(node, fileName) {
             if (node.name === 'panelClass' && fileName === 'PopoverPanel.vue') {
                 return []
             }
+            // fieldClass в FormInput.vue и FormTextarea.vue — классы
+            // приложения для самого поля, как $attrs.class для корня: это
+            // утилиты приложения, а не пакета, и префикса у них нет.
+            if (node.name === 'fieldClass' && ['FormInput.vue', 'FormTextarea.vue'].includes(fileName)) {
+                return []
+            }
             throw new Error('форма Identifier в :class не проверяется — запишите классы литералами')
         case 'CallExpression':
             // colorClass(…) — классы из src/colors.js: их строки и префикс
@@ -255,6 +261,18 @@ describe('исключение для panelClass', () => {
         const caller = '<template><popover-panel panel-class="bb:border flex"></popover-panel></template>'
 
         expect(classTokens(caller, 'SelectDate.vue')).toEqual(['bb:border', 'flex'])
+    })
+})
+
+describe('исключение для fieldClass', () => {
+    const field = '<template><input class="bb:block" :class="fieldClass"></template>'
+
+    it.each(['FormInput.vue', 'FormTextarea.vue'])('в %s :class="fieldClass" принимается', (fileName) => {
+        expect(classTokens(field, fileName)).toEqual(['bb:block'])
+    })
+
+    it('в другом файле то же отклоняется', () => {
+        expect(() => classTokens(field, 'Search.vue')).toThrow('форма Identifier в :class не проверяется')
     })
 })
 

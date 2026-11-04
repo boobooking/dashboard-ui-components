@@ -11,6 +11,7 @@
             :aria-describedby="inputDescribedBy()"
             :type="inputType"
             class="bb:mt-1 bb:block bb:w-full bb:field-frame bb:px-3 bb:py-2 bb:text-sm bb:focus:focus-ring"
+            :class="fieldClass"
         />
         <field-description v-if="hasDescription()" :id="descriptionId(inputId())"><slot name="description">{{ description }}</slot></field-description>
     </div>
@@ -53,6 +54,12 @@ export default {
         isRequired: {
             type: Boolean,
             default: false,
+        },
+        // Классы приложения для самого поля: подпись остаётся стилем пакета.
+        // Пишутся без префикса bb:, как class на корне.
+        fieldClass: {
+            type: [String, Array, Object],
+            default: null,
         },
     },
 

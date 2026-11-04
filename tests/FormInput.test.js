@@ -246,3 +246,74 @@ describe('FormInput', () => {
         expect(wrapper.find('label').text()).toBe('')
     })
 })
+
+// fieldClass — классы приложения только для самого поля; подпись, описание остаются стилем пакета
+describe('FormInput fieldClass', () => {
+    const fieldProps = { description: 'Подсказка' }
+    const nodesWithoutAppClasses = (wrapper) => [
+        wrapper.element,
+        wrapper.get('label').element,
+        wrapper.get('[id$="-description"]').element,
+    ]
+
+    it.each([
+        ['font-mono'],
+        [['font-mono', 'text-xs']],
+        [{ 'font-mono': true, 'text-xs': false }],
+    ])('fieldClass %j — только на поле', (fieldClass) => {
+        const { wrapper, errors, warnings } = mountInput({ ...fieldProps, fieldClass })
+        const field = wrapper.get('input')
+
+        expect(field.classes()).toContain('font-mono')
+        expect(field.classes()).toContain('bb:field-frame')
+        expect(field.classes('text-xs')).toBe(Array.isArray(fieldClass))
+
+        for (const node of nodesWithoutAppClasses(wrapper)) {
+            expect(node.classList.contains('font-mono')).toBe(false)
+        }
+
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it.each([[null], [''], [[]], [{}]])('fieldClass %j — на поле только классы пакета', (fieldClass) => {
+        const { wrapper, errors, warnings } = mountInput({ ...fieldProps, fieldClass })
+        const withoutProp = mountInput(fieldProps).wrapper.get('input')
+
+        expect(wrapper.get('input').classes()).toEqual(withoutProp.classes())
+        expect(wrapper.get('input').classes()).toContain('bb:field-frame')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('смена fieldClass после монтирования', async () => {
+        const { wrapper, errors, warnings } = mountInput({ ...fieldProps, fieldClass: 'font-mono' })
+
+        await wrapper.setProps({ fieldClass: 'text-xs' })
+
+        expect(wrapper.get('input').classes()).toContain('text-xs')
+        expect(wrapper.get('input').classes()).not.toContain('font-mono')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('class со страницы — на корне, не на поле', () => {
+        const { wrapper, errors, warnings } = mountInput({ ...fieldProps, fieldClass: 'font-mono' }, { class: 'mt-4' })
+
+        expect(wrapper.classes()).toContain('mt-4')
+        expect(wrapper.classes()).not.toContain('font-mono')
+        expect(wrapper.get('input').classes()).not.toContain('mt-4')
+        expect(wrapper.get('input').classes()).toContain('font-mono')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it.each([[5], [true]])('fieldClass %j — предупреждение о типе, без ошибок', (fieldClass) => {
+        const { wrapper, errors, warnings } = mountInput({ ...fieldProps, fieldClass })
+
+        expect(warnings).toEqual([expect.stringContaining('Invalid prop: type check failed for prop "fieldClass"')])
+        expect(errors).toEqual([])
+        expect(wrapper.get('input').classes()).toContain('bb:field-frame')
+        expect(wrapper.get('input').classes().filter((name) => !name.startsWith('bb:'))).toEqual([])
+    })
+})

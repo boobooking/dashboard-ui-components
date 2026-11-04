@@ -473,3 +473,75 @@ describe('FormTextarea', () => {
         client.unmount()
     })
 })
+
+// fieldClass — классы приложения только для самого поля; подпись, описание и счётчик остаются стилем пакета
+describe('FormTextarea fieldClass', () => {
+    const fieldProps = { description: 'Подсказка', characterLimit: 10 }
+    const nodesWithoutAppClasses = (wrapper) => [
+        wrapper.element,
+        wrapper.get('label').element,
+        wrapper.get('[id$="-description"]').element,
+        wrapper.get('[aria-hidden="true"]').element,
+    ]
+
+    it.each([
+        ['font-mono'],
+        [['font-mono', 'text-xs']],
+        [{ 'font-mono': true, 'text-xs': false }],
+    ])('fieldClass %j — только на поле', (fieldClass) => {
+        const { wrapper, errors, warnings } = mountTextarea({ ...fieldProps, fieldClass })
+        const field = wrapper.get('textarea')
+
+        expect(field.classes()).toContain('font-mono')
+        expect(field.classes()).toContain('bb:field-frame')
+        expect(field.classes('text-xs')).toBe(Array.isArray(fieldClass))
+
+        for (const node of nodesWithoutAppClasses(wrapper)) {
+            expect(node.classList.contains('font-mono')).toBe(false)
+        }
+
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it.each([[null], [''], [[]], [{}]])('fieldClass %j — на поле только классы пакета', (fieldClass) => {
+        const { wrapper, errors, warnings } = mountTextarea({ ...fieldProps, fieldClass })
+        const withoutProp = mountTextarea(fieldProps).wrapper.get('textarea')
+
+        expect(wrapper.get('textarea').classes()).toEqual(withoutProp.classes())
+        expect(wrapper.get('textarea').classes()).toContain('bb:field-frame')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('смена fieldClass после монтирования', async () => {
+        const { wrapper, errors, warnings } = mountTextarea({ ...fieldProps, fieldClass: 'font-mono' })
+
+        await wrapper.setProps({ fieldClass: 'text-xs' })
+
+        expect(wrapper.get('textarea').classes()).toContain('text-xs')
+        expect(wrapper.get('textarea').classes()).not.toContain('font-mono')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it('class со страницы — на корне, не на поле', () => {
+        const { wrapper, errors, warnings } = mountTextarea({ ...fieldProps, fieldClass: 'font-mono' }, { class: 'mt-4' })
+
+        expect(wrapper.classes()).toContain('mt-4')
+        expect(wrapper.classes()).not.toContain('font-mono')
+        expect(wrapper.get('textarea').classes()).not.toContain('mt-4')
+        expect(wrapper.get('textarea').classes()).toContain('font-mono')
+        expect(errors).toEqual([])
+        expect(warnings).toEqual([])
+    })
+
+    it.each([[5], [true]])('fieldClass %j — предупреждение о типе, без ошибок', (fieldClass) => {
+        const { wrapper, errors, warnings } = mountTextarea({ ...fieldProps, fieldClass })
+
+        expect(warnings).toEqual([expect.stringContaining('Invalid prop: type check failed for prop "fieldClass"')])
+        expect(errors).toEqual([])
+        expect(wrapper.get('textarea').classes()).toContain('bb:field-frame')
+        expect(wrapper.get('textarea').classes().filter((name) => !name.startsWith('bb:'))).toEqual([])
+    })
+})
