@@ -63,7 +63,7 @@ it('клик по пункту уходит в navigate плагина', ...)
 ```
 
 `tests/exports.test.js`: `'NavigationHeader'` в списке; заголовок теста — тридцать шесть компонентов.
-`tests/ssrFixtures.js`: `NavigationHeader: { props: { items: [{ key: 'a', name: 'Ордера', url: '/orders' }, { key: 'b', name: 'Группы', url: '/groups' }], activeKey: 'b', actions: [{ label: 'Выйти', href: '#' }] }, slots: { logo: '<img alt="Логотип" src="/logo.png">' } }` — если фикстуры не поддерживают слоты, без слота (см. формат файла).
+`tests/ssrFixtures.js`: `NavigationHeader: { props: { items: [{ key: 'a', name: 'Ордера', url: '/orders' }, { key: 'b', name: 'Группы', url: '/groups' }], activeKey: 'b', actions: [{ label: 'Выйти', href: '#' }] }, slots: { logo: () => h('img', { alt: 'Логотип', src: '/logo.png' }) } }` — слот функцией: `tests/ssr.test.js` передаёт `fixture.slots` прямо в `h()`, строка дала бы экранированный текст и предупреждение; `h` в файле фикстур уже импортирован.
 
 - [ ] **Step 2: Запустить — падают**
 
@@ -79,7 +79,7 @@ Expected: FAIL — компонента нет.
     <div class="bb:flex bb:h-16 bb:justify-between bb:px-8">
         <div class="bb:flex">
             <div v-if="$slots.logo" class="bb:flex bb:shrink-0 bb:items-center bb:mr-8"><slot name="logo"/></div>
-            <div class="bb:flex bb:gap-8">
+            <div class="bb:flex bb:gap-8 bb:whitespace-nowrap">
                 <navigation-menu-element v-for="item in itemList" :key="item.key" :name="item.name" :url="item.url"
                     :is-active="item.key === activeKey" :aria-current="item.key === activeKey ? 'page' : null"/>
             </div>
@@ -116,7 +116,7 @@ git commit -m "feat: добавить компонент NavigationHeader"
 
 - [ ] **Step 1: Дополнить Playground**
 
-Раздел `<h2>NavigationHeader</h2>` рядом с `NavigationMenuElement`: шапка с логотипом (любая картинка из `playground/public` или inline SVG), четыре пункта на `#`-адреса, активный второй, меню профиля из двух пунктов; шапка без логотипа и без `actions`; шапка с `activeKey` вне списка. Каждой шапке — `data-demo`-атрибут или подпись для локаторов.
+Раздел `<h2>NavigationHeader</h2>` рядом с `NavigationMenuElement`: шапка с логотипом (любая картинка из `playground/public` или inline SVG), четыре пункта на `#`-адреса (один — из двух слов, например «Анкеты VetKit»), активный второй, меню профиля из двух пунктов; шапка без логотипа и без `actions`; шапка с `activeKey` вне списка. Каждой шапке — `data-demo`-атрибут или подпись для локаторов.
 
 - [ ] **Step 2: Написать браузерные тесты**
 
@@ -127,7 +127,7 @@ git commit -m "feat: добавить компонент NavigationHeader"
 - кнопка меню справа: правый край кнопки на 32px левее правого края шапки (±1);
 - логотип слева: левый край в 32px от края шапки, первый пункт в 32px от правого края логотипа (±1);
 - шапка с `activeKey` вне списка — ни у одной ссылки нет `aria-current`;
-- `page.setViewportSize({ width: 1024, height: 768 })`: все пункты видны, `top` у них одинаковый (одна строка).
+- `page.setViewportSize({ width: 1024, height: 768 })`: все пункты видны, `top` у них одинаковый, и подпись с пробелом (в демо есть пункт из двух слов) занимает одну строку — высота её текста (`Range.getClientRects().length === 1`).
 
 - [ ] **Step 3: Запустить**
 
