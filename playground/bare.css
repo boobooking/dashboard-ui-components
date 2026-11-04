@@ -7,3 +7,9 @@ body {
 .demo-mono {
     font-family: ui-monospace, monospace;
 }
+
+.demo-window {
+    border: 1px solid var(--bb-color-gray-300);
+    border-radius: 6px;
+    overflow: hidden;
+}

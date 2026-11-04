@@ -24,7 +24,8 @@
             <p>Значение: {{ search === '' ? '(пусто)' : search }}</p>
 
             <h3>В окне со своей рамкой: заголовок, поле и ластик помещаются, углы не перекрыты</h3>
-            <search class="border border-gray-300 rounded-md overflow-hidden" header="Search" v-model="windowSearch"/>
+            <!-- Классы Tailwind собирает страница приложения, demo-window — правило голой страницы. -->
+            <search class="border border-gray-300 rounded-md overflow-hidden demo-window" header="Search" v-model="windowSearch"/>
         </section>
 
         <!-- Основной способ: точки появляются после «Создать», ввод в поле снимает свою,
