@@ -141,9 +141,10 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 `ErrorMessages`, `FormInput`, `FormTextarea`, `ActionButton`, `ActionPill`,
 `ConfirmationModal`, `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
 `NavigationHeader`, `NavigationMenuElement`, `PageTabs`, `PageCard`,
-`DetailList`, `DetailRow`, `NotificationMessage`, `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
-(`files: ["dist"]`) исходники не попадают, поэтому контракт каждого
-компонента — здесь и в playground, а не в исходном коде.
+`DetailList`, `DetailRow`, `NotificationMessage`, `TextPopover`, функцию
+`downloadFile` и плагин `dashboardUi`. В архив пакета (`files: ["dist"]`)
+исходники не попадают, поэтому контракт каждого компонента — здесь и в
+playground, а не в исходном коде.
 
 Ластики очистки фильтров идут в порядке Tab сразу после своего поля или
 кнопки, в фокусе с клавиатуры вокруг крестика кольцо; нажимаются Enter и

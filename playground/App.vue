@@ -733,13 +733,14 @@ export default {
             markAdminEmail: false,
             markAdminPassword: false,
             englishModalIsOpen: false,
-            // Табы PageTabs: адреса условные, переход виден в строке «Последний переход».
+            // Пункты NavigationHeader: адреса условные, переходов нет.
             headerItems: [
                 { key: 'orders', name: 'Ордера', url: '#orders' },
                 { key: 'forms', name: 'Анкеты VetKit', url: '#forms' },
                 { key: 'groups', name: 'Группы', url: '#groups' },
                 { key: 'users', name: 'Пользователи', url: '#users' },
             ],
+            // Табы PageTabs: адреса условные, переход виден в строке «Последний переход».
             pageTabs: [
                 { key: 'orders', name: 'Ордера', url: '/tabs/orders' },
                 { key: 'certificates', name: 'Сертификаты', url: '/tabs/certificates' },
