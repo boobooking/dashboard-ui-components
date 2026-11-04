@@ -4,3 +4,4 @@ dist
 .idea
 test-results
 playwright-report
+.superpowers/
