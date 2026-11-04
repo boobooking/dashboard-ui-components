@@ -21,7 +21,7 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно тридцать четыре компонента, плагин и downloadFile', () => {
+    it('ровно тридцать пять компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionButton',
             'ActionPill',
@@ -36,6 +36,7 @@ describe('публичная поверхность пакета', () => {
             'DropdownButtonWithAction',
             'ErrorMessages',
             'FormInput',
+            'FormTextarea',
             'HamburgerMenu',
             'InfoPill',
             'NavigationMenuElement',
@@ -64,6 +65,10 @@ describe('публичная поверхность пакета', () => {
 
     it('ListSearchField — внутренний, не экспортируется', () => {
         expect(pkg).not.toHaveProperty('ListSearchField')
+    })
+
+    it('CharacterCounter — внутренний, не экспортируется', () => {
+        expect(Object.keys(pkg)).not.toContain('CharacterCounter')
     })
 
     it('downloadFile — функция', () => {

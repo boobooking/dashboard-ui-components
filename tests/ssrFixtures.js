@@ -23,6 +23,7 @@ export const ssrFixtures = {
     DropdownButtonWithAction: { props: { actions: [{ label: 'Действие', icon: 'plus', href: '#' }, { label: 'Другое действие', icon: 'plus', href: '#' }] } },
     ErrorMessages: { props: { messages: { email: 'Неверный email' } } },
     FormInput: { props: { label: 'Имя', modelValue: 'Анна', isRequired: true } },
+    FormTextarea: { props: { label: 'Комментарий', modelValue: 'Первая\r\nвторая', isRequired: true, characterLimit: 10, description: 'Подпись' } },
     HamburgerMenu: { props: { actions: [{ label: 'Выйти', icon: 'plus', href: '#' }] } },
     InfoPill: { props: { text: 'Новый', color: 'green-pale' } },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },

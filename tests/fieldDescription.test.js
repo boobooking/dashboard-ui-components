@@ -6,6 +6,7 @@ import AmountForm from '../src/components/AmountForm.vue'
 import AmountIntervalForm from '../src/components/AmountIntervalForm.vue'
 import FieldDescription from '../src/components/FieldDescription.vue'
 import FormInput from '../src/components/FormInput.vue'
+import FormTextarea from '../src/components/FormTextarea.vue'
 import SelectCurrencyForm from '../src/components/SelectCurrencyForm.vue'
 import SelectDateForm from '../src/components/SelectDateForm.vue'
 import SelectDateIntervalForm from '../src/components/SelectDateIntervalForm.vue'
@@ -36,6 +37,7 @@ const amount = { amount: 123456, currency: 'USD' }
 
 const fields = [
     { name: 'FormInput', component: FormInput, props: { label: 'Имя' }, carrier: (wrapper) => wrapper.find('input') },
+    { name: 'FormTextarea', component: FormTextarea, props: { label: 'Комментарий' }, carrier: (wrapper) => wrapper.find('textarea') },
     { name: 'SelectSingleForm', component: SelectSingleForm, props: { label: 'Вендор', items }, carrier: trigger },
     { name: 'SelectCurrencyForm', component: SelectCurrencyForm, props: { label: 'Валюта' }, carrier: trigger },
     { name: 'SelectMultipleForm', component: SelectMultipleForm, props: { label: 'Вендор', items }, carrier: trigger },

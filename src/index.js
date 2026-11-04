@@ -26,6 +26,7 @@ export { default as AmountIntervalForm } from './components/AmountIntervalForm.v
 export { default as InfoPill } from './components/InfoPill.vue'
 export { default as ErrorMessages } from './components/ErrorMessages.vue'
 export { default as FormInput } from './components/FormInput.vue'
+export { default as FormTextarea } from './components/FormTextarea.vue'
 export { default as ActionButton } from './components/ActionButton.vue'
 export { default as ActionPill } from './components/ActionPill.vue'
 export { default as ConfirmationModal } from './components/ConfirmationModal.vue'

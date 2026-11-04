@@ -82,6 +82,7 @@
        задевает, поэтому корень перечислен отдельно. */
     .bb-dashboard-ui button,
     .bb-dashboard-ui input,
+    .bb-dashboard-ui textarea,
     button.bb-dashboard-ui {
         font: inherit;
         font-feature-settings: inherit;
@@ -111,14 +112,16 @@
     /* Как у @tailwindcss/forms, а не как у preflight: текстовым полям родной
        вид не нужен, и галочкам с переключателями тоже: их кружок, квадрат и
        галочку рисуют SelectSingleCards и SelectMultipleList. */
-    .bb-dashboard-ui input {
+    .bb-dashboard-ui input,
+    .bb-dashboard-ui textarea {
         appearance: none;
     }
 
     /* Снимает кольцо, которое плагин вешает на :focus. Перебивается свойство
        box-shadow целиком, поэтому переменные --tw-ring-* и --tw-shadow
        перестают на что-либо влиять. */
-    .bb-dashboard-ui input:focus {
+    .bb-dashboard-ui input:focus,
+    .bb-dashboard-ui textarea:focus {
         box-shadow: none;
     }
 
