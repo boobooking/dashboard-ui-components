@@ -37,7 +37,7 @@
 **Files:**
 - Modify: `src/styles/index.css`, `src/components/{FormInput,FormTextarea,AmountForm,AmountIntervalForm,SelectDateForm,SelectDateIntervalForm,SelectSingleForm,SelectMultipleForm,ListSearchField}.vue`
 - Create: `tests/fieldFrame.test.js`
-- Modify tests: `tests/AmountForm.test.js` (`FRAME_CLASSES`), `tests/AmountInterval.test.js` (`FRAME_CLASSES`, строка ~435 `formClasses`), `tests/SelectCurrency.test.js` (~219), `tests/SelectSingleWrappers.test.js` (~291, ~301, ~310), `tests/SelectMultipleWrappers.test.js` (~244, ~254, ~263), `tests/SelectDateWrappers.test.js` (~216), `tests/SelectDateIntervalWrappers.test.js` (~320, ~355); `tests/FormInput.test.js` и `tests/FormTextarea.test.js` — если проверяют классы рамки.
+- Modify tests (без перевода падают ровно эти семь файлов — проба Codex): `tests/AmountForm.test.js` (`FRAME_CLASSES`), `tests/AmountInterval.test.js` (`FRAME_CLASSES`, строка ~435 `formClasses`), `tests/SelectCurrency.test.js` (~219), `tests/SelectSingleWrappers.test.js` (~291, ~301, ~310), `tests/SelectMultipleWrappers.test.js` (~244, ~254, ~263), `tests/SelectDateWrappers.test.js` (~216), `tests/SelectDateIntervalWrappers.test.js` (~320, ~355). `tests/FormInput.test.js` и `tests/FormTextarea.test.js` классы рамки не проверяют — не трогать.
 
 **Interfaces:**
 - Produces: класс `bb:field-frame`; `--bb-field-radius` на каждом узле-носителе.
@@ -111,8 +111,8 @@ git commit -m "refactor: вынести рамку поля в утилиту fi
 
 `e2e/fieldFrame.e2e.js`, цикл по `pages`:
 
-- `все рамки полей`: `page.locator('[class~="bb:field-frame"]')`, видимые (после `scrollIntoViewIfNeeded`) — у каждой `border-top-width` `1px`, `expectColor(..., 'border-top-color', 'gray-300')`, `border-top-left-radius` `6px`, `background-color` `rgb(255, 255, 255)`, `box-shadow` не `none`, `getComputedStyle(el).getPropertyValue('--bb-field-radius').trim()` — `0.375rem`; число найденных больше 20.
-- `поле поиска в панели`: открыть панель «Вендор с поиском», поле поиска — рамка, фон, скругление как выше, `box-shadow` не `none`; после фокуса — `expectFocusRing`.
+- `все видимые рамки полей`: `page.locator('[class~="bb:field-frame"]:visible')` — поля поиска закрытых панелей остаются в DOM со `display: none`, `:visible` отсекает их до обхода; прокрутка для проверок computed style не нужна. У каждой `border-top-width` `1px`, `expectColor(..., 'border-top-color', 'gray-300')`, `border-top-left-radius` `6px`, `background-color` `rgb(255, 255, 255)`, `box-shadow` не `none`, `getComputedStyle(el).getPropertyValue('--bb-field-radius').trim()` — `0.375rem`; число видимых больше 20 (защита от пустой выборки; полноту миграции проверяет таблица носителей Task 1).
+- `поле поиска в панели` — отдельный сценарий: открыть панель «Вендор с поиском», затем её поле поиска — рамка, фон, скругление как выше, `box-shadow` не `none`; после фокуса — `expectFocusRing`.
 
 - [ ] **Step 2: Запустить**
 
