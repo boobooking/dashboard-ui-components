@@ -53,6 +53,9 @@ export const messages = {
         amountFraction: 'Копейки',
         // Поле суммы: доступное имя кнопки валюты.
         currency: 'Валюта',
+        // CharacterCounter: текст счётчика для скринридера, «Символов: 112 из 279».
+        characterCount: 'Символов',
+        characterCountOf: 'из',
     },
     en: {
         cancel: 'Cancel',
@@ -87,5 +90,7 @@ export const messages = {
         amountTo: 'to',
         amountFraction: 'Fractional part',
         currency: 'Currency',
+        characterCount: 'Characters',
+        characterCountOf: 'of',
     },
 }
