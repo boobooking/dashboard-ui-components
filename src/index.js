@@ -33,6 +33,7 @@ export { default as ConfirmationModal } from './components/ConfirmationModal.vue
 export { default as DropdownButtonWithAction } from './components/DropdownButtonWithAction.vue'
 export { default as HamburgerMenu } from './components/HamburgerMenu.vue'
 export { default as DataTable } from './components/DataTable.vue'
+export { default as NavigationHeader } from './components/NavigationHeader.vue'
 export { default as NavigationMenuElement } from './components/NavigationMenuElement.vue'
 export { default as PageTabs } from './components/PageTabs.vue'
 export { default as PageCard } from './components/PageCard.vue'

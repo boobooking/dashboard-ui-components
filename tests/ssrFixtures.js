@@ -26,6 +26,14 @@ export const ssrFixtures = {
     FormTextarea: { props: { label: 'Комментарий', modelValue: 'Первая\r\nвторая', isRequired: true, characterLimit: 10, description: 'Подпись' } },
     HamburgerMenu: { props: { actions: [{ label: 'Выйти', icon: 'plus', href: '#' }] } },
     InfoPill: { props: { text: 'Новый', color: 'green-pale' } },
+    NavigationHeader: {
+        props: {
+            items: [{ key: 'a', name: 'Ордера', url: '/orders' }, { key: 'b', name: 'Группы', url: '/groups' }],
+            activeKey: 'b',
+            actions: [{ label: 'Выйти', href: '#' }],
+        },
+        slots: { logo: () => h('img', { alt: 'Логотип', src: '/logo.png' }) },
+    },
     NavigationMenuElement: { props: { url: '/section', name: 'Раздел' } },
     NotificationMessage: { props: { modelValue: 'Письмо отправлено', type: 'confirmation', notificationHeading: 'Готово' } },
     DetailList: { slots: { default: () => h(DetailRow, { title: 'Телефон' }, () => '+7 999') } },

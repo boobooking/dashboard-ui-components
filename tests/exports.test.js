@@ -21,7 +21,7 @@ describe('публичная поверхность пакета', () => {
         expect(pkg).not.toHaveProperty(name)
     })
 
-    it('ровно тридцать пять компонентов, плагин и downloadFile', () => {
+    it('ровно тридцать шесть компонентов, плагин и downloadFile', () => {
         expect(Object.keys(pkg).sort()).toEqual([
             'ActionButton',
             'ActionPill',
@@ -39,6 +39,7 @@ describe('публичная поверхность пакета', () => {
             'FormTextarea',
             'HamburgerMenu',
             'InfoPill',
+            'NavigationHeader',
             'NavigationMenuElement',
             'NotificationMessage',
             'PageCard',
