@@ -1578,7 +1578,11 @@ Escape, клик по пункту, прокрутка и изменение р�
         ];
     },
     activeKey() {
-        const sections = { orders: ['Orders/Index'], groups: ['Groups/Index'], users: ['Users/Index'] };
+        const sections = {
+            orders: ['Orders/Index', 'Orders/Show'],
+            groups: ['Groups/Index', 'Groups/Keys/Create'],
+            users: ['Users/Index'],
+        };
 
         return Object.keys(sections).find((key) => sections[key].includes(this.$page.component)) ?? null;
     },
