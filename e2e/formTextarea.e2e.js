@@ -9,8 +9,8 @@ const counter = async (page, label) => {
 
     return page.locator(`[id="${id}-counter"]`).locator('xpath=..')
 }
-// Корень компонента: родитель строки подписи.
 const labelOf = (page, label) => textareaSection(page).locator('label', { hasText: label })
+// Корень компонента: родитель строки подписи.
 const componentRoot = (page, label) => labelOf(page, label).locator('xpath=../..')
 
 const LONG_LABEL = 'Очень длинный заголовок поля, который не помещается в одну строку и переносится'

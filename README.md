@@ -217,8 +217,8 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 У всех полей форм — `FormInput`, `FormTextarea`, `SelectSingleForm`,
 `SelectCurrencyForm`, `SelectMultipleForm`, `SelectDateForm`,
 `SelectDateIntervalForm`, `AmountForm`, `AmountIntervalForm`,
-`SelectSingleCards`, `SelectMultipleList` — есть описание под полем. Текст задаёт проп `description`, разметку, например ссылку, — слот
-`description`.
+`SelectSingleCards`, `SelectMultipleList` — есть описание под полем. Текст
+задаёт проп `description`, разметку, например ссылку, — слот `description`.
 
     <form-input v-model="email" label="Email" description="На этот адрес придёт письмо" />
 
@@ -2428,14 +2428,16 @@ exportOrders() {
   текста;
 - кнопкам, полям `input` и `textarea` — унаследованные шрифт и цвет, нулевое
   скругление, прозрачный фон и `opacity: 1`;
-- полям `input` и `textarea` — `appearance: none` и снятое кольцо фокуса (`box-shadow`).
+- полям `input` и `textarea` — `appearance: none` и снятое кольцо фокуса
+  (`box-shadow`).
 
 Обычная разметка в приложении с preflight почти не меняется — ресет
 повторяет preflight, а без preflight она получит `box-sizing`, нулевые
 отступы и снятые рамки. Поля из `@tailwindcss/forms` меняются заметно:
 текстовые поля, `select` и `textarea` теряют рамку и внутренние отступы,
-текстовые поля и `textarea` — ещё фон и размер шрифта; чекбоксы и радиокнопки теряют
-рамку, фон, цвет отметки и кольцо фокуса, радиокнопки — ещё и круглую форму.
+текстовые поля и `textarea` — ещё фон и размер шрифта; чекбоксы и
+радиокнопки теряют рамку, фон, цвет отметки и кольцо фокуса, радиокнопки —
+ещё и круглую форму.
 Вернуть оформление можно утилитами: слой `utilities` сильнее ресета.
 Например, чекбоксу: `border border-gray-300 bg-white text-indigo-600
 checked:bg-current checked:border-transparent focus:ring-2
