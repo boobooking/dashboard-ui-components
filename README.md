@@ -131,14 +131,14 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ## Компоненты
 
-Пакет экспортирует тридцать четыре компонента: `Dot`, `RussianMobileFilter`,
+Пакет экспортирует тридцать пять компонентов: `Dot`, `RussianMobileFilter`,
 `Search`, `SelectDateFilter`, `SelectDateForm`, `SelectDateIntervalFilter`,
 `SelectDateIntervalForm`,
 `SelectSingleFilter`, `SelectSingleForm`, `SelectCurrencyFilter`,
 `SelectCurrencyForm`, `AmountForm`, `AmountIntervalFilter`, `AmountIntervalForm`,
 `SelectMultipleFilter`,
 `SelectMultipleForm`, `SelectSingleCards`, `SelectMultipleList`, `InfoPill`,
-`ErrorMessages`, `FormInput`, `ActionButton`, `ActionPill`,
+`ErrorMessages`, `FormInput`, `FormTextarea`, `ActionButton`, `ActionPill`,
 `ConfirmationModal`, `DropdownButtonWithAction`, `HamburgerMenu`, `DataTable`,
 `NavigationMenuElement`, `PageTabs`, `PageCard`, `DetailList`, `DetailRow`,
 `NotificationMessage`, `TextPopover`, функцию `downloadFile` и плагин `dashboardUi`. В архив пакета
@@ -214,7 +214,7 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 ### Описание поля
 
-У всех полей форм — `FormInput`, `SelectSingleForm`, `SelectCurrencyForm`,
+У всех полей форм — `FormInput`, `FormTextarea`, `SelectSingleForm`, `SelectCurrencyForm`,
 `SelectMultipleForm`, `SelectDateForm`, `SelectDateIntervalForm`, `AmountForm`,
 `AmountIntervalForm`, `SelectSingleCards`, `SelectMultipleList` — есть описание под
 полем. Текст задаёт проп `description`, разметку, например ссылку, — слот
@@ -303,6 +303,80 @@ Tailwind, `@tailwindcss/forms`, Inertia и какие-либо токены в C
 
 `isRequired` только показывает точку: атрибут `required` и `aria-*` полю
 он не ставит.
+
+### FormTextarea
+
+Многострочное поле формы в виде `FormInput`: заголовок над полем, рамка
+на всю ширину формы. Если задан лимит, справа в строке заголовка стоит счётчик
+символов. Значение забирает форма: у поля нет события `changed`.
+
+    <form-textarea
+        v-model="message"
+        label="Текст сообщения"
+        :is-required="markMessageRequired"
+        :character-limit="279"
+        description="Текст уйдёт в SMS и push-уведомление."
+    />
+
+    <form-textarea v-model="comment" label="Комментарий" :rows="10" />
+
+| Проп | Тип | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `modelValue` | `String` | `""` | Значение поля |
+| `label` | `String` | обязателен | Заголовок над полем |
+| `isRequired` | `Boolean` | `false` | Красная точка у заголовка |
+| `rows` | `Number` | `6` | Высота поля в строках |
+| `characterLimit` | `Number` | `null` | Лимит символов; задан — над полем счётчик |
+| `description` | `String` | `null` | Подпись под полем, см. «Описание поля» |
+| `lang` | `String` | `null` | `"ru"` или `"en"`, см. «Языки» |
+
+Слот `description` — как у `FormInput`.
+
+Событие `update:modelValue` уходит на каждый ввод со строкой из поля как есть,
+без обрезки пробелов. Значение, изменённое родителем, поле показывает сразу и
+без события. Набор через IME (composition) отдаёт значение по его окончании.
+Используйте `v-model` без модификаторов: они не входят в API `FormTextarea`.
+`null` в `modelValue` — пустая строка.
+
+`rows` — целое число больше нуля. Другое значение (0, отрицательное, дробное,
+не число) отклоняется предупреждением Vue, поле рисуется с шестью строками;
+`null` и `undefined` — шесть строк без предупреждения.
+
+Счётчик показывает `112 / 279`: число символов в поле и лимит. Справа в строке
+заголовка, напротив его первой строки; 12 px, `gray-500`, цифры одинаковой
+ширины. Длинный заголовок переносится, счётчик остаётся в одну строку.
+
+- Символы считаются как `mb_strlen` в Laravel, по кодовым точкам Unicode:
+  перенос строки — один символ, обычный эмодзи — один, составной (например,
+  «семья») — несколько.
+- Строго больше лимита — первое число красное (`red-600`). Ровно на лимите и
+  меньше — без красного.
+- Ввод не ограничен: `maxlength` от пропа поле не получает. Решение о слишком
+  длинном тексте принимает форма.
+- Считается текст, который сейчас в поле, а не `modelValue`: счётчик меняется
+  на каждое событие `input`, в том числе во время набора через IME. Переносы
+  `\r\n` и одиночный `\r` из `modelValue` заменяются на `\n`, как это делает
+  сам `<textarea>`; проп родителя не меняется, событие не уходит.
+- `characterLimit` — целое число больше нуля. `null`, `undefined` и отсутствие
+  пропа — без счётчика и без предупреждения; другое значение отклоняется
+  предупреждением Vue, счётчика нет.
+- Скринридер читает «Символов: N из M» вместе с полем, видимое `N / M`
+  от него скрыто. `aria-live` нет: объявление на каждую клавишу мешало бы
+  печатать.
+
+Поле растягивается мышью только по высоте, ширина не меняется. `disabled` и
+`readonly` выглядят как у `FormInput`; счётчик и подпись остаются.
+
+`class` и `style` ложатся на корень компонента, все остальные атрибуты и
+слушатели (`placeholder`, `name`, `disabled`, `readonly`, `autocomplete`,
+`@blur`, `@keydown`) — на `<textarea>`. `id` поля создаётся сам, `for`
+заголовка указывает на него; `id` от формы заменяет созданный и в поле, и в
+`for`. `aria-describedby` от формы сохраняется: на поле `id` через пробел —
+формы, подписи и счётчика (те, что есть).
+
+Красная точка значит «не заполнено»; `isRequired` только рисует её, `required`
+и `aria-*` поле не получает. Когда показывать точку, решает форма, как у
+`FormInput`.
 
 ### SelectDateFilter
 
@@ -1790,6 +1864,7 @@ rounded-lg`, `box-sizing: border-box`. Отступов у неё нет: фор
 | `AmountForm`, `AmountIntervalFilter`, `AmountIntervalForm` — имя поля копеек | Копейки | Fractional part |
 | `AmountForm`, `AmountIntervalFilter`, `AmountIntervalForm` — имя кнопки валюты | Валюта | Currency |
 | `DataTable` — пагинация | Предыдущая / Следующая / Показаны результаты X - Y из Z | Previous / Next / Showing X - Y of Z results |
+| `FormTextarea` — текст счётчика для скринридера | Символов: N из M | Characters: N of M |
 | `PageTabs` — имя навигации для скринридера | Закладки | Tabs |
 | `PageCard` — доступное имя крестика | Назад | Back |
 | `NotificationMessage` — подпись крестика для скринридера | Закрыть | Close |
@@ -1963,7 +2038,7 @@ Inertia SSR), а серверная разметка гидратируется 
 
     npm run playground
 
-Поднимает демо-страницы со всеми тридцатью четырьмя компонентами в двух окружениях:
+Поднимает демо-страницы со всеми тридцатью пятью компонентами в двух окружениях:
 голом (без Tailwind и стилей приложения) и в окружении приложения (с
 Tailwind, `@tailwindcss/forms` и типографикой, как у потребителя). Это
 основной способ посмотреть, как компоненты выглядят и ведут себя, а не

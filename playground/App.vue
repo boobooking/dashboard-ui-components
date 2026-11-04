@@ -52,6 +52,18 @@
             </div>
         </section>
 
+        <section>
+            <h2>FormTextarea</h2>
+            <div class="demo-form">
+                <form-textarea label="Комментарий" description="Видит только администратор"/>
+                <form-textarea v-model="reminderText" label="Текст сообщения" :is-required="reminderText.trim() === ''" :character-limit="279"/>
+                <form-textarea v-model="overLimitText" label="Сверх лимита" :character-limit="279"/>
+                <form-textarea label="Десять строк" :rows="10"/>
+                <form-textarea v-model="disabledText" label="Заблокировано" disabled :character-limit="279"/>
+                <form-textarea label="Очень длинный заголовок поля, который не помещается в одну строку и переносится" :character-limit="279"/>
+            </div>
+        </section>
+
         <!-- Копия формы мероприятия russia: «Название» стоит первым, чтобы Tab входил в карточки из поля. -->
         <section>
             <h2>SelectSingleCards и SelectMultipleList</h2>
@@ -523,6 +535,7 @@
                 <amount-interval-form label="AmountIntervalForm" description="Описание под полем"/>
                 <select-single-cards label="SelectSingleCards" :items="descriptionItems" description="Описание под полем"/>
                 <select-multiple-list label="SelectMultipleList" :items="descriptionItems" description="Описание под полем"/>
+                <form-textarea label="FormTextarea" description="Описание под полем"/>
                 <select-single-form label="Ссылка в слоте" :items="descriptionItems">
                     <template #description>
                         Add them in <a href="#description-link" class="description-demo-link">Settings</a> first.
@@ -573,6 +586,7 @@ import {
     InfoPill,
     ErrorMessages,
     FormInput,
+    FormTextarea,
     ActionButton,
     ActionPill,
     ConfirmationModal,
@@ -615,6 +629,7 @@ export default {
         InfoPill,
         ErrorMessages,
         FormInput,
+        FormTextarea,
         ActionButton,
         ActionPill,
         ConfirmationModal,
@@ -642,6 +657,9 @@ export default {
             adminEmail: '',
             adminPassword: '',
             documentNumber: '',
+            reminderText: '',
+            overLimitText: 'Напоминаем о приёме у ветеринара. '.repeat(9),
+            disabledText: 'Это поле нельзя изменить',
             eventName: '',
             eventBrandItems: [
                 { id: 'rc', name: 'Royal Canin' },

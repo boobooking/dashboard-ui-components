@@ -11,7 +11,7 @@ for (const file of pages) {
         })
 
         test('вид и отступ у всех полей', async ({ page }) => {
-            await expect(descriptions(page)).toHaveCount(13)
+            await expect(descriptions(page)).toHaveCount(14)
 
             for (const description of await descriptions(page).all()) {
                 await expect(description).toHaveCSS('font-size', '12px')
@@ -39,7 +39,7 @@ for (const file of pages) {
         })
 
         test('в обёртке по содержимому описание не раздвигает поле', async ({ page }) => {
-            const description = descriptions(page).nth(11)
+            const description = descriptions(page).nth(12)
             const field = await description.locator('xpath=preceding-sibling::input').boundingBox()
             const box = await description.boundingBox()
 
