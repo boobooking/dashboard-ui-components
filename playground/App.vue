@@ -540,6 +540,14 @@
                 <h3 class="page-card-demo-heading">Длинный заголовок карточки: на узком экране он переносится и не заходит под крестик</h3>
                 <form-input v-model="pageCardTitle" label="Название" class="page-card-demo-field"/>
             </page-card>
+            <!-- Уведомление в слоте карточки: при 1440×900 и верхе карточки на
+                 y=10 его крестик лежит над крестиком карточки. Клик по нему
+                 закрывает уведомление, а не карточку. -->
+            <page-card class="page-card-demo page-card-demo-wide" width="7xl" fallback-url="#page-card" data-demo="notification-in-card">
+                <h3 class="page-card-demo-heading">Уведомление внутри карточки</h3>
+                <button type="button" class="demo-button" @click="notificationInCard = 'Уведомление поверх крестика карточки'">Показать уведомление</button>
+                <notification-message v-model="notificationInCard" type="warning"/>
+            </page-card>
         </section>
 
         <section>
@@ -744,6 +752,7 @@ export default {
             participantsThree: [],
             participantsFour: [],
             pageCardTitle: 'Поле формы',
+            notificationInCard: '',
             descriptionItems: [{ id: 'a', name: 'Первый' }, { id: 'b', name: 'Второй' }],
             detailPhoneIsShown: true,
             detailRowsAreShown: true,

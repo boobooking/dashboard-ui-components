@@ -108,6 +108,10 @@
     }
 }
 
+.page-card-demo-wide {
+    max-width: 88rem;
+}
+
 .page-card-demo-heading {
     margin: 0;
     padding: 0 var(--bb-closer-space, 0px) 0 0;

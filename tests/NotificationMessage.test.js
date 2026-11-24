@@ -238,3 +238,11 @@ describe('NotificationMessage: подпись крестика', () => {
         })
     }
 })
+
+describe('NotificationMessage: слой', () => {
+    it('корень над содержимым страницы — bb:z-10', () => {
+        const wrapper = mount(NotificationMessage, { props: { modelValue: 'Текст' } })
+
+        expect(wrapper.classes()).toContain('bb:z-10')
+    })
+})
