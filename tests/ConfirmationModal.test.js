@@ -293,3 +293,133 @@ describe('ConfirmationModal: фокус', () => {
         expect(document.activeElement).not.toBe(opener)
     })
 })
+
+describe('ConfirmationModal: галочка и слот', () => {
+    function mountWithHandlers(props, slots) {
+        const warnings = []
+        const wrapper = mount(ConfirmationModal, {
+            props: { isOpen: true, actionButtonText: 'Да', ...props },
+            slots,
+            attachTo: document.body,
+            global: { config: { warnHandler: (message) => warnings.push(message) } },
+        })
+        return { wrapper, warnings }
+    }
+
+    function button(wrapper, text) {
+        return wrapper.findAll('button').find((item) => item.text() === text)
+    }
+
+    function pressTab() {
+        document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }))
+    }
+
+    it.each([[undefined], ['']])('без галочки (agreementText %s): чекбокса нет, действие доступно', async (agreementText) => {
+        const { wrapper, warnings } = mountWithHandlers({ agreementText })
+
+        expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false)
+        expect(button(wrapper, 'Да').element.disabled).toBe(false)
+        await button(wrapper, 'Да').trigger('click')
+        expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
+        expect(warnings).toEqual([])
+    })
+
+    it('с agreementText: галочка снята, действие выключено до отметки', async () => {
+        const { wrapper, warnings } = mountWithHandlers({ agreementText: 'Подтверждаю' })
+        const checkbox = wrapper.find('input[type="checkbox"]')
+
+        expect(wrapper.find('label').text()).toContain('Подтверждаю')
+        expect(checkbox.element.checked).toBe(false)
+        expect(checkbox.attributes()).toHaveProperty('data-dialog-agreement')
+        expect(button(wrapper, 'Да').element.disabled).toBe(true)
+        await button(wrapper, 'Да').trigger('click')
+        expect(wrapper.emitted('actionConfirmed')).toBeUndefined()
+
+        await checkbox.setValue(true)
+        expect(button(wrapper, 'Да').element.disabled).toBe(false)
+        await button(wrapper, 'Да').trigger('click')
+        expect(wrapper.emitted('actionConfirmed')).toHaveLength(1)
+        expect(warnings).toEqual([])
+    })
+
+    it('клик по подписи отмечает галочку', async () => {
+        const { wrapper } = mountWithHandlers({ agreementText: 'Подтверждаю' })
+
+        await wrapper.find('label').trigger('click')
+
+        expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(true)
+        expect(button(wrapper, 'Да').element.disabled).toBe(false)
+    })
+
+    it('закрыть и открыть снова — галочка снята', async () => {
+        const { wrapper } = mountWithHandlers({ agreementText: 'Подтверждаю' })
+        await wrapper.find('input[type="checkbox"]').setValue(true)
+
+        await wrapper.setProps({ isOpen: false })
+        await wrapper.setProps({ isOpen: true })
+
+        expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(false)
+        expect(button(wrapper, 'Да').element.disabled).toBe(true)
+    })
+
+    it('смонтирована открытой — галочка снята', () => {
+        const { wrapper } = mountWithHandlers({ agreementText: 'Подтверждаю' })
+
+        expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(false)
+        expect(button(wrapper, 'Да').element.disabled).toBe(true)
+    })
+
+    it('отмена и Escape при снятой галочке дают actionCanceled', async () => {
+        const { wrapper } = mountWithHandlers({ agreementText: 'Подтверждаю' })
+        await nextFrame()
+
+        await button(wrapper, 'Отмена').trigger('click')
+        pressEscape()
+
+        expect(wrapper.emitted('actionCanceled')).toHaveLength(2)
+    })
+
+    it('слот заменяет абзац текста', () => {
+        const { wrapper } = mountWithHandlers(
+            { confirmationText: 'Текст' },
+            { default: '<p>Абзац</p><ul><li><b>Пункт</b></li></ul>' },
+        )
+        const body = wrapper.find('ul').element.parentElement
+
+        expect(body.className).toBe('bb:mt-2 bb:text-sm bb:text-gray-500')
+        expect(wrapper.find('ul > li > b').text()).toBe('Пункт')
+        expect(wrapper.text()).not.toContain('Текст')
+
+        const { wrapper: plain } = mountWithHandlers({ confirmationText: 'Текст' })
+        expect(plain.find('p').text()).toBe('Текст')
+    })
+
+    it('фокус: отмена → галочка → отмена, после отметки галочка → действие', async () => {
+        const { wrapper } = mountWithHandlers({ agreementText: 'Подтверждаю' })
+        const checkbox = wrapper.find('input[type="checkbox"]')
+        await nextFrame()
+
+        expect(document.activeElement).toBe(button(wrapper, 'Отмена').element)
+        pressTab()
+        expect(document.activeElement).toBe(checkbox.element)
+        pressTab()
+        expect(document.activeElement).toBe(button(wrapper, 'Отмена').element)
+
+        await checkbox.setValue(true)
+        checkbox.element.focus()
+        pressTab()
+        expect(document.activeElement).toBe(button(wrapper, 'Да').element)
+    })
+
+    it('inert-поле в слоте не мешает дойти до галочки', async () => {
+        const { wrapper } = mountWithHandlers(
+            { agreementText: 'Подтверждаю' },
+            { default: '<div inert><input></div>' },
+        )
+        await nextFrame()
+
+        pressTab()
+
+        expect(document.activeElement).toBe(wrapper.find('input[data-dialog-agreement]').element)
+    })
+})

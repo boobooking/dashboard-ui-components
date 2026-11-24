@@ -8,7 +8,10 @@ import DetailRow from '../src/components/DetailRow.vue'
 export const ssrFixtures = {
     ActionButton: { props: { label: 'Создать', color: 'green-solid', icon: 'plus' } },
     ActionPill: { props: { title: 'скачать xlsx', icon: 'download', isLoading: true, loadingText: 'формируется отчёт' } },
-    ConfirmationModal: { props: { isOpen: true, actionButtonText: 'Удалить', confirmationHeading: 'Удалить запись?', confirmationText: 'Действие нельзя отменить.' } },
+    ConfirmationModal: {
+        props: { isOpen: true, actionButtonText: 'Удалить', confirmationHeading: 'Удалить запись?', agreementText: 'Подтверждаю' },
+        slots: { default: () => [h('p', 'Действие нельзя отменить.'), h('ul', [h('li', 'Пункт')])] },
+    },
     DataTable: {
         props: {
             rows: [{ uuid: '1', name: 'Первый' }, { uuid: '2', name: 'Второй' }],
