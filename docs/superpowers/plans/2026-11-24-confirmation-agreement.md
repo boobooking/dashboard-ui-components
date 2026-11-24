@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- **Ветка:** `main`. Версия 0.27.0, тег и публикация — по слову владельца, в план не входят.
+- **Ветка:** `main`. Версия 0.26.1, тег и публикация — по слову владельца, в план не входят.
 - **Проп:** `agreementText: { type: String, default: null }`; галочка есть, когда строка непустая.
 - **Блокировка:** `Boolean(agreementText) && !agreed` → `ActionButton` `isDisabled`.
 - **Сброс:** `agreed = false` при каждом переходе `isOpen` в `true`; начальное значение `false`.
