@@ -1378,7 +1378,35 @@ export default {
 | `confirmationText` | `String` | `""` | Текст под заголовком |
 | `cancelButtonText` | `String` | `null` | Подпись кнопки отмены; без него — «Отмена» / «Cancel» по языку |
 | `actionButtonText` | `String` | обязателен | Подпись кнопки действия |
+| `agreementText` | `String` | `null` | Подпись галочки согласия; пустая строка или `null` — галочки нет |
 | `lang` | `String` | язык плагина | `"ru"` или `"en"` |
+
+Слот по умолчанию — тело модалки с разметкой страницы: абзацы, списки,
+выделения. Он стоит на месте `confirmationText` в обёртке
+`bb:mt-2 bb:text-sm bb:text-gray-500`, а `confirmationText` при этом не
+выводится. Вид содержимого слота задаёт страница своими классами: стили
+пакета теги в слоте не ресетят.
+
+С `agreementText` под текстом стоит галочка с этой подписью; клик по подписи
+тоже её переключает. Пока галочка снята, кнопка действия выключена и
+`actionConfirmed` не приходит. При каждом открытии модалки галочка снова
+снята. Отмена и Escape работают как обычно. Галочка входит в круг фокуса
+модалки, поля из слота — нет.
+
+    <confirmation-modal
+        :is-open="showDownload"
+        confirmation-heading="Выгрузка персональных данных"
+        agreement-text="Подтверждаю"
+        action-button-text="Скачать"
+        @action-canceled="showDownload = false"
+        @action-confirmed="download"
+    >
+        <p>Вы скачиваете файл с персональными данными.</p>
+        <ul class="mt-2 list-disc pl-5">
+            <li>Работать с ПД только <b>при наличии NDA</b></li>
+            <li><b>Уничтожить ПД</b> после работы с ними</li>
+        </ul>
+    </confirmation-modal>
 
 Кнопка действия у `type="dangerous"` — красная `ActionButton` цвета
 `red-solid`, у `type="warning"` — жёлтая цвета `yellow-solid` с тёмным текстом

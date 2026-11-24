@@ -312,6 +312,7 @@
                 <button type="button" class="demo-button" @click="warningModalIsOpen = true">Жёлтая</button>
                 <button type="button" class="demo-button" @click="dangerousModalIsOpen = true">Красная</button>
                 <dropdown-button-with-action :actions="modalMenuActions"/>
+                <button type="button" class="demo-button" @click="agreementModalIsOpen = true">С согласием</button>
             </div>
             <p>Подтверждений: {{ modalConfirms }}, отмен: {{ modalCancels }}</p>
             <confirmation-modal
@@ -331,6 +332,21 @@
                 @action-confirmed="modalConfirms++; dangerousModalIsOpen = false"
                 @action-canceled="modalCancels++; dangerousModalIsOpen = false"
             />
+            <confirmation-modal
+                :is-open="agreementModalIsOpen"
+                confirmation-heading="Выгрузка персональных данных"
+                agreement-text="Подтверждаю"
+                action-button-text="Скачать"
+                @action-confirmed="modalConfirms++; agreementModalIsOpen = false"
+                @action-canceled="modalCancels++; agreementModalIsOpen = false"
+            >
+                <p>Вы скачиваете файл с персональными данными. Подтвердите, что принимаете на себя связанную с этим ответственность:</p>
+                <ul style="list-style-type: disc; padding-left: 1.25rem; margin-top: 0.5rem">
+                    <li>Работать с ПД только <b>при наличии NDA</b></li>
+                    <li><b>Не передавать ПД другим</b> сотрудникам или третьим лицам</li>
+                    <li><b>Уничтожить ПД</b> после работы с ними</li>
+                </ul>
+            </confirmation-modal>
         </section>
 
         <section>
@@ -835,6 +851,7 @@ export default {
             ],
             warningModalIsOpen: false,
             dangerousModalIsOpen: false,
+            agreementModalIsOpen: false,
             modalConfirms: 0,
             modalCancels: 0,
             dropdownIsOpen: false,
