@@ -101,6 +101,24 @@ describe('holdDialogFocus: Tab', () => {
 
         expect(focused()).toBe('C')
     })
+
+    it('включает поле с data-dialog-agreement, пропуская выключенное и поле без метки', () => {
+        const plain = document.createElement('input')
+        const disabledAgreement = document.createElement('input')
+        disabledAgreement.setAttribute('data-dialog-agreement', '')
+        disabledAgreement.disabled = true
+        const agreement = document.createElement('input')
+        agreement.setAttribute('data-dialog-agreement', '')
+        byName('A').after(plain, disabledAgreement, agreement)
+        release = holdDialogFocus(panel, () => {})
+        byName('A').focus()
+
+        press('Tab')
+        expect(document.activeElement).toBe(agreement)
+
+        press('Tab')
+        expect(focused()).toBe('B')
+    })
 })
 
 describe('holdDialogFocus: остальные клавиши', () => {
