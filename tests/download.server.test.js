@@ -6,6 +6,9 @@ import { downloadFile } from '../src/download.js'
 // идёт за перенаправлением и заполняет redirected и url, как браузер.
 // В tests/download.test.js эти значения ответа пишутся руками. До DOM
 // функция здесь не доходит: отказ происходит раньше URL.createObjectURL.
+// /guarded-export отвечает как auth Laravel — 401 на запрос с
+// X-Requested-With и 302 на вход без него, — так проверяется, что заголовок
+// доходит по сети, а не только в аргумент fetch.
 let server
 let origin
 
@@ -18,6 +21,18 @@ beforeAll(async () => {
         }
 
         if (request.url === '/export') {
+            response.writeHead(302, { Location: '/login' })
+            response.end()
+            return
+        }
+
+        if (request.url === '/guarded-export') {
+            if (request.headers['x-requested-with'] === 'XMLHttpRequest') {
+                response.writeHead(401, { 'Content-Type': 'application/json' })
+                response.end('{"message":"Unauthenticated."}')
+                return
+            }
+
             response.writeHead(302, { Location: '/login' })
             response.end()
             return
@@ -49,6 +64,7 @@ describe('downloadFile: отказ на настоящем сервере', () =
         expect(error.message).toBe(`downloadFile: сервер перенаправил запрос ${origin}/export`)
         expect(error.redirectUrl).toBe(`${origin}/login`)
         expect(error.status).toBeNull()
+        expect(error.sessionExpired).toBe(false)
     })
 
     it('цепочка перенаправлений — redirectUrl с последним адресом', async () => {
@@ -58,6 +74,7 @@ describe('downloadFile: отказ на настоящем сервере', () =
         expect(error.message).toBe(`downloadFile: сервер перенаправил запрос ${origin}/old-export`)
         expect(error.redirectUrl).toBe(`${origin}/login`)
         expect(error.status).toBeNull()
+        expect(error.sessionExpired).toBe(false)
     })
 
     it('404 — status с кодом, redirectUrl null', async () => {
@@ -67,5 +84,16 @@ describe('downloadFile: отказ на настоящем сервере', () =
         expect(error.message).toBe(`downloadFile: ответ 404 на ${origin}/missing`)
         expect(error.status).toBe(404)
         expect(error.redirectUrl).toBeNull()
+        expect(error.sessionExpired).toBe(false)
+    })
+
+    it('401 от сервера, отвечающего как auth Laravel, — sessionExpired true', async () => {
+        const error = await downloadFile(`${origin}/guarded-export`).catch((failure) => failure)
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error.message).toBe(`downloadFile: сессия истекла, ответ 401 на ${origin}/guarded-export`)
+        expect(error.status).toBe(401)
+        expect(error.redirectUrl).toBeNull()
+        expect(error.sessionExpired).toBe(true)
     })
 })

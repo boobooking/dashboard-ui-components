@@ -1274,43 +1274,85 @@ exportOrders() {
 }
 ```
 
-- Запрос — `GET` с cookie сессии (`credentials: 'same-origin'`).
+- Запрос — `GET` с cookie сессии (`credentials: 'same-origin'`) и
+  заголовком `X-Requested-With: XMLHttpRequest`. Из-за него Laravel на
+  истёкшую сессию отвечает `401`, а на невалидные параметры — `422`, а не
+  перенаправлением.
 - Promise отклоняется:
-  - при перенаправлении — обычно на страницу входа после истёкшей сессии:
-    у ошибки `redirectUrl` — адрес, куда в итоге привёл сервер, `status` —
-    `null`;
-  - при ответе не `2xx`: `status` — код ответа, `redirectUrl` — `null`;
+  - при перенаправлении: у ошибки `redirectUrl` — адрес, куда в итоге привёл
+    сервер, `status` — `null`, `sessionExpired` — `false`;
+  - при ответе `401` — сессия истекла: `sessionExpired` — `true`, `status` —
+    `401`, `redirectUrl` — `null`;
+  - при другом ответе не `2xx`: `status` — код ответа, `redirectUrl` —
+    `null`, `sessionExpired` — `false`;
   - при сетевой ошибке — ошибкой `fetch`, без этих полей.
+- Адрес на другом origin из-за заголовка вызовет CORS-preflight: функция
+  рассчитана на свой origin.
 - Имя файла — из `Content-Disposition` (`filename*=UTF-8''…`, затем
   `filename`), без него — последний сегмент пути адреса, без пути —
   `download`.
 - Таймаута нет; уход со страницы скачивание не прерывает. Файл до
   сохранения целиком в памяти вкладки.
 
-Ссылка при истёкшей сессии привела бы браузер на страницу входа. Чтобы
-страница вела себя так же, она сама переходит по `redirectUrl`: пакет
-не импортирует ни Inertia, ни роутер. В приложении на Inertia:
+Истёкшая сессия приходит как `sessionExpired`: страница показывает своё
+уведомление, текст пишет она сама. `redirectUrl` — для прочих
+перенаправлений: ссылка привела бы браузер туда же, поэтому страница сама
+переходит по нему. Пакет не импортирует ни Inertia, ни роутер. В приложении
+на Inertia:
 
-```js
+```vue
+<template>
+    <action-pill icon="download" title="скачать xlsx" loading-text="формируется отчёт" :is-loading="exportLoading" @click="exportOrders" />
+    <p v-if="exportFailure">{{ exportFailure }}</p>
+    <notification-message v-model="sessionMessage" type="warning" />
+</template>
+
+<script>
 import { router } from '@inertiajs/vue3'
+import { ActionPill, downloadFile, NotificationMessage } from '@boobooking/dashboard-ui-components'
 
-exportOrders() {
-    this.exportFailure = "";
-    this.exportLoading = true;
+export default {
+    components: { ActionPill, NotificationMessage },
 
-    downloadFile(this.exportUrl)
-        .catch((error) => {
-            if (error.redirectUrl) {
-                router.visit(error.redirectUrl);
-                return;
-            }
+    props: {
+        exportUrl: { type: String, required: true },
+    },
 
-            this.exportFailure = "Попробуйте ещё раз";
-        })
-        .finally(() => {
-            this.exportLoading = false;
-        });
-}
+    data() {
+        return {
+            exportLoading: false,
+            exportFailure: "",
+            sessionMessage: "",
+        };
+    },
+
+    methods: {
+        exportOrders() {
+            this.exportFailure = "";
+            this.sessionMessage = "";
+            this.exportLoading = true;
+
+            downloadFile(this.exportUrl)
+                .catch((error) => {
+                    if (error.sessionExpired) {
+                        this.sessionMessage = "Сессия закончилась. Обновите страницу.";
+                        return;
+                    }
+
+                    if (error.redirectUrl) {
+                        router.visit(error.redirectUrl);
+                        return;
+                    }
+
+                    this.exportFailure = "Попробуйте ещё раз";
+                })
+                .finally(() => {
+                    this.exportLoading = false;
+                });
+        },
+    },
+};
+</script>
 ```
 
 ### ConfirmationModal
@@ -2169,6 +2211,13 @@ Tailwind, `@tailwindcss/forms` и типографикой, как у потре
 задаётся, см. «Языки».
 
 ## Обновление с 0.25
+
+`downloadFile` шлёт заголовок `X-Requested-With: XMLHttpRequest`, поэтому
+Laravel отвечает на истёкшую сессию `401` (отказ с `sessionExpired: true`), а
+не перенаправлением на вход, а на невалидные параметры выгрузки — `422`, а не
+перенаправлением назад. Страницам, которые переходили по `redirectUrl`, нужна
+ветка `sessionExpired` (пример — в разделе `downloadFile`); невалидные
+параметры попадают в общую ветку отказа.
 
 У `RussianMobileFilter` и `Search` высоту и рамку теперь рисует сам компонент:
 72px и серая рамка `gray-200`, как у остальных фильтров. Классы

@@ -47,7 +47,7 @@ describe('downloadFile: запрос и файл', () => {
 
         await downloadFile('/orders/export?phone=7')
 
-        expect(fetchMock).toHaveBeenCalledWith('/orders/export?phone=7', { credentials: 'same-origin' })
+        expect(fetchMock).toHaveBeenCalledWith('/orders/export?phone=7', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         expect(clicks).toEqual([{ href: BLOB_URL, download: 'orders_export.xlsx', connected: true }])
         expect(document.body.querySelector('a')).toBeNull()
     })
@@ -81,7 +81,7 @@ describe('downloadFile: запрос и файл', () => {
 })
 
 describe('downloadFile: отказ', () => {
-    it.each([404, 500])('ответ %s — отказ с кодом в status, файла нет', async (status) => {
+    it.each([403, 404, 422, 500])('ответ %s — отказ с кодом в status, файла нет', async (status) => {
         fetchMock.mockResolvedValue(response({ status }))
 
         const error = await downloadFile('/export').catch((failure) => failure)
@@ -90,11 +90,26 @@ describe('downloadFile: отказ', () => {
         expect(error.message).toBe(`downloadFile: ответ ${status} на /export`)
         expect(error.status).toBe(status)
         expect(error.redirectUrl).toBeNull()
+        expect(error.sessionExpired).toBe(false)
         expect(URL.createObjectURL).not.toHaveBeenCalled()
         expect(clicks).toEqual([])
     })
 
-    it('перенаправление (истёкшая сессия) — отказ с адресом в redirectUrl, страница входа не сохраняется', async () => {
+    it('401 — отказ с sessionExpired, файла нет', async () => {
+        fetchMock.mockResolvedValue(response({ status: 401 }))
+
+        const error = await downloadFile('/export').catch((failure) => failure)
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error.message).toBe('downloadFile: сессия истекла, ответ 401 на /export')
+        expect(error.status).toBe(401)
+        expect(error.redirectUrl).toBeNull()
+        expect(error.sessionExpired).toBe(true)
+        expect(URL.createObjectURL).not.toHaveBeenCalled()
+        expect(clicks).toEqual([])
+    })
+
+    it('перенаправление — отказ с адресом в redirectUrl, страница входа не сохраняется', async () => {
         fetchMock.mockResolvedValue(response({ redirected: true, url: 'https://dashboard.test/login' }))
 
         const error = await downloadFile('/export').catch((failure) => failure)
@@ -103,12 +118,13 @@ describe('downloadFile: отказ', () => {
         expect(error.message).toBe('downloadFile: сервер перенаправил запрос /export')
         expect(error.redirectUrl).toBe('https://dashboard.test/login')
         expect(error.status).toBeNull()
+        expect(error.sessionExpired).toBe(false)
         expect(URL.createObjectURL).not.toHaveBeenCalled()
         expect(clicks).toEqual([])
     })
 
-    it('перенаправление, закончившееся ответом 404, — отказ как при перенаправлении', async () => {
-        fetchMock.mockResolvedValue(response({ status: 404, redirected: true, url: 'https://dashboard.test/gone' }))
+    it.each([404, 401])('перенаправление, закончившееся ответом %s, — отказ как при перенаправлении', async (status) => {
+        fetchMock.mockResolvedValue(response({ status, redirected: true, url: 'https://dashboard.test/gone' }))
 
         const error = await downloadFile('/export').catch((failure) => failure)
 
@@ -116,6 +132,7 @@ describe('downloadFile: отказ', () => {
         expect(error.message).toBe('downloadFile: сервер перенаправил запрос /export')
         expect(error.redirectUrl).toBe('https://dashboard.test/gone')
         expect(error.status).toBeNull()
+        expect(error.sessionExpired).toBe(false)
         expect(clicks).toEqual([])
     })
 
@@ -126,6 +143,7 @@ describe('downloadFile: отказ', () => {
         await expect(downloadFile('/export')).rejects.toBe(failure)
         expect(Object.hasOwn(failure, 'redirectUrl')).toBe(false)
         expect(Object.hasOwn(failure, 'status')).toBe(false)
+        expect(Object.hasOwn(failure, 'sessionExpired')).toBe(false)
         expect(clicks).toEqual([])
     })
 })

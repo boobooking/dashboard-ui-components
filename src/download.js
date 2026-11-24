@@ -46,18 +46,25 @@ function nameFromPath(url) {
 }
 
 export async function downloadFile(url) {
-    const response = await fetch(url, { credentials: 'same-origin' })
+    const response = await fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 
-    // Сервер перенаправил — обычно на страницу входа после истёкшей сессии:
-    // без проверки под видом файла сохранилась бы её разметка. redirectUrl —
-    // куда в итоге привёл сервер: страница может отправить пользователя туда
-    // же, куда отправила бы ссылка.
+    // Сервер перенаправил: без проверки под видом файла сохранилась бы
+    // разметка страницы, куда он привёл. redirectUrl — куда в итоге привёл
+    // сервер: страница может отправить пользователя туда же, куда отправила
+    // бы ссылка.
     if (response.redirected) {
-        throw Object.assign(new Error(`downloadFile: сервер перенаправил запрос ${url}`), { redirectUrl: response.url, status: null })
+        throw Object.assign(new Error(`downloadFile: сервер перенаправил запрос ${url}`), { redirectUrl: response.url, status: null, sessionExpired: false })
+    }
+
+    // С заголовком X-Requested-With запрос для Laravel «ожидает JSON», и на
+    // истёкшую сессию он отвечает 401, а не перенаправлением на страницу
+    // входа: страница отличает этот отказ по sessionExpired.
+    if (response.status === 401) {
+        throw Object.assign(new Error(`downloadFile: сессия истекла, ответ 401 на ${url}`), { redirectUrl: null, status: 401, sessionExpired: true })
     }
 
     if (!response.ok) {
-        throw Object.assign(new Error(`downloadFile: ответ ${response.status} на ${url}`), { redirectUrl: null, status: response.status })
+        throw Object.assign(new Error(`downloadFile: ответ ${response.status} на ${url}`), { redirectUrl: null, status: response.status, sessionExpired: false })
     }
 
     const name = nameFromDisposition(response.headers.get('Content-Disposition')) ?? nameFromPath(url) ?? 'download'
